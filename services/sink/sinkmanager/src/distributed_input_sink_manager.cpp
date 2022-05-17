@@ -157,7 +157,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     // add the input type
     if (startRes == SUCCESS) {
         sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() | inputTypes);
-        DistributedInputCollector::GetInstance().SetInputTypes(sinkManagerObj_->GetInputTypes());    
+        DistributedInputCollector::GetInstance().SetInputTypes(sinkManagerObj_->GetInputTypes());
     }
 
     IStartDInputServerCallback *startServerCB = sinkManagerObj_->GetStartDInputServerCback();
@@ -297,6 +297,9 @@ int32_t DistributedInputSinkManager::Release()
     }
 
     serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
+    DHLOGI("exit dinput sink sa.");
+    exit(0);
+
     return SUCCESS;
 }
 

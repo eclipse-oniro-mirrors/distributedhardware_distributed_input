@@ -66,8 +66,15 @@ public:
 
     DInputServerType IsStartDistributedInput(const uint32_t& inputType);
 
-public:
+    bool HasDInputSourceProxy();
 
+    bool SetDInputSourceProxy(const sptr<IRemoteObject> &remoteObject);
+
+    bool HasDInputSinkProxy();
+
+    bool SetDInputSinkProxy(const sptr<IRemoteObject> &remoteObject);
+
+public:
     class RegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
     public:
         RegisterDInputCb() = default;

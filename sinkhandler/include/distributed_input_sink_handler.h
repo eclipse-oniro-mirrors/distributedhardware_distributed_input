@@ -23,6 +23,7 @@
 
 #include <string>
 #include <mutex>
+#include <condition_variable>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
@@ -36,6 +37,7 @@ public:
     int32_t ReleaseSink() override;
     int32_t SubscribeLocalHardware(const std::string& dhId, const std::string& parameters) override;
     int32_t UnsubscribeLocalHardware(const std::string& dhId) override;
+    void FinishStartSA(const std::string &params, const sptr<IRemoteObject> &remoteObject);
 
 public:
     class SALoadSinkCb : public OHOS::SystemAbilityLoadCallbackStub {
@@ -63,6 +65,9 @@ private:
     DistributedInputSinkHandler() = default;
     ~DistributedInputSinkHandler();
     OHOS::sptr<OHOS::ISystemAbilityLoadCallback> sysSinkCallback = nullptr;
+
+    std::mutex proxyMutex_;
+    std::condition_variable proxyConVar_;
 };
 
 #ifdef __cplusplus

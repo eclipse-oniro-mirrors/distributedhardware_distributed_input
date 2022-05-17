@@ -15,6 +15,7 @@
 
 #include "distributed_input_sink_handler.h"
 #include "i_distributed_sink_input.h"
+#include "load_d_input_sink_callback.h"
 #include "distributed_hardware_log.h"
 
 namespace OHOS {
@@ -29,7 +30,40 @@ DistributedInputSinkHandler::~DistributedInputSinkHandler()
 
 int32_t DistributedInputSinkHandler::InitSink(const std::string &params)
 {
-    return DistributedInputClient::GetInstance().InitSink();
+    DHLOGD("InitSource");
+    std::unique_lock<std::mutex> lock(proxyMutex_);
+    if (!DistributedInputClient::GetInstance().HasDInputSinkProxy()) {
+        sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (!samgr) {
+            DHLOGE("Failed to get system ability mgr.");
+            return FAILURE_DIS;
+        }
+        sptr<LoadDInputSinkCallback> loadCallback = new LoadDInputSinkCallback(params);
+        int32_t ret = samgr->LoadSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID, loadCallback);
+        if (ret != ERR_OK) {
+            DHLOGE("Failed to Load systemAbility, systemAbilityId:%d, ret code:%d",
+                   DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID, ret);
+            return FAILURE_DIS;
+        }
+    }
+
+    auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOADSA_TIMEOUT_MS),
+                    [this]() { return (DistributedInputClient::GetInstance().HasDInputSinkProxy()); });
+    if (!waitStatus) {
+        DHLOGE("dinput load sa timeout.");
+        return FAILURE_DIS;
+    }
+
+    return SUCCESS;
+}
+
+void DistributedInputSinkHandler::FinishStartSA(const std::string &params, const sptr<IRemoteObject> &remoteObject)
+{
+    DHLOGD("FinishStartSA");
+    std::unique_lock<std::mutex> lock(proxyMutex_);
+    DistributedInputClient::GetInstance().SetDInputSinkProxy(remoteObject);
+    DistributedInputClient::GetInstance().InitSink();
+    proxyConVar_.notify_all();
 }
 
 int32_t DistributedInputSinkHandler::ReleaseSink()

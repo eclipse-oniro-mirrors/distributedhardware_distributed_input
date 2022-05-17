@@ -532,6 +532,8 @@ int32_t DistributedInputSourceManager::Release()
     callBackHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 
     serviceRunningState_ = ServiceSourceRunningState::STATE_NOT_START;
+    DHLOGI("exit dinput source sa.");
+    exit(0);
     return SUCCESS;
 }
 

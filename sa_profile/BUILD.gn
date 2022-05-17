@@ -30,3 +30,10 @@ ohos_sa_profile("distributed_input_sink_sa_profile") {
 
   part_name = "distributed_input"
 }
+
+ohos_prebuilt_etc("dinput.cfg") {
+  relative_install_dir = "init"
+  source = "dinput.cfg"
+  part_name = "distributed_input"
+  subsystem_name = "distributedhardware"
+}

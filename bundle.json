@@ -46,6 +46,7 @@
                 "//foundation/distributedhardware/distributedinput/interfaces/inner_kits:libdinput_sdk",
                 "//foundation/distributedhardware/distributedinput/sa_profile:distributed_input_source_sa_profile",
                 "//foundation/distributedhardware/distributedinput/sa_profile:distributed_input_sink_sa_profile",
+                "//foundation/distributedhardware/distributedinput/sa_profile:dinput.cfg",
                 "//foundation/distributedhardware/distributedinput/services/source/sourcemanager:libdinput_source",
                 "//foundation/distributedhardware/distributedinput/services/source/transport:libdinput_source_trans",
                 "//foundation/distributedhardware/distributedinput/services/source/inputinject:libdinput_inject",

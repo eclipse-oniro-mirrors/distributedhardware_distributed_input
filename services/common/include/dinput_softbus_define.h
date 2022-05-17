@@ -41,9 +41,9 @@ namespace DistributedInput {
     const uint32_t DEVICE_ID_SIZE_MAX = 65;
     const uint32_t INTERCEPT_STRING_LENGTH = 20;
 
-    const std::string DINPUT_PKG_NAME = "DBinderBus_" + std::to_string(getpid());
-    const std::string SESSION_NAME_SOURCE = "DBinderInput_so_";
-    const std::string SESSION_NAME_SINK = "DBinderInput_si_";
+    const std::string DINPUT_PKG_NAME = "ohos.dhardware.dinput";
+    const std::string SESSION_NAME_SOURCE = "ohos.dhardware.dinput.so_";
+    const std::string SESSION_NAME_SINK = "ohos.dhardware.dinput.si_";
     const std::string GROUP_ID = "input_softbus_group_id";
 
     #define DINPUT_SOFTBUS_KEY_CMD_TYPE "dinput_softbus_key_cmd_type"

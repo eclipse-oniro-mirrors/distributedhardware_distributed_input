@@ -73,7 +73,7 @@ DistributedInputSinkTransport::~DistributedInputSinkTransport()
 {
     DHLOGI("~DistributedInputSinkTransport");
     sessionDevMap_.clear();
-    (void)RemoveSessionServer(DH_FWK_PKG_NAME.c_str(), mySessionName_.c_str());
+    (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
 }
 
 DistributedInputSinkTransport::DInputSinkEventHandler::DInputSinkEventHandler(
@@ -123,7 +123,8 @@ int32_t DistributedInputSinkTransport::Init()
         DHLOGE("Init unique_ptr localNode nullptr.");
         return FAILURE;
     }
-    int32_t retCode = GetLocalNodeDeviceInfo(DH_FWK_PKG_NAME.c_str(), localNode.get());
+    int32_t retCode = GetLocalNodeDeviceInfo(DINPUT_PKG_NAME.c_str(), localNode.get());
+
     if (retCode != SUCCESS) {
         DHLOGE("Init could not get local device id.");
         return FAILURE;
@@ -132,7 +133,8 @@ int32_t DistributedInputSinkTransport::Init()
     DHLOGI("Init device networkId is %s", networkId.c_str());
     mySessionName_ = SESSION_NAME_SINK + networkId.substr(0, INTERCEPT_STRING_LENGTH);
 
-    int32_t ret = CreateSessionServer(DH_FWK_PKG_NAME.c_str(), mySessionName_.c_str(), &iSessionListener);
+
+    int32_t ret = CreateSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str(), &iSessionListener);
     if (ret != SUCCESS) {
         DHLOGE("Init CreateSessionServer failed, error code %d.", ret);
         return FAILURE;

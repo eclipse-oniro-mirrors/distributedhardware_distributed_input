@@ -24,6 +24,7 @@
 
 #include <string>
 #include <mutex>
+#include <condition_variable>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
@@ -41,6 +42,7 @@ public:
         std::shared_ptr<UnregisterCallback> callback) override;
     int32_t ConfigDistributedHardware(const std::string& devId, const std::string& dhId, const std::string& key,
         const std::string& value) override;
+    void FinishStartSA(const std::string &params, const sptr<IRemoteObject> &remoteObject);
 
 public:
 
@@ -68,6 +70,9 @@ private:
     DistributedInputSourceHandler() = default;
     ~DistributedInputSourceHandler();
     OHOS::sptr<OHOS::ISystemAbilityLoadCallback> sysSourceCallback = nullptr;
+
+    std::mutex proxyMutex_;
+    std::condition_variable proxyConVar_;
 };
 
 #ifdef __cplusplus

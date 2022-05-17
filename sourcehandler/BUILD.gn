@@ -34,7 +34,8 @@ ohos_shared_library("libdinput_source_handler") {
   ]
 
   sources = [
-    "src/distributed_input_source_handler.cpp"
+    "src/distributed_input_source_handler.cpp",
+    "src/load_d_input_source_callback.cpp"
   ]
 
   defines = [

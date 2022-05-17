@@ -340,7 +340,7 @@ bool DistributedInputClient::GetDInputSourceProxy()
         if (!systemAbilityManager) {
             return false;
         }
-
+        DHLOGI("%s try get sa: %d", __func__, DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
         sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
             DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
         if (!remoteObject) {
@@ -352,6 +352,38 @@ bool DistributedInputClient::GetDInputSourceProxy()
         if ((!dInputSourceProxy_) || (!dInputSourceProxy_->AsObject())) {
             return false;
         }
+    }
+    return true;
+}
+
+bool DistributedInputClient::HasDInputSourceProxy()
+{
+    return dInputSourceProxy_ != nullptr;
+}
+
+bool DistributedInputClient::SetDInputSourceProxy(const sptr<IRemoteObject> &remoteObject)
+{
+    dInputSourceProxy_ = iface_cast<IDistributedSourceInput>(remoteObject);
+
+    if ((!dInputSourceProxy_) || (!dInputSourceProxy_->AsObject())) {
+        DHLOGE("Failed to get dinput source proxy.");
+        return false;
+    }
+    return true;
+}
+
+bool DistributedInputClient::HasDInputSinkProxy()
+{
+    return dInputSinkProxy_ != nullptr;
+}
+
+bool DistributedInputClient::SetDInputSinkProxy(const sptr<IRemoteObject> &remoteObject)
+{
+    dInputSinkProxy_ = iface_cast<IDistributedSinkInput>(remoteObject);
+
+    if ((!dInputSinkProxy_) || (!dInputSinkProxy_->AsObject())) {
+        DHLOGE("Failed to get dinput sink proxy.");
+        return false;
     }
     return true;
 }

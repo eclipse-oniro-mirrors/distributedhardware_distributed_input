@@ -14,7 +14,10 @@
  */
 
 #include "distributed_input_source_handler.h"
+
+#include "distributed_hardware_log.h"
 #include "i_distributed_source_input.h"
+#include "load_d_input_source_callback.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -27,7 +30,40 @@ DistributedInputSourceHandler::~DistributedInputSourceHandler()
 
 int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
 {
-    return DistributedInputClient::GetInstance().InitSource();
+    DHLOGD("InitSource");
+    std::unique_lock<std::mutex> lock(proxyMutex_);
+    if (!DistributedInputClient::GetInstance().HasDInputSourceProxy()) {
+        sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (!samgr) {
+            DHLOGE("Failed to get system ability mgr.");
+            return FAILURE_DIS;
+        }
+        sptr<LoadDInputSourceCallback> loadCallback = new LoadDInputSourceCallback(params);
+        int32_t ret = samgr->LoadSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, loadCallback);
+        if (ret != ERR_OK) {
+            DHLOGE("Failed to Load systemAbility, systemAbilityId:%d, ret code:%d",
+                   DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, ret);
+            return FAILURE_DIS;
+        }
+    }
+
+    auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOADSA_TIMEOUT_MS),
+                    [this]() { return (DistributedInputClient::GetInstance().HasDInputSourceProxy()); });
+    if (!waitStatus) {
+        DHLOGE("dinput load sa timeout.");
+        return FAILURE_DIS;
+    }
+
+    return SUCCESS;
+}
+
+void DistributedInputSourceHandler::FinishStartSA(const std::string &params, const sptr<IRemoteObject> &remoteObject)
+{
+    DHLOGD("FinishStartSA");
+    std::unique_lock<std::mutex> lock(proxyMutex_);
+    DistributedInputClient::GetInstance().SetDInputSourceProxy(remoteObject);
+    DistributedInputClient::GetInstance().InitSource();
+    proxyConVar_.notify_all();
 }
 
 int32_t DistributedInputSourceHandler::ReleaseSource()

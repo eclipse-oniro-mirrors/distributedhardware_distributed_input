@@ -14,6 +14,7 @@
  */
 
 #include "input_hub.h"
+#include <sys/types.h>
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
@@ -87,7 +88,7 @@ int32_t InputHub::Release()
 size_t InputHub::CollectInputEvents(RawEvent* buffer, size_t bufferSize)
 {
     size_t count;
-    for ( ; ; ) {
+    for (; ;) {
         if (needToScanDevices_) {
             needToScanDevices_ = false;
             ScanInputDevices(DEVICE_PATH);
@@ -233,7 +234,7 @@ size_t InputHub::CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize
 {
     InputDeviceEvent* event = buffer;
     size_t capacity = bufferSize;
-    for ( ; ; ) {
+    for (; ;) {
         // Report any devices that had last been added/removed.
         for (auto it = closingDevices_.begin(); it != closingDevices_.end();) {
             std::unique_ptr<Device> device = std::move(*it);
@@ -347,10 +348,34 @@ std::vector<InputDevice> InputHub::GetAllInputDevices()
 
 void InputHub::ScanInputDevices(const std::string& dirname)
 {
-    for (const auto& entry : std::filesystem::directory_iterator(dirname)) {
-        OpenInputDeviceLocked(entry.path());
+    char devname[PATH_MAX];
+    char *filename;
+    DIR *dir;
+    struct dirent *de;
+    dir = opendir(dirname.c_str());
+    if (dir == nullptr) {
+        DHLOGE("error opendir dev/input :%{public}s\n", strerror(errno));
+        return;
     }
-    return;
+
+    if (strcpy_s(devname, PATH_MAX, dirname.c_str()) != 0) {
+        DHLOGE("error strcpy_s :%{public}s\n", strerror(errno));
+    }
+    filename = devname + strlen(devname);
+    *filename++ = '/';
+    while ((de = readdir(dir))) {
+        if (de->d_name[0] == '.' &&
+            (de->d_name[1] == '\0' ||
+            (de->d_name[1] == '.' && de->d_name[DIR_FILE_NAME_SECOND] == '\0'))) {
+            continue;
+        }
+        if (strcpy_s(filename, sizeof(de->d_name), de->d_name) != 0) {
+            DHLOGE("error strcpy_s second :%{public}s\n", strerror(errno));
+        }
+        DHLOGE("scan dir failed for %{public}s", filename);
+        OpenInputDeviceLocked(devname);
+    }
+    closedir(dir);
 }
 
 int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
