@@ -1,3 +1,0 @@
-# distributedhardware_distributed_input4
-
-null
