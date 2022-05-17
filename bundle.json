@@ -1,0 +1,85 @@
+{
+    "name":"@ohos/distributed_input",
+    "description":"distributed hardware input",
+    "version":"3.1",
+    "author":{},
+    "repository":"https://gitee.com/openharmony/distributed_input",
+    "license":"Apache License 2.0",
+    "publishAs":"code-segment",
+    "segment":{
+        "destPath":"foundation/distributedhardware/distributedinput/"
+    },
+    "dirs":{},
+    "scripts":{},
+    "component":{
+        "name":"distributed_input",
+        "subsystem":"distributedhardware",
+        "syscap":[
+            "SystemCapability.distributedhardware.distributed_input"
+        ],
+        "features":[],
+        "adapted_system_type":[
+            "standard"
+        ],
+        "rom":"2000k",
+        "ram":"6M",
+        "deps":{
+            "components":[
+                "appexecfwk_standard",
+                "eventhandler",
+                "hiviewdfx_hilog_native",
+                "ipc",
+                "safwk",
+                "samgr_standard",
+                "dsoftbus_standard",
+                "utils_base",
+                "distributed_hardware_fwk"
+            ],
+            "third_party":[
+                "jsoncpp",
+                "googletest",
+                "libcrypto_static"
+            ]
+        },
+        "build":{
+            "sub_component":[
+                "//foundation/distributedhardware/distributedinput/interfaces/inner_kits:libdinput_sdk",
+                "//foundation/distributedhardware/distributedinput/sa_profile:distributed_input_source_sa_profile",
+                "//foundation/distributedhardware/distributedinput/sa_profile:distributed_input_sink_sa_profile",
+                "//foundation/distributedhardware/distributedinput/services/source/sourcemanager:libdinput_source",
+                "//foundation/distributedhardware/distributedinput/services/source/transport:libdinput_source_trans",
+                "//foundation/distributedhardware/distributedinput/services/source/inputinject:libdinput_inject",
+                "//foundation/distributedhardware/distributedinput/services/sink/sinkmanager:libdinput_sink",
+                "//foundation/distributedhardware/distributedinput/services/sink/transport:libdinput_sink_trans",
+                "//foundation/distributedhardware/distributedinput/services/sink/inputcollector:libdinput_collector",
+                "//foundation/distributedhardware/distributedinput/sourcehandler:libdinput_source_handler",
+                "//foundation/distributedhardware/distributedinput/sinkhandler:libdinput_sink_handler",
+                "//foundation/distributedhardware/distributedinput/inputdevicehandler:libdinput_handler"
+            ],
+            "inner_kits":[
+                {
+                    "type": "so",
+                    "name": "//foundation/distributedhardware/distributedinput/interfaces/inner_kits:libdinput_sdk",
+                    "header": {
+                        "header_base": "//foundation/distributedhardware/distributedinput/interfaces/inner_kits/include",
+                        "header_files": [
+                            "distributed_input_kit.h"
+                        ]
+                    }
+                }
+            ],
+            "test":[
+                "//foundation/distributedhardware/distributedinput/interfaces/inner_kits/test:test",
+                "//foundation/distributedhardware/distributedinput/sourcehandler/test:test",
+                "//foundation/distributedhardware/distributedinput/sinkhandler/test:test",
+                "//foundation/distributedhardware/distributedinput/test:test",
+                "//foundation/distributedhardware/distributedinput/services/sink/transport/test:test",
+                "//foundation/distributedhardware/distributedinput/services/source/transport/test:test",
+                "//foundation/distributedhardware/distributedinput/common/include/test:test",
+                "//foundation/distributedhardware/distributedinput/services/source/inputinject/test:test",
+                "//foundation/distributedhardware/distributedinput/services/source/sourcemanager/test:test",
+                "//foundation/distributedhardware/distributedinput/services/sink/sinkmanager/test:test"
+            ]
+        }
+    }
+}
