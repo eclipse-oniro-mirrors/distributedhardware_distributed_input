@@ -32,8 +32,6 @@ public:
 
     int32_t UnregisterDistributedHardware(const std::string& devId, const std::string& dhId);
     int32_t PrepareRemoteInput();
-    int32_t Init();
-    bool Release();
     int32_t RegisterDistributedEvent(RawEvent* buffer, size_t bufferSize);
     int32_t StructTransJson(const InputDevice& pBuf, std::string& strDescriptor);
 

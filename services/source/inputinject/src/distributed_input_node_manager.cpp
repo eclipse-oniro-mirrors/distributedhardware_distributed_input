@@ -34,23 +34,11 @@ static const uint32_t INPUT_DEVICE_CLASS_TOUCH = static_cast<uint32_t>(DeviceCla
 
 Distributed_input_node_manager::Distributed_input_node_manager()
 {
-    Init();
-}
-
-int32_t Distributed_input_node_manager::Init()
-{
-    return SUCCESS;
 }
 
 Distributed_input_node_manager::~Distributed_input_node_manager()
 {
-    Release();
-}
-
-bool Distributed_input_node_manager::Release()
-{
     CloseAllDevicesLocked();
-    return true;
 }
 
 int32_t Distributed_input_node_manager::openDevicesNode(const std::string& devId, const std::string& dhId,

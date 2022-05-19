@@ -43,7 +43,7 @@ ohos_shared_library("libdinput_inject") {
   ]
 
   deps = [
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//third_party/openssl:libcrypto_static",

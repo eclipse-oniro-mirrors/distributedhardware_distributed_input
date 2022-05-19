@@ -48,7 +48,7 @@ int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
     }
 
     auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOADSA_TIMEOUT_MS),
-                    [this]() { return (DistributedInputClient::GetInstance().HasDInputSourceProxy()); });
+        [this]() { return (DistributedInputClient::GetInstance().HasDInputSourceProxy()); });
     if (!waitStatus) {
         DHLOGE("dinput load sa timeout.");
         return FAILURE_DIS;
@@ -94,11 +94,13 @@ void DistributedInputSourceHandler::SALoadSourceCb::OnLoadSystemAbilitySuccess(i
 {
     currSystemAbilityId = systemAbilityId;
     currRemoteObject = remoteObject;
+    DHLOGI("DistributedInputSourceHandler OnLoadSystemAbilitySuccess. systemAbilityId=%d", systemAbilityId);
 }
 
 void DistributedInputSourceHandler::SALoadSourceCb::OnLoadSystemAbilityFail(int32_t systemAbilityId)
 {
     currSystemAbilityId = systemAbilityId;
+    DHLOGE("DistributedInputSourceHandler OnLoadSystemAbilityFail. systemAbilityId=%d", systemAbilityId);
 }
 
 IDistributedHardwareSource *GetSourceHardwareHandler()

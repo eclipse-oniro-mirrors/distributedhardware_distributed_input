@@ -48,7 +48,7 @@ int32_t DistributedInputSinkHandler::InitSink(const std::string &params)
     }
 
     auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOADSA_TIMEOUT_MS),
-                    [this]() { return (DistributedInputClient::GetInstance().HasDInputSinkProxy()); });
+        [this]() { return (DistributedInputClient::GetInstance().HasDInputSinkProxy()); });
     if (!waitStatus) {
         DHLOGE("dinput load sa timeout.");
         return FAILURE_DIS;
@@ -86,13 +86,13 @@ void DistributedInputSinkHandler::SALoadSinkCb::OnLoadSystemAbilitySuccess(int32
 {
     currSystemAbilityId = systemAbilityId;
     currRemoteObject = remoteObject;
-    DHLOGI("DistributedInputSinkHandler OnLoadSystemAbilitySuccess");
+    DHLOGI("DistributedInputSinkHandler OnLoadSystemAbilitySuccess. systemAbilityId=%d", systemAbilityId);
 }
 
 void DistributedInputSinkHandler::SALoadSinkCb::OnLoadSystemAbilityFail(int32_t systemAbilityId)
 {
     currSystemAbilityId = systemAbilityId;
-    DHLOGE("DistributedInputSinkHandler OnLoadSystemAbilityFail");
+    DHLOGE("DistributedInputSinkHandler OnLoadSystemAbilityFail. systemAbilityId=%d", systemAbilityId);
 }
 
 IDistributedHardwareSink *GetSinkHardwareHandler()

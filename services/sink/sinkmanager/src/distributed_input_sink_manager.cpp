@@ -232,10 +232,6 @@ bool DistributedInputSinkManager::InitAuto()
     }
 
     handler_ = std::make_shared<DistributedInputSinkEventHandler>(runner_);
-    if (handler_ == nullptr) {
-        return false;
-    }
-
     DHLOGI("init success");
     return true;
 }

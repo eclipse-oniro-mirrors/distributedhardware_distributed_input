@@ -72,7 +72,7 @@ ohos_shared_library("libdinput_source") {
 
   deps = [
     "//foundation/distributedhardware/distributedinput/interfaces/inner_kits:libdinput_sdk",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/distributedhardware/distributedinput/services/source/transport:libdinput_source_trans",

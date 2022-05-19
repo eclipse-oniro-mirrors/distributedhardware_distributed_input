@@ -65,7 +65,7 @@ ohos_unittest("distributed_input_source_handler_test") {
   ]
 
   deps = [
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${innerkits_path}:libdinput_sdk",

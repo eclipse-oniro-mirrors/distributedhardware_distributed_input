@@ -39,8 +39,6 @@ private:
     ~DistributedInputCollector();
 
     bool InitCollectEventsThread();
-    bool Initialize();
-    bool Release();
     static void *CollectEventsThread(void *param);
     void StartCollectEventsThread();
     void StopCollectEventsThread();

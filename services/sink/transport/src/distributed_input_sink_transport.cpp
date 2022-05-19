@@ -23,6 +23,26 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
+DistributedInputSinkTransport::DistributedInputSinkTransport()
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(true);
+    eventHandler_ = std::make_shared<DistributedInputSinkTransport::DInputSinkEventHandler>(runner);
+    mySessionName_ = "";
+    DHLOGI("DistributedInputSinkTransport eventHandler_");
+}
+
+DistributedInputSinkTransport::~DistributedInputSinkTransport()
+{
+    DHLOGI("~DistributedInputSinkTransport");
+    sessionDevMap_.clear();
+    (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
+}
+
+DistributedInputSinkTransport::DInputSinkEventHandler::DInputSinkEventHandler(
+    const std::shared_ptr<AppExecFwk::EventRunner> &runner) : AppExecFwk::EventHandler(runner)
+{
+}
+
 static int32_t SessionOpened(int32_t sessionId, int32_t result)
 {
     return DistributedInput::DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
@@ -59,26 +79,6 @@ DistributedInputSinkTransport &DistributedInputSinkTransport::GetInstance()
 {
     static DistributedInputSinkTransport instance;
     return instance;
-}
-
-DistributedInputSinkTransport::DistributedInputSinkTransport()
-{
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(true);
-    eventHandler_ = std::make_shared<DistributedInputSinkTransport::DInputSinkEventHandler>(runner);
-    mySessionName_ = "";
-    DHLOGI("DistributedInputSinkTransport eventHandler_");
-}
-
-DistributedInputSinkTransport::~DistributedInputSinkTransport()
-{
-    DHLOGI("~DistributedInputSinkTransport");
-    sessionDevMap_.clear();
-    (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
-}
-
-DistributedInputSinkTransport::DInputSinkEventHandler::DInputSinkEventHandler(
-    const std::shared_ptr<AppExecFwk::EventRunner> &runner) : AppExecFwk::EventHandler(runner)
-{
 }
 
 void DistributedInputSinkTransport::DInputSinkEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
@@ -119,12 +119,7 @@ int32_t DistributedInputSinkTransport::Init()
         .OnStreamReceived = StreamReceived
     };
     auto localNode = std::make_unique<NodeBasicInfo>();
-    if (localNode == nullptr) {
-        DHLOGE("Init unique_ptr localNode nullptr.");
-        return FAILURE;
-    }
     int32_t retCode = GetLocalNodeDeviceInfo(DINPUT_PKG_NAME.c_str(), localNode.get());
-
     if (retCode != SUCCESS) {
         DHLOGE("Init could not get local device id.");
         return FAILURE;
@@ -132,7 +127,6 @@ int32_t DistributedInputSinkTransport::Init()
     std::string networkId = localNode->networkId;
     DHLOGI("Init device networkId is %s", networkId.c_str());
     mySessionName_ = SESSION_NAME_SINK + networkId.substr(0, INTERCEPT_STRING_LENGTH);
-
 
     int32_t ret = CreateSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str(), &iSessionListener);
     if (ret != SUCCESS) {

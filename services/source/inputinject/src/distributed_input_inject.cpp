@@ -25,30 +25,18 @@ namespace DistributedInput {
 DistributedInputInject::DistributedInputInject()
     : isStartInjectThread_(false)
 {
-    Init();
+    inputNodeManager_ = std::make_unique<Distributed_input_node_manager>();
+}
+
+DistributedInputInject::~DistributedInputInject()
+{
+    isStartInjectThread_ = false;
 }
 
 DistributedInputInject &DistributedInputInject::GetInstance()
 {
     static DistributedInputInject instance;
     return instance;
-}
-
-int32_t DistributedInputInject::Init()
-{
-    inputNodeManager_ = std::make_unique<Distributed_input_node_manager>();
-    return SUCCESS;
-}
-
-DistributedInputInject::~DistributedInputInject()
-{
-    Release();
-}
-
-bool DistributedInputInject::Release()
-{
-    isStartInjectThread_ = false;
-    return true;
 }
 
 int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,

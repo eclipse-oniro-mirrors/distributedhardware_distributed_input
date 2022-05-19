@@ -79,7 +79,7 @@ ohos_unittest("distributed_input_test") {
     "${distributedinput_path}/sourcehandler:libdinput_source_handler",
     "${distributedinput_path}/sinkhandler:libdinput_sink_handler",
     "${distributedinput_path}/inputdevicehandler:libdinput_handler",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
   ]

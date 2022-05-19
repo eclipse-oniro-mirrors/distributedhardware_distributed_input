@@ -39,7 +39,7 @@ public:
     int32_t Init();
     int32_t OpenInputSoftbus(const std::string &remoteDevId, const std::string &hwId);
     void CloseInputSoftbus(const std::string &remoteDevId, const std::string &hwId);
-    void RegisteSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback);
+    void RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback);
 
     int32_t PrepareRemoteInput(const std::string& deviceId);
     int32_t UnprepareRemoteInput(const std::string& deviceId);

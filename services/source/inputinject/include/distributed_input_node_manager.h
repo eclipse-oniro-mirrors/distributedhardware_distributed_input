@@ -35,15 +35,12 @@ public:
     int32_t openDevicesNode(const std::string& devId, const std::string& dhId,
     const std::string& parameters);
 
-    int32_t Init();
-
     int32_t getDevice(const std::string& dhId, VirtualDevice*& device);
     void ReportEvent(const RawEvent rawEvent);
     int32_t CloseDeviceLocked(const std::string& dhId);
     void StartInjectThread();
 
 private:
-    bool Release();
     void AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device);
     int32_t CreateHandle(InputDevice event, const std::string& devId);
     void CloseAllDevicesLocked();

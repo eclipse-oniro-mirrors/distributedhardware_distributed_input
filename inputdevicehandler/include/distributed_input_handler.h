@@ -47,8 +47,6 @@ private:
     int32_t GetDeviceInfo(std::string& deviceId);
     std::shared_ptr<PluginListener> m_listener;
     bool InitCollectEventsThread();
-    bool Init();
-    bool Release();
     void NotifyHardWare(int iCnt);
 
     pthread_t collectThreadID_;

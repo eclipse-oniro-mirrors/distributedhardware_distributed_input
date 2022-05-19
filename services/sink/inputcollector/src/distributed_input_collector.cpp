@@ -38,18 +38,12 @@ DistributedInputCollector::DistributedInputCollector()
     : collectThreadID_(-1), isCollectingEvents_(false),
     isStartGetDeviceHandlerThread(false), input_types_(0)
 {
-    Initialize();
+    inputHub_ = std::make_unique<InputHub>();
 }
 
 DistributedInputCollector::~DistributedInputCollector()
 {
-    Release();
-}
-
-bool DistributedInputCollector::Release()
-{
     StopCollectEventsThread();
-    return true;
 }
 
 DistributedInputCollector &DistributedInputCollector::GetInstance()
@@ -70,12 +64,6 @@ int32_t DistributedInputCollector::Init(std::shared_ptr<AppExecFwk::EventHandler
         isStartGetDeviceHandlerThread = true;
     }
     return SUCCESS;
-}
-
-bool DistributedInputCollector::Initialize()
-{
-    inputHub_ = std::make_unique<InputHub>();
-    return true;
 }
 
 bool DistributedInputCollector::InitCollectEventsThread()

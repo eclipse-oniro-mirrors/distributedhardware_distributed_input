@@ -23,16 +23,6 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-bool VirtualDevice::DoIoctl(int32_t fd, int32_t request, const uint32_t value)
-{
-    int32_t rc = ioctl(fd, request, value);
-    if (rc < 0) {
-        DHLOGE("%s ioctl failed", __func__);
-        return false;
-    }
-    return true;
-}
-
 VirtualDevice::VirtualDevice()
     : deviceName_(""), netWorkId_(""), busTtype_(0), vendorId_(0), productId_(0), version_(0)
 {
@@ -51,6 +41,16 @@ VirtualDevice::~VirtualDevice()
         close(fd_);
         fd_ = -1;
     }
+}
+
+bool VirtualDevice::DoIoctl(int32_t fd, int32_t request, const uint32_t value)
+{
+    int32_t rc = ioctl(fd, request, value);
+    if (rc < 0) {
+        DHLOGE("%s ioctl failed", __func__);
+        return false;
+    }
+    return true;
 }
 
 bool VirtualDevice::CreateKey()

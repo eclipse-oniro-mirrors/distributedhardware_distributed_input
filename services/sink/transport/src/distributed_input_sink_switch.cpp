@@ -21,12 +21,6 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-DistributedInputSinkSwitch &DistributedInputSinkSwitch::GetInstance()
-{
-    static DistributedInputSinkSwitch instance;
-    return instance;
-}
-
 DistributedInputSinkSwitch::DistributedInputSinkSwitch()
 {
     InitSwitch();
@@ -36,6 +30,12 @@ DistributedInputSinkSwitch::~DistributedInputSinkSwitch()
 {
     DHLOGI("~DistributedInputSinkSwitch()");
     InitSwitch();
+}
+
+DistributedInputSinkSwitch &DistributedInputSinkSwitch::GetInstance()
+{
+    static DistributedInputSinkSwitch instance;
+    return instance;
 }
 
 void DistributedInputSinkSwitch::InitSwitch()
@@ -57,8 +57,7 @@ int32_t DistributedInputSinkSwitch::StartSwitch(int32_t sessionId)
             if ((*it).sessionId == sessionId) {
                 (*it).switchState = true;
                 findOld = true;
-            } else {
-                (*it).switchState = false;
+                break;
             }
         }
 

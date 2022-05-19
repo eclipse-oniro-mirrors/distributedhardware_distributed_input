@@ -33,6 +33,18 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 IMPLEMENT_SINGLE_INSTANCE(DistributedInputHandler);
+DistributedInputHandler::DistributedInputHandler()
+    : collectThreadID_(-1), isCollectingEvents_(false),
+    isStartCollectEventThread(false)
+{
+    inputHub_ = std::make_unique<InputHub>();
+    this->m_listener = nullptr;
+}
+
+DistributedInputHandler::~DistributedInputHandler()
+{
+    StopInputMonitorDeviceThread();
+}
 
 void DistributedInputHandler::StructTransJson(const InputDevice& pBuf, std::string& strDescriptor)
 {
@@ -56,24 +68,6 @@ void DistributedInputHandler::StructTransJson(const InputDevice& pBuf, std::stri
     return;
 }
 
-DistributedInputHandler::DistributedInputHandler()
-    : collectThreadID_(-1), isCollectingEvents_(false),
-    isStartCollectEventThread(false)
-{
-    Init();
-}
-
-DistributedInputHandler::~DistributedInputHandler()
-{
-    Release();
-}
-
-bool DistributedInputHandler::Release()
-{
-    StopInputMonitorDeviceThread();
-    return true;
-}
-
 int32_t DistributedInputHandler::Initialize()
 {
     if (!isStartCollectEventThread) {
@@ -81,13 +75,6 @@ int32_t DistributedInputHandler::Initialize()
         isStartCollectEventThread = true;
     }
     return SUCCESS;
-}
-
-bool DistributedInputHandler::Init()
-{
-    inputHub_ = std::make_unique<InputHub>();
-    this->m_listener = nullptr;
-    return true;
 }
 
 std::vector<DHItem> DistributedInputHandler::Query()

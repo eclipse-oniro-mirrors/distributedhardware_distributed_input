@@ -262,9 +262,6 @@ bool DistributedInputSourceManager::InitAuto()
     }
 
     handler_ = std::make_shared<DistributedInputSourceEventHandler>(runner_);
-    if (handler_ == nullptr) {
-        return false;
-    }
 
     DHLOGI("init success");
 
@@ -483,7 +480,7 @@ int32_t DistributedInputSourceManager::Init()
     }
 
     statuslistener_ = std::make_shared<DInputSourceListener>(this);
-    DistributedInputSourceTransport::GetInstance().RegisteSourceRespCallback(statuslistener_);
+    DistributedInputSourceTransport::GetInstance().RegisterSourceRespCallback(statuslistener_);
 
     serviceRunningState_ = ServiceSourceRunningState::STATE_RUNNING;
     return SUCCESS;
@@ -514,11 +511,6 @@ int32_t DistributedInputSourceManager::Release()
 
     // 3. isstart callback
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("Release jsonArrayMsg is null.");
-        return FAILURE;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
     jsonArrayMsg->push_back(tmpJson);
@@ -623,11 +615,6 @@ void DistributedInputSourceManager::handleStartServerCallback(const std::string&
         }
         if (isAllDevSwitchOff) {
             std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-            if (jsonArrayMsg == nullptr) {
-                DHLOGE("handleStartServerCallback jsonArrayMsg is null.");
-                return;
-            }
-
             nlohmann::json tmpJson;
             tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
             jsonArrayMsg->push_back(tmpJson);
@@ -665,11 +652,6 @@ int32_t DistributedInputSourceManager::RemoveInputNode(const std::string& devId,
 int32_t DistributedInputSourceManager::DeleteDevice(const std::string& devId, const std::string& dhId)
 {
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("UnregisterDistributedHardware jsonArrayMsg is null.");
-        return FAILURE;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = devId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_HWID] = dhId;

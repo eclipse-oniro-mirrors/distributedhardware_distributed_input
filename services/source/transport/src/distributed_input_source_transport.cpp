@@ -41,6 +41,19 @@ static SessionAttribute g_sessionAttr = {
     }
 };
 
+DistributedInputSourceTransport::~DistributedInputSourceTransport()
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    std::map<std::string, int32_t>::iterator iter = sessionDevMap_.begin();
+    while (iter != sessionDevMap_.end()) {
+        CloseSession(iter->second);
+    }
+    sessionDevMap_.clear();
+    devHardwareMap_.clear();
+
+    (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
+}
+
 static int32_t SessionOpened(int32_t sessionId, int32_t result)
 {
     return DistributedInput::DistributedInputSourceTransport::GetInstance().OnSessionOpened(sessionId, result);
@@ -106,18 +119,6 @@ int32_t DistributedInputSourceTransport::Init()
         return FAILURE;
     }
     return SUCCESS;
-}
-
-DistributedInputSourceTransport::~DistributedInputSourceTransport()
-{
-    std::map<std::string, int32_t>::iterator iter = sessionDevMap_.begin();
-    while (iter != sessionDevMap_.end()) {
-        CloseSession(iter->second);
-    }
-    sessionDevMap_.clear();
-    devHardwareMap_.clear();
-
-    (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
 }
 
 int32_t DistributedInputSourceTransport::CheckDeviceSessionState(const std::string &devId, const std::string &hwId)
@@ -224,9 +225,9 @@ void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remot
     }
 }
 
-void DistributedInputSourceTransport::RegisteSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback)
+void DistributedInputSourceTransport::RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback)
 {
-    DHLOGI("RegisteSourceRespCallback");
+    DHLOGI("RegisterSourceRespCallback");
     callback_ = callback;
 }
 
