@@ -23,14 +23,13 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 DistributedInputInject::DistributedInputInject()
-    : isStartInjectThread_(false)
 {
-    inputNodeManager_ = std::make_unique<Distributed_input_node_manager>();
+    inputNodeManager_ = std::make_unique<DistributedInputNodeManager>();
 }
 
 DistributedInputInject::~DistributedInputInject()
 {
-    isStartInjectThread_ = false;
+    DHLOGI("~DistributedInputInject");
 }
 
 DistributedInputInject &DistributedInputInject::GetInstance()
@@ -48,7 +47,7 @@ int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& d
     DHLOGI("describe:%s",  parameters.c_str());
 
     if (inputNodeManager_ == nullptr) {
-        DHLOGE("the Distributed_input_node_manager is null\n");
+        DHLOGE("the DistributedInputNodeManager is null\n");
         return FAILURE;
     }
     if (inputNodeManager_->openDevicesNode(devId, dhId, parameters) < 0) {
@@ -63,7 +62,7 @@ int32_t DistributedInputInject::UnregisterDistributedHardware(const std::string&
     DHLOGI("%s called deviveId:%s hardwareId:%s\n",
         __func__, devId.c_str(), dhId.c_str());
     if (inputNodeManager_ == nullptr) {
-        DHLOGE("the Distributed_input_node_manager is null\n");
+        DHLOGE("the DistributedInputNodeManager is null\n");
         return FAILURE;
     }
     if (inputNodeManager_->CloseDeviceLocked(dhId) < 0) {
@@ -96,23 +95,10 @@ int32_t DistributedInputInject::StructTransJson(const InputDevice& pBuf, std::st
     return SUCCESS;
 }
 
-int32_t DistributedInputInject::PrepareRemoteInput()
-{
-    if (inputNodeManager_ == nullptr) {
-        DHLOGE("the Distributed_input_node_manager is null\n");
-        return FAILURE;
-    }
-    if (!isStartInjectThread_) {
-        isStartInjectThread_ = true;
-        inputNodeManager_->StartInjectThread();
-    }
-    return SUCCESS;
-}
-
 int32_t DistributedInputInject::RegisterDistributedEvent(RawEvent* buffer, size_t bufferSize)
 {
     if (inputNodeManager_ == nullptr) {
-        DHLOGE("the Distributed_input_node_manager is null\n");
+        DHLOGE("the DistributedInputNodeManager is null\n");
         return FAILURE;
     }
     DHLOGE("RegisterDistributedEvent start %zu\n", bufferSize);
@@ -120,6 +106,20 @@ int32_t DistributedInputInject::RegisterDistributedEvent(RawEvent* buffer, size_
         inputNodeManager_->ReportEvent(buffer[i]);
     }
     return SUCCESS;
+}
+
+void DistributedInputInject::StartInjectThread()
+{
+    if (inputNodeManager_ != nullptr) {
+        inputNodeManager_->StartInjectThread();
+    }
+}
+
+void DistributedInputInject::StopInjectThread()
+{
+    if (inputNodeManager_ != nullptr) {
+        inputNodeManager_->StopInjectThread();
+    }
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

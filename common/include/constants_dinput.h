@@ -28,66 +28,69 @@ namespace DistributedInput {
 #define INPUT_KEY_CODE  "code"
 #define INPUT_KEY_VALUE "value"
 #define INPUT_KEY_DESCRIPTOR  "descriptor"
+#define INPUT_KEY_PATH "path"
 
 #define VIRTUAL_DEVICE_NAME "Hos Distributed Virtual Device "
 
     /**
      * Status code.
      */
-    const int32_t NO_ERROR = 0;
-    const int32_t ERROR = -1;
+    constexpr int32_t NO_ERROR = 0;
+    constexpr int32_t ERROR = -1;
 
     /**
      * Status code, indicates general success.
      */
-    const int32_t SUCCESS = 0;
+    constexpr int32_t SUCCESS = 0;
 
     /**
      * Status code, indicates general failure.
      */
-    const int32_t FAILURE = -60000;
+    constexpr int32_t FAILURE = -60000;
 
     /**
      * Status code, DISERVER general failure.
      */
-    const int32_t FAILURE_DIS = -60001;
+    constexpr int32_t FAILURE_DIS = -60001;
 
     /**
      * Status code, hardware is resigtring.
      */
-    const int32_t FAILURE_REGISTING = -60002;
+    constexpr int32_t FAILURE_REGISTING = -60002;
 
     /**
      * Status code, hardware is unresigtring.
      */
-    const int32_t FAILURE_UNREGISTING = -60003;
+    constexpr int32_t FAILURE_UNREGISTING = -60003;
 
     /**
      * Input Type NULL.
      */
-    const int32_t INPUT_TYPE_NULL = 0;
+    constexpr int32_t INPUT_TYPE_NULL = 0;
 
     /**
      * Input Type MOUSE.
      */
-    const int32_t INPUT_TYPE_MOUSE = 1;
+    constexpr int32_t INPUT_TYPE_MOUSE = 1;
 
     /**
      * Input Type KEYBOARD.
      */
-    const int32_t INPUT_TYPE_KEYBOARD = 2;
+    constexpr int32_t INPUT_TYPE_KEYBOARD = 2;
 
     /**
      * Input Type TOUCH.
      */
-    const int32_t INPUT_TYPE_TOUCH = 4;
+    constexpr int32_t INPUT_TYPE_TOUCH = 4;
 
     /**
      * Input Type ALL.
      */
-    const int32_t INPUT_TYPE_ALL = INPUT_TYPE_MOUSE | INPUT_TYPE_KEYBOARD | INPUT_TYPE_TOUCH;
+    constexpr int32_t INPUT_TYPE_ALL = INPUT_TYPE_MOUSE | INPUT_TYPE_KEYBOARD | INPUT_TYPE_TOUCH;
 
     constexpr int32_t INPUT_LOADSA_TIMEOUT_MS = 10000;
+
+    constexpr int32_t SESSION_WAIT_TIMEOUT_SECOND = 5;
 
     enum class EHandlerMsgType {
         DINPUT_SINK_EVENT_HANDLER_MSG = 1,
@@ -109,6 +112,7 @@ namespace DistributedInput {
         int32_t code;
         int32_t value;
         std::string descriptor;
+        std::string path;
     };
 
     /*

@@ -177,6 +177,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
     sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
         (sinkManagerObj_->GetInputTypes() & inputTypes));
     DistributedInputCollector::GetInstance().SetInputTypes(sinkManagerObj_->GetInputTypes());
+
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONSTOP;
     jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;

@@ -31,19 +31,19 @@ public:
         const std::string& parameters);
 
     int32_t UnregisterDistributedHardware(const std::string& devId, const std::string& dhId);
-    int32_t PrepareRemoteInput();
     int32_t RegisterDistributedEvent(RawEvent* buffer, size_t bufferSize);
     int32_t StructTransJson(const InputDevice& pBuf, std::string& strDescriptor);
+    void StartInjectThread();
+    void StopInjectThread();
 
 private:
     DistributedInputInject();
     ~DistributedInputInject();
 
-    std::unique_ptr<Distributed_input_node_manager> inputNodeManager_;
+    std::unique_ptr<DistributedInputNodeManager> inputNodeManager_;
 
     // The event queue.
     static const int EVENT_BUFFER_SIZE = 16;
-    bool isStartInjectThread_;
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware

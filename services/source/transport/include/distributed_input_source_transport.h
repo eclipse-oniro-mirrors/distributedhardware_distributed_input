@@ -16,6 +16,7 @@
 #ifndef DISTRIBUTED_INPUT_SOURCE_TRANSPORT_H
 #define DISTRIBUTED_INPUT_SOURCE_TRANSPORT_H
 
+#include <condition_variable>
 #include <string>
 #include <mutex>
 #include <set>
@@ -37,8 +38,9 @@ public:
     ~DistributedInputSourceTransport();
 
     int32_t Init();
-    int32_t OpenInputSoftbus(const std::string &remoteDevId, const std::string &hwId);
-    void CloseInputSoftbus(const std::string &remoteDevId, const std::string &hwId);
+    void Release();
+    int32_t OpenInputSoftbus(const std::string &remoteDevId);
+    void CloseInputSoftbus(const std::string &remoteDevId);
     void RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback);
 
     int32_t PrepareRemoteInput(const std::string& deviceId);
@@ -53,7 +55,7 @@ public:
 private:
     std::string FindDeviceBySession(int32_t sessionId);
     int32_t SendMsg(int32_t sessionId, std::string &message);
-    int32_t CheckDeviceSessionState(const std::string &remoteDevId, const std::string &hwId);
+    int32_t CheckDeviceSessionState(const std::string &remoteDevId);
     void HandleSessionData(int32_t sessionId, const std::string& messageData);
     void NotifyResponsePrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
@@ -63,14 +65,12 @@ private:
 
 private:
     std::map<std::string, int32_t> sessionDevMap_;
-    std::map<std::string, std::set<std::string>> devHardwareMap_;
+    std::map<std::string, bool> channelStatusMap_;
     std::mutex operationMutex_;
     std::set<int32_t> sessionIdSet_;
     std::shared_ptr<DInputSourceTransCallback> callback_;
     std::string mySessionName_ = "";
-
-    std::string lastDevId_;
-    std::string lastHwId_;
+    std::condition_variable openSessionWaitCond_;
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware

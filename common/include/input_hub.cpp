@@ -14,17 +14,20 @@
  */
 
 #include "input_hub.h"
-#include <sys/types.h>
+
+#include <cinttypes>
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
 #include <filesystem>
-#include <unistd.h>
 #include <openssl/sha.h>
-#include <sstream>
 #include <securec.h>
-#include "sys/stat.h"
+#include <sstream>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "distributed_hardware_log.h"
+#include "sys/stat.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -165,6 +168,19 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
                 event->type = iev.type;
                 event->code = iev.code;
                 event->value = iev.value;
+                event->path = device->path;
+                if (event->type == EV_KEY) {
+                    DHLOGD("1.E2E-Test Sink collect EV_KEY, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+                        event->code, event->value, event->path.c_str(), event->when);
+                } else if (event->type == EV_REL) {
+                    DHLOGD("1.E2E-Test Sink collect EV_REL, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+                        event->code, event->value, event->path.c_str(), event->when);
+                } else if (event->type == EV_ABS) {
+                    DHLOGD("1.E2E-Test Sink collect EV_ABS, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+                        event->code, event->value, event->path.c_str(), event->when);
+                } else {
+                    DHLOGW("1.E2E-Test Sink collect other type!");
+                }
                 event->descriptor = device->identifier.descriptor;
                 event += 1;
                 capacity -= 1;

@@ -35,10 +35,9 @@ void OpenInputSoftbusFuzzTest(const uint8_t* data, size_t size)
     }
 
     std::string remoteDevId(reinterpret_cast<const char*>(data), size);
-    std::string hwId(reinterpret_cast<const char*>(data), size);
 
-    DistributedInput::DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(remoteDevId, hwId);
-    DistributedInput::DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(remoteDevId, hwId);
+    DistributedInput::DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(remoteDevId);
+    DistributedInput::DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(remoteDevId);
 }
 
 void OnSessionOpenedFuzzTest(const uint8_t* data, size_t size)

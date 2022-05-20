@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-#include <cstring>
-#include "session.h"
-#include "constants_dinput.h"
-#include "dinput_softbus_define.h"
 #include "distributed_input_source_transport.h"
 
-#include "iservice_registry.h"
+#include <algorithm>
+#include <cstring>
+
+#include "distributed_hardware_log.h"
 #include "ipc_skeleton.h"
-#include "system_ability_definition.h"
+#include "iservice_registry.h"
+#include "session.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
-#include "distributed_hardware_log.h"
+#include "system_ability_definition.h"
+
+#include "constants_dinput.h"
+#include "dinput_softbus_define.h"
+#include "distributed_input_inject.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -43,15 +47,7 @@ static SessionAttribute g_sessionAttr = {
 
 DistributedInputSourceTransport::~DistributedInputSourceTransport()
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    std::map<std::string, int32_t>::iterator iter = sessionDevMap_.begin();
-    while (iter != sessionDevMap_.end()) {
-        CloseSession(iter->second);
-    }
-    sessionDevMap_.clear();
-    devHardwareMap_.clear();
-
-    (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
+    Release();
 }
 
 static int32_t SessionOpened(int32_t sessionId, int32_t result)
@@ -121,108 +117,80 @@ int32_t DistributedInputSourceTransport::Init()
     return SUCCESS;
 }
 
-int32_t DistributedInputSourceTransport::CheckDeviceSessionState(const std::string &devId, const std::string &hwId)
+void DistributedInputSourceTransport::Release()
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    std::for_each(sessionDevMap_.begin(), sessionDevMap_.end(), [](auto item) { CloseSession(item.second); });
+    (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
+    sessionDevMap_.clear();
+    channelStatusMap_.clear();
+    DistributedInputInject::GetInstance().StopInjectThread();
+}
+
+int32_t DistributedInputSourceTransport::CheckDeviceSessionState(const std::string &devId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevMap_.count(devId) != 0) {
         DHLOGI("CheckDeviceSessionState has opened %s", devId.c_str());
-
-        if (devHardwareMap_.count(devId) != 0) {
-            std::set<std::string> devHwArray = devHardwareMap_[devId];
-            devHwArray.insert(hwId);
-            devHardwareMap_[devId] = devHwArray;
-        } else {
-            std::set<std::string> devHwArray;
-            devHwArray.insert(hwId);
-            devHardwareMap_[devId] = devHwArray;
-        }
-        lastDevId_ = devId;
-        lastHwId_ = hwId;
         return SUCCESS;
     } else {
         return FAILURE;
     }
 }
 
-int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &remoteDevId, const std::string &hwId)
+int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &remoteDevId)
 {
-    int32_t ret = CheckDeviceSessionState(remoteDevId, hwId);
+    int32_t ret = CheckDeviceSessionState(remoteDevId);
     if (ret == SUCCESS) {
-        if (callback_ != nullptr) {
-            callback_->onResponseRegisterDistributedHardware(lastDevId_, lastHwId_, true);
-        } else {
-            DHLOGE("OpenInputSoftbus callback_ is null.");
-        }
+        DHLOGE("Softbus session has already opened, deviceId: %s", remoteDevId.c_str());
         return SUCCESS;
     }
 
     std::string peerSessionName = SESSION_NAME_SINK + remoteDevId.substr(0, INTERCEPT_STRING_LENGTH);
-    DHLOGI("OpenInputSoftbus peerSessionName:%s", peerSessionName.c_str());
+    DHLOGI("peerSessionName:%s", peerSessionName.c_str());
 
     int sessionId = OpenSession(mySessionName_.c_str(), peerSessionName.c_str(), remoteDevId.c_str(),
         GROUP_ID.c_str(), &g_sessionAttr);
     if (sessionId < 0) {
-        DHLOGE("OpenInputSoftbus OpenSession fail, remoteDevId:%s, sessionId:%d", remoteDevId.c_str(), sessionId);
-        if (callback_ != nullptr) {
-            callback_->onResponseRegisterDistributedHardware(remoteDevId, hwId, false);
-        } else {
-            DHLOGE("OpenInputSoftbus callback_ is null.");
-        }
+        DHLOGE("OpenSession fail, remoteDevId: %s, sessionId: %d", remoteDevId.c_str(), sessionId);
         return FAILURE;
     }
-    DHLOGI("OpenInputSoftbus OpenSession success, remoteDevId:%s, sessionId:%d", remoteDevId.c_str(), sessionId);
+
+    DHLOGI("Wait for channel session opened.");
+    {
+        std::unique_lock<std::mutex> waitLock(operationMutex_);
+        auto status = openSessionWaitCond_.wait_for(waitLock, std::chrono::seconds(SESSION_WAIT_TIMEOUT_SECOND),
+            [this, remoteDevId] () { return channelStatusMap_[remoteDevId]; });
+        if (!status) {
+            DHLOGE("OpenSession timeout, remoteDevId: %s, sessionId: %d", remoteDevId.c_str(), sessionId);
+            return FAILURE;
+        }
+    }
+
+    DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%d", remoteDevId.c_str(), sessionId);
     {
         std::unique_lock<std::mutex> sessionLock(operationMutex_);
         sessionDevMap_[remoteDevId] = sessionId;
-        if (devHardwareMap_.count(remoteDevId) != 0) {
-            std::set<std::string> devHwArray = devHardwareMap_[remoteDevId];
-            devHwArray.insert(hwId);
-            devHardwareMap_[remoteDevId] = devHwArray;
-        } else {
-            std::set<std::string> devHwArray;
-            devHwArray.insert(hwId);
-            devHardwareMap_[remoteDevId] = devHwArray;
-        }
-        lastDevId_ = remoteDevId;
-        lastHwId_ = hwId;
     }
     return SUCCESS;
 }
 
-void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remoteDevId, const std::string &hwId)
+void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remoteDevId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     // check this device's all hd is close,this device session close.
-    if (devHardwareMap_.count(remoteDevId) == 0) {
-        DHLOGI("CloseInputSoftbus device:%s is not found in devHardware.", remoteDevId.c_str());
+
+    if (sessionDevMap_.count(remoteDevId) == 0) {
+        DHLOGI("SessionDevIdMap Not find remoteDevId: %s", remoteDevId.c_str());
         return;
     }
+    int32_t sessionId = sessionDevMap_[remoteDevId];
 
-    std::set<std::string> devHwArray = devHardwareMap_[remoteDevId];
-    devHwArray.erase(hwId);
-    if (lastHwId_ == hwId) {
-        lastHwId_ = "";
-        DHLOGI("CloseInputSoftbus lastHwId_ is same hwId [%s]", hwId.c_str());
-    }
-    if (devHwArray.size() == 0) {
-        devHardwareMap_.erase(remoteDevId);
-        if (sessionDevMap_.count(remoteDevId) != 0) {
-            int32_t sessionId = sessionDevMap_[remoteDevId];
-            sessionDevMap_.erase(remoteDevId);
-            DHLOGI("CloseInputSoftbus remoteDevId:%s, sessionId:%d",
-                remoteDevId.c_str(), sessionId);
-            if (lastDevId_ == remoteDevId) {
-                lastDevId_ = "";
-                DHLOGI("CloseInputSoftbus lastDevId_ is same remoteDevId [%s]",
-                    remoteDevId.c_str());
-            }
-            CloseSession(sessionId);
-        } else {
-            DHLOGI("CloseInputSoftbus not find remoteDevId:%s",
-                remoteDevId.c_str());
-            return;
-        }
-    }
+    DHLOGI("RemoteDevId: %s, sessionId: %d", remoteDevId.c_str(), sessionId);
+    CloseSession(sessionId);
+    sessionDevMap_.erase(remoteDevId);
+    channelStatusMap_.erase(remoteDevId);
+    DistributedInputInject::GetInstance().StopInjectThread();
 }
 
 void DistributedInputSourceTransport::RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback)
@@ -368,16 +336,6 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
         if (sessionDevMap_.count(deviceId) > 0) {
             sessionDevMap_.erase(deviceId);
         }
-        if (devHardwareMap_.count(deviceId)) {
-            std::set<std::string> devHwArray = devHardwareMap_[deviceId];
-            for (auto elem : devHwArray) {
-                if (callback_ != nullptr) {
-                    callback_->onResponseRegisterDistributedHardware(deviceId, elem, false);
-                }
-            }
-
-            devHardwareMap_.erase(deviceId);
-        }
         return SUCCESS;
     }
 
@@ -385,10 +343,6 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
     int32_t sessionSide = GetSessionSide(sessionId);
     DHLOGI("session open succeed, sessionId:%d, sessionSide:%d(1 is "
         "client side), deviceId:%s", sessionId, sessionSide, deviceId.c_str());
-
-    if (callback_ != nullptr) {
-        callback_->onResponseRegisterDistributedHardware(lastDevId_, lastHwId_, true);
-    }
 
     char mySessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerSessionName[SESSION_NAME_SIZE_MAX] = "";
@@ -407,7 +361,12 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
     }
     DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s.",
         mySessionName, peerSessionName, peerDevId);
-
+    {
+        std::lock_guard<std::mutex> notifyLock(operationMutex_);
+        channelStatusMap_[peerDevId] = true;
+        openSessionWaitCond_.notify_all();
+    }
+    DistributedInputInject::GetInstance().StartInjectThread();
     return SUCCESS;
 }
 
@@ -420,9 +379,8 @@ void DistributedInputSourceTransport::OnSessionClosed(int32_t sessionId)
     if (sessionDevMap_.count(deviceId) > 0) {
         sessionDevMap_.erase(deviceId);
     }
-    if (devHardwareMap_.count(deviceId)) {
-        devHardwareMap_.erase(deviceId);
-    }
+    channelStatusMap_.erase(deviceId);
+    DistributedInputInject::GetInstance().StopInjectThread();
 }
 
 void DistributedInputSourceTransport::NotifyResponsePrepareRemoteInput(int32_t sessionId,
@@ -457,6 +415,7 @@ void DistributedInputSourceTransport::NotifyResponseUnprepareRemoteInput(int32_t
         return;
     }
     callback_->onResponseUnprepareRemoteInput(deviceId, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
+    CloseInputSoftbus(deviceId);
 }
 
 void DistributedInputSourceTransport::NotifyResponseStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)

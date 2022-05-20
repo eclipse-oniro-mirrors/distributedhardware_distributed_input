@@ -15,15 +15,17 @@
 
 #include "distributed_input_source_manager.h"
 
+#include <cinttypes>
 #include <if_system_ability_manager.h>
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
 
+#include "constants_dinput.h"
+#include "distributed_hardware_log.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
-#include "white_list_util.h"
 #include "nlohmann/json.hpp"
-#include "distributed_hardware_log.h"
+#include "white_list_util.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -68,7 +70,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseRegisterDist
         DHLOGE("onResponseRegisterDistributedHardware jsonArrayMsg is null.");
         return;
     }
-    
+
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_HWID] = dhId;
@@ -226,6 +228,20 @@ void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteI
         mEventBuffer[idx].code = oneData[INPUT_KEY_CODE];
         mEventBuffer[idx].value = oneData[INPUT_KEY_VALUE];
         mEventBuffer[idx].descriptor = oneData[INPUT_KEY_DESCRIPTOR];
+        std::string path = oneData[INPUT_KEY_PATH];
+        mEventBuffer[idx].path = path;
+        if (oneData[INPUT_KEY_TYPE] == EV_KEY) {
+            DHLOGD("3.E2E-Test Source softBus receive EV_KEY, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+                mEventBuffer[idx].code, mEventBuffer[idx].value, path.c_str(), mEventBuffer[idx].when);
+        } else if (oneData[INPUT_KEY_TYPE] == EV_REL) {
+            DHLOGD("3.E2E-Test Source softBus receive EV_REL, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+                mEventBuffer[idx].code, mEventBuffer[idx].value, path.c_str(), mEventBuffer[idx].when);
+        } else if (oneData[INPUT_KEY_TYPE] == EV_ABS) {
+            DHLOGD("3.E2E-Test Source softBus receive EV_ABS, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+                mEventBuffer[idx].code, mEventBuffer[idx].value, path.c_str(), mEventBuffer[idx].when);
+        } else {
+            DHLOGW("3.E2E-Test Source softBus receive other type!");
+        }
         idx++;
     }
     DistributedInputInject::GetInstance().RegisterDistributedEvent(mEventBuffer, jsonSize);
@@ -500,16 +516,18 @@ int32_t DistributedInputSourceManager::Release()
         if (FAILURE == ret) {
             DHLOGW("%s called, remove node fail.",  __func__);
         }
-
-        DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(devId, dhId);
     }
 
-    // 2.delete all device node data
+    // 2.transport unInit session
+    DHLOGI("Release transport instance");
+    DistributedInputSourceTransport::GetInstance().Release();
+
+    // 3.delete all device node data
     inputDevice_.clear();
     DeviceMap_.clear();
     InputTypesMap_.clear();
 
-    // 3. isstart callback
+    // 4. isStart callback
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
@@ -562,8 +580,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     if (FAILURE == ret) {
         DHLOGE("%s called, create node fail.",  __func__);
 
-        for (std::vector<DInputClientRegistInfo>::iterator iter =
-            regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
+        for (auto iter = regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
             if (iter->devId == devId && iter->dhId == dhId) {
                 iter->callback->OnResult(iter->devId, iter->dhId, FAILURE);
                 regCallbacks_.erase(iter);
@@ -573,24 +590,11 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
         return FAILURE;
     }
 
-    // 3.open softbus callback
-    ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(devId, dhId);
-    if (FAILURE == ret) {
-        DHLOGE("%s called, open softbus fail.",  __func__);
-
-        for (std::vector<DInputClientRegistInfo>::iterator iter =
-            regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
-            if (iter->devId == devId && iter->dhId == dhId) {
-                iter->callback->OnResult(iter->devId, iter->dhId, FAILURE);
-                regCallbacks_.erase(iter);
-                return FAILURE;
-            }
-        }
-        return FAILURE;
-    }
-
-    // 4.save device
+    // 3.save device
     inputDevice_.push_back(inputDeviceId);
+
+    // 4.notify source distributedfwk register hardware success
+    callback->OnResult(devId, dhId, SUCCESS);
     return SUCCESS;
 }
 
@@ -645,7 +649,6 @@ int32_t DistributedInputSourceManager::RemoveInputNode(const std::string& devId,
         }
         return FAILURE;
     }
-    DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(devId, dhId);
     return SUCCESS;
 }
 
@@ -734,31 +737,22 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& dev
         }
     }
 
+    int32_t ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(deviceId);
+    if (FAILURE == ret) {
+        DHLOGE("Open softbus session fail.");
+        return FAILURE;
+    }
+
     DInputClientPrepareInfo info;
     info.devId = deviceId;
     info.preCallback = callback;
     info.addWhiteListCallback = addWhiteListCallback;
     preCallbacks_.push_back(info);
 
-    int32_t ret = DistributedInputInject::GetInstance().PrepareRemoteInput();
-    if (FAILURE == ret) {
-        DHLOGE("%s called, prepare fail.", __func__);
-        for (std::vector<DInputClientPrepareInfo>::iterator iter =
-            preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
-            if (iter->devId == deviceId) {
-                iter->preCallback->OnResult(iter->devId, FAILURE);
-                preCallbacks_.erase(iter);
-                return FAILURE;
-            }
-        }
-        return FAILURE;
-    }
-
     ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(deviceId);
     if (FAILURE == ret) {
-        DHLOGE("%s called, prepare fail.", __func__);
-        for (std::vector<DInputClientPrepareInfo>::iterator iter =
-            preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
+        DHLOGE("Can not send message by softbus, prepare fail.");
+        for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
             if (iter->devId == deviceId) {
                 iter->preCallback->OnResult(iter->devId, FAILURE);
                 preCallbacks_.erase(iter);
@@ -796,9 +790,8 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
 
     int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(deviceId);
     if (FAILURE == ret) {
-        DHLOGE("%s called, unprepare fail.", __func__);
-        for (std::vector<DInputClientUnprepareInfo>::iterator iter =
-            unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
+        DHLOGE("Can not send message by softbus, unprepare fail.");
+        for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
             if (iter->devId == deviceId) {
                 iter->unpreCallback->OnResult(iter->devId, FAILURE);
                 unpreCallbacks_.erase(iter);

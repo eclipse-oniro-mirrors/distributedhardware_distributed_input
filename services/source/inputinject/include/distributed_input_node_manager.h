@@ -16,21 +16,24 @@
 #ifndef DISTRIBUTED_INPUT_NODE_MANAGER_H
 #define DISTRIBUTED_INPUT_NODE_MANAGER_H
 
-#include <string>
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <map>
+#include <queue>
+#include <string>
 #include <thread>
+
 #include "virtual_device.h"
 #include "constants_dinput.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class Distributed_input_node_manager {
+class DistributedInputNodeManager {
 public:
-    Distributed_input_node_manager();
-    ~Distributed_input_node_manager();
+    DistributedInputNodeManager();
+    ~DistributedInputNodeManager();
 
     int32_t openDevicesNode(const std::string& devId, const std::string& dhId,
     const std::string& parameters);
@@ -39,6 +42,7 @@ public:
     void ReportEvent(const RawEvent rawEvent);
     int32_t CloseDeviceLocked(const std::string& dhId);
     void StartInjectThread();
+    void StopInjectThread();
 
 private:
     void AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device);
@@ -46,13 +50,15 @@ private:
     void CloseAllDevicesLocked();
     void stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf);
     void InjectEvent();
+    void ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent);
 
+    std::atomic<bool> isInjectThreadRunning_;
     std::map<std::string, std::unique_ptr<VirtualDevice>> devices_;
     std::mutex operationMutex_;
-    std::thread thread_;
+    std::thread eventInjectThread_;
     std::mutex mutex_;
     std::condition_variable conditionVariable_;
-    std::vector<RawEvent> injectQueue_;
+    std::queue<std::shared_ptr<RawEvent>> injectQueue_;
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware

@@ -143,13 +143,24 @@ bool VirtualDevice::SetUp()
 
 bool VirtualDevice::InjectInputEvent(const input_event& event)
 {
-    DHLOGI("InjectInputEvent %d\n", fd_);
+    DHLOGI("InjectInputEvent %d", fd_);
 
     if (write(fd_, &event, sizeof(event)) < static_cast<ssize_t>(sizeof(event))) {
-        DHLOGE("could not inject event, removed? (fd: %d\n", fd_);
+        DHLOGE("could not inject event, removed? (fd: %d", fd_);
         return false;
     }
-
+    if (event.type == EV_KEY) {
+        DHLOGD("4.E2E-Test Source write event into input driver EV_KEY, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
+            event.code, event.value, event.input_event_sec, event.input_event_usec);
+    } else if (event.type == EV_REL) {
+        DHLOGD("4.E2E-Test Source write event into input driver EV_REL, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
+            event.code, event.value, event.input_event_sec, event.input_event_usec);
+    } else if (event.type == EV_ABS) {
+        DHLOGD("4.E2E-Test Source write event into input driver EV_ABS, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
+            event.code, event.value, event.input_event_sec, event.input_event_usec);
+    } else {
+        DHLOGW("4.E2E-Test Source write event into input driver other type!");
+    }
     DHLOGE("InjectInputEvent end\n");
 
     return true;

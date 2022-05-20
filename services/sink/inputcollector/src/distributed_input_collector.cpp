@@ -113,6 +113,7 @@ void DistributedInputCollector::StartCollectEventsThread()
             tmpJson[INPUT_KEY_TYPE] = mEventBuffer[ind].type;
             tmpJson[INPUT_KEY_CODE] = mEventBuffer[ind].code;
             tmpJson[INPUT_KEY_VALUE] = mEventBuffer[ind].value;
+            tmpJson[INPUT_KEY_PATH] = mEventBuffer[ind].path;
             tmpJson[INPUT_KEY_DESCRIPTOR] = mEventBuffer[ind].descriptor;
             jsonArrayMsg->push_back(tmpJson);
         }
