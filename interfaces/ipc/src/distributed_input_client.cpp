@@ -19,6 +19,7 @@
 #include "constants_dinput.h"
 #include "white_list_util.h"
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 #include "nlohmann/json.hpp"
 #include "softbus_bus_center.h"
 
@@ -97,7 +98,7 @@ void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& de
 int32_t DistributedInputClient::InitSource()
 {
     if (!GetDInputSourceProxy()) {
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
     return dInputSourceProxy_->Init();
 }
@@ -105,7 +106,7 @@ int32_t DistributedInputClient::InitSource()
 int32_t DistributedInputClient::InitSink()
 {
     if (!GetDInputSinkProxy()) {
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SINK_PROXY_FAIL;
     }
     return dInputSinkProxy_->Init();
 }
@@ -113,7 +114,7 @@ int32_t DistributedInputClient::InitSink()
 int32_t DistributedInputClient::ReleaseSource()
 {
     if (!GetDInputSourceProxy()) {
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     serverType = DInputServerType::NULL_SERVER_TYPE;
@@ -132,7 +133,7 @@ int32_t DistributedInputClient::ReleaseSource()
 int32_t DistributedInputClient::ReleaseSink()
 {
     if (!GetDInputSinkProxy()) {
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SINK_PROXY_FAIL;
     }
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes = INPUT_TYPE_NULL;
@@ -150,16 +151,16 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("RegisterDistributedHardware client fail");
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     if (devId.empty() || dhId.empty() || parameters.empty() || !IsJsonData(parameters) || callback == nullptr) {
-        return FAILURE;
+        return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
     }
 
     for (auto iter : dHardWareFwkRstInfos) {
         if (iter.devId == devId && iter.dhId == dhId) {
-            return FAILURE_REGISTING;
+            return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
         }
     }
 
@@ -180,16 +181,16 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("UnregisterDistributedHardware client fail");
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     if (devId.empty() || dhId.empty() || callback == nullptr) {
-        return FAILURE;
+        return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
     }
 
     for (auto iter : dHardWareFwkUnRstInfos) {
         if (iter.devId == devId && iter.dhId == dhId) {
-            return FAILURE_UNREGISTING;
+            return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
         }
     }
 
@@ -210,11 +211,11 @@ int32_t DistributedInputClient::PrepareRemoteInput(
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     if (deviceId.empty() || callback == nullptr) {
-        return FAILURE;
+        return ERR_DH_INPUT_CLIENT_PREPARE_FAIL;
     }
 
     addWhiteListCallback = new(std::nothrow) AddWhiteListInfosCb();
@@ -228,11 +229,11 @@ int32_t DistributedInputClient::UnprepareRemoteInput(
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     if (deviceId.empty() || callback == nullptr) {
-        return FAILURE;
+        return ERR_DH_INPUT_CLIENT_UNPREPARE_FAIL;
     }
 
     delWhiteListCallback = new(std::nothrow) DelWhiteListInfosCb();
@@ -246,13 +247,13 @@ int32_t DistributedInputClient::StartRemoteInput(
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("StartRemoteInput client fail");
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     if (deviceId.empty() || callback == nullptr ||
         inputTypes > INPUT_TYPE_ALL || inputTypes == INPUT_TYPE_NULL ||
         !(inputTypes & INPUT_TYPE_ALL)) {
-        return FAILURE;
+        return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
 
     return dInputSourceProxy_->StartRemoteInput(deviceId, inputTypes, callback);
@@ -265,13 +266,13 @@ int32_t DistributedInputClient::StopRemoteInput(
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("StopRemoteInput client fail");
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     if (deviceId.empty() || callback == nullptr ||
         inputTypes > INPUT_TYPE_ALL || inputTypes == INPUT_TYPE_NULL ||
         !(inputTypes & INPUT_TYPE_ALL)) {
-        return FAILURE;
+        return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
 
     return dInputSourceProxy_->StopRemoteInput(deviceId, inputTypes, callback);
@@ -290,7 +291,7 @@ bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const 
             return WhiteListUtil::GetInstance().IsNeedFilterOut(localDevId_, event);
         }
 
-        if (SUCCESS != WhiteListUtil::GetInstance().Init(localDevId_)) {
+        if (WhiteListUtil::GetInstance().Init(localDevId_) != DH_SUCCESS) {
             return true;
         }
         m_bIsAlreadyInitWhiteList = true;

@@ -16,6 +16,7 @@
 #include "start_d_input_server_call_back_stub.h"
 #include "string_ex.h"
 #include "constants_dinput.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -33,7 +34,7 @@ int32_t StartDInputServerCallbackStub::OnRemoteRequest(
 {
     std::u16string descriptor = data.ReadInterfaceToken();
     if (descriptor != IStartDInputServerCallback::GetDescriptor()) {
-        return ERROR;
+        return ERR_DH_INPUT_IPC_INVALID_DESCRIPTOR;
     }
     IStartDInputServerCallback::Message msgCode = static_cast<IStartDInputServerCallback::Message>(code);
     switch (msgCode) {
@@ -46,7 +47,7 @@ int32_t StartDInputServerCallbackStub::OnRemoteRequest(
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 }  // namespace DistributedHardware
 }  // namespace DistributedInput

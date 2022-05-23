@@ -14,6 +14,7 @@
  */
 
 #include "distributed_input_sink_proxy.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -29,7 +30,7 @@ int32_t DistributedInputSinkProxy::Init()
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SINK_PROXY_INIT_FAIL;
     bool ret = SendRequest(IDistributedSinkInput::MessageCode::INIT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -41,7 +42,7 @@ int32_t DistributedInputSinkProxy::Release()
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SINK_PROXY_RELEASE_FAIL;
     bool ret = SendRequest(IDistributedSinkInput::MessageCode::RELEASE, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -60,7 +61,7 @@ int32_t DistributedInputSinkProxy::IsStartDistributedInput(
         return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SINK_PROXY_IS_START_INPUT_FAIL;
     bool ret = SendRequest(IDistributedSinkInput::MessageCode::ISSTART_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -77,7 +78,7 @@ bool DistributedInputSinkProxy::SendRequest(
     }
     MessageOption option(MessageOption::TF_SYNC);
     int32_t result = remote->SendRequest(static_cast<uint32_t>(code), data, reply, option);
-    if (result != OHOS::NO_ERROR) {
+    if (result != DH_SUCCESS) {
         return false;
     }
     return true;

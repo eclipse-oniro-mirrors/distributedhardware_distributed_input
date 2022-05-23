@@ -23,6 +23,7 @@
 #include "distributed_input_collector.h"
 #include "distributed_input_sink_switch.h"
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -60,7 +61,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     std::string smsg = "";
     int ret = DistributedInputCollector::GetInstance().Init(
         DistributedInputSinkTransport::GetInstance().GetEventHandler());
-    if (ret != SUCCESS) {
+    if (ret != DH_SUCCESS) {
         DHLOGE("DInputSinkListener init InputCollector error.");
         jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
         jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
@@ -74,7 +75,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     // send prepare result and if result ok, send white list
     TYPE_WHITE_LIST_VEC vecFilter;
     if (sinkManagerObj_->GetInitWhiteListFlag() == false) {
-        if (SUCCESS != WhiteListUtil::GetInstance().Init(deviceId)) {
+        if (WhiteListUtil::GetInstance().Init(deviceId) != DH_SUCCESS) {
             DHLOGE("%s called, init white list fail!", __func__);
             jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
             jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
@@ -124,11 +125,11 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     // set new session
     int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
 
-    sinkManagerObj_->SetStartTransFlag((startRes == SUCCESS) ?
+    sinkManagerObj_->SetStartTransFlag((startRes == DH_SUCCESS) ?
         DInputServerType::SINK_SERVER_TYPE :
         DInputServerType::NULL_SERVER_TYPE);
 
-    bool result = (startRes == SUCCESS) ? true : false;
+    bool result = (startRes == DH_SUCCESS) ? true : false;
     nlohmann::json jsonStrSta;
     jsonStrSta[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONSTART;
     jsonStrSta[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
@@ -138,7 +139,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsgSta);
 
     // Notify the interrupted master status
-    if (FAILURE == curSessionId) {
+    if (curSessionId == ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
         DHLOGI("onStartRemoteInput called, this is the only session.");
     } else if (result) {
         DHLOGI("onStartRemoteInput called, notify curSessionId:%d Interrupted.", curSessionId);
@@ -155,7 +156,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     }
 
     // add the input type
-    if (startRes == SUCCESS) {
+    if (startRes == DH_SUCCESS) {
         sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() | inputTypes);
         DistributedInputCollector::GetInstance().SetInputTypes(sinkManagerObj_->GetInputTypes());
     }
@@ -187,7 +188,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
 
     if (sinkManagerObj_->GetInputTypes() == INPUT_TYPE_NULL) {
         DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
-        if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() == FAILURE) {
+        if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() ==
+            ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
             DHLOGI("onStartRemoteInput called, all session is stop.");
             sinkManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
         }
@@ -261,8 +263,8 @@ int32_t DistributedInputSinkManager::Init()
     isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
     // transport init session
     int32_t ret = DistributedInputSinkTransport::GetInstance().Init();
-    if (SUCCESS != ret) {
-        return FAILURE;
+    if (ret != DH_SUCCESS) {
+        return ERR_DH_INPUT_SERVER_SINK_MANAGER_INIT_FAIL;
     }
 
     statuslistener_ = std::make_shared<DInputSinkListener>(this);
@@ -270,7 +272,7 @@ int32_t DistributedInputSinkManager::Init()
 
     serviceRunningState_ = ServiceSinkRunningState::STATE_RUNNING;
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSinkManager::Release()
@@ -297,7 +299,7 @@ int32_t DistributedInputSinkManager::Release()
     DHLOGI("exit dinput sink sa.");
     exit(0);
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSinkManager::IsStartDistributedInput(

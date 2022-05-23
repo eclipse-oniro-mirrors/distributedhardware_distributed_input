@@ -15,6 +15,7 @@
 
 #include "distributed_input_sink_stub.h"
 #include "constants_dinput.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -32,7 +33,7 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
         case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::INIT): {
             int32_t ret = Init();
             if (!reply.WriteInt32(ret)) {
-                return ERROR;
+                return ERR_DH_INPUT_SINK_STUB_ON_REMOTE_REQUEST_FAIL;
             }
             break;
         }
@@ -40,7 +41,7 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
         case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::RELEASE): {
             int32_t ret = Release();
             if (!reply.WriteInt32(ret)) {
-                return ERROR;
+                return ERR_DH_INPUT_SINK_STUB_ON_REMOTE_REQUEST_FAIL;
             }
             break;
         }
@@ -51,14 +52,14 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
                 iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
             int32_t ret = IsStartDistributedInput(inputType, callback);
             if (!reply.WriteInt32(ret)) {
-                return ERROR;
+                return ERR_DH_INPUT_SINK_STUB_ON_REMOTE_REQUEST_FAIL;
             }
             break;
         }
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

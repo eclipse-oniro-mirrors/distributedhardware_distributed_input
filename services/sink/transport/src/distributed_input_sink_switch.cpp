@@ -17,6 +17,7 @@
 
 #include "constants_dinput.h"
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -50,7 +51,7 @@ int32_t DistributedInputSinkSwitch::StartSwitch(int32_t sessionId)
     std::unique_lock<std::mutex> switchLock(operationMutex_);
     if (switchVector_.empty()) {
         DHLOGE("StartSwitch sessionId:%d fail,switchVector_ is null.", sessionId);
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL;
     } else {
         bool findOld = false;
         for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
@@ -63,10 +64,10 @@ int32_t DistributedInputSinkSwitch::StartSwitch(int32_t sessionId)
 
         if (findOld) {
             DHLOGI("StartSwitch sessionId:%d is find.", sessionId);
-            return SUCCESS;
+            return DH_SUCCESS;
         } else {
             DHLOGE("StartSwitch sessionId:%d fail, not found.", sessionId);
-            return FAILURE;
+            return ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL;
         }
     }
 }
@@ -174,7 +175,7 @@ int32_t DistributedInputSinkSwitch::GetSwitchOpenedSession()
     std::unique_lock<std::mutex> switchLock(operationMutex_);
     if (switchVector_.empty()) {
         DHLOGE("GetSwitchOpenedSession error, no data.");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL;
     }
     for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
         if ((*it).switchState == true) {
@@ -182,7 +183,7 @@ int32_t DistributedInputSinkSwitch::GetSwitchOpenedSession()
         }
     }
     DHLOGE("GetSwitchOpenedSession no session is open.");
-    return FAILURE;
+    return ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

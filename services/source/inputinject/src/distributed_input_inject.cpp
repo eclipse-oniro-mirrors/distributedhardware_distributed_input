@@ -18,6 +18,7 @@
 #include <sstream>
 #include "nlohmann/json.hpp"
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -48,13 +49,13 @@ int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& d
 
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL;
     }
     if (inputNodeManager_->openDevicesNode(devId, dhId, parameters) < 0) {
         DHLOGE("create virtual device error\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_INJECT_REGISTER_FAIL;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputInject::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId)
@@ -63,13 +64,13 @@ int32_t DistributedInputInject::UnregisterDistributedHardware(const std::string&
         __func__, devId.c_str(), dhId.c_str());
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL;
     }
     if (inputNodeManager_->CloseDeviceLocked(dhId) < 0) {
         DHLOGE("delete virtual device error\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_INJECT_UNREGISTER_FAIL;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputInject::StructTransJson(const InputDevice& pBuf, std::string& strDescriptor)
@@ -92,20 +93,20 @@ int32_t DistributedInputInject::StructTransJson(const InputDevice& pBuf, std::st
     std::ostringstream stream;
     stream << tmpJson.dump();
     strDescriptor = stream.str();
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputInject::RegisterDistributedEvent(RawEvent* buffer, size_t bufferSize)
 {
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL;
     }
     DHLOGE("RegisterDistributedEvent start %zu\n", bufferSize);
     for (size_t i = 0; i < bufferSize; i++) {
         inputNodeManager_->ReportEvent(buffer[i]);
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void DistributedInputInject::StartInjectThread()

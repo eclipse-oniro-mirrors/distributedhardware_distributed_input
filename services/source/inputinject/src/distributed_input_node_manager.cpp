@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 #include "nlohmann/json.hpp"
 #include "virtual_keyboard.h"
 #include "virtual_mouse.h"
@@ -54,10 +55,10 @@ int32_t DistributedInputNodeManager::openDevicesNode(const std::string& devId, c
     InputDevice event;
     stringTransJsonTransStruct(parameters, event);
     if (CreateHandle(event, devId) < 0) {
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_OPEN_DEVICE_NODE_FAIL;
     }
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void DistributedInputNodeManager::stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf)
@@ -87,22 +88,22 @@ int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::
         device = std::make_unique<VirtualTouchpad>(event.name, event.bus, event.vendor, event.product, event.version);
     } else {
         DHLOGW("could not find the deviceType\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
     }
 
     if (device == nullptr) {
         DHLOGE("could not create new virtual device == null\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
     }
 
     device->SetNetWorkId(devId);
 
     if (!device->SetUp()) {
         DHLOGE("could not create new virtual device\n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
     }
     AddDeviceLocked(event.descriptor, std::move(device));
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void DistributedInputNodeManager::AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device)
@@ -119,10 +120,10 @@ int32_t DistributedInputNodeManager::CloseDeviceLocked(const std::string &dhId)
     std::map<std::string, std::unique_ptr<VirtualDevice>>::iterator iter = devices_.find(dhId);
     if (iter != devices_.end()) {
         devices_.erase(iter);
-        return SUCCESS;
+        return DH_SUCCESS;
     }
     DHLOGE("%s called failure, dhId=%s", __func__, dhId.c_str());
-    return FAILURE;
+    return ERR_DH_INPUT_SERVER_SOURCE_CLOSE_DEVICE_FAIL;
 }
 
 void DistributedInputNodeManager::CloseAllDevicesLocked()
@@ -134,13 +135,13 @@ void DistributedInputNodeManager::CloseAllDevicesLocked()
 
 int32_t DistributedInputNodeManager::getDevice(const std::string& dhId, VirtualDevice*& device)
 {
-    for (const auto & [id, virDevice] : devices_) {
+    for (const auto& [id, virdevice] : devices_) {
         if (id == dhId) {
-            device = virDevice.get();
-            return SUCCESS;
+            device = virdevice.get();
+            return DH_SUCCESS;
         }
     }
-    return FAILURE;
+    return ERR_DH_INPUT_SERVER_SOURCE_GET_DEVICE_FAIL;
 }
 
 void DistributedInputNodeManager::StartInjectThread()

@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 #include "sys/stat.h"
 
 namespace OHOS {
@@ -56,7 +57,7 @@ int32_t InputHub::Initialize()
     epollFd_ = epoll_create1(EPOLL_CLOEXEC);
     if (epollFd_ < 0) {
         DHLOGE("Could not create epoll instance: %s", strerror(errno));
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_EPOLL_INIT_FAIL;
     }
 
     iNotifyFd_ = inotify_init();
@@ -64,7 +65,7 @@ int32_t InputHub::Initialize()
     if (inputWd_ < 0) {
         DHLOGE(
             "Could not register INotify for %s: %s", DEVICE_PATH, strerror(errno));
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_EPOLL_INIT_FAIL;
     }
 
     struct epoll_event eventItem = {};
@@ -73,10 +74,10 @@ int32_t InputHub::Initialize()
     int result = epoll_ctl(epollFd_, EPOLL_CTL_ADD, iNotifyFd_, &eventItem);
     if (result != 0) {
         DHLOGE("Could not add INotify to epoll instance.  errno=%d", errno);
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_EPOLL_INIT_FAIL;
     }
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t InputHub::Release()
@@ -85,7 +86,7 @@ int32_t InputHub::Release()
 
     ::close(epollFd_);
     ::close(iNotifyFd_);
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 size_t InputHub::CollectInputEvents(RawEvent* buffer, size_t bufferSize)
@@ -332,7 +333,7 @@ int32_t InputHub::RefreshEpollItem()
     if (pollResult == 0) {
         // Timed out.
         pendingEventCount_ = 0;
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_EPOLL_WAIT_TIMEOUT;
     }
 
     if (pollResult < 0) {
@@ -349,7 +350,7 @@ int32_t InputHub::RefreshEpollItem()
         // Some events occurred.
         pendingEventCount_ = size_t(pollResult);
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 std::vector<InputDevice> InputHub::GetAllInputDevices()
@@ -400,7 +401,7 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
         std::unique_lock<std::mutex> deviceLock(visitMutex_);
         for (const auto& [deviceId, device] : devices_) {
             if (device->path == devicePath) {
-                return SUCCESS; // device was already registered
+                return DH_SUCCESS; // device was already registered
             }
         }
     }
@@ -411,12 +412,12 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     int fd = open(devicePath.c_str(), O_RDWR | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
         DHLOGE("could not open %s, %s\n", devicePath.c_str(), strerror(errno));
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_OPEN_DEVICEPATH_FAIL;
     }
 
     InputDevice identifier;
     if (MakeInputDevice(fd, identifier) < 0) {
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
     }
     AssignDescriptorLocked(identifier);
 
@@ -436,10 +437,10 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     DHLOGI("  descriptor: \"%s\"\n", identifier.descriptor.c_str());
     
     if (MakeDevice(fd, std::move(device)) < 0) {
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_MAKE_DEVICE_FAIL;
     }
     
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t InputHub::MakeInputDevice(int fd, InputDevice& identifier)
@@ -456,21 +457,21 @@ int32_t InputHub::MakeInputDevice(int fd, InputDevice& identifier)
 
     // If the device is already a virtual device, don't monitor it.
     if (identifier.name.find(VIRTUAL_DEVICE_NAME) != std::string::npos) {
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
     }
     // Get device driver version.
     int driverVersion;
     if (ioctl(fd, EVIOCGVERSION, &driverVersion)) {
         DHLOGE("could not get driver version for %s\n", strerror(errno));
         close(fd);
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
     }
     // Get device identifier.
     struct input_id inputId;
     if (ioctl(fd, EVIOCGID, &inputId)) {
         DHLOGE("could not get device input id for %s\n", strerror(errno));
         close(fd);
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
     }
     identifier.bus = inputId.bustype;
     identifier.product = inputId.product;
@@ -495,7 +496,7 @@ int32_t InputHub::MakeInputDevice(int fd, InputDevice& identifier)
         (driverVersion >> DRIVER_VERSION_MOVE) & DRIVER_VERSION_MAX,
         driverVersion & DRIVER_VERSION_MAX);
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
@@ -521,18 +522,18 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
     // If the device isn't recognized as something we handle, don't monitor it.
     if (device->classes == 0) {
         DHLOGI("Dropping device: name='%s'", device->identifier.name.c_str());
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_MAKE_DEVICE_FAIL;
     }
 
-    if (RegisterDeviceForEpollLocked(*device) != SUCCESS) {
-        return FAILURE;
+    if (RegisterDeviceForEpollLocked(*device) != DH_SUCCESS) {
+        return ERR_DH_INPUT_HUB_MAKE_DEVICE_FAIL;
     }
 
     DHLOGI("New device: fd=%d, name='%s', classes=0x%x,",
         fd, device->identifier.name.c_str(), device->classes);
     device->identifier.classes = device->classes;
     AddDeviceLocked(std::move(device));
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void InputHub::AssignDescriptorLocked(InputDevice& identifier)
@@ -561,7 +562,7 @@ std::string InputHub::StringPrintf(const char* format, ...) const
     va_start(ap, format);
     std::string result;
     int ret = vsnprintf_s(space, sizeof(space), sizeof(space) - 1, format, ap);
-    if (ret > ERROR && ret < sizeof(space)) {
+    if (ret >= DH_SUCCESS && ret < sizeof(space)) {
         result = space;
     } else {
         return "the buffer is overflow!";
@@ -618,7 +619,7 @@ std::string InputHub::GenerateDescriptor(InputDevice& identifier) const
 int32_t InputHub::RegisterDeviceForEpollLocked(const Device& device)
 {
     int32_t result = RegisterFdForEpoll(device.fd);
-    if (result != SUCCESS) {
+    if (result != DH_SUCCESS) {
         DHLOGE("Could not add input device fd to epoll for device %d", device.id);
         return result;
     }
@@ -635,7 +636,7 @@ int32_t InputHub::RegisterFdForEpoll(int fd)
             "Could not add fd to epoll instance: %s", strerror(errno));
         return -errno;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void InputHub::AddDeviceLocked(std::unique_ptr<Device> device)
@@ -662,13 +663,13 @@ int32_t InputHub::UnregisterDeviceFromEpollLocked(const Device& device) const
 {
     if (device.HasValidFd()) {
         int32_t result = UnregisterFdFromEpoll(device.fd);
-        if (result != SUCCESS) {
+        if (result != DH_SUCCESS) {
             DHLOGE(
                 "Could not remove input device fd from epoll for device %d", device.id);
             return result;
         }
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t InputHub::UnregisterFdFromEpoll(int fd) const
@@ -676,9 +677,9 @@ int32_t InputHub::UnregisterFdFromEpoll(int fd) const
     if (epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, nullptr)) {
         DHLOGE(
             "Could not remove fd from epoll instance: %s", strerror(errno));
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_UNREGISTER_FD_FAIL;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t InputHub::ReadNotifyLocked()
@@ -693,9 +694,9 @@ int32_t InputHub::ReadNotifyLocked()
     res = read(iNotifyFd_, event_buf, sizeof(event_buf));
     if (res < (int)sizeof(*event)) {
         if (errno == EINTR)
-            return SUCCESS;
+            return DH_SUCCESS;
         DHLOGE("could not get event, %s\n", strerror(errno));
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_GET_EVENT_FAIL;
     }
 
     while (res >= (int) sizeof(*event)) {
@@ -705,7 +706,7 @@ int32_t InputHub::ReadNotifyLocked()
         res -= event_size;
         event_pos += event_size;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void InputHub::JudgeDeviceOpenOrClose(const inotify_event& event)
@@ -859,17 +860,17 @@ int32_t InputHub::Device::Enable()
     if (fd < 0) {
         DHLOGE(
             "could not open %s, %s\n", path.c_str(), strerror(errno));
-        return FAILURE;
+        return ERR_DH_INPUT_HUB_DEVICE_ENABLE_FAIL;
     }
     enabled = true;
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t InputHub::Device::Disable()
 {
     Close();
     enabled = false;
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 bool InputHub::Device::HasValidFd() const

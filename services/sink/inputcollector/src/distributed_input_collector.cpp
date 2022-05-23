@@ -25,6 +25,7 @@
 #include "sys/stat.h"
 #include "nlohmann/json.hpp"
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -57,13 +58,13 @@ int32_t DistributedInputCollector::Init(std::shared_ptr<AppExecFwk::EventHandler
     sinkHandler_ = sinkHandler;
     if (sinkHandler_ == nullptr) {
         DHLOGE("DistributedInputCollector::Init sinkHandler_ failed \n");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_COLLECTOR_INIT_FAIL;
     }
     if (!isStartGetDeviceHandlerThread) {
         InitCollectEventsThread();
         isStartGetDeviceHandlerThread = true;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 bool DistributedInputCollector::InitCollectEventsThread()

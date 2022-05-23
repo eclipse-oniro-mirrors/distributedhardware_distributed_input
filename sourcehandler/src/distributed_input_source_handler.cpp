@@ -16,6 +16,7 @@
 #include "distributed_input_source_handler.h"
 
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 #include "i_distributed_source_input.h"
 #include "load_d_input_source_callback.h"
 
@@ -36,14 +37,14 @@ int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
         sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!samgr) {
             DHLOGE("Failed to get system ability mgr.");
-            return FAILURE_DIS;
+            return ERR_DH_INPUT_SINK_HANDLER_INIT_SOURCE_SA_FAIL;
         }
         sptr<LoadDInputSourceCallback> loadCallback = new LoadDInputSourceCallback(params);
         int32_t ret = samgr->LoadSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, loadCallback);
         if (ret != ERR_OK) {
             DHLOGE("Failed to Load systemAbility, systemAbilityId:%d, ret code:%d",
                    DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, ret);
-            return FAILURE_DIS;
+            return ERR_DH_INPUT_SINK_HANDLER_INIT_SOURCE_SA_FAIL;
         }
     }
 
@@ -51,10 +52,10 @@ int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
         [this]() { return (DistributedInputClient::GetInstance().HasDInputSourceProxy()); });
     if (!waitStatus) {
         DHLOGE("dinput load sa timeout.");
-        return FAILURE_DIS;
+        return ERR_DH_INPUT_SINK_HANDLER_INIT_SOURCE_SA_FAIL;
     }
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void DistributedInputSourceHandler::FinishStartSA(const std::string &params, const sptr<IRemoteObject> &remoteObject)
@@ -86,7 +87,7 @@ int32_t DistributedInputSourceHandler::UnregisterDistributedHardware(const std::
 int32_t DistributedInputSourceHandler::ConfigDistributedHardware(const std::string &devId,
     const std::string &dhId, const std::string &key, const std::string &value)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void DistributedInputSourceHandler::SALoadSourceCb::OnLoadSystemAbilitySuccess(int32_t systemAbilityId,

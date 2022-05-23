@@ -15,6 +15,7 @@
 
 #include "distributed_input_source_stub.h"
 #include "constants_dinput.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -33,9 +34,9 @@ int32_t DistributedInputSourceStub::HandleRegisterDistributedHardware(MessagePar
     sptr<IRegisterDInputCallback> callback = iface_cast<IRegisterDInputCallback>(data.ReadRemoteObject());
     int32_t ret = RegisterDistributedHardware(devId, dhId, params, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERROR;
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceStub::HandleUnregisterDistributedHardware(MessageParcel &data, MessageParcel &reply)
@@ -45,9 +46,9 @@ int32_t DistributedInputSourceStub::HandleUnregisterDistributedHardware(MessageP
     sptr<IUnregisterDInputCallback> callback = iface_cast<IUnregisterDInputCallback>(data.ReadRemoteObject());
     int32_t ret = UnregisterDistributedHardware(devId, dhId, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERROR;
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceStub::HandlePrepareRemoteInput(MessageParcel &data, MessageParcel &reply)
@@ -59,9 +60,9 @@ int32_t DistributedInputSourceStub::HandlePrepareRemoteInput(MessageParcel &data
         iface_cast<IAddWhiteListInfosCallback>(data.ReadRemoteObject());
     int32_t ret = PrepareRemoteInput(deviceId, callback, addCallback);
     if (!reply.WriteInt32(ret)) {
-        return ERROR;
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceStub::HandleUnprepareRemoteInput(MessageParcel &data, MessageParcel &reply)
@@ -73,9 +74,9 @@ int32_t DistributedInputSourceStub::HandleUnprepareRemoteInput(MessageParcel &da
         iface_cast<IDelWhiteListInfosCallback>(data.ReadRemoteObject());
     int32_t ret = UnprepareRemoteInput(deviceId, callback, delCallback);
     if (!reply.WriteInt32(ret)) {
-        return ERROR;
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceStub::HandleStartRemoteInput(MessageParcel &data, MessageParcel &reply)
@@ -85,9 +86,9 @@ int32_t DistributedInputSourceStub::HandleStartRemoteInput(MessageParcel &data, 
     sptr<IStartDInputCallback> callback = iface_cast<IStartDInputCallback>(data.ReadRemoteObject());
     int32_t ret = StartRemoteInput(deviceId, inputTypes, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERROR;
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceStub::HandleStopRemoteInput(MessageParcel &data, MessageParcel &reply)
@@ -97,9 +98,9 @@ int32_t DistributedInputSourceStub::HandleStopRemoteInput(MessageParcel &data, M
     sptr<IStopDInputCallback> callback = iface_cast<IStopDInputCallback>(data.ReadRemoteObject());
     int32_t ret = StopRemoteInput(deviceId, inputTypes, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERROR;
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceStub::HandleIsStartDistributedInput(MessageParcel &data, MessageParcel &reply)
@@ -108,9 +109,9 @@ int32_t DistributedInputSourceStub::HandleIsStartDistributedInput(MessageParcel 
     sptr<IStartDInputServerCallback> callback = iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
     int32_t ret = IsStartDistributedInput(inputType, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERROR;
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
     }
-    return NO_ERROR;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -120,18 +121,18 @@ int32_t DistributedInputSourceStub::OnRemoteRequest(uint32_t code, MessageParcel
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::INIT): {
             int32_t ret = Init();
             if (!reply.WriteInt32(ret)) {
-                return ERROR;
+                return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
             } else {
-                return NO_ERROR;
+                return DH_SUCCESS;
             }
             break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::RELEASE): {
             int32_t ret = Release();
             if (!reply.WriteInt32(ret)) {
-                return ERROR;
+                return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
             } else {
-                return NO_ERROR;
+                return DH_SUCCESS;
             }
             break;
         }

@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -52,14 +53,14 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
     if (deviceId.empty()) {
         // device id error
         DHLOGE("%s error, deviceId empty", __func__);
-        return FAILURE;
+        return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
 
     std::ifstream inFile(g_filepath, std::ios::in | std::ios::binary);
     if (!inFile.is_open()) {
         // file open error
         DHLOGE("%s error, file open fail path=%s", __func__, g_filepath);
-        return FAILURE;
+        return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
 
     TYPE_KEY_CODE_VEC vecKeyCode;
@@ -107,14 +108,14 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
 
     DHLOGI("%s called success, deviceId=%s", __func__, deviceId.c_str());
     PrintWhiteList();
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t WhiteListUtil::UnInit(void)
 {
     DHLOGI("%s called", __func__);
     ClearWhiteList();
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &vecKeyCode,
@@ -155,7 +156,7 @@ int32_t WhiteListUtil::SyncWhiteList(const std::string &deviceId, const TYPE_WHI
     std::lock_guard<std::mutex> lock(mutex_);
     mapDeviceWhiteList_[deviceId] = vecWhiteList;
     PrintWhiteList();
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t WhiteListUtil::ClearWhiteList(const std::string &deviceId)
@@ -165,14 +166,14 @@ int32_t WhiteListUtil::ClearWhiteList(const std::string &deviceId)
 
     std::lock_guard<std::mutex> lock(mutex_);
     mapDeviceWhiteList_.erase(deviceId);
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t WhiteListUtil::ClearWhiteList(void)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     TYPE_DEVICE_WHITE_LIST_MAP().swap(mapDeviceWhiteList_);
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t WhiteListUtil::GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST_VEC &vecWhiteList)
@@ -186,12 +187,12 @@ int32_t WhiteListUtil::GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST
         vecWhiteList = iter->second;
         DHLOGI("%s called success, deviceId=%s",
             __func__, deviceId.c_str());
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
     DHLOGE("%s called failure, deviceId=%s",
         __func__, deviceId.c_str());
-    return FAILURE;
+    return ERR_DH_INPUT_WHILTELIST_GET_WHILTELIST_FAIL;
 }
 
 bool WhiteListUtil::CheckSubVecData(const TYPE_COMBINATION_KEY_VEC::iterator &iter2,

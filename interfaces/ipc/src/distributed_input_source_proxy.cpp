@@ -14,12 +14,11 @@
  */
 
 #include "distributed_input_source_proxy.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-const int32_t DISTRIBUTED_INPUT_DENIED = -1;
-
 DistributedInputSourceProxy::DistributedInputSourceProxy(const sptr<IRemoteObject> &object)
     : IRemoteProxy<IDistributedSourceInput>(object)
 {}
@@ -31,7 +30,7 @@ int32_t DistributedInputSourceProxy::Init()
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_INIT_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::INIT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -43,7 +42,7 @@ int32_t DistributedInputSourceProxy::Release()
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_RELEASE_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::RELEASE, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -56,19 +55,19 @@ int32_t DistributedInputSourceProxy::RegisterDistributedHardware(const std::stri
 {
     MessageParcel data;
     if (!data.WriteString(devId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
     }
     if (!data.WriteString(dhId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
     }
     if (!data.WriteString(parameters)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_REGISTER_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::REGISTER_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -81,16 +80,16 @@ int32_t DistributedInputSourceProxy::UnregisterDistributedHardware(const std::st
 {
     MessageParcel data;
     if (!data.WriteString(devId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_WRITE_MSG_FAIL;
     }
     if (!data.WriteString(dhId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_WRITE_MSG_FAIL;
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::UNREGISTER_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -104,16 +103,16 @@ int32_t DistributedInputSourceProxy::PrepareRemoteInput(
 {
     MessageParcel data;
     if (!data.WriteString(deviceId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_PREPARE_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_PREPARE_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(addWhiteListCallback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_PREPARE_WRITE_MSG_FAIL;
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_PREPARE_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::PREPARE_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -127,16 +126,16 @@ int32_t DistributedInputSourceProxy::UnprepareRemoteInput(
 {
     MessageParcel data;
     if (!data.WriteString(deviceId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(delWhiteListCallback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_WRITE_MSG_FAIL;
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::UNPREPARE_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -149,16 +148,16 @@ int32_t DistributedInputSourceProxy::StartRemoteInput(
 {
     MessageParcel data;
     if (!data.WriteString(deviceId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_START_WRITE_MSG_FAIL;
     }
     if (!data.WriteUint32(inputTypes)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_START_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_START_WRITE_MSG_FAIL;
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_START_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::START_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -171,16 +170,16 @@ int32_t DistributedInputSourceProxy::StopRemoteInput(
 {
     MessageParcel data;
     if (!data.WriteString(deviceId)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_STOP_WRITE_MSG_FAIL;
     }
     if (!data.WriteUint32(inputTypes)) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_STOP_WRITE_MSG_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return DISTRIBUTED_INPUT_DENIED;
+        return ERR_DH_INPUT_SOURCE_PROXY_STOP_WRITE_MSG_FAIL;
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_STOP_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::STOP_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -199,7 +198,7 @@ int32_t DistributedInputSourceProxy::IsStartDistributedInput(
         return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
     }
     MessageParcel reply;
-    int32_t result = ERROR;
+    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_IS_START_INPUT_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::ISSTART_REMOTE_INPUT, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -216,7 +215,7 @@ bool DistributedInputSourceProxy::SendRequest(
     }
     MessageOption option(MessageOption::TF_SYNC);
     int32_t result = remote->SendRequest(static_cast<uint32_t>(code), data, reply, option);
-    if (result != OHOS::NO_ERROR) {
+    if (result != DH_SUCCESS) {
         return false;
     }
     return true;

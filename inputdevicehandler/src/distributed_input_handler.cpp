@@ -28,6 +28,7 @@
 #include "nlohmann/json.hpp"
 #include "sys/stat.h"
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -74,7 +75,7 @@ int32_t DistributedInputHandler::Initialize()
         InitCollectEventsThread();
         isStartCollectEventThread = true;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 std::vector<DHItem> DistributedInputHandler::Query()
@@ -119,12 +120,12 @@ int32_t DistributedInputHandler::GetDeviceInfo(std::string& deviceId)
     int32_t retCode = GetLocalNodeDeviceInfo("ohos.distributedhardware.devicemanager", localNode.get());
     if (retCode != 0) {
         DHLOGE("Could not get device id.");
-        return FAILURE;
+        return ERR_DH_INPUT_HANDLER_GET_DEVICE_ID_FAIL;
     }
 
     deviceId = localNode->networkId;
     DHLOGI("device id is %s", deviceId.c_str());
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 bool DistributedInputHandler::InitCollectEventsThread()

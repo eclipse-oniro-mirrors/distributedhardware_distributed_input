@@ -22,6 +22,7 @@
 
 #include "constants_dinput.h"
 #include "distributed_hardware_log.h"
+#include "dinput_errcode.h"
 #include "session.h"
 #include "softbus_bus_center.h"
 
@@ -97,7 +98,6 @@ void DistributedInputSinkTransport::DInputSinkEventHandler::ProcessEvent(const A
             sendMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_BODY_DATA;
             sendMsg[DINPUT_SOFTBUS_KEY_INPUT_DATA] = innerMsg->dump();
             std::string smsg = sendMsg.dump();
-
             for (nlohmann::json::iterator it = innerMsg->begin(); it != innerMsg->end(); ++it) {
                 nlohmann::json oneData = *it;
                 int32_t code = oneData[INPUT_KEY_CODE];
@@ -144,20 +144,20 @@ int32_t DistributedInputSinkTransport::Init()
     };
     auto localNode = std::make_unique<NodeBasicInfo>();
     int32_t retCode = GetLocalNodeDeviceInfo(DINPUT_PKG_NAME.c_str(), localNode.get());
-    if (retCode != SUCCESS) {
+    if (retCode != DH_SUCCESS) {
         DHLOGE("Init could not get local device id.");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_INIT_FAIL;
     }
     std::string networkId = localNode->networkId;
     DHLOGI("Init device networkId is %s", networkId.c_str());
     mySessionName_ = SESSION_NAME_SINK + networkId.substr(0, INTERCEPT_STRING_LENGTH);
 
     int32_t ret = CreateSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str(), &iSessionListener);
-    if (ret != SUCCESS) {
+    if (ret != DH_SUCCESS) {
         DHLOGE("Init CreateSessionServer failed, error code %d.", ret);
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_INIT_FAIL;
     }
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> DistributedInputSinkTransport::GetEventHandler()
@@ -178,14 +178,14 @@ int32_t DistributedInputSinkTransport::RespPrepareRemoteInput(
     if (sessionId > 0) {
         DHLOGI("RespPrepareRemoteInput session:%d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
-        if (ret != SUCCESS) {
+        if (ret != DH_SUCCESS) {
             DHLOGE("RespPrepareRemoteInput error, SendMessage fail.");
-            return FAILURE;
+            return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPPREPARE_FAIL;
         }
-        return SUCCESS;
+        return DH_SUCCESS;
     } else {
         DHLOGE("RespPrepareRemoteInput error, sessionId <= 0.");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPPREPARE_FAIL;
     }
 }
 
@@ -195,14 +195,14 @@ int32_t DistributedInputSinkTransport::RespUnprepareRemoteInput(
     if (sessionId > 0) {
         DHLOGI("RespUnprepareRemoteInput sessionId:%d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
-        if (ret != SUCCESS) {
+        if (ret != DH_SUCCESS) {
             DHLOGE("RespUnprepareRemoteInput error, SendMessage fail.");
-            return FAILURE;
+            return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPUNPREPARE_FAIL;
         }
-        return SUCCESS;
+        return DH_SUCCESS;
     } else {
         DHLOGE("RespUnprepareRemoteInput error, sessionId <= 0.");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPUNPREPARE_FAIL;
     }
 }
 
@@ -212,14 +212,14 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
     if (sessionId > 0) {
         DHLOGI("RespStartRemoteInput sessionId:%d, result:%d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
-        if (ret != SUCCESS) {
+        if (ret != DH_SUCCESS) {
             DHLOGE("RespStartRemoteInput error, SendMessage fail.");
-            return FAILURE;
+            return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTART_FAIL;
         }
-        return SUCCESS;
+        return DH_SUCCESS;
     } else {
         DHLOGE("RespStartRemoteInput error, sessionId <= 0.");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTART_FAIL;
     }
 }
 
@@ -229,14 +229,14 @@ int32_t DistributedInputSinkTransport::RespStopRemoteInput(
     if (sessionId > 0) {
         DHLOGI("RespStopRemoteInput sessionId:%d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
-        if (ret != SUCCESS) {
+        if (ret != DH_SUCCESS) {
             DHLOGE("RespStopRemoteInput error, SendMessage fail.");
-            return FAILURE;
+            return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTOP_FAIL;
         }
-        return SUCCESS;
+        return DH_SUCCESS;
     } else {
         DHLOGE("RespStopRemoteInput error, sessionId <= 0.");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTOP_FAIL;
     }
 }
 
@@ -245,18 +245,18 @@ int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::strin
     DHLOGI("start SendMessage");
     if (message.size() > MSG_MAX_SIZE) {
         DHLOGE("SendMessage error: message.size() > MSG_MAX_SIZE");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
     }
     uint8_t *buf = (uint8_t *)calloc((MSG_MAX_SIZE), sizeof(uint8_t));
     if (buf == nullptr) {
         DHLOGE("SendMessage: malloc memory failed");
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
     }
     int32_t outLen = 0;
-    if (memcpy_s(buf, MSG_MAX_SIZE, (const uint8_t *)message.c_str(), message.size()) != SUCCESS) {
+    if (memcpy_s(buf, MSG_MAX_SIZE, (const uint8_t *)message.c_str(), message.size()) != DH_SUCCESS) {
         DHLOGE("SendMessage: memcpy memory failed");
         free(buf);
-        return FAILURE;
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
     }
     outLen = message.size();
     int32_t ret = SendBytes(sessionId, buf, outLen);
@@ -266,12 +266,12 @@ int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::strin
 
 int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_t result)
 {
-    if (result != SUCCESS) {
+    if (result != DH_SUCCESS) {
         DHLOGE("session open failed, sessionId %d", sessionId);
         if (sessionIdSet_.count(sessionId) > 0) {
             sessionIdSet_.erase(sessionId);
         }
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
     // return 1 is client
@@ -282,23 +282,23 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
     char peerSessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetMySessionName(sessionId, mySessionName, sizeof(mySessionName));
-    if (ret != SUCCESS) {
+    if (ret != DH_SUCCESS) {
         DHLOGI("get my session name failed, session id is %d.", sessionId);
     }
     // get other device session name
     ret = GetPeerSessionName(sessionId, peerSessionName, sizeof(peerSessionName));
-    if (ret != SUCCESS) {
+    if (ret != DH_SUCCESS) {
         DHLOGI("get my peer session name failed, session id is %d.", sessionId);
     }
 
     ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
-    if (ret != SUCCESS) {
+    if (ret != DH_SUCCESS) {
         DHLOGI("get my peer device id failed, session id is %d.", sessionId);
     }
     DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s.",
         mySessionName, peerSessionName, peerDevId);
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
@@ -325,7 +325,7 @@ void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const voi
         return;
     }
 
-    if (memcpy_s(buf, dataLen + 1, (const uint8_t*)data, dataLen) != SUCCESS) {
+    if (memcpy_s(buf, dataLen + 1, (const uint8_t*)data, dataLen) != DH_SUCCESS) {
         DHLOGE("OnBytesReceived: memcpy memory failed");
         free(buf);
         return;
