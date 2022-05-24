@@ -14,6 +14,7 @@
  */
 
 #include "distributed_input_sourcetrans_test.h"
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -48,77 +49,77 @@ HWTEST_F(DistributedInputSourceTransTest, OpenInputSoftbus, testing::ext::TestSi
 {
     std::string remoteDevId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
     int32_t ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(remoteDevId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_TIMEOUT, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, PrepareRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "";
     int32_t ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(deviceId);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, PrepareRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "tttt0001";
     int32_t ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(deviceId);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, PrepareRemoteInput03, testing::ext::TestSize.Level1)
 {
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
     int32_t ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, UnprepareRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "";
     int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(deviceId);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, UnprepareRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "tttt0001";
     int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(deviceId);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, UnprepareRemoteInput03, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
     int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, StartRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "tttt0001";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId);
-    EXPECT_EQ(FAILURE, ret);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, INPUT_TYPE_ALL);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, StartRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, INPUT_TYPE_ALL);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "tttt0001";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId);
-    EXPECT_EQ(FAILURE, ret);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId, INPUT_TYPE_ALL);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId, INPUT_TYPE_ALL);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL, ret);
     DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(deviceId);
 }
 }

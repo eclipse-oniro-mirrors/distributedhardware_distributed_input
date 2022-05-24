@@ -46,6 +46,7 @@ ohos_unittest("distributed_input_source_handler_test") {
 
   sources = [
     "//foundation/distributedhardware/distributedinput/sourcehandler/src/distributed_input_source_handler.cpp",
+    "//foundation/distributedhardware/distributedinput/sourcehandler/src/load_d_input_source_callback.cpp",
     "distributed_input_sourcehandler_test.cpp",
     "//foundation/distributedhardware/distributedinput/sourcehandler/test/unittest/mock/mock_distributed_input_client.cpp",
   ]

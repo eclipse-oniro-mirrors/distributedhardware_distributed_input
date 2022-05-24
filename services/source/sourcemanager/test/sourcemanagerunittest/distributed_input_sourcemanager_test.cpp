@@ -15,17 +15,20 @@
 
 #include "distributed_input_sourcemanager_test.h"
 
-#include <iostream>
 #include <fcntl.h>
-#include <unistd.h>
+#include <iostream>
 #include <thread>
-#include <linux/input.h>
-#include "event_handler.h"
+#include <unistd.h>
 
-#include <if_system_ability_manager.h>
-#include <system_ability_definition.h>
-#include <iservice_registry.h>
+#include <linux/input.h>
+
+#include "event_handler.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
 #include "nlohmann/json.hpp"
+#include "system_ability_definition.h"
+
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -207,7 +210,7 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware03, testi
     std::cout << "RegisterDistributedHardware13"<< std::endl;
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
-    std::cout << "RegisterDistributedHardware14"<< std::endl;
+    std::cout << "RegisterDistributedHardware03"<< std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -219,7 +222,7 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput01, testing::ext::
     std::cout << "PrepareRemoteInput011"<< std::endl;
     int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback, addWhiteListCallback);
     std::cout << "PrepareRemoteInput012"<< std::endl;
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput02, testing::ext::TestSize.Level0)
@@ -228,7 +231,7 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput02, testing::ext::
     sptr<TestPrepareDInputCallback> callback;
     sptr<TestAddWhiteListInfosCb> addWhiteListCallback = new TestAddWhiteListInfosCb();
     int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback, addWhiteListCallback);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput03, testing::ext::TestSize.Level0)
@@ -237,55 +240,55 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput03, testing::ext::
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
     sptr<TestAddWhiteListInfosCb> addWhiteListCallback = new TestAddWhiteListInfosCb();
     int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback, addWhiteListCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
-    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_MOUSE, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStartDInputCallback> callback;
-    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_MOUSE, callback);
-    EXPECT_EQ(FAILURE, ret);
+    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput03, testing::ext::TestSize.Level0)
 {
     std::string devId = "";
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
-    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_MOUSE, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
-    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_MOUSE, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string devId = "";
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
-    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_MOUSE, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput03, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStopDInputCallback> callback;
-    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_MOUSE, callback);
-    EXPECT_EQ(FAILURE, ret);
+    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput01, testing::ext::TestSize.Level0)
@@ -294,7 +297,7 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput01, testing::ext
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
     sptr<TestDelWhiteListInfosCb> delWhiteListCallback = new TestDelWhiteListInfosCb();
     int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback, delWhiteListCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput02, testing::ext::TestSize.Level0)
@@ -303,7 +306,7 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput02, testing::ext
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
     sptr<TestDelWhiteListInfosCb> delWhiteListCallback = new TestDelWhiteListInfosCb();
     int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback, delWhiteListCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput03, testing::ext::TestSize.Level0)
@@ -312,7 +315,7 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput03, testing::ext
     sptr<TestUnprepareDInputCallback> callback;
     sptr<TestDelWhiteListInfosCb> delWhiteListCallback;
     int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback, delWhiteListCallback);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware01, testing::ext::TestSize.Level0)
@@ -321,7 +324,7 @@ HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware01, tes
     std::string dhId = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
     sptr<TestUnregisterDInputCb> callback = new TestUnregisterDInputCb();
     int32_t ret = sourceManager_->UnregisterDistributedHardware(devId, dhId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware02, testing::ext::TestSize.Level0)
@@ -330,7 +333,7 @@ HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware02, tes
     std::string dhId = "rt12r1nr81n521be8rb1erbe1w8bg1erb18";
     sptr<TestUnregisterDInputCb> callback = new TestUnregisterDInputCb();
     int32_t ret = sourceManager_->UnregisterDistributedHardware(devId, dhId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware03, testing::ext::TestSize.Level0)
@@ -339,7 +342,7 @@ HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware03, tes
     std::string dhId = "afv4s8b1dr1b8er1bd65fb16redb1dfb18d1b56df1b68d";
     sptr<TestUnregisterDInputCb> callback = new TestUnregisterDInputCb();
     int32_t ret = sourceManager_->UnregisterDistributedHardware(devId, dhId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, ret);
 }
 }
 }

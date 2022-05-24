@@ -50,7 +50,7 @@ HWTEST_F(DistributedInputSinkManagerTest, Init01, testing::ext::TestSize.Level0)
 
 HWTEST_F(DistributedInputSinkManagerTest, Release01, testing::ext::TestSize.Level0)
 {
-    std::cout << "Init01"<< std::endl;
+    std::cout << "Release01"<< std::endl;
     int32_t ret = sinkManager_->Release();
     EXPECT_EQ(SUCCESS, ret);
 }

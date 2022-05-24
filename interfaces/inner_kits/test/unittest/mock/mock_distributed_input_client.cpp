@@ -59,14 +59,17 @@ void DistributedInputClient::UnregisterDInputCb::OnResult(
     }
 }
 
-void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status)
+void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status, const uint32_t& inputTypes)
 {
     if (DInputServerType::SOURCE_SERVER_TYPE == static_cast<DInputServerType>(status)) {
         DistributedInputClient::GetInstance().serverType = DInputServerType::SOURCE_SERVER_TYPE;
+        DistributedInputClient::GetInstance().inputTypes = inputTypes;
     } else if (DInputServerType::SINK_SERVER_TYPE == static_cast<DInputServerType>(status)) {
         DistributedInputClient::GetInstance().serverType = DInputServerType::SINK_SERVER_TYPE;
+        DistributedInputClient::GetInstance().inputTypes = inputTypes;
     } else {
         DistributedInputClient::GetInstance().serverType = DInputServerType::NULL_SERVER_TYPE;
+        DistributedInputClient::GetInstance().inputTypes = INPUT_TYPE_NULL;
     }
 }
 
@@ -105,7 +108,7 @@ int32_t DistributedInputClient::ReleaseSink()
 }
 
 int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
-    const std::string& parameters, std::shared_ptr<RegisterCallback>& callback)
+    const std::string& parameters, const std::shared_ptr<RegisterCallback>& callback)
 {
     return SUCCESS;
 }

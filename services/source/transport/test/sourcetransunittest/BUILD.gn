@@ -37,6 +37,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${fwk_utils_path}/include",
     "${service_common}/include",
     "//third_party/json/include",
+    "${services_source_path}/inputinject/include",
     "//foundation/distributedhardware/distributedinput/services/source/transport/test/sourcetransunittest/mock",
   ]
 
@@ -64,6 +65,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp:devicemanagersdk",
+    "//foundation/distributedhardware/distributedinput/services/source/inputinject:libdinput_inject",
   ]
 
   external_deps = [

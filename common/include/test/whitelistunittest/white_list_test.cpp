@@ -15,6 +15,7 @@
 
 #include "white_list_test.h"
 #include "constants_dinput.h"
+#include "dinput_errcode.h"
 #include "white_list_util.h"
 
 using namespace testing::ext;
@@ -51,7 +52,7 @@ HWTEST_F(WhiteListTest, Init02, testing::ext::TestSize.Level0)
 {
     std::string deviceId;
     int32_t ret = WhiteListUtil::GetInstance().Init(deviceId);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_WHILTELIST_INIT_FAIL, ret);
 }
 
 HWTEST_F(WhiteListTest, Init03, testing::ext::TestSize.Level0)
@@ -190,7 +191,7 @@ HWTEST_F(WhiteListTest, GetWhiteList03, testing::ext::TestSize.Level0)
     std::string deviceId = "xxx";
     TYPE_WHITE_LIST_VEC vecWhiteList;
     int32_t ret = WhiteListUtil::GetInstance().GetWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_WHILTELIST_GET_WHILTELIST_FAIL, ret);
 }
 
 HWTEST_F(WhiteListTest, GetWhiteList04, testing::ext::TestSize.Level0)
@@ -198,7 +199,7 @@ HWTEST_F(WhiteListTest, GetWhiteList04, testing::ext::TestSize.Level0)
     std::string deviceId = "";
     TYPE_WHITE_LIST_VEC vecWhiteList;
     int32_t ret = WhiteListUtil::GetInstance().GetWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(FAILURE, ret);
+    EXPECT_EQ(ERR_DH_INPUT_WHILTELIST_GET_WHILTELIST_FAIL, ret);
 }
 
 HWTEST_F(WhiteListTest, IsNeedFilterOut01, testing::ext::TestSize.Level0)

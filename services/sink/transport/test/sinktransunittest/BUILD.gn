@@ -30,6 +30,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
+    "//utils/native/base/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",

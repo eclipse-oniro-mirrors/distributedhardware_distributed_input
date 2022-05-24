@@ -41,11 +41,14 @@ ohos_unittest("distributed_input_sink_handler_test") {
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
+    "//third_party/json/include",
   ]
 
   sources = [
     "//foundation/distributedhardware/distributedinput/sinkhandler/src/distributed_input_sink_handler.cpp",
+    "//foundation/distributedhardware/distributedinput/sinkhandler/src/load_d_input_sink_callback.cpp",
     "distributed_input_sinkhandler_test.cpp",
+    "//foundation/distributedhardware/distributedinput/sinkhandler/test/unittest/mock/mock_distributed_input_client.cpp",
   ]
 
   cflags = [
@@ -67,7 +70,7 @@ ohos_unittest("distributed_input_sink_handler_test") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${innerkits_path}:libdinput_sdk",
-    "${services_sink_path}/sinkmanager:libdinput_sink",
+    "${services_source_path}/sourcemanager:libdinput_source",
   ]
 
   external_deps = [
