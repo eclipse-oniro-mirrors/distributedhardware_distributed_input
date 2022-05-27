@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,25 +16,24 @@
 #ifndef DISRIBUTED_INPUT_TEST_H
 #define DISRIBUTED_INPUT_TEST_H
 
-#include "i_distributed_sink_input.h"
-#include "i_distributed_source_input.h"
+#include <thread>
+#include <functional>
+#include <iostream>
+
+#include <gtest/gtest.h>
+#include <refbase.h>
+
+#include "constants_dinput.h"
+#include "distributed_input_handler.h"
 #include "distributed_input_kit.h"
 #include "distributed_input_sink_handler.h"
 #include "distributed_input_source_handler.h"
-#include "distributed_input_handler.h"
-
+#include "i_distributed_sink_input.h"
+#include "i_distributed_source_input.h"
 #include "prepare_d_input_call_back_stub.h"
 #include "unprepare_d_input_call_back_stub.h"
 #include "start_d_input_call_back_stub.h"
 #include "stop_d_input_call_back_stub.h"
-
-#include "constants_dinput.h"
-
-#include <thread>
-#include <functional>
-#include <iostream>
-#include <gtest/gtest.h>
-#include <refbase.h>
 
 namespace OHOS {
 namespace DistributedHardware {

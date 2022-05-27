@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "load_d_input_sink_callback.h"
 
 #include "distributed_hardware_log.h"
+
 #include "distributed_input_sink_handler.h"
+#include "load_d_input_sink_callback.h"
 
 namespace OHOS {
 namespace DistributedHardware {

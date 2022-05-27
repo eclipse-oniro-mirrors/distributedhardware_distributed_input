@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,17 @@
 #define DISTRIBUTED_INPUT_KIT_H
 
 #include <string>
+
+#include "distributed_hardware_log.h"
+
 #include "constants_dinput.h"
 #include "distributed_input_client.h"
 #include "i_register_d_input_call_back.h"
-#include "i_unregister_d_input_call_back.h"
-#include "i_prepare_d_input_call_back.h"
-#include "i_unprepare_d_input_call_back.h"
 #include "i_start_d_input_call_back.h"
 #include "i_stop_d_input_call_back.h"
-#include "distributed_hardware_log.h"
+#include "i_unregister_d_input_call_back.h"
+#include "i_prepare_d_input_call_back.h"
+#include "i_unprepare_d_input_call_back.h
 
 namespace OHOS {
 namespace DistributedHardware {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,17 @@
 
 #include "distributed_input_sink_manager.h"
 
-#include <if_system_ability_manager.h>
-#include <iservice_registry.h>
-#include <system_ability_definition.h>
+#include "anonymous_string.h"
+#include "distributed_hardware_log.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
 #include "nlohmann/json.hpp"
-#include "distributed_input_sink_transport.h"
+#include "system_ability_definition.h"
+
 #include "distributed_input_collector.h"
 #include "distributed_input_sink_switch.h"
-#include "distributed_hardware_log.h"
+#include "distributed_input_sink_transport.h"
+
 #include "dinput_errcode.h"
 #include "white_list_util.h"
 

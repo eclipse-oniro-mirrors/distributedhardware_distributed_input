@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,17 @@
 #ifndef DISTRIBUTED_INPUT_CLIENT_H
 #define DISTRIBUTED_INPUT_CLIENT_H
 
-#include <string>
-#include <mutex>
 #include <iostream>
+#include <mutex>
+#include <string>
 
+#include "add_white_list_infos_call_back_stub.h"
+#include "del_white_list_infos_call_back_stub.h"
 #include "i_distributed_source_input.h"
 #include "i_distributed_sink_input.h"
 #include "register_d_input_call_back_stub.h"
-#include "unregister_d_input_call_back_stub.h"
 #include "start_d_input_server_call_back_stub.h"
-#include "add_white_list_infos_call_back_stub.h"
-#include "del_white_list_infos_call_back_stub.h"
+#include "unregister_d_input_call_back_stub.h"
 
 #include "idistributed_hardware_source.h"
 #include "idistributed_hardware_sink.h"

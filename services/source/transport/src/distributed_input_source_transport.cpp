@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,18 +18,19 @@
 #include <algorithm>
 #include <cstring>
 
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
-#include "dinput_errcode.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "session.h"
-#include "softbus_bus_center.h"
-#include "softbus_common.h"
 #include "system_ability_definition.h"
 
 #include "constants_dinput.h"
+#include "dinput_errcode.h"
 #include "dinput_softbus_define.h"
 #include "distributed_input_inject.h"
+#include "session.h"
+#include "softbus_bus_center.h"
+#include "softbus_common.h"
 
 namespace OHOS {
 namespace DistributedHardware {

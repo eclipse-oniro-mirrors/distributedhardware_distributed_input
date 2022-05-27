@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,26 @@
  */
 
 #include "distributed_input_handler.h"
-#include <sys/inotify.h>
+
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <sstream>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <openssl/sha.h>
+#include <sys/inotify.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
-#include "softbus_bus_center.h"
-#include "constants_dinput.h"
-#include "nlohmann/json.hpp"
-#include "sys/stat.h"
+
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
+#include "nlohmann/json.hpp"
+
+#include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "softbus_bus_center.h"
 
 namespace OHOS {
 namespace DistributedHardware {

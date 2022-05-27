@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,20 @@
 #ifndef DISRIBUTED_INPUT_SINK_MANAGER_SERVICE_H
 #define DISRIBUTED_INPUT_SINK_MANAGER_SERVICE_H
 
+#include <cstring>
+#include <set>
+
 #include <sys/types.h>
 #include <unistd.h>
-#include <set>
-#include <cstring>
-#include "distributed_input_sink_stub.h"
-#include "distributed_input_sink_event_handler.h"
+
 #include "event_handler.h"
 #include "singleton.h"
 #include "system_ability.h"
+
 #include "constants_dinput.h"
 #include "dinput_sink_trans_callback.h"
+#include "distributed_input_sink_stub.h"
+#include "distributed_input_sink_event_handler.h"
 
 namespace OHOS {
 namespace DistributedHardware {

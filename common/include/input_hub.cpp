@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,18 +17,21 @@
 
 #include <cinttypes>
 #include <cstring>
+#include <filesystem>
+#include <sstream>
+
 #include <dirent.h>
 #include <fcntl.h>
-#include <filesystem>
 #include <openssl/sha.h>
 #include <securec.h>
-#include <sstream>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
+
 #include "dinput_errcode.h"
-#include "sys/stat.h"
 
 namespace OHOS {
 namespace DistributedHardware {

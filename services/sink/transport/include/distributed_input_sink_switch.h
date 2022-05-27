@@ -16,10 +16,11 @@
 #ifndef DISTRIBUTED_INPUT_SINK_SWITCH_H
 #define DISTRIBUTED_INPUT_SINK_SWITCH_H
 
-#include <string>
-#include <set>
-#include <vector>
 #include <mutex>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "dinput_softbus_define.h"
 
 namespace OHOS {

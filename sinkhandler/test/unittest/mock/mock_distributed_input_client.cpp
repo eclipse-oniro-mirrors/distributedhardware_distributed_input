@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "distributed_input_client.h"
-#include "constants_dinput.h"
-#include "white_list_util.h"
-#include "nlohmann/json.hpp"
 #include "distributed_hardware_log.h"
+#include "nlohmann/json.hpp"
+
+#include "constants_dinput.h"
+#include "distributed_input_client.h"
+#include "white_list_util.h"
 
 namespace OHOS {
 namespace DistributedHardware {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,18 @@
 #include "distributed_input_source_manager.h"
 
 #include <cinttypes>
-#include <if_system_ability_manager.h>
-#include <system_ability_definition.h>
-#include <iservice_registry.h>
+
+#include "anonymous_string.h"
+#include "distributed_hardware_log.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
+#include "nlohmann/json.hpp"
+#include "system_ability_definition.h"
 
 #include "constants_dinput.h"
-#include "distributed_hardware_log.h"
 #include "dinput_errcode.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
-#include "nlohmann/json.hpp"
 #include "white_list_util.h"
 
 namespace OHOS {

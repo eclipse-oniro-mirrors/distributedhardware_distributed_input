@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,15 @@
 #ifndef DISTRIBUTED_INPUT_SINK_TRANSPORT_H
 #define DISTRIBUTED_INPUT_SINK_TRANSPORT_H
 
-#include <string>
 #include <mutex>
 #include <set>
+#include <string>
 #include <vector>
 
-#include "nlohmann/json.hpp"
 #include "constants.h"
 #include "event_handler.h"
+#include "nlohmann/json.hpp"
+
 #include "dinput_sink_trans_callback.h"
 #include "dinput_softbus_define.h"
 #include "distributed_input_sink_switch.h"

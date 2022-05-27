@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,15 @@
 
 #include <cinttypes>
 #include <cstring>
+
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
-#include "dinput_errcode.h"
 #include "nlohmann/json.hpp"
+
+#include "dinput_errcode.h"
 #include "virtual_keyboard.h"
 #include "virtual_mouse.h"
 #include "virtual_touchpad.h"

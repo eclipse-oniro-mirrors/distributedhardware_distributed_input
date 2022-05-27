@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "load_d_input_source_callback.h"
 
 #include "distributed_hardware_log.h"
+
 #include "distributed_input_source_handler.h"
 
 namespace OHOS {

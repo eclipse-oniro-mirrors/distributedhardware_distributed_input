@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,19 @@
 #ifndef DISTRIBUTED_INPUT_HANDLER_H
 #define DISTRIBUTED_INPUT_HANDLER_H
 
-#include <string>
-#include <mutex>
-#include <map>
-#include <sys/epoll.h>
 #include <functional>
+#include <map>
+#include <mutex>
+#include <string>
+
+#include <sys/epoll.h>
 #include <linux/input.h>
+
 #include "ihardware_handler.h"
 #include "single_instance.h"
-#include "input_hub.h"
+
 #include "constants_dinput.h"
+#include "input_hub.h"
 
 namespace OHOS {
 namespace DistributedHardware {

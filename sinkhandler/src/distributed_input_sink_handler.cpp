@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,12 @@
  */
 
 #include "distributed_input_sink_handler.h"
+
+#include "distributed_hardware_log.h"
+
+#include "dinput_errcode.h"
 #include "i_distributed_sink_input.h"
 #include "load_d_input_sink_callback.h"
-#include "distributed_hardware_log.h"
-#include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,14 +18,14 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <mutex>
 #include <map>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
 
-#include "virtual_device.h"
 #include "constants_dinput.h"
+#include "virtual_device.h"
 
 namespace OHOS {
 namespace DistributedHardware {

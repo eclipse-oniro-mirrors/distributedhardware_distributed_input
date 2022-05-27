@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,17 @@
  */
 
 #include "distributed_input_test.h"
-#include "idistributed_hardware_source.h"
-#include "ipc_skeleton.h"
-#include "softbus_bus_center.h"
-#include "nlohmann/json.hpp"
 
 #include <cstring>
-#include <unistd.h>
 #include <thread>
+
+#include <unistd.h>
+
+#include "idistributed_hardware_source.h"
+#include "ipc_skeleton.h"
+#include "nlohmann/json.hpp"
+
+#include "softbus_bus_center.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;

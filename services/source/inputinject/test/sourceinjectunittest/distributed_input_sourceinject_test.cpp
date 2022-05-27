@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,18 @@
 
 #include "distributed_input_sourceinject_test.h"
 
-#include <iostream>
-#include <fcntl.h>
 #include <cstring>
-#include <unistd.h>
+#include <fcntl.h>
+#include <iostream>
 #include <thread>
+#include <unistd.h>
+
 #include <linux/input.h>
 
 #include "event_handler.h"
-#include "softbus_bus_center.h"
 #include "nlohmann/json.hpp"
+
+#include "softbus_bus_center.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;

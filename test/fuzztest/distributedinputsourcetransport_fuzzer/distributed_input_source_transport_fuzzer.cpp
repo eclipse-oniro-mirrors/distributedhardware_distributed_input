@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,17 @@
  */
 
 #include "distributed_input_source_transport_fuzzer.h"
-#include "distributed_input_source_transport.h"
 
 #include <cstddef>
 #include <cstdint>
-
-#include "constants_dinput.h"
-
-#include <thread>
 #include <functional>
 #include <iostream>
+#include <thread>
+
 #include <refbase.h>
+
+#include "constants_dinput.h"
+#include "distributed_input_source_transport.h"
 
 namespace OHOS {
 namespace DistributedHardware {
