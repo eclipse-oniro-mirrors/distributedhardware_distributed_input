@@ -61,66 +61,66 @@ void DistributedInputSourceManagerTest::TearDownTestCase()
 }
 
 void DistributedInputSourceManagerTest::TestRegisterDInputCb::OnResult(
-    const std::string& devId, const std::string& dhId, const int32_t& status)
+    const std::string& devId, const std::string& dhId, const int32_t& status) const
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestUnregisterDInputCb::OnResult(
-    const std::string& devId, const std::string& dhId, const int32_t& status)
+    const std::string& devId, const std::string& dhId, const int32_t& status) const
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestPrepareDInputCallback::OnResult(
-    const std::string& deviceId, const int32_t& status)
+    const std::string& deviceId, const int32_t& status) const
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestUnprepareDInputCallback::OnResult(
-    const std::string& deviceId, const int32_t& status)
+    const std::string& deviceId, const int32_t& status) const
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestStartDInputCallback::OnResult(
-    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
+    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestStopDInputCallback::OnResult(
-    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
+    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestAddWhiteListInfosCb::OnResult(
-    const std::string &deviceId, const std::string &strJson)
+    const std::string &deviceId, const std::string &strJson) const
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestDelWhiteListInfosCb::OnResult(
-    const std::string& deviceId)
+    const std::string& deviceId) const
 {
     return;
 }
 
-int32_t DistributedInputSourceManagerTest::StructTransJson(const InputDevice* pBuf, std::string& strDescriptor)
+int32_t DistributedInputSourceManagerTest::StructTransJson(const InputDevice& pBuf, std::string& strDescriptor) const
 {
     nlohmann::json tmpJson;
-    tmpJson["name"] = pBuf->name;
-    tmpJson["location"] = pBuf->location;
-    tmpJson["uniqueId"] = pBuf->uniqueId;
-    tmpJson["bus"] = pBuf->bus;
-    tmpJson["vendor"] = pBuf->vendor;
-    tmpJson["product"] = pBuf->product;
-    tmpJson["version"] = pBuf->version;
-    tmpJson["descriptor"] = pBuf->descriptor;
-    tmpJson["nonce"] = pBuf->nonce;
-    tmpJson["classes"] = pBuf->classes;
+    tmpJson["name"] = pBuf.name;
+    tmpJson["location"] = pBuf.location;
+    tmpJson["uniqueId"] = pBuf.uniqueId;
+    tmpJson["bus"] = pBuf.bus;
+    tmpJson["vendor"] = pBuf.vendor;
+    tmpJson["product"] = pBuf.product;
+    tmpJson["version"] = pBuf.version;
+    tmpJson["descriptor"] = pBuf.descriptor;
+    tmpJson["nonce"] = pBuf.nonce;
+    tmpJson["classes"] = pBuf.classes;
 
     std::ostringstream stream;
     stream << tmpJson.dump();
@@ -152,11 +152,11 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware01, testi
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
-    StructTransJson(&pBuffer, parameters);
+    StructTransJson(pBuffer, parameters);
 
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
-    
+
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -179,7 +179,7 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware02, testi
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
     std::cout << "RegisterDistributedHardware2"<< std::endl;
-    StructTransJson(&pBuffer, parameters);
+    StructTransJson(pBuffer, parameters);
     std::cout << "RegisterDistributedHardware3"<< std::endl;
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
@@ -206,7 +206,7 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware03, testi
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
     std::cout << "RegisterDistributedHardware12"<< std::endl;
-    StructTransJson(&pBuffer, parameters);
+    StructTransJson(pBuffer, parameters);
     std::cout << "RegisterDistributedHardware13"<< std::endl;
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);

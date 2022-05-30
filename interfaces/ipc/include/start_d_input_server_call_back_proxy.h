@@ -34,7 +34,7 @@ public:
     virtual void OnResult(const int32_t& status, const uint32_t& inputTypes) override;
 
 private:
-    static inline BrokerDelegator<StartDInputServerCallbackProxy> g_delegator;
+    static inline BrokerDelegator<StartDInputServerCallbackProxy> delegator_;
 };
 }  // namespace DistributedHardware
 }  // namespace DistributedInput

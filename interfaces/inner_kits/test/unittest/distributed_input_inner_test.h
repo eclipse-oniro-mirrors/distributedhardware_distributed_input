@@ -52,7 +52,7 @@ public:
     public:
         TestPrepareDInputCallback() = default;
         virtual ~TestPrepareDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const int32_t& status);
+        void OnResult(const std::string& deviceId, const int32_t& status) const;
     };
 
     class TestUnprepareDInputCallback : public
@@ -60,7 +60,7 @@ public:
     public:
         TestUnprepareDInputCallback() = default;
         virtual ~TestUnprepareDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const int32_t& status);
+        void OnResult(const std::string& deviceId, const int32_t& status) const;
     };
 
     class TestStartDInputCallback : public
@@ -68,7 +68,7 @@ public:
     public:
         TestStartDInputCallback() = default;
         virtual ~TestStartDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status);
+        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const;
     };
 
     class TestStopDInputCallback : public
@@ -76,7 +76,7 @@ public:
     public:
         TestStopDInputCallback() = default;
         virtual ~TestStopDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status);
+        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const;
     };
 };
 } // namespace DistributedInput

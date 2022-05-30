@@ -19,6 +19,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
@@ -48,7 +49,7 @@ WhiteListUtil &WhiteListUtil::GetInstance(void)
 
 int32_t WhiteListUtil::Init(const std::string &deviceId)
 {
-    DHLOGI("%s called, deviceId=%s", __func__, deviceId.c_str());
+    DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
     ClearWhiteList();
 
     if (deviceId.empty()) {
@@ -107,8 +108,7 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
     std::lock_guard<std::mutex> lock(mutex_);
     mapDeviceWhiteList_[deviceId] = vecWhiteList;
 
-    DHLOGI("%s called success, deviceId=%s", __func__, deviceId.c_str());
-    PrintWhiteList();
+    DHLOGI("success, deviceId=%s", GetAnonyString(deviceId).c_str());
     return DH_SUCCESS;
 }
 
@@ -151,19 +151,16 @@ void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &
 
 int32_t WhiteListUtil::SyncWhiteList(const std::string &deviceId, const TYPE_WHITE_LIST_VEC &vecWhiteList)
 {
-    DHLOGI("%s called, deviceId=%s",
-        __func__, deviceId.c_str());
+    DHLOGI("deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
     mapDeviceWhiteList_[deviceId] = vecWhiteList;
-    PrintWhiteList();
     return DH_SUCCESS;
 }
 
 int32_t WhiteListUtil::ClearWhiteList(const std::string &deviceId)
 {
-    DHLOGI("%s called, deviceId=%s",
-        __func__, deviceId.c_str());
+    DHLOGI("deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
     mapDeviceWhiteList_.erase(deviceId);
@@ -179,20 +176,17 @@ int32_t WhiteListUtil::ClearWhiteList(void)
 
 int32_t WhiteListUtil::GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST_VEC &vecWhiteList)
 {
-    DHLOGI("%s called, deviceId=%s",
-        __func__, deviceId.c_str());
+    DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
     TYPE_DEVICE_WHITE_LIST_MAP::iterator iter = mapDeviceWhiteList_.find(deviceId);
     if (iter != mapDeviceWhiteList_.end()) {
         vecWhiteList = iter->second;
-        DHLOGI("%s called success, deviceId=%s",
-            __func__, deviceId.c_str());
+        DHLOGI("GetWhiteList success, deviceId=%s", GetAnonyString(deviceId).c_str());
         return DH_SUCCESS;
     }
 
-    DHLOGE("%s called failure, deviceId=%s",
-        __func__, deviceId.c_str());
+    DHLOGI("GetWhiteList fail, deviceId=%s", GetAnonyString(deviceId).c_str());
     return ERR_DH_INPUT_WHILTELIST_GET_WHILTELIST_FAIL;
 }
 
@@ -211,9 +205,7 @@ bool WhiteListUtil::CheckSubVecData(const TYPE_COMBINATION_KEY_VEC::iterator &it
 
 bool WhiteListUtil::IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event)
 {
-    DHLOGI("%s called!", __func__);
-
-    PrintWhiteList();
+    DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
     if (mapDeviceWhiteList_.empty()) {
@@ -226,10 +218,6 @@ bool WhiteListUtil::IsNeedFilterOut(const std::string &deviceId, const BusinessE
         DHLOGE("%s called, not find by deviceId!", __func__);
         return false;
     }
-
-    DHLOGI(
-        "%s called, deviceId=%s, keyCode=%d, keyAction=%d",
-        __func__, deviceId.c_str(), event.keyCode, event.keyAction);
 
     TYPE_KEY_CODE_VEC vecKeyCode = event.pressedKeys;
     vecKeyCode.push_back(event.keyCode);
@@ -265,41 +253,6 @@ bool WhiteListUtil::IsNeedFilterOut(const std::string &deviceId, const BusinessE
 
     DHLOGI("%s called, bIsMatching=%d", __func__, bIsMatching);
     return bIsMatching;
-}
-
-void WhiteListUtil::SubPrintWhiteList(const TYPE_WHITE_LIST_VEC &vecWhiteList) const
-{
-    for (int32_t iIndex = 0; iIndex < vecWhiteList.size(); ++iIndex) {
-        TYPE_COMBINATION_KEY_VEC vecCombinationKey = vecWhiteList[iIndex];
-        for (int32_t jIndex = 0; jIndex < vecCombinationKey.size(); ++jIndex) {
-            TYPE_KEY_CODE_VEC vecKeyCode = vecCombinationKey[jIndex];
-            for (int32_t kIndex = 0; kIndex < vecKeyCode.size(); ++kIndex) {
-                DHLOGI(
-                    "PrintWhiteList [%d][%d][%d]=[%d]",
-                    iIndex, jIndex, kIndex, vecKeyCode[kIndex]);
-            }
-        }
-    }
-}
-
-void WhiteListUtil::PrintWhiteList(void)
-{
-    if (mapDeviceWhiteList_.empty()) {
-        DHLOGI("%s called, mapDeviceWhiteList_ is empty!", __func__);
-        return;
-    }
-
-    DHLOGI("%s begin!", __func__);
-    for (TYPE_DEVICE_WHITE_LIST_MAP::iterator iter = mapDeviceWhiteList_.begin();
-        iter != mapDeviceWhiteList_.end();
-        ++iter) {
-        DHLOGI("deviceId=%s", iter->first.c_str());
-        TYPE_WHITE_LIST_VEC vecWhiteList = iter->second;
-        SubPrintWhiteList(vecWhiteList);
-        DHLOGI("%s next!", __func__);
-    }
-    DHLOGI("%s end!", __func__);
-    return;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

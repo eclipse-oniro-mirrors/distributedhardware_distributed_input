@@ -48,7 +48,6 @@ void DistributedInputClient::RegisterDInputCb::OnResult(
             return;
         }
     }
-    DHLOGI("dinputtest 13");
 }
 
 void DistributedInputClient::UnregisterDInputCb::OnResult(
@@ -83,14 +82,9 @@ void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status
 
 void DistributedInputClient::AddWhiteListInfosCb::OnResult(const std::string &deviceId, const std::string &strJson)
 {
-    DHLOGI("AddWhiteListInfosCb deviceId :%s. \n", deviceId.c_str());
-
-    if (strJson.empty()) {
-        DHLOGI("AddWhiteListInfosCb whitelist is empty.\n", deviceId.c_str());
-        return;
+    if (!strJson.empty()) {
+        DistributedInputClient::GetInstance().AddWhiteListInfos(deviceId, strJson);
     }
-
-    DistributedInputClient::GetInstance().AddWhiteListInfos(deviceId, strJson);
 }
 
 void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& deviceId)
@@ -150,7 +144,7 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
     const std::string& parameters, const std::shared_ptr<RegisterCallback>& callback)
 {
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, devId.c_str(), devId.c_str(), parameters.c_str());
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("RegisterDistributedHardware client fail");
@@ -180,7 +174,8 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
 int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::shared_ptr<UnregisterCallback>& callback)
 {
-    DHLOGI("%s called, deviceId: %s,  dhId: %s", __func__, devId.c_str(), devId.c_str());
+    DHLOGI("%s called, deviceId: %s,  dhId: %s",
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("UnregisterDistributedHardware client fail");
@@ -210,7 +205,7 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
 int32_t DistributedInputClient::PrepareRemoteInput(
     const std::string& deviceId, sptr<IPrepareDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
+    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
@@ -228,7 +223,7 @@ int32_t DistributedInputClient::PrepareRemoteInput(
 int32_t DistributedInputClient::UnprepareRemoteInput(
     const std::string& deviceId, sptr<IUnprepareDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
+    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
@@ -246,7 +241,7 @@ int32_t DistributedInputClient::UnprepareRemoteInput(
 int32_t DistributedInputClient::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, deviceId.c_str(), inputTypes);
+    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("StartRemoteInput client fail");
@@ -265,7 +260,7 @@ int32_t DistributedInputClient::StartRemoteInput(
 int32_t DistributedInputClient::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, deviceId.c_str(), inputTypes);
+    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (!GetDInputSourceProxy()) {
         DHLOGE("StopRemoteInput client fail");
@@ -283,7 +278,7 @@ int32_t DistributedInputClient::StopRemoteInput(
 
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
 {
-    DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
+    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
     if (serverType == DInputServerType::NULL_SERVER_TYPE) {
         DHLOGE("No sa start using.");
         return true;

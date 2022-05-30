@@ -42,8 +42,6 @@ private:
     ~WhiteListUtil();
     WhiteListUtil(const WhiteListUtil &other) = delete;
     const WhiteListUtil &operator=(const WhiteListUtil &other) = delete;
-    void PrintWhiteList(void);
-    void SubPrintWhiteList(const TYPE_WHITE_LIST_VEC &vecWhiteList) const;
     void ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &vecKeyCode,
                              TYPE_COMBINATION_KEY_VEC &vecCombinationKey) const;
     bool CheckSubVecData(const TYPE_COMBINATION_KEY_VEC::iterator &iter2,

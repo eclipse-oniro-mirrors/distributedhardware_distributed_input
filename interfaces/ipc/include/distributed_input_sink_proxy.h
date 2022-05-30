@@ -42,7 +42,7 @@ public:
 private:
     bool SendRequest(IDistributedSinkInput::MessageCode code, MessageParcel &data, MessageParcel &reply);
 
-    static inline BrokerDelegator<DistributedInputSinkProxy> g_delegator;
+    static inline BrokerDelegator<DistributedInputSinkProxy> delegator_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

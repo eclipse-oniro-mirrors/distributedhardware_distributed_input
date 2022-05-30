@@ -65,10 +65,10 @@ int32_t DistributedInputSinkSwitch::StartSwitch(int32_t sessionId)
         }
 
         if (findOld) {
-            DHLOGI("StartSwitch sessionId:%d is find.", sessionId);
+            DHLOGI("StartSwitch sessionId:%s is find.", GetAnonyInt32(sessionId).c_str());
             return DH_SUCCESS;
         } else {
-            DHLOGE("StartSwitch sessionId:%d fail, not found.", sessionId);
+            DHLOGE("StartSwitch sessionId:%s fail, not found.", GetAnonyInt32(sessionId).c_str());
             return ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL;
         }
     }
@@ -78,7 +78,7 @@ void DistributedInputSinkSwitch::StopSwitch(int32_t sessionId)
 {
     std::unique_lock<std::mutex> switchLock(operationMutex_);
     if (switchVector_.empty()) {
-        DHLOGE("StopSwitch sessionId:%d fail,switchVector_ is null.", sessionId);
+        DHLOGE("StopSwitch sessionId:%s fail,switchVector_ is null.", GetAnonyInt32(sessionId).c_str());
     } else {
         bool findOld = false;
         for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
@@ -90,9 +90,9 @@ void DistributedInputSinkSwitch::StopSwitch(int32_t sessionId)
         }
 
         if (findOld) {
-            DHLOGI("StopSwitch sessionId:%d is success.", sessionId);
+            DHLOGI("StopSwitch sessionId:%s is success.", GetAnonyInt32(sessionId).c_str());
         } else {
-            DHLOGE("StopSwitch sessionId:%d fail,not find it.", sessionId);
+            DHLOGE("StopSwitch sessionId:%s fail,not find it.", GetAnonyInt32(sessionId).c_str());
         }
     }
 }
@@ -116,7 +116,7 @@ void DistributedInputSinkSwitch::AddSession(int32_t sessionId)
     if (switchVector_.empty()) {
         SwitchStateData tmp(sessionId, false);
         switchVector_.push_back(tmp);
-        DHLOGI("AddSession sessionId:%d add first.", sessionId);
+        DHLOGI("AddSession sessionId:%s add first.", GetAnonyInt32(sessionId).c_str());
     } else {
         bool findOld = false;
         for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
@@ -128,11 +128,11 @@ void DistributedInputSinkSwitch::AddSession(int32_t sessionId)
         }
 
         if (findOld) {
-            DHLOGI("AddSession sessionId:%d is find.", sessionId);
+            DHLOGI("AddSession sessionId:%s is find.", GetAnonyInt32(sessionId).c_str());
         } else {
             SwitchStateData tmp(sessionId, false);
             switchVector_.push_back(tmp);
-            DHLOGI("AddSession sessionId:%d add new.", sessionId);
+            DHLOGI("AddSession sessionId:%s add new.", GetAnonyInt32(sessionId).c_str());
         }
     }
 }
@@ -141,7 +141,7 @@ void DistributedInputSinkSwitch::RemoveSession(int32_t sessionId)
 {
     std::unique_lock<std::mutex> switchLock(operationMutex_);
     if (switchVector_.empty()) {
-        DHLOGE("RemoveSession sessionId:%d fail,switch_vector is null.", sessionId);
+        DHLOGE("RemoveSession sessionId:%s fail,switch_vector is null.", GetAnonyInt32(sessionId).c_str());
     } else {
         bool findOld = false;
         for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end();) {
@@ -154,9 +154,9 @@ void DistributedInputSinkSwitch::RemoveSession(int32_t sessionId)
             }
         }
         if (findOld) {
-            DHLOGI("RemoveSession sessionId:%d is success.", sessionId);
+            DHLOGI("RemoveSession sessionId:%s is success.", GetAnonyInt32(sessionId).c_str());
         } else {
-            DHLOGE("RemoveSession sessionId:%d fail,not find it.", sessionId);
+            DHLOGE("RemoveSession sessionId:%s fail,not find it.", GetAnonyInt32(sessionId).c_str());
         }
     }
 }

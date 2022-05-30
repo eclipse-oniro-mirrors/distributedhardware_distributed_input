@@ -49,7 +49,7 @@ public:
     public:
         TestPrepareDInputCallback() = default;
         virtual ~TestPrepareDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const int32_t& status);
+        void OnResult(const std::string& deviceId, const int32_t& status) const;
     };
 
     class TestUnprepareDInputCallback : public
@@ -57,7 +57,7 @@ public:
     public:
         TestUnprepareDInputCallback() = default;
         virtual ~TestUnprepareDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const int32_t& status);
+        void OnResult(const std::string& deviceId, const int32_t& status) const;
     };
 
     class TestStartDInputCallback : public
@@ -65,7 +65,7 @@ public:
     public:
         TestStartDInputCallback() = default;
         virtual ~TestStartDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status);
+        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const;
     };
 
     class TestStopDInputCallback : public
@@ -73,39 +73,39 @@ public:
     public:
         TestStopDInputCallback() = default;
         virtual ~TestStopDInputCallback() = default;
-        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status);
+        void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const;
     };
 
     class TestRegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
     public:
         TestRegisterDInputCb() = default;
         virtual ~TestRegisterDInputCb() = default;
-        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status);
+        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status) const;
     };
 
     class TestUnregisterDInputCb : public OHOS::DistributedHardware::DistributedInput::UnregisterDInputCallbackStub {
     public:
         TestUnregisterDInputCb() = default;
         virtual ~TestUnregisterDInputCb() = default;
-        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status);
+        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status) const;
     };
 
     class TestAddWhiteListInfosCb : public OHOS::DistributedHardware::DistributedInput::AddWhiteListInfosCallbackStub {
     public:
         TestAddWhiteListInfosCb() = default;
         virtual ~TestAddWhiteListInfosCb() = default;
-        void OnResult(const std::string &deviceId, const std::string &strJson);
+        void OnResult(const std::string &deviceId, const std::string &strJson) const;
     };
 
     class TestDelWhiteListInfosCb : public OHOS::DistributedHardware::DistributedInput::DelWhiteListInfosCallbackStub {
     public:
         TestDelWhiteListInfosCb() = default;
         virtual ~TestDelWhiteListInfosCb() = default;
-        void OnResult(const std::string &deviceId);
+        void OnResult(const std::string &deviceId) const;
     };
 
 private:
-    int32_t StructTransJson(const InputDevice* pBuf, std::string& strDescriptor);
+    int32_t StructTransJson(const InputDevice& pBuf, std::string& strDescriptor) const;
     DistributedInputSourceManager* sourceManager_;
 };
 } // namespace DistributedInput

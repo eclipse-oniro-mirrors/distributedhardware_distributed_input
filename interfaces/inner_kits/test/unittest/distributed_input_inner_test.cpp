@@ -41,28 +41,28 @@ void DistributedInputInnerTest::TearDownTestCase()
 
 
 void DistributedInputInnerTest::TestPrepareDInputCallback::OnResult(
-    const std::string& deviceId, const int32_t& status)
+    const std::string& deviceId, const int32_t& status) const
 
 {
     return;
 }
 
 void DistributedInputInnerTest::TestUnprepareDInputCallback::OnResult(
-    const std::string& deviceId, const int32_t& status)
+    const std::string& deviceId, const int32_t& status) const
 
 {
     return;
 }
 
 void DistributedInputInnerTest::TestStartDInputCallback::OnResult(
-    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
+    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const
 
 {
     return;
 }
 
 void DistributedInputInnerTest::TestStopDInputCallback::OnResult(
-    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
+    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const
 
 {
     return;

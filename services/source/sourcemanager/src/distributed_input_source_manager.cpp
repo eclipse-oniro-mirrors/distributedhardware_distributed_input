@@ -56,7 +56,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseRegisterDist
     const std::string deviceId, const std::string dhId, bool result)
 {
     DHLOGI("onResponseRegisterDistributedHardware called, deviceId: %s, "
-        "result: %d.", deviceId.c_str(), result);
+        "result: %s.", GetAnonyString(deviceId).c_str(), result);
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseRegisterDistributedHardware sourceManagerObj_ is null.");
         return;
@@ -68,7 +68,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseRegisterDist
         return;
     }
 
-    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -84,7 +84,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponsePrepareRemot
     bool result, const std::string &object)
 {
     DHLOGI("onResponsePrepareRemoteInput called, deviceId: %s, result: %d.",
-        deviceId.c_str(), result);
+        GetAnonyString(deviceId).c_str(), result);
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponsePrepareRemoteInput sourceManagerObj_ is null.");
@@ -96,7 +96,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponsePrepareRemot
         DHLOGE("onResponsePrepareRemoteInput GetCallbackEventHandler is null.");
         return;
     }
-    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -112,7 +112,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseUnprepareRem
     const std::string deviceId, bool result)
 {
     DHLOGI("onResponseUnprepareRemoteInput called, deviceId: %s, "
-        "result: %d.", deviceId.c_str(), result);
+        "result: %d.", GetAnonyString(deviceId).c_str(), result);
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseUnprepareRemoteInput sourceManagerObj_ is null.");
@@ -124,7 +124,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseUnprepareRem
         DHLOGE("onResponseUnprepareRemoteInput GetCallbackEventHandler is null.");
         return;
     }
-    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -139,7 +139,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteI
     const std::string deviceId, const uint32_t inputTypes, bool result)
 {
     DHLOGI("onResponseStartRemoteInput called, deviceId: %s, inputTypes: %d, result: %d.",
-        deviceId.c_str(), inputTypes, result);
+        GetAnonyString(deviceId).c_str(), inputTypes, result);
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseStartRemoteInput sourceManagerObj_ is null.");
@@ -155,7 +155,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteI
         sourceManagerObj_->SetDeviceMapValue(deviceId, DINPUT_SOURCE_SWITCH_ON);
     }
 
-    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
     if (jsonArrayMsg == nullptr) {
         DHLOGE("onResponseStartRemoteInput jsonArrayMsg is null.");
         return;
@@ -175,7 +175,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteIn
     const std::string deviceId, const uint32_t inputTypes, bool result)
 {
     DHLOGI("onResponseStopRemoteInput called, deviceId: %s, inputTypes: %d, result: %d.",
-        deviceId.c_str(), inputTypes, result);
+        GetAnonyString(deviceId).c_str(), inputTypes, result);
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseStopRemoteInput sourceManagerObj_ is null.");
@@ -187,7 +187,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteIn
             ERR_DH_INPUT_SERVER_SOURCE_MANAGERGET_CALLBACK_HANDLER_FAIL);
         return;
     }
-    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -205,7 +205,7 @@ void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteI
     nlohmann::json inputData = nlohmann::json::parse(event);
     int jsonSize = inputData.size();
     DHLOGI("onReceivedEventRemoteInput called, deviceId: %s, json size:%d.",
-        deviceId.c_str(), jsonSize);
+        GetAnonyString(deviceId).c_str(), jsonSize);
 
     RawEvent mEventBuffer[jsonSize];
     int idx = 0;
@@ -255,7 +255,7 @@ void DistributedInputSourceManager::OnStart()
         return;
     }
 
-    DHLOGI("DistributedInputSourceManager  start success.");
+    DHLOGI("DistributedInputSourceManager start success.");
 }
 
 bool DistributedInputSourceManager::InitAuto()
@@ -303,7 +303,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyRegis
         }
     } else {
         DHLOGW("ProcessEvent DINPUT_SOURCE_MANAGER_RIGISTER_MSG the "
-            "devId[%s] dhId[%s] is bad data.", deviceId.c_str(), dhId.c_str());
+            "devId[%s] dhId[%s] is bad data.", GetAnonyString(deviceId).c_str(), GetAnonyString(dhId).c_str());
     }
 
     sourceManagerObj_->RunRegisterCallback(deviceId, dhId,
@@ -368,7 +368,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
         sourceManagerObj_->SetInputTypesMap(
             deviceId, sourceManagerObj_->GetInputTypesMap(deviceId) | inputTypes);
     }
-    sourceManagerObj_->SetStartTransFlag(result && sourceManagerObj_->GetInputTypesMap(deviceId) > 0 ?
+    sourceManagerObj_->SetStartTransFlag((result && (sourceManagerObj_->GetInputTypesMap(deviceId) > 0)) ?
         DInputServerType::SOURCE_SERVER_TYPE : DInputServerType::NULL_SERVER_TYPE);
     if (sourceManagerObj_->GetStartDInputServerCback() != nullptr) {
         sourceManagerObj_->GetStartDInputServerCback()->OnResult(
@@ -504,7 +504,7 @@ int32_t DistributedInputSourceManager::Release()
     for (std::vector<InputDeviceId>::iterator iter = inputDevice_.begin(); iter != inputDevice_.end(); ++iter) {
         std::string devId = iter->devId;
         std::string dhId = iter->dhId;
-        DHLOGI("Release() devId[%s] dhId[%s]", devId.c_str(), dhId.c_str());
+        DHLOGI("Release() devId[%s] dhId[%s]", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
         int32_t ret = DistributedInputInject::GetInstance().UnregisterDistributedHardware(devId, dhId);
         if (ret != DH_SUCCESS) {
             DHLOGW("%s called, remove node fail.",  __func__);
@@ -521,7 +521,7 @@ int32_t DistributedInputSourceManager::Release()
     InputTypesMap_.clear();
 
     // 4. isStart callback
-    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
     jsonArrayMsg->push_back(tmpJson);
@@ -544,12 +544,12 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     const std::string& parameters, sptr<IRegisterDInputCallback> callback)
 {
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, devId.c_str(), dhId.c_str(), parameters.c_str());
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
 
     if (callback == nullptr) {
         DHLOGE(
             "%s called, deviceId: %s callback is null.",
-            __func__, devId.c_str());
+            __func__, GetAnonyString(devId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL;
     }
 
@@ -611,7 +611,7 @@ void DistributedInputSourceManager::handleStartServerCallback(const std::string&
             }
         }
         if (isAllDevSwitchOff) {
-            std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+            std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
             nlohmann::json tmpJson;
             tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
             jsonArrayMsg->push_back(tmpJson);
@@ -648,7 +648,7 @@ int32_t DistributedInputSourceManager::RemoveInputNode(const std::string& devId,
 
 int32_t DistributedInputSourceManager::DeleteDevice(const std::string& devId, const std::string& dhId)
 {
-    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = devId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_HWID] = dhId;
@@ -668,10 +668,10 @@ int32_t DistributedInputSourceManager::DeleteDevice(const std::string& devId, co
 int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
     sptr<IUnregisterDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s,  dhId: %s", __func__, devId.c_str(), dhId.c_str());
+    DHLOGI("%s called, deviceId: %s,  dhId: %s", __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     if (callback == nullptr) {
-        DHLOGE("%s called, deviceId: %s callback is null.", __func__, devId.c_str());
+        DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(devId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
@@ -685,7 +685,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
 
     std::vector<InputDeviceId>::iterator it = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
     if (it == inputDevice_.end()) {
-        DHLOGE("%s called, deviceId: %s is not exist.", __func__, devId.c_str());
+        DHLOGE("%s called, deviceId: %s is not exist.", __func__, GetAnonyString(devId).c_str());
         for (std::vector<DInputClientUnregistInfo>::iterator iter =
             unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
             if (iter->devId == devId && iter->dhId == dhId) {
@@ -718,9 +718,9 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
 int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& deviceId,
     sptr<IPrepareDInputCallback> callback, sptr<IAddWhiteListInfosCallback> addWhiteListCallback)
 {
-    DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
+    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
     if (callback == nullptr) {
-        DHLOGE("%s called, deviceId: %s callback is null.", __func__, deviceId.c_str());
+        DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
 
@@ -763,7 +763,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
     DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
 
     if (callback == nullptr) {
-        DHLOGE("%s called, deviceId: %s callback is null.", __func__, deviceId.c_str());
+        DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
     }
 
@@ -799,10 +799,10 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
 int32_t DistributedInputSourceManager::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, deviceId.c_str(), inputTypes);
+    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (callback == nullptr) {
-        DHLOGE("%s called, deviceId: %s callback is null.", __func__, deviceId.c_str());
+        DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
 
@@ -840,10 +840,10 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
 int32_t DistributedInputSourceManager::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, deviceId.c_str(), inputTypes);
+    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (callback == nullptr) {
-        DHLOGE("%s called, deviceId: %s callback is null.", __func__, deviceId.c_str());
+        DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
 

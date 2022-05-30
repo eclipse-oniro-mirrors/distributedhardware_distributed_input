@@ -129,7 +129,7 @@ int32_t DistributedInputHandler::GetDeviceInfo(std::string& deviceId)
     }
 
     deviceId = localNode->networkId;
-    DHLOGI("device id is %s", deviceId.c_str());
+    DHLOGI("device id is %s", GetAnonyString(deviceId).c_str());
     return DH_SUCCESS;
 }
 

@@ -72,7 +72,7 @@ static void MessageReceived(int32_t sessionId, const void *data, uint32_t dataLe
     (void)sessionId;
     (void)data;
     (void)dataLen;
-    DHLOGI("sessionId:%d, dataLen:%d", sessionId, dataLen);
+    DHLOGI("sessionId:%s, dataLen:%d", GetAnonyInt32(sessionId).c_str(), dataLen);
 }
 
 static void StreamReceived(int32_t sessionId, const StreamData *data, const StreamData *ext,
@@ -82,7 +82,7 @@ static void StreamReceived(int32_t sessionId, const StreamData *data, const Stre
     (void)data;
     (void)ext;
     (void)param;
-    DHLOGI("sessionId:%d", sessionId);
+    DHLOGI("sessionId:%s", GetAnonyInt32(sessionId).c_str());
 }
 DistributedInputSourceTransport &DistributedInputSourceTransport::GetInstance()
 {
@@ -108,7 +108,7 @@ int32_t DistributedInputSourceTransport::Init()
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_INIT_FAIL;
     }
     std::string networkId = localNode->networkId;
-    DHLOGI("Init device local networkId is %s", networkId.c_str());
+    DHLOGI("Init device local networkId is %s", GetAnonyString(networkId).c_str());
     mySessionName_ = SESSION_NAME_SOURCE + networkId.substr(0, INTERCEPT_STRING_LENGTH);
 
     int32_t ret = CreateSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str(), &iSessionListener);
@@ -133,7 +133,7 @@ int32_t DistributedInputSourceTransport::CheckDeviceSessionState(const std::stri
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevMap_.count(devId) != 0) {
-        DHLOGI("CheckDeviceSessionState has opened %s", devId.c_str());
+        DHLOGI("CheckDeviceSessionState has opened %s", GetAnonyString(devId).c_str());
         return DH_SUCCESS;
     } else {
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_DEVICE_SESSION_STATE;
@@ -144,7 +144,7 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
 {
     int32_t ret = CheckDeviceSessionState(remoteDevId);
     if (ret == DH_SUCCESS) {
-        DHLOGE("Softbus session has already opened, deviceId: %s", remoteDevId.c_str());
+        DHLOGE("Softbus session has already opened, deviceId: %s", GetAnonyString(remoteDevId).c_str());
         return DH_SUCCESS;
     }
 
@@ -154,7 +154,8 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
     int sessionId = OpenSession(mySessionName_.c_str(), peerSessionName.c_str(), remoteDevId.c_str(),
         GROUP_ID.c_str(), &g_sessionAttr);
     if (sessionId < 0) {
-        DHLOGE("OpenSession fail, remoteDevId: %s, sessionId: %d", remoteDevId.c_str(), sessionId);
+        DHLOGE("OpenSession fail, remoteDevId: %s, sessionId: %s",
+            GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_FAIL;
     }
 
@@ -164,12 +165,14 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
         auto status = openSessionWaitCond_.wait_for(waitLock, std::chrono::seconds(SESSION_WAIT_TIMEOUT_SECOND),
             [this, remoteDevId] () { return channelStatusMap_[remoteDevId]; });
         if (!status) {
-            DHLOGE("OpenSession timeout, remoteDevId: %s, sessionId: %d", remoteDevId.c_str(), sessionId);
+            DHLOGE("OpenSession timeout, remoteDevId: %s, sessionId: %s",
+                GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_TIMEOUT;
         }
     }
 
-    DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%d", remoteDevId.c_str(), sessionId);
+    DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%s",
+        GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
     {
         std::unique_lock<std::mutex> sessionLock(operationMutex_);
         sessionDevMap_[remoteDevId] = sessionId;
@@ -183,12 +186,12 @@ void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remot
     // check this device's all hd is close,this device session close.
 
     if (sessionDevMap_.count(remoteDevId) == 0) {
-        DHLOGI("SessionDevIdMap Not find remoteDevId: %s", remoteDevId.c_str());
+        DHLOGI("SessionDevIdMap Not find remoteDevId: %s", GetAnonyString(remoteDevId).c_str());
         return;
     }
     int32_t sessionId = sessionDevMap_[remoteDevId];
 
-    DHLOGI("RemoteDevId: %s, sessionId: %d", remoteDevId.c_str(), sessionId);
+    DHLOGI("RemoteDevId: %s, sessionId: %s", GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
     CloseSession(sessionId);
     sessionDevMap_.erase(remoteDevId);
     channelStatusMap_.erase(remoteDevId);
@@ -218,16 +221,16 @@ int32_t DistributedInputSourceTransport::PrepareRemoteInput(const std::string& d
         std::string smsg = jsonStr.dump();
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
-            DHLOGE("PrepareRemoteInput deviceId:%s, sessionId:%d, smsg:%s, SendMsg error, ret:%d.",
-                deviceId.c_str(), sessionId, smsg.c_str(), ret);
+            DHLOGE("PrepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
         }
-        DHLOGI("PrepareRemoteInput devId:%s, sessionId:%d, msg:%s.",
-            deviceId.c_str(), sessionId, smsg.c_str());
+        DHLOGI("PrepareRemoteInput devId:%s, sessionId:%s, msg:%s.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         return DH_SUCCESS;
     } else {
         DHLOGE("PrepareRemoteInput error, not find this device:%s.",
-            deviceId.c_str());
+            GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
     }
 }
@@ -244,16 +247,16 @@ int32_t DistributedInputSourceTransport::UnprepareRemoteInput(const std::string&
         std::string smsg = jsonStr.dump();
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
-            DHLOGE("UnprepareRemoteInput deviceId:%s, sessionId:%d, smsg:%s, SendMsg error, ret:%d.",
-                deviceId.c_str(), sessionId, smsg.c_str(), ret);
+            DHLOGE("UnprepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
         }
-        DHLOGI("UnprepareRemoteInput deviceId:%s, sessionId:%d, smsg:%s.",
-            deviceId.c_str(), sessionId, smsg.c_str());
+        DHLOGI("UnprepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         return DH_SUCCESS;
     } else {
         DHLOGE("UnprepareRemoteInput error, not find this device:%s.",
-            deviceId.c_str());
+            GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
     }
 }
@@ -272,15 +275,16 @@ int32_t DistributedInputSourceTransport::StartRemoteInput(
         std::string smsg = jsonStr.dump();
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
-            DHLOGE("StartRemoteInput deviceId:%s, sessionId:%d, smsg:%s, SendMsg error, ret:%d.",
-                deviceId.c_str(), sessionId, smsg.c_str(), ret);
+            DHLOGE("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
         }
-        DHLOGI("StartRemoteInput deviceId:%s, sessionId:%d, smsg:%s.", deviceId.c_str(), sessionId, smsg.c_str());
+        DHLOGI("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         return DH_SUCCESS;
     } else {
         DHLOGE("StartRemoteInput error, not find this device:%s.",
-            deviceId.c_str());
+            GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
     }
 }
@@ -299,14 +303,15 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(
         std::string smsg = jsonStr.dump();
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
-            DHLOGE("StopRemoteInput deviceId:%s, sessionId:%d, smsg:%s, SendMsg error, ret:%d.",
-                deviceId.c_str(), sessionId, smsg.c_str(), ret);
+            DHLOGE("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
         }
-        DHLOGI("StopRemoteInput deviceId:%s, sessionId:%d, smsg:%s.", deviceId.c_str(), sessionId, smsg.c_str());
+        DHLOGI("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         return DH_SUCCESS;
     } else {
-        DHLOGE("StopRemoteInput error, not find this device:%s.", deviceId.c_str());
+        DHLOGE("StopRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
     }
 }
@@ -332,8 +337,8 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
 {
     if (result != DH_SUCCESS) {
         std::string deviceId = FindDeviceBySession(sessionId);
-        DHLOGE("session open failed, sessionId:%d, result:%d, "
-            "deviceId:%s", sessionId, result, deviceId.c_str());
+        DHLOGE("session open failed, sessionId:%s, result:%d, "
+            "deviceId:%s", GetAnonyInt32(sessionId).c_str(), result, GetAnonyString(deviceId).c_str());
         std::unique_lock<std::mutex> sessionLock(operationMutex_);
         if (sessionDevMap_.count(deviceId) > 0) {
             sessionDevMap_.erase(deviceId);
@@ -343,26 +348,26 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
 
     std::string deviceId = FindDeviceBySession(sessionId);
     int32_t sessionSide = GetSessionSide(sessionId);
-    DHLOGI("session open succeed, sessionId:%d, sessionSide:%d(1 is "
-        "client side), deviceId:%s", sessionId, sessionSide, deviceId.c_str());
+    DHLOGI("session open succeed, sessionId:%s, sessionSide:%d(1 is "
+        "client side), deviceId:%s", GetAnonyInt32(sessionId).c_str(), sessionSide, GetAnonyString(deviceId).c_str());
 
     char mySessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerSessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetMySessionName(sessionId, mySessionName, sizeof(mySessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my session name failed, session id is %d.", sessionId);
+        DHLOGI("get my session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
     ret = GetPeerSessionName(sessionId, peerSessionName, sizeof(peerSessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get peer session name failed, session id is %d.", sessionId);
+        DHLOGI("get peer session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
     ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get peer device id failed, session id is %d.", sessionId);
+        DHLOGI("get peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
-    DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s.",
-        mySessionName, peerSessionName, peerDevId);
+    DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s",
+        mySessionName, peerSessionName, GetAnonyString(peerDevId).c_str());
     {
         std::lock_guard<std::mutex> notifyLock(operationMutex_);
         channelStatusMap_[peerDevId] = true;
@@ -375,8 +380,8 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
 void DistributedInputSourceTransport::OnSessionClosed(int32_t sessionId)
 {
     std::string deviceId = FindDeviceBySession(sessionId);
-    DHLOGI("OnSessionClosed, sessionId:%d, deviceId:%s",
-        sessionId, deviceId.c_str());
+    DHLOGI("OnSessionClosed, sessionId:%s, deviceId:%s",
+        GetAnonyInt32(sessionId).c_str(), GetAnonyString(deviceId).c_str());
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevMap_.count(deviceId) > 0) {
         sessionDevMap_.erase(deviceId);
@@ -523,7 +528,7 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
 
 void DistributedInputSourceTransport::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
-    DHLOGI("OnBytesReceived, sessionId:%d, dataLen:%d", sessionId, dataLen);
+    DHLOGI("OnBytesReceived, sessionId:%s, dataLen:%d", GetAnonyInt32(sessionId).c_str(), dataLen);
     if (sessionId < 0 || data == nullptr || dataLen <= 0) {
         DHLOGE("OnBytesReceived param check failed");
         return;

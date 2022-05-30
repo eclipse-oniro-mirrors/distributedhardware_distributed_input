@@ -60,7 +60,7 @@ public:
 private:
     bool SendRequest(const IDistributedSourceInput::MessageCode code, MessageParcel &data, MessageParcel &reply);
 
-    static inline BrokerDelegator<DistributedInputSourceProxy> g_delegator;
+    static inline BrokerDelegator<DistributedInputSourceProxy> delegator_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

@@ -95,7 +95,7 @@ int32_t InputHub::Release()
 size_t InputHub::CollectInputEvents(RawEvent* buffer, size_t bufferSize)
 {
     size_t count;
-    for (; ;) {
+    for (;;) {
         if (needToScanDevices_) {
             needToScanDevices_ = false;
             ScanInputDevices(DEVICE_PATH);
@@ -104,11 +104,11 @@ size_t InputHub::CollectInputEvents(RawEvent* buffer, size_t bufferSize)
             std::unique_lock<std::mutex> deviceLock(visitMutex_);
             std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
             openingDevices_.pop_back();
-            DHLOGI("Reporting device opened: id=%d, name=%s\n",
-                device->id, device->path.c_str());
+            DHLOGI("Reporting device opened: id=%s, name=%s\n",
+                GetAnonyInt32(device->id).c_str(), device->path.c_str());
             auto [dev_it, inserted] = devices_.insert_or_assign(device->id, std::move(device));
             if (!inserted) {
-                DHLOGI("Device id %d exists, replaced. \n", device->id);
+                DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
             }
         }
         deviceChanged_ = false;
@@ -232,14 +232,15 @@ void InputHub::DeviceIsExists(InputDeviceEvent* event, size_t capacity)
         std::unique_lock<std::mutex> deviceLock(visitMutex_);
         std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
         openingDevices_.pop_back();
-        DHLOGI("Reporting device opened: id=%d, name=%s\n", device->id, device->path.c_str());
+        DHLOGI("Reporting device opened: id=%s, name=%s\n",
+            GetAnonyInt32(device->id).c_str(), device->path.c_str());
         event->type = DeviceType::DEVICE_ADDED;
         event->deviceInfo = device->identifier;
         event += 1;
 
         auto [dev_it, inserted] = devices_.insert_or_assign(device->id, std::move(device));
         if (!inserted) {
-            DHLOGI("Device id %d exists, replaced. \n", device->id);
+            DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
         }
 
         if (--capacity == 0) {
@@ -254,11 +255,12 @@ size_t InputHub::CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize
 {
     InputDeviceEvent* event = buffer;
     size_t capacity = bufferSize;
-    for (; ;) {
+    for (;;) {
         // Report any devices that had last been added/removed.
         for (auto it = closingDevices_.begin(); it != closingDevices_.end();) {
             std::unique_ptr<Device> device = std::move(*it);
-            DHLOGI("Reporting device closed: id=%d, name=%s\n", device->id, device->path.c_str());
+            DHLOGI("Reporting device closed: id=%s, name=%s\n",
+                GetAnonyInt32(device->id).c_str(), device->path.c_str());
             event->type = DeviceType::DEVICE_REMOVED;
             event->deviceInfo = device->identifier;
             event += 1;
@@ -494,10 +496,6 @@ int32_t InputHub::MakeInputDevice(int fd, InputDevice& identifier)
         buffer[sizeof(buffer) - 1] = '\0';
         identifier.uniqueId = buffer;
     }
-    DHLOGI("  driver:     v%d.%d.%d\n",
-        driverVersion >> MOVE_POSITION_SIXTEEN,
-        (driverVersion >> DRIVER_VERSION_MOVE) & DRIVER_VERSION_MAX,
-        driverVersion & DRIVER_VERSION_MAX);
 
     return DH_SUCCESS;
 }
@@ -651,8 +649,8 @@ void InputHub::AddDeviceLocked(std::unique_ptr<Device> device)
 void InputHub::CloseDeviceLocked(Device& device)
 {
     DHLOGI(
-        "Removed device: path=%s name=%s id=%d fd=%d classes=0x%x",
-        device.path.c_str(), device.identifier.name.c_str(), device.id,
+        "Removed device: path=%s name=%s id=%s fd=%d classes=0x%x",
+        device.path.c_str(), device.identifier.name.c_str(), GetAnonyInt32(device.id).c_str(),
         device.fd, device.classes);
 
     UnregisterDeviceFromEpollLocked(device);
@@ -668,7 +666,7 @@ int32_t InputHub::UnregisterDeviceFromEpollLocked(const Device& device) const
         int32_t result = UnregisterFdFromEpoll(device.fd);
         if (result != DH_SUCCESS) {
             DHLOGE(
-                "Could not remove input device fd from epoll for device %d", device.id);
+                "Could not remove input device fd from epoll for device %s", GetAnonyInt32(device.id).c_str());
             return result;
         }
     }
@@ -861,8 +859,7 @@ int32_t InputHub::Device::Enable()
     chmod(path.c_str(), S_IWRITE | S_IREAD);
     fd = open(path.c_str(), O_RDWR | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
-        DHLOGE(
-            "could not open %s, %s\n", path.c_str(), strerror(errno));
+        DHLOGE("could not open %s, %s\n", path.c_str(), strerror(errno));
         return ERR_DH_INPUT_HUB_DEVICE_ENABLE_FAIL;
     }
     enabled = true;

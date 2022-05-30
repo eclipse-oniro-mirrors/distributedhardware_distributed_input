@@ -71,7 +71,7 @@ static void MessageReceived(int32_t sessionId, const void *data, uint32_t dataLe
     (void)sessionId;
     (void)data;
     (void)dataLen;
-    DHLOGI("sessionId:%d, dataLen:%d", sessionId, dataLen);
+    DHLOGI("sessionId:%s, dataLen:%d", GetAnonyInt32(sessionId).c_str(), dataLen);
 }
 
 static void StreamReceived(int32_t sessionId, const StreamData *data, const StreamData *ext,
@@ -81,7 +81,7 @@ static void StreamReceived(int32_t sessionId, const StreamData *data, const Stre
     (void)data;
     (void)ext;
     (void)param;
-    DHLOGI("sessionId:%d", sessionId);
+    DHLOGI("sessionId:%s", GetAnonyInt32(sessionId).c_str());
 }
 DistributedInputSinkTransport &DistributedInputSinkTransport::GetInstance()
 {
@@ -151,7 +151,7 @@ int32_t DistributedInputSinkTransport::Init()
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_INIT_FAIL;
     }
     std::string networkId = localNode->networkId;
-    DHLOGI("Init device networkId is %s", networkId.c_str());
+    DHLOGI("Init device networkId is %s", GetAnonyString(networkId).c_str());
     mySessionName_ = SESSION_NAME_SINK + networkId.substr(0, INTERCEPT_STRING_LENGTH);
 
     int32_t ret = CreateSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str(), &iSessionListener);
@@ -178,7 +178,7 @@ int32_t DistributedInputSinkTransport::RespPrepareRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespPrepareRemoteInput session:%d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespPrepareRemoteInput session:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespPrepareRemoteInput error, SendMessage fail.");
@@ -195,7 +195,7 @@ int32_t DistributedInputSinkTransport::RespUnprepareRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespUnprepareRemoteInput sessionId:%d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespUnprepareRemoteInput sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespUnprepareRemoteInput error, SendMessage fail.");
@@ -212,7 +212,8 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespStartRemoteInput sessionId:%d, result:%d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespStartRemoteInput sessionId:%s, result:%d, smsg:%s.",
+            GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespStartRemoteInput error, SendMessage fail.");
@@ -229,7 +230,7 @@ int32_t DistributedInputSinkTransport::RespStopRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespStopRemoteInput sessionId:%d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespStopRemoteInput sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespStopRemoteInput error, SendMessage fail.");
@@ -269,7 +270,7 @@ int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::strin
 int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_t result)
 {
     if (result != DH_SUCCESS) {
-        DHLOGE("session open failed, sessionId %d", sessionId);
+        DHLOGE("session open failed, sessionId %s", GetAnonyInt32(sessionId).c_str());
         if (sessionIdSet_.count(sessionId) > 0) {
             sessionIdSet_.erase(sessionId);
         }
@@ -278,34 +279,34 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
 
     // return 1 is client
     int32_t sessionSide = GetSessionSide(sessionId);
-    DHLOGI("session open succeed, sessionId %d, sessionSide %d", sessionId, sessionSide);
+    DHLOGI("session open succeed, sessionId %s, sessionSide %d", GetAnonyInt32(sessionId).c_str(), sessionSide);
 
     char mySessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerSessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetMySessionName(sessionId, mySessionName, sizeof(mySessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my session name failed, session id is %d.", sessionId);
+        DHLOGI("get my session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
     // get other device session name
     ret = GetPeerSessionName(sessionId, peerSessionName, sizeof(peerSessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my peer session name failed, session id is %d.", sessionId);
+        DHLOGI("get my peer session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
 
     ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my peer device id failed, session id is %d.", sessionId);
+        DHLOGI("get my peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
-    DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s.",
-        mySessionName, peerSessionName, peerDevId);
+    DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s",
+        mySessionName, peerSessionName, GetAnonyString(peerDevId).c_str());
 
     return DH_SUCCESS;
 }
 
 void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
 {
-    DHLOGI("OnSessionClosed, sessionId:%d", sessionId);
+    DHLOGI("OnSessionClosed, sessionId:%s", GetAnonyInt32(sessionId).c_str());
     if (sessionIdSet_.count(sessionId) > 0) {
         sessionIdSet_.erase(sessionId);
     }
@@ -315,7 +316,7 @@ void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
 
 void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
-    DHLOGI("OnBytesReceived, sessionId:%d, dataLen:%d", sessionId, dataLen);
+    DHLOGI("OnBytesReceived, sessionId:%s, dataLen:%d", GetAnonyInt32(sessionId).c_str(), dataLen);
     if (sessionId < 0 || data == nullptr || dataLen <= 0) {
         DHLOGE("OnBytesReceived param check failed");
         return;
@@ -351,7 +352,7 @@ void DistributedInputSinkTransport::NotifyPrepareRemoteInput(int32_t sessionId, 
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_PREPARE deviceId:%s.",
-        deviceId.c_str());
+        GetAnonyString(deviceId).c_str());
     callback_->onPrepareRemoteInput(sessionId, deviceId);
 }
 
@@ -363,7 +364,7 @@ void DistributedInputSinkTransport::NotifyUnprepareRemoteInput(int32_t sessionId
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     DHLOGI("OnBytesReceived cmdType TRANS_SOURCE_MSG_UNPREPARE deviceId:%s.",
-        deviceId.c_str());
+        GetAnonyString(deviceId).c_str());
     callback_->onUnprepareRemoteInput(sessionId);
 }
 
@@ -376,7 +377,7 @@ void DistributedInputSinkTransport::NotifyStartRemoteInput(int32_t sessionId, co
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
     DHLOGI("OnBytesRecei,ved cmdType is TRANS_SOURCE_MSG_START deviceId:%s inputTypes:%d .",
-        deviceId.c_str(), inputTypes);
+        GetAnonyString(deviceId).c_str(), inputTypes);
     callback_->onStartRemoteInput(sessionId, inputTypes);
 }
 
@@ -388,7 +389,7 @@ void DistributedInputSinkTransport::NotifyStopRemoteInput(int32_t sessionId, con
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
-    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP deviceId:%s.", deviceId.c_str());
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP deviceId:%s.", GetAnonyString(deviceId).c_str());
     callback_->onStopRemoteInput(sessionId, inputTypes);
 }
 
@@ -442,10 +443,10 @@ void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const s
 void DistributedInputSinkTransport::CloseAllSession()
 {
     std::vector<int32_t> vecSession = DistributedInputSinkSwitch::GetInstance().GetAllSessionId();
-    DHLOGI("CloseAllSession session vector size is %d.", vecSession.size());
+    DHLOGI("CloseAllSession session vector size is %d", vecSession.size());
     for (int32_t kIndex = 0; kIndex < vecSession.size(); ++kIndex) {
         CloseSession(vecSession[kIndex]);
-        DHLOGI("CloseAllSession [%d] sessionid is %d.", kIndex, vecSession[kIndex]);
+        DHLOGI("CloseAllSession [%d] sessionid is %s", kIndex, GetAnonyInt32(vecSession[kIndex]).c_str());
     }
 
     // clear session data

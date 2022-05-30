@@ -27,7 +27,7 @@
 #include "i_stop_d_input_call_back.h"
 #include "i_unregister_d_input_call_back.h"
 #include "i_prepare_d_input_call_back.h"
-#include "i_unprepare_d_input_call_back.h
+#include "i_unprepare_d_input_call_back.h"
 
 namespace OHOS {
 namespace DistributedHardware {

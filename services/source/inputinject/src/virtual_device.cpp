@@ -139,7 +139,7 @@ bool VirtualDevice::SetUp()
     if (ioctl(fd_, UI_GET_SYSNAME(sizeof(sysfs_device_name)), sysfs_device_name) < 0) {
         DHLOGE("Unable to get input device name: %s", __func__);
     }
-    DHLOGI("get input device name: %s", sysfs_device_name);
+    DHLOGI("get input device name: %s", GetAnonyString(sysfs_device_name).c_str());
     return true;
 }
 
@@ -170,7 +170,7 @@ bool VirtualDevice::InjectInputEvent(const input_event& event)
 
 void VirtualDevice::SetNetWorkId(const std::string netWorkId)
 {
-    DHLOGI("SetNetWorkId %s\n", netWorkId.c_str());
+    DHLOGI("SetNetWorkId %s\n", GetAnonyString(netWorkId).c_str());
     netWorkId_.append(netWorkId);
 }
 } // namespace DistributedInput

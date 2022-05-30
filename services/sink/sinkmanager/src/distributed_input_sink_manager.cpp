@@ -57,7 +57,7 @@ DistributedInputSinkManager::DInputSinkListener::~DInputSinkListener()
 void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     const int32_t& sessionId, const std::string &deviceId)
 {
-    DHLOGI("onPrepareRemoteInput called, sessionId: %d", sessionId);
+    DHLOGI("onPrepareRemoteInput called, sessionId: %s", GetAnonyInt32(sessionId).c_str());
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONPREPARE;
@@ -108,7 +108,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
 
 void DistributedInputSinkManager::DInputSinkListener::onUnprepareRemoteInput(const int32_t& sessionId)
 {
-    DHLOGI("onUnprepareRemoteInput called, sessionId: %d", sessionId);
+    DHLOGI("onUnprepareRemoteInput called, sessionId: %s", GetAnonyInt32(sessionId).c_str());
     onStopRemoteInput(sessionId, INPUT_TYPE_ALL);
     DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
 
@@ -123,8 +123,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
-    DHLOGI("onStartRemoteInput called, curSessionId:%d, new sessionId: %d",
-        curSessionId, sessionId);
+    DHLOGI("onStartRemoteInput called, curSessionId:%s, new sessionId: %s",
+        GetAnonyInt32(curSessionId).c_str(), GetAnonyInt32(sessionId).c_str());
     // set new session
     int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
 
@@ -145,7 +145,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     if (curSessionId == ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
         DHLOGI("onStartRemoteInput called, this is the only session.");
     } else if (result) {
-        DHLOGI("onStartRemoteInput called, notify curSessionId:%d Interrupted.", curSessionId);
+        DHLOGI("onStartRemoteInput called, notify curSessionId:%s Interrupted.",
+            GetAnonyInt32(curSessionId).c_str());
         nlohmann::json jsonStrStp;
         jsonStrStp[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONSTOP;
         jsonStrStp[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
@@ -176,7 +177,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
 void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
-    DHLOGI("onStopRemoteInput called, sessionId: %d, inputTypes: %d", sessionId, inputTypes);
+    DHLOGI("onStopRemoteInput called, sessionId: %s, inputTypes: %d",
+        GetAnonyInt32(sessionId).c_str(), inputTypes);
 
     sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
         (sinkManagerObj_->GetInputTypes() & inputTypes));
@@ -286,10 +288,8 @@ int32_t DistributedInputSinkManager::Release()
     DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
     // 2.close all session
     DistributedInputSinkTransport::GetInstance().CloseAllSession();
-    // 3.stop event collect
-    // DistributedInputCollector::GetInstance().;
 
-    // 4.notify callback servertype
+    // 3.notify callback servertype
     SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
     IStartDInputServerCallback *startServerCB = GetStartDInputServerCback();
     if (startServerCB == nullptr) {

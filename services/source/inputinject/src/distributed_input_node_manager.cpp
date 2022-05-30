@@ -113,19 +113,19 @@ void DistributedInputNodeManager::AddDeviceLocked(const std::string& dhId, std::
 {
     auto [dev_it, inserted] = devices_.insert_or_assign(dhId, std::move(device));
     if (!inserted) {
-        DHLOGI("Device id %s exists, replaced. \n", dhId.c_str());
+        DHLOGI("Device id %s exists, replaced. \n", GetAnonyString(dhId).c_str());
     }
 }
 
 int32_t DistributedInputNodeManager::CloseDeviceLocked(const std::string &dhId)
 {
-    DHLOGI("%s called, dhId=%s", __func__, dhId.c_str());
+    DHLOGI("%s called, dhId=%s", __func__, GetAnonyString(dhId).c_str());
     std::map<std::string, std::unique_ptr<VirtualDevice>>::iterator iter = devices_.find(dhId);
     if (iter != devices_.end()) {
         devices_.erase(iter);
         return DH_SUCCESS;
     }
-    DHLOGE("%s called failure, dhId=%s", __func__, dhId.c_str());
+    DHLOGE("%s called failure, dhId=%s", __func__, GetAnonyString(dhId).c_str());
     return ERR_DH_INPUT_SERVER_SOURCE_CLOSE_DEVICE_FAIL;
 }
 
@@ -203,7 +203,7 @@ void DistributedInputNodeManager::ProcessInjectEvent(const std::shared_ptr<RawEv
         .value = rawEvent->value
     };
     DHLOGI("InjectEvent dhId: %s, eventType: %d, eventCode: %d, eventValue: %d, when: " PRId64"",
-        dhId.c_str(), event.type, event.code, event.value, rawEvent->when);
+        GetAnonyString(dhId).c_str(), event.type, event.code, event.value, rawEvent->when);
     VirtualDevice* device = nullptr;
     if (getDevice(dhId, device) < 0) {
         DHLOGE("could not find the device");

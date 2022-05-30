@@ -34,7 +34,7 @@ public:
     virtual void OnResult(const std::string& deviceId, const std::string& strJson) override;
 
 private:
-    static inline BrokerDelegator<AddWhiteListInfosCallbackProxy> g_delegator;
+    static inline BrokerDelegator<AddWhiteListInfosCallbackProxy> delegator_;
 };
 }  // namespace DistributedHardware
 }  // namespace DistributedInput

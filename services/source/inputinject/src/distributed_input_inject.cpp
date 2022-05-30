@@ -45,10 +45,8 @@ DistributedInputInject &DistributedInputInject::GetInstance()
 int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::string& parameters)
 {
-    DHLOGI("%s called",  __func__);
-    DHLOGI("deviveId:%s",  devId.c_str());
-    DHLOGI("hardwareId:%s",  dhId.c_str());
-    DHLOGI("describe:%s",  parameters.c_str());
+    DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
 
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");
@@ -63,8 +61,8 @@ int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& d
 
 int32_t DistributedInputInject::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId)
 {
-    DHLOGI("%s called deviveId:%s hardwareId:%s\n",
-        __func__, devId.c_str(), dhId.c_str());
+    DHLOGI("%s called, deviceId: %s,  dhId: %s",
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");
         return ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL;
