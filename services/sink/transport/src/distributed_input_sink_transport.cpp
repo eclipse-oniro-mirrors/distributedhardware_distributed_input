@@ -212,8 +212,7 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespStartRemoteInput sessionId:%s, result:%d, smsg:%s.",
-            GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+        DHLOGI("RespStartRemoteInput sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespStartRemoteInput error, SendMessage fail.");
