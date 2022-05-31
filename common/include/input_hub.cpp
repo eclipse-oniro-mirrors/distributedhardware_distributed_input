@@ -157,9 +157,6 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
         }
         Device* device = GetDeviceByFd(eventItem.data.fd);
         if (!device) {
-            DHLOGE(
-                "Received unexpected epoll event 0x%08x for unknown fd %d.",
-                eventItem.events, eventItem.data.fd);
             continue;
         }
         if (eventItem.events & EPOLLIN) {
@@ -226,14 +223,31 @@ size_t InputHub::ReadInputEvent(int32_t readSize, Device& device)
     return count;
 }
 
-void InputHub::DeviceIsExists(InputDeviceEvent* event, size_t capacity)
+size_t InputHub::DeviceIsExists(InputDeviceEvent* buffer, size_t bufferSize)
 {
+    InputDeviceEvent* event = buffer;
+    size_t capacity = bufferSize;
+    // Report any devices that had last been added/removed.
+    for (auto it = closingDevices_.begin(); it != closingDevices_.end();) {
+        std::unique_ptr<Device> device = std::move(*it);
+        DHLOGI("Reporting device closed: id=%s, name=%s\n", GetAnonyInt32(device->id).c_str(), device->path.c_str());
+        event->type = DeviceType::DEVICE_REMOVED;
+        event->deviceInfo = device->identifier;
+        event += 1;
+        it = closingDevices_.erase(it);
+        if (--capacity == 0) {
+            break;
+        }
+    }
+    if (needToScanDevices_) {
+        needToScanDevices_ = false;
+        ScanInputDevices(DEVICE_PATH);
+    }
     while (!openingDevices_.empty()) {
         std::unique_lock<std::mutex> deviceLock(visitMutex_);
         std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
         openingDevices_.pop_back();
-        DHLOGI("Reporting device opened: id=%s, name=%s\n",
-            GetAnonyInt32(device->id).c_str(), device->path.c_str());
+        DHLOGI("Reporting device opened: id=%s, name=%s\n", GetAnonyInt32(device->id).c_str(), device->path.c_str());
         event->type = DeviceType::DEVICE_ADDED;
         event->deviceInfo = device->identifier;
         event += 1;
@@ -242,40 +256,20 @@ void InputHub::DeviceIsExists(InputDeviceEvent* event, size_t capacity)
         if (!inserted) {
             DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
         }
-
         if (--capacity == 0) {
             break;
         }
     }
-    deviceChanged_ = false;
-    GetDeviceHandler();
+    return event - buffer;
 }
 
 size_t InputHub::CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize)
 {
-    InputDeviceEvent* event = buffer;
-    size_t capacity = bufferSize;
+    size_t count;
     for (;;) {
-        // Report any devices that had last been added/removed.
-        for (auto it = closingDevices_.begin(); it != closingDevices_.end();) {
-            std::unique_ptr<Device> device = std::move(*it);
-            DHLOGI("Reporting device closed: id=%s, name=%s\n",
-                GetAnonyInt32(device->id).c_str(), device->path.c_str());
-            event->type = DeviceType::DEVICE_REMOVED;
-            event->deviceInfo = device->identifier;
-            event += 1;
-            it = closingDevices_.erase(it);
-            if (--capacity == 0) {
-                break;
-            }
-        }
-
-        if (needToScanDevices_) {
-            needToScanDevices_ = false;
-            ScanInputDevices(DEVICE_PATH);
-        }
-
-        DeviceIsExists(event, capacity);
+        count = DeviceIsExists(buffer, bufferSize);
+        deviceChanged_ = false;
+        GetDeviceHandler();
 
         if (pendingINotify_ && pendingEventIndex_ >= pendingEventCount_) {
             pendingINotify_ = false;
@@ -287,7 +281,7 @@ size_t InputHub::CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize
         if (deviceChanged_) {
             continue;
         }
-        if (event != buffer) {
+        if (count > 0) {
             break;
         }
         if (RefreshEpollItem() < 0) {
@@ -296,7 +290,7 @@ size_t InputHub::CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize
     }
 
     // All done, return the number of events we read.
-    return event - buffer;
+    return count;
 }
 
 void InputHub::GetDeviceHandler()

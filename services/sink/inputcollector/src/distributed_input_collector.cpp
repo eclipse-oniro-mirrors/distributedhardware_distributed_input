@@ -110,7 +110,7 @@ void DistributedInputCollector::StartCollectEventsThread()
 
         // The RawEvent obtained by the controlled end calls transport and is
         // sent to the main control end.
-        std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+        std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
         for (int ind = 0; ind < count; ind++) {
             nlohmann::json tmpJson;
             tmpJson[INPUT_KEY_WHEN] = mEventBuffer[ind].when;

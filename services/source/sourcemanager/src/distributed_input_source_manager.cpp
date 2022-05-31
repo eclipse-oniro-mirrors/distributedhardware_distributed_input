@@ -68,7 +68,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseRegisterDist
         return;
     }
 
-    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -96,7 +96,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponsePrepareRemot
         DHLOGE("onResponsePrepareRemoteInput GetCallbackEventHandler is null.");
         return;
     }
-    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -124,7 +124,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseUnprepareRem
         DHLOGE("onResponseUnprepareRemoteInput GetCallbackEventHandler is null.");
         return;
     }
-    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -155,7 +155,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteI
         sourceManagerObj_->SetDeviceMapValue(deviceId, DINPUT_SOURCE_SWITCH_ON);
     }
 
-    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
     if (jsonArrayMsg == nullptr) {
         DHLOGE("onResponseStartRemoteInput jsonArrayMsg is null.");
         return;
@@ -187,7 +187,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteIn
             ERR_DH_INPUT_SERVER_SOURCE_MANAGERGET_CALLBACK_HANDLER_FAIL);
         return;
     }
-    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
 
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
@@ -521,7 +521,7 @@ int32_t DistributedInputSourceManager::Release()
     InputTypesMap_.clear();
 
     // 4. isStart callback
-    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
     jsonArrayMsg->push_back(tmpJson);
@@ -611,7 +611,7 @@ void DistributedInputSourceManager::handleStartServerCallback(const std::string&
             }
         }
         if (isAllDevSwitchOff) {
-            std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+            std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
             nlohmann::json tmpJson;
             tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
             jsonArrayMsg->push_back(tmpJson);
@@ -648,7 +648,7 @@ int32_t DistributedInputSourceManager::RemoveInputNode(const std::string& devId,
 
 int32_t DistributedInputSourceManager::DeleteDevice(const std::string& devId, const std::string& dhId)
 {
-    std::unique_ptr<nlohmann::json> jsonArrayMsg = std::make_unique<nlohmann::json>();
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = devId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_HWID] = dhId;
@@ -698,7 +698,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     }
 
     // 1.remove input node
-    if (DeleteDevice(devId, dhId) != DH_SUCCESS) {
+    if (RemoveInputNode(devId, dhId) != DH_SUCCESS) {
         callback->OnResult(devId, dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }

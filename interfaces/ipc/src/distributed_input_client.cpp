@@ -290,7 +290,7 @@ bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const 
         }
 
         if (WhiteListUtil::GetInstance().Init(localDevId_) != DH_SUCCESS) {
-            return true;
+            return false;
         }
         m_bIsAlreadyInitWhiteList = true;
 

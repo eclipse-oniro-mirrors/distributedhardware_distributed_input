@@ -80,7 +80,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     if (sinkManagerObj_->GetInitWhiteListFlag() == false) {
         if (WhiteListUtil::GetInstance().Init(deviceId) != DH_SUCCESS) {
             DHLOGE("%s called, init white list fail!", __func__);
-            jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+            jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
             jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
             smsg = jsonStr.dump();
             DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
@@ -92,7 +92,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     WhiteListUtil::GetInstance().GetWhiteList(deviceId, vecFilter);
     if (vecFilter.empty() || vecFilter[0].empty() || vecFilter[0][0].empty()) {
         DHLOGE("onPrepareRemoteInput called, white list is null.");
-        jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+        jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
         jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
         smsg = jsonStr.dump();
         DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);

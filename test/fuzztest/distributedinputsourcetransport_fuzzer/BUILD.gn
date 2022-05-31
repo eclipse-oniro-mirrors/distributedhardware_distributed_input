@@ -32,8 +32,9 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
     "${service_common}/include",
+    "${services_source_path}/inputinject/include",
+    "${services_source_path}/transport/include",
     "//third_party/json/include",
-    "//foundation/distributedhardware/distributedinput/services/source/transport/test/sourcetransunittest/mock",
   ]
 
   cflags = [
@@ -49,10 +50,12 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
   ]
 
   deps = [
+    "//foundation/distributedhardware/distributedinput/interfaces/inner_kits:libdinput_sdk",
     "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp:devicemanagersdk",
+    "//foundation/distributedhardware/distributedinput/services/source/transport:libdinput_source_trans",
+    "//foundation/distributedhardware/distributedinput/services/source/inputinject:libdinput_inject",
     ]
 
   external_deps = [

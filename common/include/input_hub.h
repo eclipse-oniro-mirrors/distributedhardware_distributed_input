@@ -35,7 +35,7 @@ public:
     ~InputHub();
     size_t CollectInputEvents(RawEvent* buffer, size_t bufferSize);
     size_t CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize);
-    void DeviceIsExists(InputDeviceEvent* event, size_t capacity);
+    size_t DeviceIsExists(InputDeviceEvent* event, size_t capacity);
     std::vector<InputDevice> GetAllInputDevices();
     void SetSupportInputType(const uint32_t& inputType);
 private:
