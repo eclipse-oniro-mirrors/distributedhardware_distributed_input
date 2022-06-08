@@ -33,7 +33,7 @@
 ## **目录**
 
 ```
-/foundation/distributedhardware/distributedinput
+/foundation/distributedhardware/distributed_input
 ├── common                                  # 分布式输入常量定义和公共函数
 ├── frameworks                              # 分布式输入innerkit接口使用到的回调函数定义
 ├── inputdevicehandler                      # 分布式输入实现分布式硬件管理框架定义的能力查询接口实现

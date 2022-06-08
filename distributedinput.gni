@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-distributedinput_path = "//foundation/distributedhardware/distributedinput"
+distributedinput_path = "//foundation/distributedhardware/distributed_input"
 
 distributedhardwarefwk_path = "//foundation/distributedhardware/distributedhardwarefwk"
 

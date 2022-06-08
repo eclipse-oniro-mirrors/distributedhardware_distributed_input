@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/source_manager"
 
 group("sourcemanagerunittest") {
@@ -30,8 +30,8 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${innerkits_path}/src",
     "${ipc_path}/include",
     "${ipc_path}/src",
-    "//foundation/distributedhardware/distributedinput/services/source/sourcemanager/include",
-    "//foundation/distributedhardware/distributedinput/frameworks/include",
+    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/include",
+    "//foundation/distributedhardware/distributed_input/frameworks/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -48,17 +48,17 @@ ohos_unittest("distributed_input_sourcemanager_test") {
   ]
 
   sources = [
-    "//foundation/distributedhardware/distributedinput/services/source/sourcemanager/src/distributed_input_source_manager.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/sourcemanager/src/distributed_input_source_event_handler.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_event_handler.cpp",
     "distributed_input_sourcemanager_test.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/distributed_input_inject.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/distributed_input_node_manager.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_device.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_keyboard.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_mouse.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_touchpad.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/transport/src/distributed_input_source_transport.cpp",
-    
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_inject.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_node_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_device.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_keyboard.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_mouse.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
+
 
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/sink_manager"
 
 group("sinkmanagerunittest") {
@@ -30,9 +30,9 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "${innerkits_path}/src",
     "${ipc_path}/include",
     "${ipc_path}/src",
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/include",
-    "//foundation/distributedhardware/distributedinput/services/sink/sinkmanager/include",
-    "//foundation/distributedhardware/distributedinput/frameworks/include",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/include",
+    "//foundation/distributedhardware/distributed_input/frameworks/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -49,11 +49,11 @@ ohos_unittest("distributed_input_sinkmanager_test") {
   sources = [
     "${common_path}/include/white_list_util.cpp",
     "${common_path}/include/input_hub.cpp",
-    "//foundation/distributedhardware/distributedinput/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/src/distributed_input_sink_switch.cpp",
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/src/distributed_input_sink_transport.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
     "distributed_input_sinkmanager_test.cpp",
-    "//foundation/distributedhardware/distributedinput/services/sink/sinkmanager/src/distributed_input_sink_event_handler.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_event_handler.cpp",
     "${ipc_path}/src/distributed_input_sink_stub.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",

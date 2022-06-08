@@ -14,15 +14,15 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("DistributedInputSinkTransportFuzzTest") {
   module_out_path = "distributedinput_stander/system"
-  # fuzz_config_file = "//foundation/distributedhardware/distributedinput/test/fuzztest/distributedinputsinktransport_fuzzer"
+  # fuzz_config_file = "//foundation/distributedhardware/distributed_input/test/fuzztest/distributedinputsinktransport_fuzzer"
 
   include_dirs = [
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/include",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -41,8 +41,8 @@ ohos_fuzztest("DistributedInputSinkTransportFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/src/distributed_input_sink_switch.cpp",
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/src/distributed_input_sink_transport.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
     "distributed_input_sink_transport_fuzzer.cpp",
   ]
 

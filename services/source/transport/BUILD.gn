@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_source_trans") {
   include_dirs = [
@@ -47,7 +47,7 @@ ohos_shared_library("libdinput_source_trans") {
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp:devicemanagersdk",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject:libdinput_inject",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
   ]
 
   external_deps = [

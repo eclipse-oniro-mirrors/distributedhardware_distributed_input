@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/system"
 
 group("system") {

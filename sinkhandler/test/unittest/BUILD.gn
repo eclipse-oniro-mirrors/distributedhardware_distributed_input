@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/sink_handler"
 
 group("unittest") {
@@ -45,10 +45,10 @@ ohos_unittest("distributed_input_sink_handler_test") {
   ]
 
   sources = [
-    "//foundation/distributedhardware/distributedinput/sinkhandler/src/distributed_input_sink_handler.cpp",
-    "//foundation/distributedhardware/distributedinput/sinkhandler/src/load_d_input_sink_callback.cpp",
+    "//foundation/distributedhardware/distributed_input/sinkhandler/src/distributed_input_sink_handler.cpp",
+    "//foundation/distributedhardware/distributed_input/sinkhandler/src/load_d_input_sink_callback.cpp",
     "distributed_input_sinkhandler_test.cpp",
-    "//foundation/distributedhardware/distributedinput/sinkhandler/test/unittest/mock/mock_distributed_input_client.cpp",
+    "//foundation/distributedhardware/distributed_input/sinkhandler/test/unittest/mock/mock_distributed_input_client.cpp",
   ]
 
   cflags = [

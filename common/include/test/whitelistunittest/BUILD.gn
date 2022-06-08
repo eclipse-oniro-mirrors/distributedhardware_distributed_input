@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/white_list_test"
 
 group("whitelistunittest") {
@@ -30,8 +30,8 @@ ohos_unittest("distributed_input_white_list_test") {
     "${innerkits_path}/src",
     "${ipc_path}/include",
     "${ipc_path}/src",
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/include",
-    "//foundation/distributedhardware/distributedinput/frameworks/include",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
+    "//foundation/distributedhardware/distributed_input/frameworks/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",

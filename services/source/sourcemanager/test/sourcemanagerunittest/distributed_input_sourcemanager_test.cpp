@@ -61,49 +61,49 @@ void DistributedInputSourceManagerTest::TearDownTestCase()
 }
 
 void DistributedInputSourceManagerTest::TestRegisterDInputCb::OnResult(
-    const std::string& devId, const std::string& dhId, const int32_t& status) const
+    const std::string& devId, const std::string& dhId, const int32_t& status)
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestUnregisterDInputCb::OnResult(
-    const std::string& devId, const std::string& dhId, const int32_t& status) const
+    const std::string& devId, const std::string& dhId, const int32_t& status)
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestPrepareDInputCallback::OnResult(
-    const std::string& deviceId, const int32_t& status) const
+    const std::string& deviceId, const int32_t& status)
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestUnprepareDInputCallback::OnResult(
-    const std::string& deviceId, const int32_t& status) const
+    const std::string& deviceId, const int32_t& status)
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestStartDInputCallback::OnResult(
-    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const
+    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestStopDInputCallback::OnResult(
-    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status) const
+    const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestAddWhiteListInfosCb::OnResult(
-    const std::string &deviceId, const std::string &strJson) const
+    const std::string &deviceId, const std::string &strJson)
 {
     return;
 }
 
 void DistributedInputSourceManagerTest::TestDelWhiteListInfosCb::OnResult(
-    const std::string& deviceId) const
+    const std::string& deviceId)
 {
     return;
 }

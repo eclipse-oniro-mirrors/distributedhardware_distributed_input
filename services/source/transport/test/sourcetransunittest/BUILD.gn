@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/source_trans"
 
 group("sourcetransunittest") {
@@ -26,7 +26,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
   module_out_path = module_out_path
 
   include_dirs = [
-    "//foundation/distributedhardware/distributedinput/services/source/transport/include",
+    "//foundation/distributedhardware/distributed_input/services/source/transport/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -38,11 +38,11 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${service_common}/include",
     "//third_party/json/include",
     "${services_source_path}/inputinject/include",
-    "//foundation/distributedhardware/distributedinput/services/source/transport/test/sourcetransunittest/mock",
+    "//foundation/distributedhardware/distributed_input/services/source/transport/test/sourcetransunittest/mock",
   ]
 
   sources = [
-    "//foundation/distributedhardware/distributedinput/services/source/transport/src/distributed_input_source_transport.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
     "distributed_input_sourcetrans_test.cpp",
   ]
 
@@ -65,7 +65,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp:devicemanagersdk",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject:libdinput_inject",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
   ]
 
   external_deps = [

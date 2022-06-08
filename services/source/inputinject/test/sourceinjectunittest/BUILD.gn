@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/source_inject"
 
 group("sourceinjectunittest") {
@@ -30,8 +30,8 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "${innerkits_path}/src",
     "${ipc_path}/include",
     "${ipc_path}/src",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/include",
-    "//foundation/distributedhardware/distributedinput/frameworks/include",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/include",
+    "//foundation/distributedhardware/distributed_input/frameworks/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -45,12 +45,12 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
   ]
 
   sources = [
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/distributed_input_inject.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/distributed_input_node_manager.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_device.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_keyboard.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_mouse.cpp",
-    "//foundation/distributedhardware/distributedinput/services/source/inputinject/src/virtual_touchpad.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_inject.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_node_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_device.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_keyboard.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_mouse.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
     "distributed_input_sourceinject_test.cpp",
   ]
 

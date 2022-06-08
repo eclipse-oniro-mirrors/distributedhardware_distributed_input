@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributedinput/distributedinput.gni")
+import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributedinput_stander/sink_trans"
 
 group("sinktransunittest") {
@@ -26,7 +26,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
   module_out_path = module_out_path
 
   include_dirs = [
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/include",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -37,12 +37,12 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${fwk_utils_path}/include",
     "${service_common}/include",
     "//third_party/json/include",
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/test/sinktransunittest/mock",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/test/sinktransunittest/mock",
   ]
 
   sources = [
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/src/distributed_input_sink_switch.cpp",
-    "//foundation/distributedhardware/distributedinput/services/sink/transport/src/distributed_input_sink_transport.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
     "distributed_input_sinktrans_test.cpp",
   ]
 
