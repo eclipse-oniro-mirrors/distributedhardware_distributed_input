@@ -42,7 +42,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${service_common}/include",
     "//third_party/json/include",
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
-    "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp/include",
+    "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include",
     "${services_source_path}/inputinject/include",
     "${services_source_path}/transport/include",
   ]
@@ -103,7 +103,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
-    "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp:devicemanagersdk",
+    "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
   ]
 
   external_deps = [
