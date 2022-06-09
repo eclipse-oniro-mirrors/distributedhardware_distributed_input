@@ -41,7 +41,7 @@ ohos_shared_library("libdinput_sink_trans") {
   ]
 
   deps = [
-    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",

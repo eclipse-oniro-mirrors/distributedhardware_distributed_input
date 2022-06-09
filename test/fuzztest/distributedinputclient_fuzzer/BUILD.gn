@@ -65,7 +65,7 @@ ohos_fuzztest("DistributedInputClientFuzzTest") {
     "${distributedinput_path}/sourcehandler:libdinput_source_handler",
     "${distributedinput_path}/sinkhandler:libdinput_sink_handler",
     "${distributedinput_path}/inputdevicehandler:libdinput_handler",
-    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
     ]
 

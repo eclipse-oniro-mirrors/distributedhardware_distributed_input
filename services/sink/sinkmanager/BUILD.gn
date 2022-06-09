@@ -52,7 +52,7 @@ ohos_shared_library("libdinput_sink") {
 
   deps = [
     "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
-    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",

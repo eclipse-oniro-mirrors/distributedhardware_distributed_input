@@ -66,7 +66,7 @@ ohos_unittest("distributed_input_sink_handler_test") {
   ]
 
   deps = [
-    "//foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler:libeventhandler",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${innerkits_path}:libdinput_sdk",
