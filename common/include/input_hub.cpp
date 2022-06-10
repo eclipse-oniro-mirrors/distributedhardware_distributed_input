@@ -37,9 +37,8 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-static const char *DEVICE_PATH = "/dev/input";
-static const uint32_t INPUT_DEVICE_CLASS_KEYBOARD = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_KEYBOARD);
-static const uint32_t INPUT_DEVICE_CLASS_CURSOR   = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_CURSOR);
+const char *DEVICE_PATH = "/dev/input";
+const uint32_t SLEEP_TIME_MS = 100000;
 }
 
 InputHub::InputHub() : needToScanDevices_(true),
@@ -170,18 +169,7 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
                 event->code = iev.code;
                 event->value = iev.value;
                 event->path = device->path;
-                if (event->type == EV_KEY) {
-                    DHLOGD("1.E2E-Test Sink collect EV_KEY, Code: %d, Value: %d, Path: %s, When: " PRId64"",
-                        event->code, event->value, event->path.c_str(), event->when);
-                } else if (event->type == EV_REL) {
-                    DHLOGD("1.E2E-Test Sink collect EV_REL, Code: %d, Value: %d, Path: %s, When: " PRId64"",
-                        event->code, event->value, event->path.c_str(), event->when);
-                } else if (event->type == EV_ABS) {
-                    DHLOGD("1.E2E-Test Sink collect EV_ABS, Code: %d, Value: %d, Path: %s, When: " PRId64"",
-                        event->code, event->value, event->path.c_str(), event->when);
-                } else {
-                    DHLOGW("1.E2E-Test Sink collect other type!");
-                }
+                RecordEventLog(event);
                 event->descriptor = device->identifier.descriptor;
                 event += 1;
                 capacity -= 1;
@@ -343,7 +331,7 @@ int32_t InputHub::RefreshEpollItem()
         // Hopefully the error is transient.
         if (errno != EINTR) {
             DHLOGE("poll failed (errno=%d)\n", errno);
-            usleep(SLEEP_TIME);
+            usleep(SLEEP_TIME_MS);
         }
     } else {
         // Some events occurred.
@@ -819,12 +807,33 @@ uint32_t InputHub::SizeofBitArray(uint32_t bit)
 
 bool InputHub::GetIsSupportInputTypes(uint32_t classes)
 {
-    return classes & input_types_;
+    return classes & inputTypes_;
 }
 void InputHub::SetSupportInputType(const uint32_t& inputTypes)
 {
-    input_types_ = inputTypes;
-    DHLOGI("SetSupportInputType: inputTypes=0x%x,", input_types_);
+    inputTypes_ = inputTypes;
+    DHLOGI("SetSupportInputType: inputTypes=0x%x,", inputTypes_);
+}
+
+void InputHub::RecordEventLog(const RawEvent* event)
+{
+    std::string eventType = "";
+    switch (event->type) {
+        case EV_KEY:
+            eventType = "EV_KEY";
+            break;
+        case EV_REL:
+            eventType = "EV_REL";
+            break;
+        case EV_ABS:
+            eventType = "EV_ABS";
+            break;
+        default:
+            eventType = "other type";
+            break;
+    }
+    DHLOGD("1.E2E-Test Sink collect event, EventType: %s, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+        eventType.c_str(), event->code, event->value, event->path.c_str(), event->when);
 }
 
 InputHub::Device::Device(int fd, int32_t id, const std::string& path,

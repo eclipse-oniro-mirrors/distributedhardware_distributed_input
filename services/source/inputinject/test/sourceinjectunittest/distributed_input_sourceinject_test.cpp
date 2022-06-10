@@ -34,11 +34,6 @@ using namespace std;
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-namespace {
-static const uint32_t INPUT_DEVICE_CLASS_KEYBOARD = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_KEYBOARD);
-static const uint32_t INPUT_DEVICE_CLASS_CURSOR = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_CURSOR);
-static const uint32_t INPUT_DEVICE_CLASS_TOUCH = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_TOUCH);
-}
 void DistributedInputSourceInjectTest::SetUp()
 {
 }
@@ -57,7 +52,6 @@ void DistributedInputSourceInjectTest::TearDownTestCase()
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware01, testing::ext::TestSize.Level1)
 {
-    std::cout<< "start"<<std::endl;
     InputDevice pBuffer;
     pBuffer.name = "uinput_name_keyboard";
     pBuffer.bus = 0x03;
@@ -73,17 +67,13 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware01, testin
     std::string devId = "y4umjym16tgn21m896f1nt2y1894ty61nty651m89t1m";
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
-    std::cout<< "start1"<<std::endl;
     DistributedInputInject::GetInstance().StructTransJson(pBuffer, parameters);
-    std::cout<< "start2"<<std::endl;
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedHardware(devId, dhId, parameters);
-    std::cout<< "end"<<std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware02, testing::ext::TestSize.Level1)
 {
-    std::cout<< "start"<<std::endl;
     InputDevice pBuffer;
     pBuffer.name = "uinput_name_mouse";
     pBuffer.bus = 0x03;
@@ -100,15 +90,12 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware02, testin
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
     DistributedInputInject::GetInstance().StructTransJson(pBuffer, parameters);
-    std::cout<< "start2"<<std::endl;
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedHardware(devId, dhId, parameters);
-    std::cout<< "end"<<std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware03, testing::ext::TestSize.Level1)
 {
-    std::cout<< "start"<<std::endl;
     InputDevice pBuffer;
     pBuffer.name = "uinput_name_touch";
     pBuffer.bus = 0x03;
@@ -124,17 +111,13 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware03, testin
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
-    std::cout<< "start1"<<std::endl;
     DistributedInputInject::GetInstance().StructTransJson(pBuffer, parameters);
-    std::cout<< "start2"<<std::endl;
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedHardware(devId, dhId, parameters);
-    std::cout<< "end"<<std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent01, testing::ext::TestSize.Level1)
 {
-    std::cout<< "keyboard"<<std::endl;
     struct RawEvent writeBuffer[4];
     RawEvent* event = writeBuffer;
 
@@ -167,13 +150,11 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent01, testing::
 
     size_t count = (size_t)(sizeof(writeBuffer) / sizeof(RawEvent));
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedEvent(writeBuffer, count);
-    std::cout<< "end"<<std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent02, testing::ext::TestSize.Level1)
 {
-    std::cout<< "mouse"<<std::endl;
     struct RawEvent writeBuffer[4];
     RawEvent* event = writeBuffer;
 
@@ -212,13 +193,11 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent02, testing::
 
     size_t count = (size_t)(sizeof(writeBuffer) / sizeof(RawEvent));
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedEvent(writeBuffer, count);
-    std::cout<< "end"<<std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent03, testing::ext::TestSize.Level1)
 {
-    std::cout<< "touchpad"<<std::endl;
     struct RawEvent writeBuffer[4];
     RawEvent* event = writeBuffer;
 
@@ -251,7 +230,6 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent03, testing::
 
     size_t count = (size_t)(sizeof(writeBuffer) / sizeof(RawEvent));
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedEvent(writeBuffer, count);
-    std::cout<< "end"<<std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 } // namespace DistributedInput

@@ -36,13 +36,6 @@ using namespace std;
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-namespace {
-    static const uint32_t INPUT_DEVICE_CLASS_KEYBOARD =
-        static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_KEYBOARD);
-    static const uint32_t INPUT_DEVICE_CLASS_CURSOR = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_CURSOR);
-    static const uint32_t INPUT_DEVICE_CLASS_TOUCH = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_TOUCH);
-}
-
 void DistributedInputSourceManagerTest::SetUp()
 {
     sourceManager_ = new DistributedInputSourceManager(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, true);
@@ -63,48 +56,67 @@ void DistributedInputSourceManagerTest::TearDownTestCase()
 void DistributedInputSourceManagerTest::TestRegisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
+    (void)devId;
+    (void)dhId;
+    (void)status;
     return;
 }
 
 void DistributedInputSourceManagerTest::TestUnregisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
+    (void)devId;
+    (void)dhId;
+    (void)status;
     return;
 }
 
 void DistributedInputSourceManagerTest::TestPrepareDInputCallback::OnResult(
     const std::string& deviceId, const int32_t& status)
 {
+    (void)deviceId;
+    (void)status;
     return;
 }
 
 void DistributedInputSourceManagerTest::TestUnprepareDInputCallback::OnResult(
     const std::string& deviceId, const int32_t& status)
 {
+    (void)deviceId;
+    (void)status;
     return;
 }
 
 void DistributedInputSourceManagerTest::TestStartDInputCallback::OnResult(
     const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
 {
+    (void)deviceId;
+    (void)inputTypes;
+    (void)status;
     return;
 }
 
 void DistributedInputSourceManagerTest::TestStopDInputCallback::OnResult(
     const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
 {
+    (void)deviceId;
+    (void)inputTypes;
+    (void)status;
     return;
 }
 
 void DistributedInputSourceManagerTest::TestAddWhiteListInfosCb::OnResult(
     const std::string &deviceId, const std::string &strJson)
 {
+    (void)deviceId;
+    (void)strJson;
     return;
 }
 
 void DistributedInputSourceManagerTest::TestDelWhiteListInfosCb::OnResult(
     const std::string& deviceId)
 {
+    (void)deviceId;
     return;
 }
 
@@ -130,7 +142,6 @@ int32_t DistributedInputSourceManagerTest::StructTransJson(const InputDevice& pB
 
 HWTEST_F(DistributedInputSourceManagerTest, Init01, testing::ext::TestSize.Level0)
 {
-    std::cout << "Init01"<< std::endl;
     int32_t ret = sourceManager_->Init();
     EXPECT_EQ(SUCCESS, ret);
 }
@@ -162,7 +173,6 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware01, testi
 
 HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware02, testing::ext::TestSize.Level0)
 {
-    std::cout << "RegisterDistributedHardware1"<< std::endl;
     InputDevice pBuffer;
     pBuffer.name = "uinput_name_mouse";
     pBuffer.bus = 0x03;
@@ -178,18 +188,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware02, testi
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
-    std::cout << "RegisterDistributedHardware2"<< std::endl;
     StructTransJson(pBuffer, parameters);
-    std::cout << "RegisterDistributedHardware3"<< std::endl;
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
-    std::cout << "RegisterDistributedHardware4"<< std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware03, testing::ext::TestSize.Level0)
 {
-    std::cout << "RegisterDistributedHardware11"<< std::endl;
     InputDevice pBuffer;
     pBuffer.name = "uinput_name_keyboard";
     pBuffer.bus = 0x03;
@@ -205,12 +211,9 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware03, testi
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     std::string dhId = pBuffer.descriptor;
     std::string parameters;
-    std::cout << "RegisterDistributedHardware12"<< std::endl;
     StructTransJson(pBuffer, parameters);
-    std::cout << "RegisterDistributedHardware13"<< std::endl;
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
-    std::cout << "RegisterDistributedHardware03"<< std::endl;
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -219,9 +222,7 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput01, testing::ext::
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
     sptr<TestAddWhiteListInfosCb> addWhiteListCallback = new TestAddWhiteListInfosCb();
-    std::cout << "PrepareRemoteInput011"<< std::endl;
     int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback, addWhiteListCallback);
-    std::cout << "PrepareRemoteInput012"<< std::endl;
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 

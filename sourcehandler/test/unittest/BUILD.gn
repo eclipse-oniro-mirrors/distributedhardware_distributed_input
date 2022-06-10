@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
-module_out_path = "distributedinput_stander/source_handler"
+module_out_path = "distributed_input/source_handler"
 
 group("unittest") {
   testonly = true

@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
-module_out_path = "distributedinput_stander/white_list_test"
+module_out_path = "distributed_input/white_list_test"
 
 group("whitelistunittest") {
   testonly = true

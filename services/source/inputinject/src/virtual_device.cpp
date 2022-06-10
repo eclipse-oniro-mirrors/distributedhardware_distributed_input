@@ -151,18 +151,7 @@ bool VirtualDevice::InjectInputEvent(const input_event& event)
         DHLOGE("could not inject event, removed? (fd: %d", fd_);
         return false;
     }
-    if (event.type == EV_KEY) {
-        DHLOGD("4.E2E-Test Source write event into input driver EV_KEY, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
-            event.code, event.value, event.input_event_sec, event.input_event_usec);
-    } else if (event.type == EV_REL) {
-        DHLOGD("4.E2E-Test Source write event into input driver EV_REL, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
-            event.code, event.value, event.input_event_sec, event.input_event_usec);
-    } else if (event.type == EV_ABS) {
-        DHLOGD("4.E2E-Test Source write event into input driver EV_ABS, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
-            event.code, event.value, event.input_event_sec, event.input_event_usec);
-    } else {
-        DHLOGW("4.E2E-Test Source write event into input driver other type!");
-    }
+    RecordEventLog(event);
     DHLOGE("InjectInputEvent end\n");
 
     return true;
@@ -172,6 +161,27 @@ void VirtualDevice::SetNetWorkId(const std::string netWorkId)
 {
     DHLOGI("SetNetWorkId %s\n", GetAnonyString(netWorkId).c_str());
     netWorkId_.append(netWorkId);
+}
+
+void VirtualDevice::RecordEventLog(const input_event& event)
+{
+    std::string eventType = "";
+    switch (event.type) {
+        case EV_KEY:
+            eventType = "EV_KEY";
+            break;
+        case EV_REL:
+            eventType = "EV_REL";
+            break;
+        case EV_ABS:
+            eventType = "EV_ABS";
+            break;
+        default:
+            eventType = "other type";
+            break;
+    }
+    DHLOGD("4.E2E-Test Source write event into input driver, EventType: %s Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
+        eventType.c_str(), event.code, event.value, event.input_event_sec, event.input_event_usec);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

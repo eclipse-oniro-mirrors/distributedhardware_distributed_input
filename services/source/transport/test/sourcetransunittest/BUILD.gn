@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
-module_out_path = "distributedinput_stander/source_trans"
+module_out_path = "distributed_input/source_trans"
 
 group("sourcetransunittest") {
   testonly = true
@@ -39,6 +39,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "//third_party/json/include",
     "${services_source_path}/inputinject/include",
     "//foundation/distributedhardware/distributed_input/services/source/transport/test/sourcetransunittest/mock",
+    "//foundation/communication/dsoftbus/interfaces/kits/transport",
   ]
 
   sources = [
@@ -66,6 +67,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp:devicemanagersdk",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "//foundation/communication/dsoftbus/sdk:softbus_client",
   ]
 
   external_deps = [

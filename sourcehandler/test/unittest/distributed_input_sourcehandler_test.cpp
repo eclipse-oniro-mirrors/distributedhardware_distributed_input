@@ -41,14 +41,12 @@ void DistributedInputSourceHandlerTest::TearDownTestCase()
 int32_t DistributedInputSourceHandlerTest::TestRegisterDInputCallback::OnRegisterResult(const std::string &devId,
     const std::string &dhId, int32_t status, const std::string &data)
 {
-    std::cout << "OnRegisterResult" << std::endl;
     return SUCCESS;
 }
 
 int32_t DistributedInputSourceHandlerTest::TestUnregisterDInputCallback::OnUnregisterResult(const std::string &devId,
     const std::string &dhId, int32_t status, const std::string &data)
 {
-    std::cout << "OnUnregisterResult" << std::endl;
     return SUCCESS;
 }
 
@@ -86,7 +84,6 @@ HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware01, testi
 
 HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware02, testing::ext::TestSize.Level0)
 {
-    std::cout << "RegisterDistributedHardware02"<< std::endl;
     std::shared_ptr<TestRegisterDInputCallback> registerCallback = nullptr;
     std::string devId = "";
     std::string dhId = "";
@@ -97,7 +94,6 @@ HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware02, testi
 
 HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware03, testing::ext::TestSize.Level0)
 {
-    std::cout << "RegisterDistributedHardware03"<< std::endl;
     std::shared_ptr<TestRegisterDInputCallback> registerCallback = std::make_shared<TestRegisterDInputCallback>();
     int32_t ret = DistributedInputSourceHandler::GetInstance().RegisterDistributedHardware(
         "devId",
@@ -110,7 +106,6 @@ HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware03, testi
 }
 HWTEST_F(DistributedInputSourceHandlerTest, UnregisterDistributedHardware01, testing::ext::TestSize.Level0)
 {
-    std::cout << "UnregisterDistributedHardware01"<< std::endl;
     std::shared_ptr<TestUnregisterDInputCallback> unregisterDInputCallback =
             std::make_shared<TestUnregisterDInputCallback>();
     int32_t ret = DistributedInputSourceHandler::GetInstance().UnregisterDistributedHardware("devId",

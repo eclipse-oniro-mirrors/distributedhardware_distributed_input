@@ -18,7 +18,7 @@ import("//foundation/distributedhardware/distributed_input/distributedinput.gni"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
-  module_out_path = "distributedinput_stander/system"
+  module_out_path = "distributed_input/system"
   # fuzz_config_file = "//foundation/distributedhardware/distributed_input/test/fuzztest/distributedinputsourcetransport_fuzzer"
 
   include_dirs = [

@@ -28,11 +28,10 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-    const char *g_filepath = "/system/profile/dinput_business_event_whitelist.cfg";
-    const char *g_splitSymbol1 = ",";
-    const char *g_splitSymbol2 = "|";
+    const char* WHITE_LIST_FILE_PATH = "/system/profile/dinput_business_event_whitelist.cfg";
+    const char* SPLIT_LINE = "|";
+    const char* SPLIT_COMMA = ",";
 }
-
 WhiteListUtil::WhiteListUtil()
 {
 }
@@ -58,10 +57,10 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
         return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
 
-    std::ifstream inFile(g_filepath, std::ios::in | std::ios::binary);
+    std::ifstream inFile(WHITE_LIST_FILE_PATH, std::ios::in | std::ios::binary);
     if (!inFile.is_open()) {
         // file open error
-        DHLOGE("%s error, file open fail path=%s", __func__, g_filepath);
+        DHLOGE("%s error, file open fail path=%s", __func__, WHITE_LIST_FILE_PATH);
         return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
 
@@ -76,18 +75,18 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
         vecKeyCode.clear();
         vecCombinationKey.clear();
 
-        std::size_t pos1 = line.find(g_splitSymbol1);
+        std::size_t pos1 = line.find(SPLIT_COMMA);
         while (std::string::npos != pos1) {
             std::string column = line.substr(0, pos1);
             line = line.substr(pos1 + 1, line.size());
-            pos1 = line.find(g_splitSymbol1);
+            pos1 = line.find(SPLIT_COMMA);
             vecKeyCode.clear();
             ReadLineDataStepOne(column, vecKeyCode, vecCombinationKey);
         }
 
         if (!line.empty()) {
             int32_t keyCode = std::stoi(line);
-            if (keyCode) {
+            if (keyCode != 0) {
                 vecKeyCode.push_back(keyCode);
             }
 
@@ -122,15 +121,15 @@ int32_t WhiteListUtil::UnInit(void)
 void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &vecKeyCode,
                                         TYPE_COMBINATION_KEY_VEC &vecCombinationKey) const
 {
-    std::size_t pos2 = column.find(g_splitSymbol2);
-    while (std::string::npos != pos2) {
+    std::size_t pos2 = column.find(SPLIT_LINE);
+    while (pos2 != std::string::npos) {
         std::string single = column.substr(0, pos2);
         column = column.substr(pos2 + 1, column.size());
-        pos2 = column.find(g_splitSymbol2);
+        pos2 = column.find(SPLIT_LINE);
 
         if (!single.empty()) {
             int32_t keyCode = std::stoi(single);
-            if (keyCode) {
+            if (keyCode != 0) {
                 vecKeyCode.push_back(keyCode);
             }
         }
@@ -138,7 +137,7 @@ void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &
 
     if (!column.empty()) {
         int32_t keyCode = std::stoi(column);
-        if (keyCode) {
+        if (keyCode != 0) {
             vecKeyCode.push_back(keyCode);
         }
     }
@@ -213,7 +212,7 @@ bool WhiteListUtil::IsNeedFilterOut(const std::string &deviceId, const BusinessE
         return false;
     }
 
-    TYPE_DEVICE_WHITE_LIST_MAP::iterator iter = mapDeviceWhiteList_.find(deviceId);
+    TYPE_DEVICE_WHITE_LIST_MAP::const_iterator iter = mapDeviceWhiteList_.find(deviceId);
     if (iter == mapDeviceWhiteList_.end()) {
         DHLOGE("%s called, not find by deviceId!", __func__);
         return false;

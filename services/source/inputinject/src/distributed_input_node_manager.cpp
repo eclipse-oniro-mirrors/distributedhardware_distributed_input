@@ -33,12 +33,6 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-namespace {
-static const uint32_t INPUT_DEVICE_CLASS_KEYBOARD = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_KEYBOARD);
-static const uint32_t INPUT_DEVICE_CLASS_CURSOR = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_CURSOR);
-static const uint32_t INPUT_DEVICE_CLASS_TOUCH = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_TOUCH);
-}
-
 DistributedInputNodeManager::DistributedInputNodeManager() : isInjectThreadRunning_(false)
 {
 }

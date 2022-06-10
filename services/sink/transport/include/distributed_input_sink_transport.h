@@ -56,6 +56,7 @@ public:
         ~DInputSinkEventHandler() {}
 
         void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+        void RecordEventLog(const std::shared_ptr<nlohmann::json> &events);
     };
 
     std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> GetEventHandler();

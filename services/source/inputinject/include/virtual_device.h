@@ -61,6 +61,9 @@ protected:
     struct uinput_abs_setup absTemp_ = {};
     std::vector<uinput_abs_setup> absInit_;
     const std::string pid_ = std::to_string(getpid());
+
+private:
+    void RecordEventLog(const input_event& event);
 };
 }
 }

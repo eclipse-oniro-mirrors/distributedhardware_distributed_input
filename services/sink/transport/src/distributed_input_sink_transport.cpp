@@ -100,25 +100,7 @@ void DistributedInputSinkTransport::DInputSinkEventHandler::ProcessEvent(const A
             sendMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_BODY_DATA;
             sendMsg[DINPUT_SOFTBUS_KEY_INPUT_DATA] = innerMsg->dump();
             std::string smsg = sendMsg.dump();
-            for (nlohmann::json::iterator it = innerMsg->begin(); it != innerMsg->end(); ++it) {
-                nlohmann::json oneData = *it;
-                int32_t code = oneData[INPUT_KEY_CODE];
-                int32_t value = oneData[INPUT_KEY_VALUE];
-                int64_t when = oneData[INPUT_KEY_WHEN];
-                std::string path = oneData[INPUT_KEY_PATH];
-                if (oneData[INPUT_KEY_TYPE] == EV_KEY) {
-                    DHLOGD("2.E2E-Test Sink softBus send EV_KEY, Code: %d, Value: %d, Path: %s, When: %" PRId64"",
-                        code, value, path.c_str(), when);
-                } else if (oneData[INPUT_KEY_TYPE] == EV_REL) {
-                    DHLOGD("2.E2E-Test Sink softBus send EV_REL, Code: %d, Value: %d, Path: %s, When: %" PRId64"",
-                        code, value, path.c_str(), when);
-                } else if (oneData[INPUT_KEY_TYPE] == EV_ABS) {
-                    DHLOGD("2.E2E-Test Sink softBus send EV_ABS, Code: %d, Value: %d, Path: %s, When: %" PRId64"",
-                        code, value, path.c_str(), when);
-                } else {
-                    DHLOGW("2.E2E-Test Sink softBus send other type!");
-                }
-            }
+            RecordEventLog(innerMsg);
             int32_t sessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
             if (sessionId > 0) {
                 DistributedInputSinkTransport::GetInstance().SendMessage(sessionId, smsg);
@@ -333,7 +315,7 @@ void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const voi
         return;
     }
 
-    std::string message = (char *)buf;
+    std::string message(buf, buf + dataLen);
     DHLOGI("OnBytesReceived message:%s.", message.c_str());
     HandleSessionData(sessionId, message);
 
@@ -450,6 +432,36 @@ void DistributedInputSinkTransport::CloseAllSession()
 
     // clear session data
     DistributedInputSinkSwitch::GetInstance().InitSwitch();
+}
+
+void DistributedInputSinkTransport::DInputSinkEventHandler::RecordEventLog(
+    const std::shared_ptr<nlohmann::json> &events)
+{
+    for (nlohmann::json::const_iterator iter = events->cbegin(); iter != events->cend(); ++iter) {
+        nlohmann::json event = *iter;
+        std::string eventType = "";
+        int32_t evType = event[INPUT_KEY_TYPE];
+        switch (evType) {
+            case EV_KEY:
+                eventType = "EV_KEY";
+                break;
+            case EV_REL:
+                eventType = "EV_REL";
+                break;
+            case EV_ABS:
+                eventType = "EV_ABS";
+                break;
+            default:
+                eventType = "other type";
+                break;
+        }
+        int64_t when = event[INPUT_KEY_WHEN];
+        int32_t code = event[INPUT_KEY_CODE];
+        int32_t value = event[INPUT_KEY_VALUE];
+        std::string path = event[INPUT_KEY_PATH];
+        DHLOGD("2.E2E-Test Sink softBus send, EventType:%s, Code: %d, Value: %d, Path: %s, When: %" PRId64"",
+            eventType.c_str(), code, value, path.c_str(), when);
+    }
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

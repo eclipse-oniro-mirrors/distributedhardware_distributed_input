@@ -110,6 +110,7 @@ public:
         void onResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result);
         void onResponseStopRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result);
         void onReceivedEventRemoteInput(const std::string deviceId, const std::string &event);
+        void RecordEventLog(int64_t when, int32_t type, int32_t code, int32_t value, const std::string& path);
 
     private:
         DistributedInputSourceManager *sourceManagerObj_;

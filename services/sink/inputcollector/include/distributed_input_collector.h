@@ -54,7 +54,7 @@ private:
     bool isStartGetDeviceHandlerThread;
     std::unique_ptr<InputHub> inputHub_;
     std::shared_ptr<AppExecFwk::EventHandler> sinkHandler_;
-    uint32_t input_types_;
+    uint32_t inputTypes_;
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware

@@ -104,6 +104,7 @@ private:
     /* this macro computes the number of bytes needed to represent a bit array of the specified size */
     uint32_t SizeofBitArray(uint32_t bit);
     bool GetIsSupportInputTypes(uint32_t classes);
+    void RecordEventLog(const RawEvent* event);
 
     int epollFd_;
     int iNotifyFd_;
@@ -116,9 +117,6 @@ private:
     std::string deviceId_;
     int32_t nextDeviceId_;
 
-    // Maximum number of signalled FDs to handle at a time.
-    static const int EPOLL_MAX_EVENTS = 16;
-    static const int SLEEP_TIME = 100000;
     // The array of pending epoll events and the index of the next event to be handled.
     struct epoll_event mPendingEventItems[EPOLL_MAX_EVENTS];
     size_t pendingEventCount_;
@@ -127,7 +125,7 @@ private:
     std::mutex operationMutex_;
     std::mutex visitMutex_;
     bool deviceChanged_;
-    uint32_t input_types_;
+    uint32_t inputTypes_;
 
     static const int DIR_FILE_NAME_SECOND = 2;
     static const int MOVE_POSITION_SIXTEEN = 16;

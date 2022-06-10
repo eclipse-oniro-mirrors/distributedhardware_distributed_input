@@ -216,20 +216,9 @@ void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteI
         mEventBuffer[idx].code = oneData[INPUT_KEY_CODE];
         mEventBuffer[idx].value = oneData[INPUT_KEY_VALUE];
         mEventBuffer[idx].descriptor = oneData[INPUT_KEY_DESCRIPTOR];
-        std::string path = oneData[INPUT_KEY_PATH];
-        mEventBuffer[idx].path = path;
-        if (oneData[INPUT_KEY_TYPE] == EV_KEY) {
-            DHLOGD("3.E2E-Test Source softBus receive EV_KEY, Code: %d, Value: %d, Path: %s, When: " PRId64"",
-                mEventBuffer[idx].code, mEventBuffer[idx].value, path.c_str(), mEventBuffer[idx].when);
-        } else if (oneData[INPUT_KEY_TYPE] == EV_REL) {
-            DHLOGD("3.E2E-Test Source softBus receive EV_REL, Code: %d, Value: %d, Path: %s, When: " PRId64"",
-                mEventBuffer[idx].code, mEventBuffer[idx].value, path.c_str(), mEventBuffer[idx].when);
-        } else if (oneData[INPUT_KEY_TYPE] == EV_ABS) {
-            DHLOGD("3.E2E-Test Source softBus receive EV_ABS, Code: %d, Value: %d, Path: %s, When: " PRId64"",
-                mEventBuffer[idx].code, mEventBuffer[idx].value, path.c_str(), mEventBuffer[idx].when);
-        } else {
-            DHLOGW("3.E2E-Test Source softBus receive other type!");
-        }
+        mEventBuffer[idx].path = oneData[INPUT_KEY_PATH];
+        RecordEventLog(oneData[INPUT_KEY_WHEN], oneData[INPUT_KEY_TYPE], oneData[INPUT_KEY_CODE],
+            oneData[INPUT_KEY_VALUE], oneData[INPUT_KEY_PATH]);
         idx++;
     }
     DistributedInputInject::GetInstance().RegisterDistributedEvent(mEventBuffer, jsonSize);
@@ -1069,6 +1058,28 @@ void DistributedInputSourceManager::SetInputTypesMap(const std::string deviceId,
         }
     }
     InputTypesMap_[deviceId] = value;
+}
+
+void DistributedInputSourceManager::DInputSourceListener::RecordEventLog(int64_t when, int32_t type, int32_t code,
+    int32_t value, const std::string &path)
+{
+    std::string eventType = "";
+    switch (type) {
+        case EV_KEY:
+            eventType = "EV_KEY";
+            break;
+        case EV_REL:
+            eventType = "EV_REL";
+            break;
+        case EV_ABS:
+            eventType = "EV_ABS";
+            break;
+        default:
+            eventType = "other type";
+            break;
+    }
+    DHLOGD("3.E2E-Test Source softBus receive event, EventType: %s Code: %d, Value: %d, Path: %s, When: " PRId64"",
+        eventType.c_str(), code, value, path.c_str(), when);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

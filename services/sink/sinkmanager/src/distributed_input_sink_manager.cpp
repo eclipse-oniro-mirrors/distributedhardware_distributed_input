@@ -37,7 +37,7 @@ REGISTER_SYSTEM_ABILITY_BY_ID(DistributedInputSinkManager, DISTRIBUTED_HARDWARE_
 DistributedInputSinkManager::DistributedInputSinkManager(int32_t saId, bool runOnCreate)
     : SystemAbility(saId, runOnCreate)
 {
-    input_types_ = 0;
+    inputTypes_ = 0;
 }
 
 DistributedInputSinkManager::DInputSinkListener::DInputSinkListener(DistributedInputSinkManager *manager)
@@ -345,11 +345,11 @@ void DistributedInputSinkManager::SetInitWhiteListFlag(bool isInit)
 
 int32_t DistributedInputSinkManager::GetInputTypes()
 {
-    return input_types_;
+    return inputTypes_;
 }
 void DistributedInputSinkManager::SetInputTypes(const uint32_t& inputTypess)
 {
-    input_types_ = inputTypess;
+    inputTypes_ = inputTypess;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

@@ -70,7 +70,6 @@ void DistributedInputTest::TestPluginListener::PluginHardware(
     const std::string &dhId, const std::string &attrs)
 {
     std::cout << std::endl;
-    std::cout << "TestPluginListener::PluginHardware " << std::endl;
     std::cout << "dhId::" << dhId <<std::endl;
     std::cout << "attrs::" << attrs <<std::endl;
     std::cout << "Enter the case No : " <<std::endl;

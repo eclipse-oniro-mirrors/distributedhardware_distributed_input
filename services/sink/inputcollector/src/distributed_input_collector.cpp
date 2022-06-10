@@ -33,14 +33,9 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-namespace {
-static const uint32_t INPUT_DEVICE_CLASS_KEYBOARD = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_KEYBOARD);
-static const uint32_t INPUT_DEVICE_CLASS_CURSOR   = static_cast<uint32_t>(DeviceClasses::INPUT_DEVICE_CLASS_CURSOR);
-}
-
 DistributedInputCollector::DistributedInputCollector()
     : collectThreadID_(-1), isCollectingEvents_(false),
-    isStartGetDeviceHandlerThread(false), input_types_(0)
+    isStartGetDeviceHandlerThread(false), inputTypes_(0)
 {
     inputHub_ = std::make_unique<InputHub>();
 }
@@ -146,15 +141,15 @@ void DistributedInputCollector::StopCollectEventsThread()
 void DistributedInputCollector::SetInputTypes(const int32_t& inputType)
 {
     if (inputType & INPUT_TYPE_MOUSE) {
-        input_types_ |= INPUT_DEVICE_CLASS_CURSOR;
+        inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
     if (inputType & INPUT_TYPE_KEYBOARD) {
-        input_types_ |= INPUT_DEVICE_CLASS_KEYBOARD;
+        inputTypes_ |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
     if (inputType & INPUT_TYPE_TOUCH) {
-        input_types_ |= INPUT_DEVICE_CLASS_CURSOR;
+        inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
-    inputHub_->SetSupportInputType(input_types_);
+    inputHub_->SetSupportInputType(inputTypes_);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

@@ -45,13 +45,6 @@ HWTEST_F(DistributedInputSourceTransTest, Init, testing::ext::TestSize.Level0)
     EXPECT_EQ(SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSourceTransTest, OpenInputSoftbus, testing::ext::TestSize.Level0)
-{
-    std::string remoteDevId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(remoteDevId);
-    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_TIMEOUT, ret);
-}
-
 HWTEST_F(DistributedInputSourceTransTest, PrepareRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "";
