@@ -44,6 +44,8 @@ void DistributedInputInnerTest::TestPrepareDInputCallback::OnResult(
     const std::string& deviceId, const int32_t& status)
 
 {
+    (void)deviceId;
+    (void)status;
     return;
 }
 
@@ -51,6 +53,8 @@ void DistributedInputInnerTest::TestUnprepareDInputCallback::OnResult(
     const std::string& deviceId, const int32_t& status)
 
 {
+    (void)deviceId;
+    (void)status;
     return;
 }
 

@@ -178,7 +178,7 @@ int32_t WhiteListUtil::GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST
     DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
-    TYPE_DEVICE_WHITE_LIST_MAP::iterator iter = mapDeviceWhiteList_.find(deviceId);
+    TYPE_DEVICE_WHITE_LIST_MAP::const_iterator iter = mapDeviceWhiteList_.find(deviceId);
     if (iter != mapDeviceWhiteList_.end()) {
         vecWhiteList = iter->second;
         DHLOGI("GetWhiteList success, deviceId=%s", GetAnonyString(deviceId).c_str());

@@ -38,7 +38,6 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${service_common}/include",
     "//third_party/json/include",
     "${services_source_path}/inputinject/include",
-    "//foundation/distributedhardware/distributed_input/services/source/transport/test/sourcetransunittest/mock",
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
   ]
 

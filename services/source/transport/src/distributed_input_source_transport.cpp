@@ -546,7 +546,7 @@ void DistributedInputSourceTransport::OnBytesReceived(int32_t sessionId, const v
         return;
     }
 
-    std::string message = (char *)buf;
+    std::string message(buf, buf + dataLen);
     DHLOGI("OnBytesReceived message:%s.", message.c_str());
     HandleSessionData(sessionId, message);
 

@@ -47,12 +47,6 @@ HWTEST_F(DistributedInputSinkManagerTest, Init01, testing::ext::TestSize.Level0)
     int32_t ret = sinkManager_->Init();
     EXPECT_EQ(SUCCESS, ret);
 }
-
-HWTEST_F(DistributedInputSinkManagerTest, Release01, testing::ext::TestSize.Level0)
-{
-    int32_t ret = sinkManager_->Release();
-    EXPECT_EQ(SUCCESS, ret);
-}
 }
 }
 }
