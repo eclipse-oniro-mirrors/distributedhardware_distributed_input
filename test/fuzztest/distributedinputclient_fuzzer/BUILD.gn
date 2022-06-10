@@ -31,16 +31,16 @@ ohos_fuzztest("DistributedInputClientFuzzTest") {
     "${distributedinput_path}/sourcehandler/include",
     "${distributedinput_path}/sinkhandler/include",
     "${distributedinput_path}/inputdevicehandler/include",
-    "//foundation/distributedhardware/distributedhardwarefwk/common/utils/include",
+    "//foundation/distributedhardware/distributed_hardware_fwk/common/utils/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${service_common}/include",
     "${common_path}/include",
     "//third_party/json/include",
-    "//foundation/distributedhardware/distributedhardwarefwk/common/log/include",
-    "//foundation/distributedhardware/distributedhardwarefwk/common/utils/include",
-    "//foundation/distributedhardware/distributedhardwarefwk/utils/include/log",
-    "//foundation/distributedhardware/distributedhardwarefwk/utils/include",
+    "//foundation/distributedhardware/distributed_hardware_fwk/common/log/include",
+    "//foundation/distributedhardware/distributed_hardware_fwk/common/utils/include",
+    "//foundation/distributedhardware/distributed_hardware_fwk/utils/include/log",
+    "//foundation/distributedhardware/distributed_hardware_fwk/utils/include",
   ]
 
   cflags = [

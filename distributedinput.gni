@@ -13,7 +13,7 @@
 
 distributedinput_path = "//foundation/distributedhardware/distributed_input"
 
-distributedhardwarefwk_path = "//foundation/distributedhardware/distributedhardwarefwk"
+distributedhardwarefwk_path = "//foundation/distributedhardware/distributed_hardware_fwk"
 
 common_path = "${distributedinput_path}/common"
 
