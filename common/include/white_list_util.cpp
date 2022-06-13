@@ -28,7 +28,6 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-    const char* WHITE_LIST_FILE_PATH = "/etc/dinput_business_event_whitelist.cfg";
     const char* SPLIT_LINE = "|";
     const char* SPLIT_COMMA = ",";
 }
@@ -50,6 +49,7 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
 {
     DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
     ClearWhiteList();
+    const char* whiteListFilePath = "/etc/dinput_business_event_whitelist.cfg";
 
     if (deviceId.empty()) {
         // device id error
@@ -57,10 +57,10 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
         return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
 
-    std::ifstream inFile(WHITE_LIST_FILE_PATH, std::ios::in | std::ios::binary);
+    std::ifstream inFile(whiteListFilePath, std::ios::in | std::ios::binary);
     if (!inFile.is_open()) {
         // file open error
-        DHLOGE("%s error, file open fail path=%s", __func__, WHITE_LIST_FILE_PATH);
+        DHLOGE("%s error, file open fail path=%s", __func__, whiteListFilePath);
         return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
 

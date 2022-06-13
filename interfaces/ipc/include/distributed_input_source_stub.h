@@ -34,6 +34,8 @@ public:
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
+    int32_t HandleInitDistributedHardware(MessageParcel &reply);
+    int32_t HandleReleaseDistributedHardware(MessageParcel &reply);
     int32_t HandleRegisterDistributedHardware(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterDistributedHardware(MessageParcel &data, MessageParcel &reply);
     int32_t HandlePrepareRemoteInput(MessageParcel &data, MessageParcel &reply);

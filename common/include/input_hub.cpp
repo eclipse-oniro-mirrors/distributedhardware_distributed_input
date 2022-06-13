@@ -352,8 +352,6 @@ std::vector<InputDevice> InputHub::GetAllInputDevices()
 
 void InputHub::ScanInputDevices(const std::string& dirname)
 {
-    char devname[PATH_MAX];
-    char *filename;
     DIR *dir;
     struct dirent *de;
     dir = opendir(dirname.c_str());
@@ -362,22 +360,14 @@ void InputHub::ScanInputDevices(const std::string& dirname)
         return;
     }
 
-    if (strcpy_s(devname, PATH_MAX, dirname.c_str()) != 0) {
-        DHLOGE("error strcpy_s :%{public}s\n", strerror(errno));
-    }
-    filename = devname + strlen(devname);
-    *filename++ = '/';
     while ((de = readdir(dir))) {
         if (de->d_name[0] == '.' &&
             (de->d_name[1] == '\0' ||
             (de->d_name[1] == '.' && de->d_name[DIR_FILE_NAME_SECOND] == '\0'))) {
             continue;
         }
-        if (strcpy_s(filename, sizeof(de->d_name), de->d_name) != 0) {
-            DHLOGE("error strcpy_s second :%{public}s\n", strerror(errno));
-        }
-        DHLOGE("scan dir failed for %{public}s", filename);
-        OpenInputDeviceLocked(devname);
+        std::string devName = dirname + "/" + std::string(de->d_name);
+        OpenInputDeviceLocked(devName);
     }
     closedir(dir);
 }

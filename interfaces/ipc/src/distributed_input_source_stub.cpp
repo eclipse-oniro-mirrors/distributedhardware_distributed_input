@@ -27,6 +27,24 @@ DistributedInputSourceStub::DistributedInputSourceStub()
 DistributedInputSourceStub::~DistributedInputSourceStub()
 {}
 
+int32_t DistributedInputSourceStub::HandleInitDistributedHardware(MessageParcel &reply)
+{
+    int32_t ret = Init();
+    if (!reply.WriteInt32(ret)) {
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleReleaseDistributedHardware(MessageParcel &reply)
+{
+    int32_t ret = Release();
+    if (!reply.WriteInt32(ret)) {
+        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
 int32_t DistributedInputSourceStub::HandleRegisterDistributedHardware(MessageParcel &data, MessageParcel &reply)
 {
     std::string devId = data.ReadString();
@@ -120,21 +138,11 @@ int32_t DistributedInputSourceStub::OnRemoteRequest(uint32_t code, MessageParcel
 {
     switch (code) {
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::INIT): {
-            int32_t ret = Init();
-            if (!reply.WriteInt32(ret)) {
-                return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
-            } else {
-                return DH_SUCCESS;
-            }
+            return HandleInitDistributedHardware(reply);
             break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::RELEASE): {
-            int32_t ret = Release();
-            if (!reply.WriteInt32(ret)) {
-                return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
-            } else {
-                return DH_SUCCESS;
-            }
+            return HandleReleaseDistributedHardware(reply);
             break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::REGISTER_REMOTE_INPUT): {

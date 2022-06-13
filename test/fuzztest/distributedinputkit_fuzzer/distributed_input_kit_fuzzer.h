@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #ifndef DISTRIBUTED_INPUT_KIT_FUZZER_H
 #define DISTRIBUTED_INPUT_KIT_FUZZER_H
 

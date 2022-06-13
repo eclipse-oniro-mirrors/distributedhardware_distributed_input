@@ -39,10 +39,8 @@ void DistributedInputInnerTest::TearDownTestCase()
 {
 }
 
-
 void DistributedInputInnerTest::TestPrepareDInputCallback::OnResult(
     const std::string& deviceId, const int32_t& status)
-
 {
     (void)deviceId;
     (void)status;
@@ -69,6 +67,9 @@ void DistributedInputInnerTest::TestStartDInputCallback::OnResult(
 void DistributedInputInnerTest::TestStopDInputCallback::OnResult(
     const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status)
 {
+    (void)deviceId;
+    (void)inputTypes;
+    (void)status;
     return;
 }
 
