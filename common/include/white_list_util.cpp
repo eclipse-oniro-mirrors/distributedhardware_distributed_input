@@ -28,7 +28,7 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-    const char* WHITE_LIST_FILE_PATH = "/system/profile/dinput_business_event_whitelist.cfg";
+    const char* WHITE_LIST_FILE_PATH = "/etc/dinput_business_event_whitelist.cfg";
     const char* SPLIT_LINE = "|";
     const char* SPLIT_COMMA = ",";
 }
