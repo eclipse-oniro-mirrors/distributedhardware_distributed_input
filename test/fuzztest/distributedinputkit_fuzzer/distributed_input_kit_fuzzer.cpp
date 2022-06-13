@@ -42,7 +42,7 @@ public OHOS::DistributedHardware::DistributedInput::PrepareDInputCallbackStub {
 public:
     TestPrepareDInputCallback() = default;
     virtual ~TestPrepareDInputCallback() = default;
-    void OnResult(const std::string& deviceId, const int32_t& status) const
+    void OnResult(const std::string& deviceId, const int32_t& status)
     {
         (void)deviceId;
         (void)status;
@@ -54,7 +54,7 @@ public OHOS::DistributedHardware::DistributedInput::UnprepareDInputCallbackStub 
 public:
     TestUnprepareDInputCallback() = default;
     virtual ~TestUnprepareDInputCallback() = default;
-    void OnResult(const std::string& deviceId, const int32_t& status) const
+    void OnResult(const std::string& deviceId, const int32_t& status)
     {
         (void)deviceId;
         (void)status;
@@ -64,7 +64,7 @@ public:
 class TestStartDInputCallback :
 public OHOS::DistributedHardware::DistributedInput::StartDInputCallbackStub {
 public:
-    void OnResult(const std::string& devId, const uint32_t& inputTypes, const int32_t& status) const
+    void OnResult(const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
     {
         (void)devId;
         (void)inputTypes;
@@ -77,7 +77,7 @@ public OHOS::DistributedHardware::DistributedInput::StopDInputCallbackStub {
 public:
     TestStopDInputCallback() = default;
     virtual ~TestStopDInputCallback() = default;
-    void OnResult(const std::string& devId, const uint32_t& inputTypes, const int32_t& status) const
+    void OnResult(const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
     {
         (void)devId;
         (void)inputTypes;
