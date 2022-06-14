@@ -1040,7 +1040,7 @@ int32_t DistributedInputSourceManager::GetInputTypesMap(const std::string device
 
 int32_t DistributedInputSourceManager::GetAllInputTypesMap()
 {
-    int32_t rInputTypes = INPUT_TYPE_NULL;
+    uint32_t rInputTypes = INPUT_TYPE_NULL;
     std::map<std::string, uint32_t>::iterator iter;
     for (iter = InputTypesMap_.begin(); iter != InputTypesMap_.end(); iter++) {
         rInputTypes |= iter->second;

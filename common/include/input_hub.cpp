@@ -659,7 +659,7 @@ int32_t InputHub::ReadNotifyLocked()
 {
     int res;
     char event_buf[512];
-    int event_size;
+    unsigned int event_size;
     int event_pos = 0;
     struct inotify_event *event;
 
@@ -849,7 +849,12 @@ void InputHub::Device::Close()
 
 int32_t InputHub::Device::Enable()
 {
-    chmod(path.c_str(), S_IWRITE | S_IREAD);
+    char pathCheck[PATH_MAX + 1] = {0x00};
+
+    if (std::strlen(path.c_str()) > PATH_MAX || realpath(path.c_str(), pathCheck) == NULL) {
+        DHLOGE("path check fail\n");
+        return ERR_DH_INPUT_HUB_DEVICE_ENABLE_FAIL;
+    }
     fd = open(path.c_str(), O_RDWR | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
         DHLOGE("could not open %s, %s\n", path.c_str(), strerror(errno));

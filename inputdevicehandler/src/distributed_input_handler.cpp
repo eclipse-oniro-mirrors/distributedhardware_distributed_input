@@ -170,7 +170,7 @@ void DistributedInputHandler::StartInputMonitorDeviceThread(const std::string de
         size_t count = inputHub_->CollectInputHandler(mEventBuffer, INPUT_DEVICR_BUFFER_SIZE);
         if (count > 0) {
             DHLOGI("Count: %zu", count);
-            for (int iCnt = 0; iCnt < count; iCnt++) {
+            for (size_t iCnt = 0; iCnt < count; iCnt++) {
                 NotifyHardWare(iCnt);
             }
         } else {

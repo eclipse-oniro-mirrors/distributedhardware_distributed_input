@@ -66,22 +66,22 @@ namespace DistributedInput {
     /**
      * Input Type NULL.
      */
-    constexpr int32_t INPUT_TYPE_NULL = 0;
+    constexpr uint32_t INPUT_TYPE_NULL = 0;
 
     /**
      * Input Type MOUSE.
      */
-    constexpr int32_t INPUT_TYPE_MOUSE = 1;
+    constexpr uint32_t INPUT_TYPE_MOUSE = 1;
 
     /**
      * Input Type KEYBOARD.
      */
-    constexpr int32_t INPUT_TYPE_KEYBOARD = 2;
+    constexpr uint32_t INPUT_TYPE_KEYBOARD = 2;
 
     /**
      * Input Type TOUCH.
      */
-    constexpr int32_t INPUT_TYPE_TOUCH = 4;
+    constexpr uint32_t INPUT_TYPE_TOUCH = 4;
 
     /**
      * Maximum number of signalled FDs to handle at a time.
@@ -91,7 +91,7 @@ namespace DistributedInput {
     /**
      * Input Type ALL.
      */
-    constexpr int32_t INPUT_TYPE_ALL = INPUT_TYPE_MOUSE | INPUT_TYPE_KEYBOARD | INPUT_TYPE_TOUCH;
+    constexpr uint32_t INPUT_TYPE_ALL = INPUT_TYPE_MOUSE | INPUT_TYPE_KEYBOARD | INPUT_TYPE_TOUCH;
 
     constexpr int32_t INPUT_LOADSA_TIMEOUT_MS = 10000;
 

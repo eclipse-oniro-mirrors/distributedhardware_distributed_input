@@ -343,7 +343,7 @@ void DistributedInputSinkManager::SetInitWhiteListFlag(bool isInit)
     isAlreadyInitWhiteList_ = isInit;
 }
 
-int32_t DistributedInputSinkManager::GetInputTypes()
+uint32_t DistributedInputSinkManager::GetInputTypes()
 {
     return inputTypes_;
 }

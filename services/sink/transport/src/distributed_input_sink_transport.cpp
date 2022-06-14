@@ -242,7 +242,7 @@ int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::strin
         free(buf);
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
     }
-    outLen = message.size();
+    outLen = (int32_t)(message.size());
     int32_t ret = SendBytes(sessionId, buf, outLen);
     free(buf);
     return ret;

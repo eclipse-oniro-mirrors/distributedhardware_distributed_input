@@ -77,7 +77,7 @@ public:
 
     void SetInitWhiteListFlag(bool isInit);
 
-    int32_t GetInputTypes();
+    uint32_t GetInputTypes();
 
     void SetInputTypes(const uint32_t& inputTypess);
 
@@ -98,7 +98,7 @@ private:
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<DistributedInputSinkEventHandler> handler_;
     bool InitAuto();
-    int32_t inputTypes_;
+    uint32_t inputTypes_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
