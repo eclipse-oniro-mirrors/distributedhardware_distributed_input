@@ -152,7 +152,7 @@ bool VirtualDevice::InjectInputEvent(const input_event& event)
         return false;
     }
     RecordEventLog(event);
-    DHLOGE("InjectInputEvent end\n");
+    DHLOGI("InjectInputEvent end\n");
 
     return true;
 }

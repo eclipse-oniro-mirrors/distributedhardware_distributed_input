@@ -103,7 +103,7 @@ int32_t DistributedInputInject::RegisterDistributedEvent(RawEvent* buffer, size_
         DHLOGE("the DistributedInputNodeManager is null\n");
         return ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL;
     }
-    DHLOGE("RegisterDistributedEvent start %zu\n", bufferSize);
+    DHLOGI("RegisterDistributedEvent start %zu\n", bufferSize);
     for (size_t i = 0; i < bufferSize; i++) {
         inputNodeManager_->ReportEvent(buffer[i]);
     }

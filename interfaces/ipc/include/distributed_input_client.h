@@ -16,6 +16,7 @@
 #ifndef DISTRIBUTED_INPUT_CLIENT_H
 #define DISTRIBUTED_INPUT_CLIENT_H
 
+#include <atomic>
 #include <iostream>
 #include <mutex>
 #include <string>
@@ -30,12 +31,15 @@
 
 #include "idistributed_hardware_source.h"
 #include "idistributed_hardware_sink.h"
+#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 class DistributedInputClient {
 public:
+    ~DistributedInputClient(){};
+
     static DistributedInputClient &GetInstance();
 
     int32_t InitSource();
@@ -110,7 +114,15 @@ public:
         void OnResult(const std::string &deviceId);
     };
 
+    class SystemAbilityListener : public SystemAbilityStatusChangeStub {
+    public:
+        void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+        void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    };
+
 private:
+    DistributedInputClient();
+    void Init();
     bool GetDInputSourceProxy();
     bool GetDInputSinkProxy();
     bool IsJsonData(std::string strData) const;
@@ -118,7 +130,12 @@ private:
     void DelWhiteListInfos(const std::string &deviceId) const;
 
 private:
+    static std::shared_ptr<DistributedInputClient> instance;
     std::mutex mutex_;
+    std::atomic<bool> dInputSourceSAOnline = false;
+    std::atomic<bool> dInputSinkSAOnline = false;
+    std::atomic<bool> isSubscribeSrcSAChangeListener = false;
+    std::atomic<bool> isSubscribeSinkSAChangeListener = false;
     sptr<IDistributedSourceInput> dInputSourceProxy_ = nullptr;
     sptr<IDistributedSinkInput> dInputSinkProxy_ = nullptr;
 
@@ -134,7 +151,8 @@ private:
     sptr<StartDInputServerCb> sourceTypeCallback = nullptr;
     sptr<AddWhiteListInfosCb> addWhiteListCallback = nullptr;
     sptr<DelWhiteListInfosCb> delWhiteListCallback = nullptr;
-    
+    sptr<SystemAbilityListener> saListenerCallback = nullptr;
+
     struct DHardWareFwkRegistInfo {
         std::string devId;
         std::string dhId;

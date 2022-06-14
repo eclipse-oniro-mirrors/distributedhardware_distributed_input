@@ -24,10 +24,15 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
+std::shared_ptr<DistributedInputClient> DistributedInputClient::instance(new DistributedInputClient());
+
+DistributedInputClient::DistributedInputClient()
+{
+}
+
 DistributedInputClient &DistributedInputClient::GetInstance()
 {
-    static DistributedInputClient instance;
-    return instance;
+    return *instance.get();
 }
 
 void DistributedInputClient::RegisterDInputCb::OnResult(

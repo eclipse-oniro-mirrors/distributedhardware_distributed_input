@@ -93,6 +93,8 @@ namespace DistributedInput {
      */
     constexpr uint32_t INPUT_TYPE_ALL = INPUT_TYPE_MOUSE | INPUT_TYPE_KEYBOARD | INPUT_TYPE_TOUCH;
 
+    constexpr int32_t INPUT_SUBSCRIBESA_DELAY_MS = 5;
+
     constexpr int32_t INPUT_LOADSA_TIMEOUT_MS = 10000;
 
     constexpr int32_t SESSION_WAIT_TIMEOUT_SECOND = 5;
