@@ -122,7 +122,7 @@ int32_t DistributedInputHandler::GetDeviceInfo(std::string& deviceId)
 {
     std::unique_lock<std::mutex> my_lock(operationMutex_);
     auto localNode = std::make_unique<NodeBasicInfo>();
-    int32_t retCode = GetLocalNodeDeviceInfo("ohos.distributedhardware.devicemanager", localNode.get());
+    int32_t retCode = GetLocalNodeDeviceInfo("ohos.dhardware", localNode.get());
     if (retCode != 0) {
         DHLOGE("Could not get device id.");
         return ERR_DH_INPUT_HANDLER_GET_DEVICE_ID_FAIL;
