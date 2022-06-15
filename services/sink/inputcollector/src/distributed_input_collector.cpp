@@ -34,7 +34,7 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 DistributedInputCollector::DistributedInputCollector()
-    : collectThreadID_(-1), isCollectingEvents_(false),
+    : mEventBuffer{0x00}, collectThreadID_(-1), isCollectingEvents_(false),
     isStartGetDeviceHandlerThread(false), inputTypes_(0)
 {
     inputHub_ = std::make_unique<InputHub>();
@@ -106,7 +106,7 @@ void DistributedInputCollector::StartCollectEventsThread()
         // The RawEvent obtained by the controlled end calls transport and is
         // sent to the main control end.
         std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-        for (int ind = 0; ind < count; ind++) {
+        for (size_t ind = 0; ind < count; ind++) {
             nlohmann::json tmpJson;
             tmpJson[INPUT_KEY_WHEN] = mEventBuffer[ind].when;
             tmpJson[INPUT_KEY_TYPE] = mEventBuffer[ind].type;
@@ -138,15 +138,15 @@ void DistributedInputCollector::StopCollectEventsThread()
     DHLOGW("DistributedInputCollector::StopCollectEventsThread exit!");
 }
 
-void DistributedInputCollector::SetInputTypes(const int32_t& inputType)
+void DistributedInputCollector::SetInputTypes(const uint32_t& inputType)
 {
-    if (inputType & INPUT_TYPE_MOUSE) {
+    if ((inputType & INPUT_TYPE_MOUSE) != 0) {
         inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
-    if (inputType & INPUT_TYPE_KEYBOARD) {
+    if ((inputType & INPUT_TYPE_KEYBOARD) != 0) {
         inputTypes_ |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
-    if (inputType & INPUT_TYPE_TOUCH) {
+    if ((inputType & INPUT_TYPE_TOUCH) != 0) {
         inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
     inputHub_->SetSupportInputType(inputTypes_);

@@ -126,11 +126,6 @@ private:
     std::mutex visitMutex_;
     bool deviceChanged_;
     uint32_t inputTypes_;
-
-    static const int DIR_FILE_NAME_SECOND = 2;
-    static const int MOVE_POSITION_SIXTEEN = 16;
-    static const int DRIVER_VERSION_MOVE = 8;
-    static const uint16_t DRIVER_VERSION_MAX = 0xff;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

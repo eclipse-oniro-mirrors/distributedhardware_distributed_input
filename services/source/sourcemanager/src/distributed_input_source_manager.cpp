@@ -1029,7 +1029,7 @@ void DistributedInputSourceManager::SetDeviceMapValue(const std::string deviceId
 }
 
 
-int32_t DistributedInputSourceManager::GetInputTypesMap(const std::string deviceId)
+uint32_t DistributedInputSourceManager::GetInputTypesMap(const std::string deviceId)
 {
     std::map<std::string, uint32_t>::iterator key = InputTypesMap_.find(deviceId);
     if (key != InputTypesMap_.end()) {
@@ -1038,7 +1038,7 @@ int32_t DistributedInputSourceManager::GetInputTypesMap(const std::string device
     return INPUT_TYPE_NULL;
 }
 
-int32_t DistributedInputSourceManager::GetAllInputTypesMap()
+uint32_t DistributedInputSourceManager::GetAllInputTypesMap()
 {
     uint32_t rInputTypes = INPUT_TYPE_NULL;
     std::map<std::string, uint32_t>::iterator iter;

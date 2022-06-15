@@ -268,8 +268,7 @@ int32_t DistributedInputClient::StopRemoteInput(
     }
 
     if (deviceId.empty() || callback == nullptr ||
-        inputTypes > INPUT_TYPE_ALL || inputTypes == INPUT_TYPE_NULL ||
-        !(inputTypes & INPUT_TYPE_ALL)) {
+        inputTypes > INPUT_TYPE_ALL || inputTypes == INPUT_TYPE_NULL || !(inputTypes & INPUT_TYPE_ALL)) {
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
 
@@ -419,7 +418,7 @@ bool DistributedInputClient::IsJsonData(std::string strData) const
     }
 
     int num = 1;
-    for (int i = 1; i < strData.length(); ++i) {
+    for (size_t i = 1; i < strData.length(); ++i) {
         if (strData[i] == '{') {
             ++num;
         } else if (strData[i] == '}') {
@@ -437,7 +436,7 @@ void DistributedInputClient::AddWhiteListInfos(
     const std::string &deviceId, const std::string &strJson) const
 {
     nlohmann::json inputData = nlohmann::json::parse(strJson);
-    int jsonSize = inputData.size();
+    size_t jsonSize = inputData.size();
     DHLOGI("AddWhiteListInfosCb OnResult json size:%d.\n", jsonSize);
     TYPE_WHITE_LIST_VEC vecWhiteList = inputData;
     WhiteListUtil::GetInstance().SyncWhiteList(deviceId, vecWhiteList);

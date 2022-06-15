@@ -35,7 +35,7 @@ class DistributedInputCollector {
 public:
     static DistributedInputCollector &GetInstance();
     int32_t Init(std::shared_ptr<AppExecFwk::EventHandler> sinkHandler);
-    void SetInputTypes(const int32_t& inputType);
+    void SetInputTypes(const uint32_t& inputType);
 
 private:
     DistributedInputCollector();

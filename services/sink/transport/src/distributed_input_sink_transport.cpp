@@ -425,7 +425,7 @@ void DistributedInputSinkTransport::CloseAllSession()
 {
     std::vector<int32_t> vecSession = DistributedInputSinkSwitch::GetInstance().GetAllSessionId();
     DHLOGI("CloseAllSession session vector size is %d", vecSession.size());
-    for (int32_t kIndex = 0; kIndex < vecSession.size(); ++kIndex) {
+    for (size_t kIndex = 0; kIndex < vecSession.size(); ++kIndex) {
         CloseSession(vecSession[kIndex]);
         DHLOGI("CloseAllSession [%d] sessionid is %s", kIndex, GetAnonyInt32(vecSession[kIndex]).c_str());
     }

@@ -158,8 +158,8 @@ namespace DistributedInput {
      */
     struct RawEvent {
         int64_t when;
-        int32_t type;
-        int32_t code;
+        uint32_t type;
+        uint32_t code;
         int32_t value;
         std::string descriptor;
         std::string path;

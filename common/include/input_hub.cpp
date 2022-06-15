@@ -41,9 +41,8 @@ const char *DEVICE_PATH = "/dev/input";
 const uint32_t SLEEP_TIME_MS = 100000;
 }
 
-InputHub::InputHub() : needToScanDevices_(true),
-    nextDeviceId_(1), pendingEventCount_(0),
-    pendingEventIndex_(0), pendingINotify_(false),
+InputHub::InputHub() : epollFd_(0), iNotifyFd_(0), inputWd_(0), needToScanDevices_(true), nextDeviceId_(1),
+    mPendingEventItems{0x00}, pendingEventCount_(0), pendingEventIndex_(0), pendingINotify_(false),
     deviceChanged_(false)
 {
     Initialize();
@@ -223,9 +222,10 @@ size_t InputHub::DeviceIsExists(InputDeviceEvent* buffer, size_t bufferSize)
         event->deviceInfo = device->identifier;
         event += 1;
         it = closingDevices_.erase(it);
-        if (--capacity == 0) {
+        if (capacity == 0) {
             break;
         }
+        capacity--;
     }
     if (needToScanDevices_) {
         needToScanDevices_ = false;
@@ -244,9 +244,10 @@ size_t InputHub::DeviceIsExists(InputDeviceEvent* buffer, size_t bufferSize)
         if (!inserted) {
             DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
         }
-        if (--capacity == 0) {
+        if (capacity == 0) {
             break;
         }
+        capacity--;
     }
     return event - buffer;
 }
@@ -359,11 +360,16 @@ void InputHub::ScanInputDevices(const std::string& dirname)
         DHLOGE("error opendir dev/input :%{public}s\n", strerror(errno));
         return;
     }
-
+    size_t dirNameFirstPos = 0;
+    size_t dirNameSecondPos = 1;
+    size_t dirNameThirdPos = 2;
     while ((de = readdir(dir))) {
-        if (de->d_name[0] == '.' &&
-            (de->d_name[1] == '\0' ||
-            (de->d_name[1] == '.' && de->d_name[DIR_FILE_NAME_SECOND] == '\0'))) {
+        /*
+         * The maximum value of d_name defined in the Linux kernel is 260. Therefore,
+         * The d_name length does not need to be verified.
+         */
+        if (de->d_name[dirNameFirstPos] == '.' && (de->d_name[dirNameSecondPos] == '\0' ||
+            (de->d_name[dirNameSecondPos] == '.' && de->d_name[dirNameThirdPos] == '\0'))) {
             continue;
         }
         std::string devName = dirname + "/" + std::string(de->d_name);
@@ -382,11 +388,17 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
             }
         }
     }
-    
+
     std::unique_lock<std::mutex> my_lock(operationMutex_);
     DHLOGI("Opening device: %s", devicePath.c_str());
     chmod(devicePath.c_str(), S_IWRITE | S_IREAD);
-    int fd = open(devicePath.c_str(), O_RDWR | O_CLOEXEC | O_NONBLOCK);
+    char canonicalDevicePath[PATH_MAX + 1] = {0x00};
+    if (devicePath.length() == 0 || devicePath.length() > PATH_MAX ||
+        realpath(devicePath.c_str(), canonicalDevicePath) == nullptr) {
+        DHLOGE("path check fail, error path: %s", devicePath.c_str());
+        return ERR_DH_INPUT_HUB_OPEN_DEVICEPATH_FAIL;
+    }
+    int fd = open(canonicalDevicePath, O_RDWR | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
         DHLOGE("could not open %s, %s\n", devicePath.c_str(), strerror(errno));
         return ERR_DH_INPUT_HUB_OPEN_DEVICEPATH_FAIL;
@@ -657,22 +669,22 @@ int32_t InputHub::UnregisterFdFromEpoll(int fd) const
 
 int32_t InputHub::ReadNotifyLocked()
 {
-    int res;
+    size_t res;
     char event_buf[512];
-    unsigned int event_size;
-    int event_pos = 0;
+    size_t event_size;
+    size_t event_pos = 0;
     struct inotify_event *event;
 
     DHLOGI("readNotify nfd: %d\n", iNotifyFd_);
     res = read(iNotifyFd_, event_buf, sizeof(event_buf));
-    if (res < (int)sizeof(*event)) {
+    if (res < sizeof(*event)) {
         if (errno == EINTR)
             return DH_SUCCESS;
         DHLOGE("could not get event, %s\n", strerror(errno));
         return ERR_DH_INPUT_HUB_GET_EVENT_FAIL;
     }
 
-    while (res >= (int) sizeof(*event)) {
+    while (res >= sizeof(*event)) {
         event = (struct inotify_event *)(event_buf + event_pos);
         JudgeDeviceOpenOrClose(*event);
         event_size = sizeof(*event) + event->len;
@@ -849,13 +861,13 @@ void InputHub::Device::Close()
 
 int32_t InputHub::Device::Enable()
 {
-    char pathCheck[PATH_MAX + 1] = {0x00};
+    char canonicalPath[PATH_MAX + 1] = {0x00};
 
-    if (std::strlen(path.c_str()) > PATH_MAX || realpath(path.c_str(), pathCheck) == NULL) {
-        DHLOGE("path check fail\n");
+    if (path.length() == 0 || path.length() > PATH_MAX || realpath(path.c_str(), canonicalPath) == nullptr) {
+        DHLOGE("path check fail, error path: %s", path.c_str());
         return ERR_DH_INPUT_HUB_DEVICE_ENABLE_FAIL;
     }
-    fd = open(path.c_str(), O_RDWR | O_CLOEXEC | O_NONBLOCK);
+    fd = open(canonicalPath, O_RDWR | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
         DHLOGE("could not open %s, %s\n", path.c_str(), strerror(errno));
         return ERR_DH_INPUT_HUB_DEVICE_ENABLE_FAIL;

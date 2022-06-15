@@ -170,8 +170,8 @@ public:
     int32_t RemoveInputNode(const std::string& devId, const std::string& dhId);
     int32_t DeleteDevice(const std::string& devId, const std::string& dhId);
     void SetInputTypesMap(const std::string deviceId, int32_t value);
-    int32_t GetInputTypesMap(const std::string deviceId);
-    int32_t GetAllInputTypesMap();
+    uint32_t GetInputTypesMap(const std::string deviceId);
+    uint32_t GetAllInputTypesMap();
 
 private:
 
