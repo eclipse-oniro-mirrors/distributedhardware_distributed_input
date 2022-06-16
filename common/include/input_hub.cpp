@@ -39,6 +39,7 @@ namespace DistributedInput {
 namespace {
 const char *DEVICE_PATH = "/dev/input";
 const uint32_t SLEEP_TIME_MS = 100000;
+const uint32_t ERROR_MSG_MAX_LEN = 256;
 }
 
 InputHub::InputHub() : epollFd_(0), iNotifyFd_(0), inputWd_(0), needToScanDevices_(true), nextDeviceId_(1),
@@ -53,11 +54,19 @@ InputHub::~InputHub()
     Release();
 }
 
+static std::string ConvertErrNo()
+{
+    char errMsg[ERROR_MSG_MAX_LEN] = {0};
+    strerror_r(errno, errMsg, ERROR_MSG_MAX_LEN);
+    std::string errNoMsg(errMsg);
+    return errNoMsg;
+}
+
 int32_t InputHub::Initialize()
 {
     epollFd_ = epoll_create1(EPOLL_CLOEXEC);
     if (epollFd_ < 0) {
-        DHLOGE("Could not create epoll instance: %s", strerror(errno));
+        DHLOGE("Could not create epoll instance: %s", ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_EPOLL_INIT_FAIL;
     }
 
@@ -65,7 +74,7 @@ int32_t InputHub::Initialize()
     inputWd_ = inotify_add_watch(iNotifyFd_, DEVICE_PATH, IN_DELETE | IN_CREATE);
     if (inputWd_ < 0) {
         DHLOGE(
-            "Could not register INotify for %s: %s", DEVICE_PATH, strerror(errno));
+            "Could not register INotify for %s: %s", DEVICE_PATH, ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_EPOLL_INIT_FAIL;
     }
 
@@ -357,7 +366,7 @@ void InputHub::ScanInputDevices(const std::string& dirname)
     struct dirent *de;
     dir = opendir(dirname.c_str());
     if (dir == nullptr) {
-        DHLOGE("error opendir dev/input :%{public}s\n", strerror(errno));
+        DHLOGE("error opendir dev/input :%{public}s\n", ConvertErrNo().c_str());
         return;
     }
     size_t dirNameFirstPos = 0;
@@ -400,13 +409,13 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     }
     int fd = open(canonicalDevicePath, O_RDWR | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
-        DHLOGE("could not open %s, %s\n", devicePath.c_str(), strerror(errno));
+        DHLOGE("could not open %s, %s\n", devicePath.c_str(), ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_OPEN_DEVICEPATH_FAIL;
     }
 
     InputDevice identifier;
-    if (MakeInputDevice(fd, identifier) < 0) {
-        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
+    if (QueryInputDeviceInfo(fd, identifier) < 0) {
+        return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
     }
     AssignDescriptorLocked(identifier);
 
@@ -424,21 +433,21 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     DHLOGI("  location:   \"%s\"\n", identifier.location.c_str());
     DHLOGI("  unique id:  \"%s\"\n", identifier.uniqueId.c_str());
     DHLOGI("  descriptor: \"%s\"\n", identifier.descriptor.c_str());
-    
+
     if (MakeDevice(fd, std::move(device)) < 0) {
         return ERR_DH_INPUT_HUB_MAKE_DEVICE_FAIL;
     }
-    
+
     return DH_SUCCESS;
 }
 
-int32_t InputHub::MakeInputDevice(int fd, InputDevice& identifier)
+int32_t InputHub::QueryInputDeviceInfo(int fd, InputDevice& identifier)
 {
-    char buffer[80] = {};
+    char buffer[256] = {0};
     // Get device name.
     if (ioctl(fd, EVIOCGNAME(sizeof(buffer) - 1), &buffer) < 1) {
         DHLOGE(
-            "Could not get device name for %s", strerror(errno));
+            "Could not get device name for %s", ConvertErrNo().c_str());
     } else {
         buffer[sizeof(buffer) - 1] = '\0';
         identifier.name = buffer;
@@ -446,21 +455,21 @@ int32_t InputHub::MakeInputDevice(int fd, InputDevice& identifier)
 
     // If the device is already a virtual device, don't monitor it.
     if (identifier.name.find(VIRTUAL_DEVICE_NAME) != std::string::npos) {
-        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
+        return ERR_DH_INPUT_HUB_IS_VIRTUAL_DEVICE;
     }
     // Get device driver version.
     int driverVersion;
     if (ioctl(fd, EVIOCGVERSION, &driverVersion)) {
-        DHLOGE("could not get driver version for %s\n", strerror(errno));
+        DHLOGE("could not get driver version for %s\n", ConvertErrNo().c_str());
         close(fd);
-        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
+        return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
     }
     // Get device identifier.
     struct input_id inputId;
     if (ioctl(fd, EVIOCGID, &inputId)) {
-        DHLOGE("could not get device input id for %s\n", strerror(errno));
+        DHLOGE("could not get device input id for %s\n", ConvertErrNo().c_str());
         close(fd);
-        return ERR_DH_INPUT_HUB_MAKE_INPUT_DEVICE_FAIL;
+        return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
     }
     identifier.bus = inputId.bustype;
     identifier.product = inputId.product;
@@ -468,14 +477,14 @@ int32_t InputHub::MakeInputDevice(int fd, InputDevice& identifier)
     identifier.version = inputId.version;
     // Get device physical location.
     if (ioctl(fd, EVIOCGPHYS(sizeof(buffer) - 1), &buffer) < 1) {
-        DHLOGE("could not get location for %s\n", strerror(errno));
+        DHLOGE("could not get location for %s\n", ConvertErrNo().c_str());
     } else {
         buffer[sizeof(buffer) - 1] = '\0';
         identifier.location = buffer;
     }
     // Get device unique id.
     if (ioctl(fd, EVIOCGUNIQ(sizeof(buffer) - 1), &buffer) < 1) {
-        DHLOGE("could not get idstring for %s\n", strerror(errno));
+        DHLOGE("could not get idstring for %s\n", ConvertErrNo().c_str());
     } else {
         buffer[sizeof(buffer) - 1] = '\0';
         identifier.uniqueId = buffer;
@@ -618,7 +627,7 @@ int32_t InputHub::RegisterFdForEpoll(int fd)
     eventItem.data.fd = fd;
     if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, fd, &eventItem)) {
         DHLOGE(
-            "Could not add fd to epoll instance: %s", strerror(errno));
+            "Could not add fd to epoll instance: %s", ConvertErrNo().c_str());
         return -errno;
     }
     return DH_SUCCESS;
@@ -661,7 +670,7 @@ int32_t InputHub::UnregisterFdFromEpoll(int fd) const
 {
     if (epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, nullptr)) {
         DHLOGE(
-            "Could not remove fd from epoll instance: %s", strerror(errno));
+            "Could not remove fd from epoll instance: %s", ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_UNREGISTER_FD_FAIL;
     }
     return DH_SUCCESS;
@@ -680,7 +689,7 @@ int32_t InputHub::ReadNotifyLocked()
     if (res < sizeof(*event)) {
         if (errno == EINTR)
             return DH_SUCCESS;
-        DHLOGE("could not get event, %s\n", strerror(errno));
+        DHLOGE("could not get event, %s\n", ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_GET_EVENT_FAIL;
     }
 
@@ -869,7 +878,7 @@ int32_t InputHub::Device::Enable()
     }
     fd = open(canonicalPath, O_RDWR | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
-        DHLOGE("could not open %s, %s\n", path.c_str(), strerror(errno));
+        DHLOGE("could not open %s, %s\n", path.c_str(), ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_DEVICE_ENABLE_FAIL;
     }
     enabled = true;

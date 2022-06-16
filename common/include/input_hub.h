@@ -71,7 +71,7 @@ private:
 
     void ScanInputDevices(const std::string& dirname);
     int32_t OpenInputDeviceLocked(const std::string& devicePath);
-    int32_t MakeInputDevice(int fd, InputDevice& identifier);
+    int32_t QueryInputDeviceInfo(int fd, InputDevice& identifier);
     int32_t MakeDevice(int fd, std::unique_ptr<Device> device);
     void AssignDescriptorLocked(InputDevice& identifier);
     std::string GenerateDescriptor(InputDevice& identifier) const;

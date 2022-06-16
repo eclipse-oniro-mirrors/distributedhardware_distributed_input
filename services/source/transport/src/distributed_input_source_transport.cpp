@@ -573,7 +573,7 @@ int32_t DistributedInputSourceTransport::SendMsg(int32_t sessionId, std::string 
         free(buf);
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_SENDMESSSAGE;
     }
-    outLen = message.size();
+    outLen = (int32_t)message.size();
     int32_t ret = SendBytes(sessionId, buf, outLen);
     free(buf);
     return ret;
