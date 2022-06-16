@@ -32,6 +32,7 @@ ohos_shared_library("libdinput_source") {
     "${service_common}/include",
     "${services_source_path}/inputinject/include",
     "${services_source_path}/transport/include",
+    "${dfx_utils_path}/include",
     "//third_party/json/include",
   ]
 
@@ -77,6 +78,7 @@ ohos_shared_library("libdinput_source") {
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/distributedhardware/distributed_input/services/source/transport:libdinput_source_trans",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "${dfx_utils_path}:libdinput_dfx_utils",
   ]
 
   external_deps = [
@@ -84,6 +86,7 @@ ohos_shared_library("libdinput_source") {
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
     "samgr_standard:samgr_proxy",
+    "hisysevent_native:libhisysevent",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

@@ -23,6 +23,9 @@
         ],
         "rom":"2000k",
         "ram":"6M",
+        "hisysevent_config": [
+            "//foundation/distributedhardware/distributed_input/hisysevent.yaml"
+        ],
         "deps":{
             "components":[
                 "appexecfwk_standard",
@@ -55,7 +58,8 @@
                 "//foundation/distributedhardware/distributed_input/services/sink/inputcollector:libdinput_collector",
                 "//foundation/distributedhardware/distributed_input/sourcehandler:libdinput_source_handler",
                 "//foundation/distributedhardware/distributed_input/sinkhandler:libdinput_sink_handler",
-                "//foundation/distributedhardware/distributed_input/inputdevicehandler:libdinput_handler"
+                "//foundation/distributedhardware/distributed_input/inputdevicehandler:libdinput_handler",
+                "//foundation/distributedhardware/distributed_input/dfx_utils:libdinput_dfx_utils"
             ],
             "inner_kits":[
                 {

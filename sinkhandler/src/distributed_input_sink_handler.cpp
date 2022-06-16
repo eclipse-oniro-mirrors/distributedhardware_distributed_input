@@ -18,6 +18,7 @@
 #include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
+#include "hisysevent_util.h"
 #include "i_distributed_sink_input.h"
 #include "load_d_input_sink_callback.h"
 
@@ -42,6 +43,8 @@ int32_t DistributedInputSinkHandler::InitSink(const std::string &params)
             return ERR_DH_INPUT_SINK_HANDLER_INIT_SINK_SA_FAIL;
         }
         sptr<LoadDInputSinkCallback> loadCallback = new LoadDInputSinkCallback(params);
+        HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_INIT,
+            "dinput sink LoadSystemAbility call");
         int32_t ret = samgr->LoadSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID, loadCallback);
         if (ret != ERR_OK) {
             DHLOGE("Failed to Load systemAbility, systemAbilityId:%d, ret code:%d",
@@ -71,6 +74,8 @@ void DistributedInputSinkHandler::FinishStartSA(const std::string &params, const
 
 int32_t DistributedInputSinkHandler::ReleaseSink()
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT,
+        "dinput exit sink sa release.");
     return DistributedInputClient::GetInstance().ReleaseSink();
 }
 

@@ -18,6 +18,7 @@
 #include "distributed_hardware_log.h"
 
 #include "distributed_input_source_handler.h"
+#include "hisysevent_util.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -39,6 +40,8 @@ void LoadDInputSourceCallback::OnLoadSystemAbilitySuccess(
 void LoadDInputSourceCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
 {
     DHLOGE("load dinput SA failed, systemAbilityId:%d", systemAbilityId);
+    HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_INIT_FAIL,
+        "dinput source LoadSystemAbility call failed.");
 }
 }
 }

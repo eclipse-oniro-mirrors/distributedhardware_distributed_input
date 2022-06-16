@@ -16,6 +16,7 @@
 #include "distributed_hardware_log.h"
 
 #include "distributed_input_sink_handler.h"
+#include "hisysevent_util.h"
 #include "load_d_input_sink_callback.h"
 
 namespace OHOS {
@@ -37,6 +38,8 @@ void LoadDInputSinkCallback::OnLoadSystemAbilitySuccess(
 
 void LoadDInputSinkCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
 {
+    HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_INIT_FAIL,
+        "dinput sink LoadSystemAbility call failed.");
     DHLOGE("load dinput SA failed, systemAbilityId:%d", systemAbilityId);
 }
 }

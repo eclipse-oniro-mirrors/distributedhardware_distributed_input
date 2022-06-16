@@ -28,6 +28,7 @@
 #include "dinput_errcode.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
+#include "hisysevent_util.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -532,6 +533,7 @@ int32_t DistributedInputSourceManager::Release()
 int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::string& parameters, sptr<IRegisterDInputCallback> callback)
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_REGISTER, devId, dhId, "dinput register call.");
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
         __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
 
@@ -539,6 +541,9 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
         DHLOGE(
             "%s called, deviceId: %s callback is null.",
             __func__, GetAnonyString(devId).c_str());
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_REGISTER_FAIL, devId, dhId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL,
+            "dinput register distributed hardware failed callback is nullptr.");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL;
     }
 
@@ -560,6 +565,9 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     // 2.create input node
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedHardware(devId, dhId, parameters);
     if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_REGISTER_FAIL, devId, dhId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL,
+            "dinput register distributed hardware failed in create input node.");
         DHLOGE("%s called, create node fail.",  __func__);
 
         for (auto iter = regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
@@ -657,10 +665,14 @@ int32_t DistributedInputSourceManager::DeleteDevice(const std::string& devId, co
 int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
     sptr<IUnregisterDInputCallback> callback)
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNREGISTER, devId, dhId, "dinput unregister call");
     DHLOGI("%s called, deviceId: %s,  dhId: %s", __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(devId).c_str());
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
+            "dinput unregister distributed hardware failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
@@ -675,6 +687,9 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     std::vector<InputDeviceId>::iterator it = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
     if (it == inputDevice_.end()) {
         DHLOGE("%s called, deviceId: %s is not exist.", __func__, GetAnonyString(devId).c_str());
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
+            "dinput unregister distributed hardware failed in deviceId is not exist");
         for (std::vector<DInputClientUnregistInfo>::iterator iter =
             unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
             if (iter->devId == devId && iter->dhId == dhId) {
@@ -689,6 +704,9 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     // 1.remove input node
     if (RemoveInputNode(devId, dhId) != DH_SUCCESS) {
         callback->OnResult(devId, dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
+            "dinput unregister distributed hardware failed in remove input node");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
@@ -696,6 +714,9 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     inputDevice_.erase(it);
     if (DeleteDevice(devId, dhId) != DH_SUCCESS) {
         callback->OnResult(devId, dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
+            "dinput unregister distributed hardware failed in delete device");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
@@ -707,21 +728,32 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
 int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& deviceId,
     sptr<IPrepareDInputCallback> callback, sptr<IAddWhiteListInfosCallback> addWhiteListCallback)
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_PREPARE, deviceId,
+        "dinput prepare remote input call");
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
+            "dinput prepare remote input call failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
 
     for (auto iter : preCallbacks_) {
         if (iter.devId == deviceId) {
             callback->OnResult(deviceId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL);
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
+                "dinput prepare remote input call failed in already prepared");
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
         }
     }
     int32_t ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(deviceId);
     if (ret != DH_SUCCESS) {
         DHLOGE("Open softbus session fail.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
+            "dinput prepare distributed hardware failed in open softbus");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
     DInputClientPrepareInfo info;
@@ -732,6 +764,9 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& dev
 
     ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(deviceId);
     if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
+            "dinput prepare remote input call failed in transport prepare");
         DHLOGE("Can not send message by softbus, prepare fail.");
         for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
             if (iter->devId == deviceId) {
@@ -749,16 +784,24 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& dev
 int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& deviceId,
     sptr<IUnprepareDInputCallback> callback, sptr<IDelWhiteListInfosCallback> delWhiteListCallback)
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId,
+        "dinput unprepare remote input call");
     DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL,
+            "dinput unprepare remote input call failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
     }
 
     for (auto iter : unpreCallbacks_) {
         if (iter.devId == deviceId) {
             callback->OnResult(deviceId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL);
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL,
+                "dinput unprepare remote input call failed in already unprepared");
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
         }
     }
@@ -772,6 +815,9 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
     int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(deviceId);
     if (ret != DH_SUCCESS) {
         DHLOGE("Can not send message by softbus, unprepare fail.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL,
+            "dinput unprepare remote input call failed in transport unprepare");
         for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
             if (iter->devId == deviceId) {
                 iter->unpreCallback->OnResult(iter->devId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL);
@@ -788,16 +834,24 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
 int32_t DistributedInputSourceManager::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, deviceId,
+        "dinput start use call");
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL,
+            "dinput start use call failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
 
     for (auto iter : staCallbacks_) {
         if (iter.devId == deviceId && iter.inputTypes == inputTypes) {
             callback->OnResult(deviceId, inputTypes, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL);
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL,
+                "dinput start use call failed in already started");
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
         }
     }
@@ -811,6 +865,9 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
     DeviceMap_[deviceId] = DINPUT_SOURCE_SWITCH_OFF; // when sink device start success,set DINPUT_SOURCE_SWITCH_ON
     int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, inputTypes);
     if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL,
+            "dinput start use call failed in transport start");
         DHLOGE("%s called, start fail.", __func__);
         for (std::vector<DInputClientStartInfo>::iterator iter =
             staCallbacks_.begin(); iter != staCallbacks_.end(); iter++) {
@@ -829,16 +886,24 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
 int32_t DistributedInputSourceManager::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, deviceId,
+        "dinput stop use call");
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL,
+            "dinput stop use call failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
 
     for (auto iter : stpCallbacks_) {
         if (iter.devId == deviceId && iter.inputTypes == inputTypes) {
             callback->OnResult(deviceId, inputTypes, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL);
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL,
+                "dinput stop use call failed in already stoped");
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
         }
     }
@@ -852,6 +917,9 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
     int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId, inputTypes);
     if (ret != DH_SUCCESS) {
         DHLOGE("%s called, stop fail.", __func__);
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL,
+            "dinput stop use call failed in transport stop");
         for (std::vector<DInputClientStopInfo>::iterator iter =
             stpCallbacks_.begin(); iter != stpCallbacks_.end(); iter++) {
             if (iter->devId == deviceId && iter->inputTypes == inputTypes) {

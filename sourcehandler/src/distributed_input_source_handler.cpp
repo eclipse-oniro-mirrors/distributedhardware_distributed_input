@@ -18,6 +18,7 @@
 #include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
+#include "hisysevent_util.h"
 #include "i_distributed_source_input.h"
 #include "load_d_input_source_callback.h"
 
@@ -41,6 +42,8 @@ int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
             return ERR_DH_INPUT_SINK_HANDLER_INIT_SOURCE_SA_FAIL;
         }
         sptr<LoadDInputSourceCallback> loadCallback = new LoadDInputSourceCallback(params);
+        HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_INIT,
+            "dinput init source sa start.");
         int32_t ret = samgr->LoadSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, loadCallback);
         if (ret != ERR_OK) {
             DHLOGE("Failed to Load systemAbility, systemAbilityId:%d, ret code:%d",
@@ -70,6 +73,8 @@ void DistributedInputSourceHandler::FinishStartSA(const std::string &params, con
 
 int32_t DistributedInputSourceHandler::ReleaseSource()
 {
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT,
+        "dinput exit source sa release.");
     return DistributedInputClient::GetInstance().ReleaseSource();
 }
 
