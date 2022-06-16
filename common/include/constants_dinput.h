@@ -86,7 +86,12 @@ namespace DistributedInput {
     /**
      * Maximum number of signalled FDs to handle at a time.
      */
-    const uint32_t EPOLL_MAX_EVENTS = 16;
+    constexpr uint32_t EPOLL_MAX_EVENTS = 16;
+
+    /**
+     * Maximum number of event buffer size.
+     */
+    constexpr uint32_t INPUT_EVENT_BUFFER_SIZE = 256;
 
     /**
      * Input Type ALL.

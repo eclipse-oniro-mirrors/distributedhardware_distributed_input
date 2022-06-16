@@ -16,6 +16,7 @@
 #ifndef INPUT_HUB_H
 #define INPUT_HUB_H
 
+#include <atomic>
 #include <mutex>
 #include <unordered_map>
 
@@ -33,8 +34,10 @@ class InputHub {
 public:
     InputHub();
     ~InputHub();
-    size_t CollectInputEvents(RawEvent* buffer, size_t bufferSize);
-    size_t CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize);
+    size_t StartCollectInputEvents(RawEvent* buffer, size_t bufferSize);
+    size_t StartCollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize);
+    void StopCollectInputEvents();
+    void StopCollectInputHandler();
     size_t DeviceIsExists(InputDeviceEvent* event, size_t capacity);
     std::vector<InputDevice> GetAllInputDevices();
     void SetSupportInputType(const uint32_t& inputType);
@@ -126,6 +129,8 @@ private:
     std::mutex visitMutex_;
     bool deviceChanged_;
     uint32_t inputTypes_;
+    std::atomic<bool> isStartCollectEvent_;
+    std::atomic<bool> isStartCollectHandler_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

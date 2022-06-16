@@ -96,7 +96,7 @@ void *DistributedInputCollector::CollectEventsThread(void *param)
 void DistributedInputCollector::StartCollectEventsThread()
 {
     while (isCollectingEvents_) {
-        size_t count = inputHub_->CollectInputEvents(mEventBuffer, INPUT_EVENT_BUFFER_SIZE);
+        size_t count = inputHub_->StartCollectInputEvents(mEventBuffer, INPUT_EVENT_BUFFER_SIZE);
         if (count > 0) {
             DHLOGI("Count: %zu", count);
         } else {
@@ -130,6 +130,7 @@ void DistributedInputCollector::StopCollectEventsThread()
 {
     isCollectingEvents_ = false;
     isStartGetDeviceHandlerThread = false;
+    inputHub_->StopCollectInputEvents();
     if (collectThreadID_ != (pthread_t)(-1)) {
         DHLOGI("DistributedInputCollector::Wait collect thread exit");
         pthread_join(collectThreadID_, NULL);
@@ -150,6 +151,11 @@ void DistributedInputCollector::SetInputTypes(const uint32_t& inputType)
         inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
     inputHub_->SetSupportInputType(inputTypes_);
+}
+
+void DistributedInputCollector::Release()
+{
+    StopCollectEventsThread();
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

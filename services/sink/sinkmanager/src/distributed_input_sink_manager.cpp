@@ -298,6 +298,9 @@ int32_t DistributedInputSinkManager::Release()
         startServerCB->OnResult(0, 0);
     }
 
+    // 4.Release input collect resource
+    DistributedInputCollector::GetInstance().Release();
+
     serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DHLOGI("exit dinput sink sa.");
     exit(0);

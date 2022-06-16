@@ -16,6 +16,7 @@
 #ifndef DISTRIBUTED_INPUT_COLLECTOR_H
 #define DISTRIBUTED_INPUT_COLLECTOR_H
 
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <string>
@@ -35,6 +36,7 @@ class DistributedInputCollector {
 public:
     static DistributedInputCollector &GetInstance();
     int32_t Init(std::shared_ptr<AppExecFwk::EventHandler> sinkHandler);
+    void Release();
     void SetInputTypes(const uint32_t& inputType);
 
 private:
@@ -46,8 +48,6 @@ private:
     void StartCollectEventsThread();
     void StopCollectEventsThread();
 
-    // The event queue.
-    static const int INPUT_EVENT_BUFFER_SIZE = 256;
     RawEvent mEventBuffer[INPUT_EVENT_BUFFER_SIZE];
     pthread_t collectThreadID_;
     bool isCollectingEvents_;

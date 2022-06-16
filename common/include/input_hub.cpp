@@ -44,7 +44,7 @@ const uint32_t ERROR_MSG_MAX_LEN = 256;
 
 InputHub::InputHub() : epollFd_(0), iNotifyFd_(0), inputWd_(0), needToScanDevices_(true), nextDeviceId_(1),
     mPendingEventItems{0x00}, pendingEventCount_(0), pendingEventIndex_(0), pendingINotify_(false),
-    deviceChanged_(false)
+    deviceChanged_(false), isStartCollectEvent_(false), isStartCollectHandler_(false)
 {
     Initialize();
 }
@@ -96,13 +96,16 @@ int32_t InputHub::Release()
 
     ::close(epollFd_);
     ::close(iNotifyFd_);
+    StopCollectInputEvents();
+    StopCollectInputHandler();
     return DH_SUCCESS;
 }
 
-size_t InputHub::CollectInputEvents(RawEvent* buffer, size_t bufferSize)
+size_t InputHub::StartCollectInputEvents(RawEvent* buffer, size_t bufferSize)
 {
     size_t count;
-    for (;;) {
+    isStartCollectEvent_.store(true);
+    while (isStartCollectEvent_.load()) {
         if (needToScanDevices_) {
             needToScanDevices_ = false;
             ScanInputDevices(DEVICE_PATH);
@@ -145,6 +148,11 @@ size_t InputHub::CollectInputEvents(RawEvent* buffer, size_t bufferSize)
 
     // All done, return the number of events we read.
     return count;
+}
+
+void InputHub::StopCollectInputEvents()
+{
+    isStartCollectEvent_.store(false);
 }
 
 size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
@@ -261,10 +269,11 @@ size_t InputHub::DeviceIsExists(InputDeviceEvent* buffer, size_t bufferSize)
     return event - buffer;
 }
 
-size_t InputHub::CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize)
+size_t InputHub::StartCollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize)
 {
     size_t count;
-    for (;;) {
+    isStartCollectHandler_.store(true);
+    while (isStartCollectHandler_.load()) {
         count = DeviceIsExists(buffer, bufferSize);
         deviceChanged_ = false;
         GetDeviceHandler();
@@ -289,6 +298,11 @@ size_t InputHub::CollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize
 
     // All done, return the number of events we read.
     return count;
+}
+
+void InputHub::StopCollectInputHandler()
+{
+    isStartCollectHandler_.store(false);
 }
 
 void InputHub::GetDeviceHandler()
