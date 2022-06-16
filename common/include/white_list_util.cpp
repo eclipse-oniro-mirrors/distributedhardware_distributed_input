@@ -28,8 +28,8 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-    const char* SPLIT_LINE = "|";
-    const char* SPLIT_COMMA = ",";
+    const char* const SPLIT_LINE = "|";
+    const char* const SPLIT_COMMA = ",";
 }
 WhiteListUtil::WhiteListUtil()
 {
@@ -49,7 +49,7 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
 {
     DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
     ClearWhiteList();
-    const char* whiteListFilePath = "/etc/dinput_business_event_whitelist.cfg";
+    const char* const whiteListFilePath = "/etc/dinput_business_event_whitelist.cfg";
 
     if (deviceId.empty()) {
         // device id error
