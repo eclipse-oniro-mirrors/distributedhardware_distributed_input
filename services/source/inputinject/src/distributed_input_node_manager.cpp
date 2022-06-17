@@ -152,9 +152,11 @@ void DistributedInputNodeManager::StopInjectThread()
 {
     DHLOGI("start");
     isInjectThreadRunning_.store(false);
+    conditionVariable_.notify_all();
     if (eventInjectThread_.joinable()) {
         eventInjectThread_.join();
     }
+    DHLOGI("stop");
 }
 
 void DistributedInputNodeManager::ReportEvent(const RawEvent rawEvent)
@@ -171,7 +173,8 @@ void DistributedInputNodeManager::InjectEvent()
         std::shared_ptr<RawEvent> event = nullptr;
         {
             std::unique_lock<std::mutex> waitEventLock(mutex_);
-            conditionVariable_.wait(waitEventLock, [this] () { return !injectQueue_.empty(); });
+            conditionVariable_.wait(waitEventLock,
+                [this]() { return !isInjectThreadRunning_.load() || !injectQueue_.empty(); });
             if (injectQueue_.empty()) {
                 continue;
             }
@@ -186,6 +189,7 @@ void DistributedInputNodeManager::InjectEvent()
         DHLOGD("process event, inject queue size: %zu", injectQueue_.size());
         ProcessInjectEvent(event);
     }
+    DHLOGI("stop");
 }
 
 void DistributedInputNodeManager::ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent)
