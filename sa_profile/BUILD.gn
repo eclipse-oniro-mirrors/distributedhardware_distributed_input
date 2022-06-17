@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//drivers/adapter/uhdf2/uhdf.gni")
+import("//drivers/hdf_core/adapter/uhdf2/uhdf.gni")
 import("//build/ohos/sa_profile/sa_profile.gni")
 
 ohos_sa_profile("distributed_input_source_sa_profile") {
