@@ -31,7 +31,7 @@
                 "ipc",
                 "safwk",
                 "samgr_standard",
-                "dsoftbus_standard",
+                "dsoftbus",
                 "utils_base",
                 "distributed_hardware_fwk"
             ],

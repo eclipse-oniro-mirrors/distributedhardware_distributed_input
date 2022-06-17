@@ -59,7 +59,7 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     ]
 
   external_deps = [
-    "dsoftbus_standard:softbus_client",
+    "dsoftbus:softbus_client",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",

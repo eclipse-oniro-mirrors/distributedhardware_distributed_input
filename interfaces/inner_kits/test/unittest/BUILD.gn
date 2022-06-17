@@ -94,7 +94,7 @@ ohos_unittest("distributed_input_inner_test") {
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
     "samgr_standard:samgr_proxy",
-    "dsoftbus_standard:softbus_client",
+    "dsoftbus:softbus_client",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
