@@ -61,7 +61,7 @@ private:
 
     // The event queue.
     static const int INPUT_DEVICR_BUFFER_SIZE = 32;
-    InputDeviceEvent mEventBuffer[INPUT_DEVICR_BUFFER_SIZE];
+    InputDeviceEvent mEventBuffer[INPUT_DEVICR_BUFFER_SIZE] = {};
     std::mutex operationMutex_;
     std::unique_ptr<InputHub> inputHub_;
 };

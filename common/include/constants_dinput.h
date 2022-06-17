@@ -176,7 +176,8 @@ namespace DistributedInput {
      * Input device Info retrieved from the kernel.
      */
     struct InputDevice {
-        inline InputDevice() : bus(0), vendor(0), product(0), version(0) {}
+        inline InputDevice() : name(""), location(""), uniqueId(""), bus(0), vendor(0), product(0),
+            version(0), descriptor(""), nonce(0), classes(0) {}
         std::string name;
         std::string location;
         std::string uniqueId;

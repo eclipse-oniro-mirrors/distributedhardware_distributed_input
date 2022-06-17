@@ -203,7 +203,7 @@ void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteI
     const std::string deviceId, const std::string &event)
 {
     nlohmann::json inputData = nlohmann::json::parse(event);
-    int jsonSize = inputData.size();
+    size_t jsonSize = inputData.size();
     DHLOGI("onReceivedEventRemoteInput called, deviceId: %s, json size:%d.",
         GetAnonyString(deviceId).c_str(), jsonSize);
 
@@ -1048,7 +1048,7 @@ uint32_t DistributedInputSourceManager::GetAllInputTypesMap()
     return rInputTypes;
 }
 
-void DistributedInputSourceManager::SetInputTypesMap(const std::string deviceId, int32_t value)
+void DistributedInputSourceManager::SetInputTypesMap(const std::string deviceId, uint32_t value)
 {
     if (value == INPUT_TYPE_NULL) {
         std::map<std::string, uint32_t>::iterator key = InputTypesMap_.find(deviceId);

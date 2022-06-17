@@ -44,7 +44,7 @@ const uint32_t ERROR_MSG_MAX_LEN = 256;
 
 InputHub::InputHub() : epollFd_(0), iNotifyFd_(0), inputWd_(0), needToScanDevices_(true), nextDeviceId_(1),
     mPendingEventItems{0x00}, pendingEventCount_(0), pendingEventIndex_(0), pendingINotify_(false),
-    deviceChanged_(false), isStartCollectEvent_(false), isStartCollectHandler_(false)
+    deviceChanged_(false), inputTypes_(0), isStartCollectEvent_(false), isStartCollectHandler_(false)
 {
     Initialize();
 }
@@ -699,7 +699,7 @@ int32_t InputHub::ReadNotifyLocked()
     struct inotify_event *event;
 
     DHLOGI("readNotify nfd: %d\n", iNotifyFd_);
-    res = read(iNotifyFd_, event_buf, sizeof(event_buf));
+    res = (size_t)read(iNotifyFd_, event_buf, sizeof(event_buf));
     if (res < sizeof(*event)) {
         if (errno == EINTR)
             return DH_SUCCESS;
