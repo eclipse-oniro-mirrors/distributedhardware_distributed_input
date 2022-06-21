@@ -26,9 +26,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 std::shared_ptr<DistributedInputClient> DistributedInputClient::instance(new DistributedInputClient());
 
-DistributedInputClient::DistributedInputClient()
-{
-}
+DistributedInputClient::DistributedInputClient() {}
 
 DistributedInputClient &DistributedInputClient::GetInstance()
 {

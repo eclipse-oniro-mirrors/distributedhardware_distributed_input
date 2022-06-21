@@ -31,6 +31,7 @@ namespace {
     const char* const SPLIT_LINE = "|";
     const char* const SPLIT_COMMA = ",";
 }
+
 WhiteListUtil::WhiteListUtil()
 {
 }

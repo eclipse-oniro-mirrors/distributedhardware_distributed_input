@@ -52,7 +52,7 @@ int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
         }
     }
 
-    auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOADSA_TIMEOUT_MS),
+    auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOAD_SA_TIMEOUT_MS),
         [this]() { return (DistributedInputClient::GetInstance().HasDInputSourceProxy()); });
     if (!waitStatus) {
         DHLOGE("dinput load sa timeout.");

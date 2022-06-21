@@ -43,8 +43,8 @@ const uint32_t ERROR_MSG_MAX_LEN = 256;
 }
 
 InputHub::InputHub() : epollFd_(0), iNotifyFd_(0), inputWd_(0), needToScanDevices_(true), nextDeviceId_(1),
-    mPendingEventItems{0x00}, pendingEventCount_(0), pendingEventIndex_(0), pendingINotify_(false),
-    deviceChanged_(false), inputTypes_(0), isStartCollectEvent_(false), isStartCollectHandler_(false)
+    mPendingEventItems{}, pendingEventCount_(0), pendingEventIndex_(0), pendingINotify_(false), deviceChanged_(false),
+    inputTypes_(0), isStartCollectEvent_(false), isStartCollectHandler_(false)
 {
     Initialize();
 }
@@ -388,7 +388,7 @@ void InputHub::ScanInputDevices(const std::string& dirname)
     size_t dirNameThirdPos = 2;
     while ((de = readdir(dir))) {
         /*
-         * The maximum value of d_name defined in the Linux kernel is 260. Therefore,
+         * The maximum value of d_name defined in the linux kernel is 260. Therefore,
          * The d_name length does not need to be verified.
          */
         if (de->d_name[dirNameFirstPos] == '.' && (de->d_name[dirNameSecondPos] == '\0' ||

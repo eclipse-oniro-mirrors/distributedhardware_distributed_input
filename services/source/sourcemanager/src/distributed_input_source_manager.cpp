@@ -1146,7 +1146,7 @@ void DistributedInputSourceManager::DInputSourceListener::RecordEventLog(int64_t
             eventType = "other type";
             break;
     }
-    DHLOGD("3.E2E-Test Source softBus receive event, EventType: %s Code: %d, Value: %d, Path: %s, When: " PRId64"",
+    DHLOGD("3.E2E-Test Source softBus receive event, EventType: %s, Code: %d, Value: %d, Path: %s, When: " PRId64"",
         eventType.c_str(), code, value, path.c_str(), when);
 }
 } // namespace DistributedInput

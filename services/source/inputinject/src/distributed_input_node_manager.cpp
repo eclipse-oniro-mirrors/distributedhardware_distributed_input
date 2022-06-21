@@ -146,6 +146,7 @@ void DistributedInputNodeManager::StartInjectThread()
     DHLOGI("start");
     isInjectThreadRunning_.store(true);
     eventInjectThread_ = std::thread(&DistributedInputNodeManager::InjectEvent, this);
+    DHLOGI("end");
 }
 
 void DistributedInputNodeManager::StopInjectThread()
@@ -156,7 +157,7 @@ void DistributedInputNodeManager::StopInjectThread()
     if (eventInjectThread_.joinable()) {
         eventInjectThread_.join();
     }
-    DHLOGI("stop");
+    DHLOGI("end");
 }
 
 void DistributedInputNodeManager::ReportEvent(const RawEvent rawEvent)
@@ -189,7 +190,7 @@ void DistributedInputNodeManager::InjectEvent()
         DHLOGD("process event, inject queue size: %zu", injectQueue_.size());
         ProcessInjectEvent(event);
     }
-    DHLOGI("stop");
+    DHLOGI("end");
 }
 
 void DistributedInputNodeManager::ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent)

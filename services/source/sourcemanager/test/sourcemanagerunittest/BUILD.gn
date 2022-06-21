@@ -59,8 +59,6 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_mouse.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
-
-
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",

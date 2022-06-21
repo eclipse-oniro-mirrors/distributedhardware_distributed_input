@@ -350,6 +350,7 @@ uint32_t DistributedInputSinkManager::GetInputTypes()
 {
     return inputTypes_;
 }
+
 void DistributedInputSinkManager::SetInputTypes(const uint32_t& inputTypess)
 {
     inputTypes_ = inputTypess;

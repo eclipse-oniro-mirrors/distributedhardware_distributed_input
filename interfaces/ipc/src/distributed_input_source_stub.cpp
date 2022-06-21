@@ -139,39 +139,30 @@ int32_t DistributedInputSourceStub::OnRemoteRequest(uint32_t code, MessageParcel
     switch (code) {
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::INIT): {
             return HandleInitDistributedHardware(reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::RELEASE): {
             return HandleReleaseDistributedHardware(reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::REGISTER_REMOTE_INPUT): {
             return HandleRegisterDistributedHardware(data, reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::UNREGISTER_REMOTE_INPUT): {
             return HandleUnregisterDistributedHardware(data, reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::PREPARE_REMOTE_INPUT): {
             return HandlePrepareRemoteInput(data, reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::UNPREPARE_REMOTE_INPUT): {
             return HandleUnprepareRemoteInput(data, reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::START_REMOTE_INPUT): {
             return HandleStartRemoteInput(data, reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::STOP_REMOTE_INPUT): {
             return HandleStopRemoteInput(data, reply);
-            break;
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::ISSTART_REMOTE_INPUT): {
             return HandleIsStartDistributedInput(data, reply);
-            break;
         }
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

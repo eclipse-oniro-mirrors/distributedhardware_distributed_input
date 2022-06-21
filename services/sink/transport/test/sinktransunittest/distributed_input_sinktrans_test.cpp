@@ -122,6 +122,7 @@ HWTEST_F(DistributedInputSinkTransTest, StartSwitch01, testing::ext::TestSize.Le
     int32_t ret = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
     EXPECT_EQ(SUCCESS, ret);
 }
+
 HWTEST_F(DistributedInputSinkTransTest, StartSwitch02, testing::ext::TestSize.Level1)
 {
     int32_t sessionId = 1000;

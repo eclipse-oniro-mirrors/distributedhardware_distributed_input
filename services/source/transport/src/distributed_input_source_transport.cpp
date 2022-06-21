@@ -158,10 +158,12 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
             GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_FAIL;
     }
+
     {
         std::unique_lock<std::mutex> sessionLock(operationMutex_);
         sessionDevMap_[remoteDevId] = sessionId;
     }
+
     DHLOGI("Wait for channel session opened.");
     {
         std::unique_lock<std::mutex> waitLock(operationMutex_);

@@ -180,7 +180,7 @@ void VirtualDevice::RecordEventLog(const input_event& event)
             eventType = "other type";
             break;
     }
-    DHLOGD("4.E2E-Test Source write event into input driver, EventType: %s Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
+    DHLOGD("4.E2E-Test Source write event into input driver, EventType: %s, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
         eventType.c_str(), event.code, event.value, event.input_event_sec, event.input_event_usec);
 }
 } // namespace DistributedInput
