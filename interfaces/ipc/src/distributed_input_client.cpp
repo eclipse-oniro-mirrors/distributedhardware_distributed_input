@@ -110,13 +110,13 @@ void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status
 {
     if (DInputServerType::SOURCE_SERVER_TYPE == static_cast<DInputServerType>(status)) {
         DistributedInputClient::GetInstance().serverType = DInputServerType::SOURCE_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes = inputTypes;
+        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
     } else if (DInputServerType::SINK_SERVER_TYPE == static_cast<DInputServerType>(status)) {
         DistributedInputClient::GetInstance().serverType = DInputServerType::SINK_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes = inputTypes;
+        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
     } else {
         DistributedInputClient::GetInstance().serverType = DInputServerType::NULL_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes = INPUT_TYPE_NULL;
+        DistributedInputClient::GetInstance().inputTypes_ = DInputDeviceType::NONE;
     }
 }
 
@@ -181,7 +181,7 @@ int32_t DistributedInputClient::ReleaseSource()
     }
 
     serverType = DInputServerType::NULL_SERVER_TYPE;
-    inputTypes = INPUT_TYPE_NULL;
+    inputTypes_ = DInputDeviceType::NONE;
     m_bIsAlreadyInitWhiteList = false;
     callbackRegister = nullptr;
     callbackUnregister = nullptr;
@@ -199,7 +199,7 @@ int32_t DistributedInputClient::ReleaseSink()
         return ERR_DH_INPUT_CLIENT_GET_SINK_PROXY_FAIL;
     }
     serverType = DInputServerType::NULL_SERVER_TYPE;
-    inputTypes = INPUT_TYPE_NULL;
+    inputTypes_ = DInputDeviceType::NONE;
     m_bIsAlreadyInitWhiteList = false;
     sinkTypeCallback = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList(localDevId_);
@@ -315,8 +315,9 @@ int32_t DistributedInputClient::StartRemoteInput(
     }
 
     if (deviceId.empty() || callback == nullptr ||
-        inputTypes > INPUT_TYPE_ALL || inputTypes == INPUT_TYPE_NULL ||
-        !(inputTypes & INPUT_TYPE_ALL)) {
+        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
+        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
+        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
 
@@ -334,7 +335,9 @@ int32_t DistributedInputClient::StopRemoteInput(
     }
 
     if (deviceId.empty() || callback == nullptr ||
-        inputTypes > INPUT_TYPE_ALL || inputTypes == INPUT_TYPE_NULL || !(inputTypes & INPUT_TYPE_ALL)) {
+        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
+        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
+        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
 
@@ -367,7 +370,7 @@ bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const 
 
 DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t& inputType)
 {
-    DHLOGI("%s called, inputType: %d, inputTypes: %d, ", __func__, inputType, inputTypes);
+    DHLOGI("%s called, inputType: %d, inputTypes: %d, ", __func__, inputType, static_cast<uint32_t>(inputTypes_));
     int32_t retSource = 0;
     int32_t retSink = 0;
 
@@ -387,7 +390,7 @@ DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t&
         serverType = DInputServerType::SINK_SERVER_TYPE;
     }
 
-    if (inputType & inputTypes) {
+    if (inputType & static_cast<uint32_t>(inputTypes_)) {
         return serverType;
     } else {
         return DInputServerType::NULL_SERVER_TYPE;

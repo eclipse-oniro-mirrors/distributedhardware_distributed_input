@@ -37,19 +37,19 @@ REGISTER_SYSTEM_ABILITY_BY_ID(DistributedInputSinkManager, DISTRIBUTED_HARDWARE_
 DistributedInputSinkManager::DistributedInputSinkManager(int32_t saId, bool runOnCreate)
     : SystemAbility(saId, runOnCreate)
 {
-    inputTypes_ = 0;
+    inputTypes_ = DInputDeviceType::NONE;
 }
 
 DistributedInputSinkManager::DInputSinkListener::DInputSinkListener(DistributedInputSinkManager *manager)
 {
     sinkManagerObj_ = manager;
-    sinkManagerObj_->SetInputTypes(INPUT_TYPE_NULL);
+    sinkManagerObj_->SetInputTypes(static_cast<uint32_t>(DInputDeviceType::NONE));
     DHLOGI("DInputSinkListener init.");
 }
 
 DistributedInputSinkManager::DInputSinkListener::~DInputSinkListener()
 {
-    sinkManagerObj_->SetInputTypes(INPUT_TYPE_NULL);
+    sinkManagerObj_->SetInputTypes(static_cast<uint32_t>(DInputDeviceType::NONE));
     sinkManagerObj_ = nullptr;
     DHLOGI("DInputSinkListener destory.");
 }
@@ -109,7 +109,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
 void DistributedInputSinkManager::DInputSinkListener::onUnprepareRemoteInput(const int32_t& sessionId)
 {
     DHLOGI("onUnprepareRemoteInput called, sessionId: %s", GetAnonyInt32(sessionId).c_str());
-    onStopRemoteInput(sessionId, INPUT_TYPE_ALL);
+    onStopRemoteInput(sessionId, static_cast<uint32_t>(DInputDeviceType::ALL));
     DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
 
     nlohmann::json jsonStr;
@@ -125,12 +125,30 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
     DHLOGI("onStartRemoteInput called, curSessionId:%s, new sessionId: %s",
         GetAnonyInt32(curSessionId).c_str(), GetAnonyInt32(sessionId).c_str());
-    // set new session
-    int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
 
-    sinkManagerObj_->SetStartTransFlag((startRes == DH_SUCCESS) ?
-        DInputServerType::SINK_SERVER_TYPE :
-        DInputServerType::NULL_SERVER_TYPE);
+    int32_t startRes = DH_SUCCESS;
+    if (curSessionId == sessionId) {
+        DHLOGI("sessionId switch state is true, need not switch");
+    } else {
+        DHLOGI("sessionId switch state is false, need to switch");
+        int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
+
+        sinkManagerObj_->SetStartTransFlag((startRes == DH_SUCCESS) ?
+            DInputServerType::SINK_SERVER_TYPE :
+            DInputServerType::NULL_SERVER_TYPE);
+
+        if ((curSessionId != ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) && (startRes == DH_SUCCESS)) {
+            DHLOGI("notify curSessionId:%s Interrupted.", GetAnonyInt32(curSessionId).c_str());
+            nlohmann::json jsonStrStp;
+            jsonStrStp[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONSTOP;
+            jsonStrStp[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+            jsonStrStp[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+            std::string smsgStp = jsonStrStp.dump();
+            DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(curSessionId, smsgStp);
+            sinkManagerObj_->SetInputTypes(static_cast<uint32_t>(DInputDeviceType::NONE));
+            DistributedInputCollector::GetInstance().SetInputTypes(sinkManagerObj_->GetInputTypes());
+        }
+    }
 
     bool result = (startRes == DH_SUCCESS) ? true : false;
     nlohmann::json jsonStrSta;
@@ -140,24 +158,6 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     std::string smsgSta = jsonStrSta.dump();
 
     DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsgSta);
-
-    // Notify the interrupted master status
-    if (curSessionId == ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
-        DHLOGI("onStartRemoteInput called, this is the only session.");
-    } else if (result) {
-        DHLOGI("onStartRemoteInput called, notify curSessionId:%s Interrupted.",
-            GetAnonyInt32(curSessionId).c_str());
-        nlohmann::json jsonStrStp;
-        jsonStrStp[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONSTOP;
-        jsonStrStp[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
-        jsonStrStp[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
-        std::string smsgStp = jsonStrStp.dump();
-        DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(curSessionId, smsgStp);
-        sinkManagerObj_->SetInputTypes(INPUT_TYPE_NULL);
-        DistributedInputCollector::GetInstance().SetInputTypes(sinkManagerObj_->GetInputTypes());
-    } else {
-        DHLOGI("onStartRemoteInput called, new session is error, not notify curSession.");
-    }
 
     // add the input type
     if (startRes == DH_SUCCESS) {
@@ -191,18 +191,18 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
     std::string smsg = jsonStr.dump();
     DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
 
-    if (sinkManagerObj_->GetInputTypes() == INPUT_TYPE_NULL) {
+    if (sinkManagerObj_->GetInputTypes() == static_cast<uint32_t>(DInputDeviceType::NONE)) {
         DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
         if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() ==
             ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
-            DHLOGI("onStartRemoteInput called, all session is stop.");
+            DHLOGI("all session is stop.");
             sinkManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
         }
     }
 
     IStartDInputServerCallback *startServerCB = sinkManagerObj_->GetStartDInputServerCback();
     if (startServerCB == nullptr) {
-        DHLOGE("onStartRemoteInput called, startServerCB is null.");
+        DHLOGE("startServerCB is null.");
     } else {
         startServerCB->OnResult(
             static_cast<int32_t>(sinkManagerObj_->GetStartTransFlag()), sinkManagerObj_->GetInputTypes());
@@ -348,12 +348,12 @@ void DistributedInputSinkManager::SetInitWhiteListFlag(bool isInit)
 
 uint32_t DistributedInputSinkManager::GetInputTypes()
 {
-    return inputTypes_;
+    return static_cast<uint32_t>(inputTypes_);
 }
 
-void DistributedInputSinkManager::SetInputTypes(const uint32_t& inputTypess)
+void DistributedInputSinkManager::SetInputTypes(const uint32_t& inputTypes)
 {
-    inputTypes_ = inputTypess;
+    inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

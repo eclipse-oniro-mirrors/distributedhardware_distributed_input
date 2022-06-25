@@ -189,7 +189,8 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput01, testing::ext::TestSize.L
 {
     string deviceId = "StartRemoteInput01";
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
-    int32_t ret = DistributedInputKit::StartRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -197,7 +198,8 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput02, testing::ext::TestSize.L
 {
     string deviceId = "";
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
-    int32_t ret = DistributedInputKit::StartRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -205,7 +207,8 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput03, testing::ext::TestSize.L
 {
     string deviceId = "StartRemoteInput01";
     sptr<TestStartDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::StartRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -213,7 +216,8 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput04, testing::ext::TestSize.L
 {
     string deviceId = "";
     sptr<TestStartDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::StartRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -221,7 +225,8 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput01, testing::ext::TestSize.Le
 {
     string deviceId = "StopRemoteInput01";
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
-    int32_t ret = DistributedInputKit::StopRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -229,7 +234,8 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput02, testing::ext::TestSize.Le
 {
     string deviceId = "";
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
-    int32_t ret = DistributedInputKit::StopRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -237,7 +243,8 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput03, testing::ext::TestSize.Le
 {
     string deviceId = "StopRemoteInput01";
     sptr<TestStopDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::StopRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -245,7 +252,8 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput04, testing::ext::TestSize.Le
 {
     string deviceId = "";
     sptr<TestStopDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::StopRemoteInput(deviceId, INPUT_TYPE_ALL, callback);
+    int32_t ret =
+        DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -285,7 +293,7 @@ HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput1, testing::ext::Test
 {
     DistributedInputClient::GetInstance().ReleaseSource();
     DistributedInputClient::GetInstance().InitSink();
-    DInputServerType ret = DistributedInputKit::IsStartDistributedInput(INPUT_TYPE_ALL);
+    DInputServerType ret = DistributedInputKit::IsStartDistributedInput(static_cast<uint32_t>(DInputDeviceType::ALL));
 
     if (ret == DInputServerType::NULL_SERVER_TYPE) {
         EXPECT_EQ(SUCCESS, 0);
@@ -296,7 +304,7 @@ HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput1, testing::ext::Test
 
 HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput2, testing::ext::TestSize.Level0)
 {
-    DInputServerType ret = DistributedInputKit::IsStartDistributedInput(INPUT_TYPE_ALL);
+    DInputServerType ret = DistributedInputKit::IsStartDistributedInput(static_cast<uint32_t>(DInputDeviceType::ALL));
 
     if (ret == DInputServerType::NULL_SERVER_TYPE) {
         EXPECT_EQ(SUCCESS, 0);

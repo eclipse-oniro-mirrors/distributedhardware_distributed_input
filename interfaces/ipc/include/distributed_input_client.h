@@ -143,7 +143,7 @@ private:
     const std::string localDevId_ = "localNodeDevice";
 
     DInputServerType serverType = DInputServerType::NULL_SERVER_TYPE;
-    uint32_t inputTypes = INPUT_TYPE_NULL;
+    DInputDeviceType inputTypes_ = DInputDeviceType::NONE;
 
     sptr<RegisterDInputCb> callbackRegister = nullptr;
     sptr<UnregisterDInputCb> callbackUnregister = nullptr;

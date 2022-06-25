@@ -98,7 +98,7 @@ private:
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<DistributedInputSinkEventHandler> handler_;
     bool InitAuto();
-    uint32_t inputTypes_;
+    DInputDeviceType inputTypes_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

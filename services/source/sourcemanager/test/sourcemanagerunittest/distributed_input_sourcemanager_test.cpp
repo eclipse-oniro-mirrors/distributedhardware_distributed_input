@@ -248,7 +248,7 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput01, testing::ext::Te
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
-    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    int32_t ret = sourceManager_->StartRemoteInput(devId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
@@ -256,7 +256,7 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput02, testing::ext::Te
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStartDInputCallback> callback;
-    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    int32_t ret = sourceManager_->StartRemoteInput(devId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
@@ -264,7 +264,7 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput03, testing::ext::Te
 {
     std::string devId = "";
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
-    int32_t ret = sourceManager_->StartRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    int32_t ret = sourceManager_->StartRemoteInput(devId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
@@ -272,7 +272,7 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput01, testing::ext::Tes
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
-    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    int32_t ret = sourceManager_->StopRemoteInput(devId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
@@ -280,7 +280,7 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput02, testing::ext::Tes
 {
     std::string devId = "";
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
-    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    int32_t ret = sourceManager_->StopRemoteInput(devId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
@@ -288,7 +288,7 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput03, testing::ext::Tes
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStopDInputCallback> callback;
-    int32_t ret = sourceManager_->StopRemoteInput(devId, INPUT_TYPE_ALL, callback);
+    int32_t ret = sourceManager_->StopRemoteInput(devId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 

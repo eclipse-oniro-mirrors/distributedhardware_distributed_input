@@ -64,24 +64,15 @@ namespace DistributedInput {
     constexpr int32_t FAILURE_UNREGISTING = -60003;
 
     /**
-     * Input Type NULL.
+     * Device Type definitions
      */
-    constexpr uint32_t INPUT_TYPE_NULL = 0;
-
-    /**
-     * Input Type MOUSE.
-     */
-    constexpr uint32_t INPUT_TYPE_MOUSE = 1;
-
-    /**
-     * Input Type KEYBOARD.
-     */
-    constexpr uint32_t INPUT_TYPE_KEYBOARD = 2;
-
-    /**
-     * Input Type TOUCH.
-     */
-    constexpr uint32_t INPUT_TYPE_TOUCH = 4;
+    enum class DInputDeviceType : uint32_t {
+        NONE = 0x0000,
+        MOUSE = 0x0001,
+        KEYBOARD = 0x0002,
+        TOUCHPAD = MOUSE,
+        ALL = MOUSE | KEYBOARD,
+    };
 
     /**
      * Maximum number of signalled FDs to handle at a time.
@@ -92,11 +83,6 @@ namespace DistributedInput {
      * Maximum number of event buffer size.
      */
     constexpr uint32_t INPUT_EVENT_BUFFER_SIZE = 256;
-
-    /**
-     * Input Type ALL.
-     */
-    constexpr uint32_t INPUT_TYPE_ALL = INPUT_TYPE_MOUSE | INPUT_TYPE_KEYBOARD | INPUT_TYPE_TOUCH;
 
     constexpr int32_t INPUT_LOAD_SA_TIMEOUT_MS = 10000;
 

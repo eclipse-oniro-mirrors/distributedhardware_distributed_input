@@ -311,7 +311,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyUnreg
     std::string dhId = innerMsg[INPUT_SOURCEMANAGER_KEY_HWID];
     bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
     if (result) {
-        sourceManagerObj_->SetDeviceMapValue(deviceId, INPUT_TYPE_NULL);
+        sourceManagerObj_->SetDeviceMapValue(deviceId, DINPUT_SOURCE_SWITCH_OFF);
     }
     sourceManagerObj_->RunUnregisterCallback(deviceId, dhId,
         result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_MSG_IS_BAD);
@@ -340,7 +340,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyUnpre
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
     if (result) {
-        sourceManagerObj_->SetDeviceMapValue(deviceId, INPUT_TYPE_NULL);
+        sourceManagerObj_->SetDeviceMapValue(deviceId, DINPUT_SOURCE_SWITCH_OFF);
     }
     sourceManagerObj_->RunUnprepareCallback(deviceId,
         result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_MSG_IS_BAD);
@@ -419,7 +419,8 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
     sourceManagerObj_->SetStartTransFlag(startTransFlag);
 
     if (sourceManagerObj_->GetStartDInputServerCback() != nullptr) {
-        sourceManagerObj_->GetStartDInputServerCback()->OnResult(serType, INPUT_TYPE_NULL);
+        sourceManagerObj_->GetStartDInputServerCback()->OnResult(
+            serType, static_cast<uint32_t>(DInputDeviceType::NONE));
     } else {
         DHLOGE("ProcessEvent GetStartDInputServerCback() is null.");
     }
@@ -1106,12 +1107,12 @@ uint32_t DistributedInputSourceManager::GetInputTypesMap(const std::string devic
     if (key != InputTypesMap_.end()) {
         return InputTypesMap_[deviceId];
     }
-    return INPUT_TYPE_NULL;
+    return static_cast<uint32_t>(DInputDeviceType::NONE);
 }
 
 uint32_t DistributedInputSourceManager::GetAllInputTypesMap()
 {
-    uint32_t rInputTypes = INPUT_TYPE_NULL;
+    uint32_t rInputTypes = static_cast<uint32_t>(DInputDeviceType::NONE);
     std::map<std::string, uint32_t>::iterator iter;
     for (iter = InputTypesMap_.begin(); iter != InputTypesMap_.end(); iter++) {
         rInputTypes |= iter->second;
@@ -1121,7 +1122,7 @@ uint32_t DistributedInputSourceManager::GetAllInputTypesMap()
 
 void DistributedInputSourceManager::SetInputTypesMap(const std::string deviceId, uint32_t value)
 {
-    if (value == INPUT_TYPE_NULL) {
+    if (value == static_cast<uint32_t>(DInputDeviceType::NONE)) {
         std::map<std::string, uint32_t>::iterator key = InputTypesMap_.find(deviceId);
         if (key != InputTypesMap_.end()) {
             InputTypesMap_.erase(key);

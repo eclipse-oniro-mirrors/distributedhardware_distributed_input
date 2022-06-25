@@ -140,15 +140,14 @@ void DistributedInputCollector::StopCollectEventsThread()
 
 void DistributedInputCollector::SetInputTypes(const uint32_t& inputType)
 {
-    if ((inputType & INPUT_TYPE_MOUSE) != 0) {
+    inputTypes_ = 0;
+    if ((inputType & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
         inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
-    if ((inputType & INPUT_TYPE_KEYBOARD) != 0) {
+    if ((inputType & static_cast<uint32_t>(DInputDeviceType::KEYBOARD)) != 0) {
         inputTypes_ |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
-    if ((inputType & INPUT_TYPE_TOUCH) != 0) {
-        inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
-    }
+
     inputHub_->SetSupportInputType(inputTypes_);
 }
 

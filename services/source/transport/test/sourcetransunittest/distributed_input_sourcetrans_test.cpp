@@ -90,28 +90,32 @@ HWTEST_F(DistributedInputSourceTransTest, UnprepareRemoteInput03, testing::ext::
 HWTEST_F(DistributedInputSourceTransTest, StartRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "tttt0001";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, INPUT_TYPE_ALL);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(
+        deviceId, static_cast<uint32_t>(DInputDeviceType::ALL));
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, StartRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, INPUT_TYPE_ALL);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(
+        deviceId, static_cast<uint32_t>(DInputDeviceType::ALL));
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "tttt0001";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId, INPUT_TYPE_ALL);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(
+        deviceId, static_cast<uint32_t>(DInputDeviceType::ALL));
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
-    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId, INPUT_TYPE_ALL);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(
+        deviceId, static_cast<uint32_t>(DInputDeviceType::ALL));
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL, ret);
     DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(deviceId);
 }

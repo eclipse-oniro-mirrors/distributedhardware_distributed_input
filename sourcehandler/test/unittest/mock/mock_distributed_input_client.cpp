@@ -64,13 +64,13 @@ void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status
 {
     if (DInputServerType::SOURCE_SERVER_TYPE == static_cast<DInputServerType>(status)) {
         DistributedInputClient::GetInstance().serverType = DInputServerType::SOURCE_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes = inputTypes;
+        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
     } else if (DInputServerType::SINK_SERVER_TYPE == static_cast<DInputServerType>(status)) {
         DistributedInputClient::GetInstance().serverType = DInputServerType::SINK_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes = inputTypes;
+        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
     } else {
         DistributedInputClient::GetInstance().serverType = DInputServerType::NULL_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes = INPUT_TYPE_NULL;
+        DistributedInputClient::GetInstance().inputTypes_ = DInputDeviceType::NONE;
     }
 }
 
