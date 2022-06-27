@@ -26,6 +26,7 @@
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_hitrace.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
 #include "hisysevent_util.h"
@@ -728,14 +729,14 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
 int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& deviceId,
     sptr<IPrepareDInputCallback> callback, sptr<IAddWhiteListInfosCallback> addWhiteListCallback)
 {
-    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_PREPARE, deviceId,
-        "dinput prepare remote input call");
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_PREPARE, deviceId, "dinput prepare call");
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
-            "dinput prepare remote input call failed in callback is nullptr");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "dinput prepare failed in callback is nullptr");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
 
@@ -743,30 +744,28 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& dev
         if (iter.devId == deviceId) {
             callback->OnResult(deviceId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL);
             HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
-                "dinput prepare remote input call failed in already prepared");
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "dinput prepare failed in already prepared");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
         }
     }
+
     int32_t ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(deviceId);
     if (ret != DH_SUCCESS) {
         DHLOGE("Open softbus session fail.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
-            "dinput prepare distributed hardware failed in open softbus");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "dinput prepare failed in open softbus");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
-    DInputClientPrepareInfo info;
-    info.devId = deviceId;
-    info.preCallback = callback;
-    info.addWhiteListCallback = addWhiteListCallback;
+    DInputClientPrepareInfo info(deviceId, callback, addWhiteListCallback);
     preCallbacks_.push_back(info);
 
     ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(deviceId);
     if (ret != DH_SUCCESS) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL,
-            "dinput prepare remote input call failed in transport prepare");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "dinput prepare failed in transport prepare");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
         DHLOGE("Can not send message by softbus, prepare fail.");
         for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
             if (iter->devId == deviceId) {
@@ -784,15 +783,15 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& dev
 int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& deviceId,
     sptr<IUnprepareDInputCallback> callback, sptr<IDelWhiteListInfosCallback> delWhiteListCallback)
 {
-    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId,
-        "dinput unprepare remote input call");
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId, "dinput unprepare call");
     DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL,
-            "dinput unprepare remote input call failed in callback is nullptr");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "dinput unprepare failed in callback is nullptr");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
     }
 
@@ -800,8 +799,8 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
         if (iter.devId == deviceId) {
             callback->OnResult(deviceId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL);
             HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL,
-                "dinput unprepare remote input call failed in already unprepared");
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "dinput unprepare failed in already unprepared");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
         }
     }
@@ -816,8 +815,8 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
     if (ret != DH_SUCCESS) {
         DHLOGE("Can not send message by softbus, unprepare fail.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL,
-            "dinput unprepare remote input call failed in transport unprepare");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "dinput unprepare failed in transport unprepare");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
         for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
             if (iter->devId == deviceId) {
                 iter->unpreCallback->OnResult(iter->devId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL);
@@ -834,15 +833,15 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
 int32_t DistributedInputSourceManager::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
-    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, deviceId,
-        "dinput start use call");
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, deviceId, "dinput start use call");
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL,
-            "dinput start use call failed in callback is nullptr");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in callback is nullptr");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
 
@@ -850,8 +849,8 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
         if (iter.devId == deviceId && iter.inputTypes == inputTypes) {
             callback->OnResult(deviceId, inputTypes, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL);
             HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL,
-                "dinput start use call failed in already started");
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in already started");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
         }
     }
@@ -866,8 +865,8 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
     int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, inputTypes);
     if (ret != DH_SUCCESS) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL,
-            "dinput start use call failed in transport start");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("%s called, start fail.", __func__);
         for (std::vector<DInputClientStartInfo>::iterator iter =
             staCallbacks_.begin(); iter != staCallbacks_.end(); iter++) {
@@ -886,15 +885,15 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
 int32_t DistributedInputSourceManager::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
 {
-    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, deviceId,
-        "dinput stop use call");
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, deviceId, "dinput stop use call");
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL,
-            "dinput stop use call failed in callback is nullptr");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in callback is nullptr");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
 
@@ -902,8 +901,8 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
         if (iter.devId == deviceId && iter.inputTypes == inputTypes) {
             callback->OnResult(deviceId, inputTypes, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL);
             HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL,
-                "dinput stop use call failed in already stoped");
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in already stoped");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
             return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
         }
     }
@@ -918,8 +917,8 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
     if (ret != DH_SUCCESS) {
         DHLOGE("%s called, stop fail.", __func__);
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL,
-            "dinput stop use call failed in transport stop");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         for (std::vector<DInputClientStopInfo>::iterator iter =
             stpCallbacks_.begin(); iter != stpCallbacks_.end(); iter++) {
             if (iter->devId == deviceId && iter->inputTypes == inputTypes) {
@@ -983,6 +982,7 @@ void DistributedInputSourceManager::RunUnregisterCallback(
 void DistributedInputSourceManager::RunPrepareCallback(
     const std::string& devId, const int32_t& status, const std::string& object)
 {
+    FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
     for (std::vector<DInputClientPrepareInfo>::iterator iter =
         preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
         if (iter->devId == devId) {
@@ -1000,6 +1000,7 @@ void DistributedInputSourceManager::RunPrepareCallback(
 void DistributedInputSourceManager::RunUnprepareCallback(
     const std::string& devId, const int32_t& status)
 {
+    FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
     for (std::vector<DInputClientUnprepareInfo>::iterator iter =
         unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
         if (iter->devId == devId) {
@@ -1017,6 +1018,7 @@ void DistributedInputSourceManager::RunUnprepareCallback(
 void DistributedInputSourceManager::RunStartCallback(
     const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
 {
+    FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     for (std::vector<DInputClientStartInfo>::iterator iter =
         staCallbacks_.begin(); iter != staCallbacks_.end(); iter++) {
         if (iter->devId == devId && iter->inputTypes == inputTypes) {
@@ -1033,6 +1035,7 @@ void DistributedInputSourceManager::RunStartCallback(
 void DistributedInputSourceManager::RunStopCallback(
     const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
 {
+    FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     for (std::vector<DInputClientStopInfo>::iterator iter =
         stpCallbacks_.begin(); iter != stpCallbacks_.end(); iter++) {
         if (iter->devId == devId && iter->inputTypes == inputTypes) {

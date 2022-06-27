@@ -191,6 +191,10 @@ private:
         std::string devId;
         sptr<IPrepareDInputCallback> preCallback = nullptr;
         sptr<IAddWhiteListInfosCallback> addWhiteListCallback = nullptr;
+
+        DInputClientPrepareInfo(std::string deviceId, sptr<IPrepareDInputCallback> prepareCallback,
+            sptr<IAddWhiteListInfosCallback> addWhiteListCallback) : devId(deviceId), preCallback(prepareCallback),
+            addWhiteListCallback(addWhiteListCallback) {}
     };
 
     struct DInputClientUnprepareInfo {
@@ -198,7 +202,7 @@ private:
         sptr<IUnprepareDInputCallback> unpreCallback = nullptr;
         sptr<IDelWhiteListInfosCallback>  delWhiteListCallback = nullptr;
     };
-    
+
     struct DInputClientStartInfo {
         std::string devId;
         uint32_t inputTypes;

@@ -28,7 +28,8 @@ ohos_shared_library("libdinput_source_trans") {
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "${service_common}/include",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include",
-    "${services_source_path}/inputinject/include"
+    "${services_source_path}/inputinject/include",
+    "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
   ]
 
   sources = [
@@ -55,6 +56,7 @@ ohos_shared_library("libdinput_source_trans") {
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
     "samgr_standard:samgr_proxy",
+    "hitrace_native:hitrace_meter",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

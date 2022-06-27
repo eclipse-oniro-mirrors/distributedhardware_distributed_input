@@ -26,6 +26,7 @@
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_hitrace.h"
 #include "dinput_softbus_define.h"
 #include "distributed_input_inject.h"
 #include "session.h"
@@ -151,11 +152,13 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
     std::string peerSessionName = SESSION_NAME_SINK + remoteDevId.substr(0, INTERCEPT_STRING_LENGTH);
     DHLOGI("OpenInputSoftbus peerSessionName:%s", peerSessionName.c_str());
 
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_OPEN_SESSION_START, DINPUT_OPEN_SESSION_TASK);
     int sessionId = OpenSession(mySessionName_.c_str(), peerSessionName.c_str(), remoteDevId.c_str(),
         GROUP_ID.c_str(), &g_sessionAttr);
     if (sessionId < 0) {
         DHLOGE("OpenSession fail, remoteDevId: %s, sessionId: %s",
             GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_OPEN_SESSION_START, DINPUT_OPEN_SESSION_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_FAIL;
     }
 
@@ -336,6 +339,7 @@ std::string DistributedInputSourceTransport::FindDeviceBySession(int32_t session
 
 int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int32_t result)
 {
+    FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_OPEN_SESSION_START, DINPUT_OPEN_SESSION_TASK);
     if (result != DH_SUCCESS) {
         std::string deviceId = FindDeviceBySession(sessionId);
         DHLOGE("session open failed, sessionId:%s, result:%d, "

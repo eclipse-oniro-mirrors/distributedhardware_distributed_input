@@ -39,6 +39,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "//third_party/json/include",
     "${services_source_path}/inputinject/include",
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
+    "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
   ]
 
   sources = [
@@ -74,6 +75,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
     "samgr_standard:samgr_proxy",
+    "hitrace_native:hitrace_meter",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
