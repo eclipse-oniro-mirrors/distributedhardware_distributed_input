@@ -39,11 +39,16 @@ DistributedInputNodeManager::DistributedInputNodeManager() : isInjectThreadRunni
 
 DistributedInputNodeManager::~DistributedInputNodeManager()
 {
-    CloseAllDevicesLocked();
+    DHLOGI("destructor start");
     isInjectThreadRunning_.store(false);
     if (eventInjectThread_.joinable()) {
         eventInjectThread_.join();
     }
+    {
+        std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
+        virtualDeviceMap_.clear();
+    }
+    DHLOGI("destructor end");
 }
 
 int32_t DistributedInputNodeManager::openDevicesNode(const std::string& devId, const std::string& dhId,
@@ -105,7 +110,8 @@ int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::
 
 void DistributedInputNodeManager::AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device)
 {
-    auto [dev_it, inserted] = devices_.insert_or_assign(dhId, std::move(device));
+    std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
+    auto [dev_it, inserted] = virtualDeviceMap_.insert_or_assign(dhId, std::move(device));
     if (!inserted) {
         DHLOGI("Device id %s exists, replaced. \n", GetAnonyString(dhId).c_str());
     }
@@ -114,27 +120,22 @@ void DistributedInputNodeManager::AddDeviceLocked(const std::string& dhId, std::
 int32_t DistributedInputNodeManager::CloseDeviceLocked(const std::string &dhId)
 {
     DHLOGI("%s called, dhId=%s", __func__, GetAnonyString(dhId).c_str());
-    std::map<std::string, std::unique_ptr<VirtualDevice>>::iterator iter = devices_.find(dhId);
-    if (iter != devices_.end()) {
-        devices_.erase(iter);
+    std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
+    std::map<std::string, std::unique_ptr<VirtualDevice>>::iterator iter = virtualDeviceMap_.find(dhId);
+    if (iter != virtualDeviceMap_.end()) {
+        virtualDeviceMap_.erase(iter);
         return DH_SUCCESS;
     }
     DHLOGE("%s called failure, dhId=%s", __func__, GetAnonyString(dhId).c_str());
     return ERR_DH_INPUT_SERVER_SOURCE_CLOSE_DEVICE_FAIL;
 }
 
-void DistributedInputNodeManager::CloseAllDevicesLocked()
-{
-    for (const auto & [id, virDevice] : devices_) {
-        CloseDeviceLocked(id);
-    }
-}
-
 int32_t DistributedInputNodeManager::getDevice(const std::string& dhId, VirtualDevice*& device)
 {
-    for (const auto& [id, virdevice] : devices_) {
-        if (id == dhId) {
-            device = virdevice.get();
+    std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
+    for (const auto& [id, virDevice] : virtualDeviceMap_) {
+        if (id.compare(dhId) == 0) {
+            device = virDevice.get();
             return DH_SUCCESS;
         }
     }
@@ -162,7 +163,7 @@ void DistributedInputNodeManager::StopInjectThread()
 
 void DistributedInputNodeManager::ReportEvent(const RawEvent rawEvent)
 {
-    std::lock_guard<std::mutex> lockGuard(mutex_);
+    std::lock_guard<std::mutex> lockGuard(injectThreadMutex_);
     injectQueue_.push(std::make_shared<RawEvent>(rawEvent));
     conditionVariable_.notify_all();
 }
@@ -173,7 +174,7 @@ void DistributedInputNodeManager::InjectEvent()
     while (isInjectThreadRunning_.load()) {
         std::shared_ptr<RawEvent> event = nullptr;
         {
-            std::unique_lock<std::mutex> waitEventLock(mutex_);
+            std::unique_lock<std::mutex> waitEventLock(injectThreadMutex_);
             conditionVariable_.wait(waitEventLock,
                 [this]() { return !isInjectThreadRunning_.load() || !injectQueue_.empty(); });
             if (injectQueue_.empty()) {

@@ -47,16 +47,17 @@ public:
 private:
     void AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device);
     int32_t CreateHandle(InputDevice event, const std::string& devId);
-    void CloseAllDevicesLocked();
     void stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf);
     void InjectEvent();
     void ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent);
 
+    /* the key is dhId, and the value is virtualDevice */
+    std::map<std::string, std::unique_ptr<VirtualDevice>> virtualDeviceMap_;
+    std::mutex virtualDeviceMapMutex_;
     std::atomic<bool> isInjectThreadRunning_;
-    std::map<std::string, std::unique_ptr<VirtualDevice>> devices_;
     std::mutex operationMutex_;
     std::thread eventInjectThread_;
-    std::mutex mutex_;
+    std::mutex injectThreadMutex_;
     std::condition_variable conditionVariable_;
     std::queue<std::shared_ptr<RawEvent>> injectQueue_;
 };
