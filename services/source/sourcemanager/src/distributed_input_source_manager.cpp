@@ -23,6 +23,7 @@
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
 #include "system_ability_definition.h"
+#include "string_ex.h"
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
@@ -30,6 +31,7 @@
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
 #include "hisysevent_util.h"
+#include "hidumper.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -673,8 +675,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(devId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
-            "dinput unregister distributed hardware failed in callback is nullptr");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
@@ -690,8 +691,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     if (it == inputDevice_.end()) {
         DHLOGE("%s called, deviceId: %s is not exist.", __func__, GetAnonyString(devId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
-            "dinput unregister distributed hardware failed in deviceId is not exist");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in deviceId is not exist");
         for (std::vector<DInputClientUnregistInfo>::iterator iter =
             unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
             if (iter->devId == devId && iter->dhId == dhId) {
@@ -707,8 +707,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     if (RemoveInputNode(devId, dhId) != DH_SUCCESS) {
         callback->OnResult(devId, dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
-            "dinput unregister distributed hardware failed in remove input node");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in remove input node");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
@@ -717,11 +716,11 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     if (DeleteDevice(devId, dhId) != DH_SUCCESS) {
         callback->OnResult(devId, dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL,
-            "dinput unregister distributed hardware failed in delete device");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in delete device");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
+    HiDumper::GetInstance().DeleteNodeInfo(devId, dhId);
     // 3.isstart callback
     handleStartServerCallback(devId);
     return DH_SUCCESS;
@@ -1152,6 +1151,27 @@ void DistributedInputSourceManager::DInputSourceListener::RecordEventLog(int64_t
     }
     DHLOGD("3.E2E-Test Source softBus receive event, EventType: %s, Code: %d, Value: %d, Path: %s, When: " PRId64"",
         eventType.c_str(), code, value, path.c_str(), when);
+}
+
+int32_t DistributedInputSourceManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
+{
+    DHLOGI("DistributedInputSourceManager Dump.");
+    std::vector<std::string> argsStr;
+    for (auto iter : args) {
+        argsStr.emplace_back(Str16ToStr8(iter));
+    }
+    std::string result("");
+    if (!HiDumper::GetInstance().HiDump(argsStr, result)) {
+        DHLOGI("Hidump error.");
+        return ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL;
+    }
+
+    int ret = dprintf(fd, "%s\n", result.c_str());
+    if (ret < 0) {
+        DHLOGE("dprintf error.");
+        return ERR_DH_INPUT_HIDUMP_DPRINTF_FAIL;
+    }
+    return DH_SUCCESS;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

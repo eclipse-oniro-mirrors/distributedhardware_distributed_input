@@ -41,7 +41,6 @@ ohos_shared_library("libdinput_source") {
     "src/distributed_input_source_manager.cpp",
     "src/distributed_input_source_event_handler.cpp",
     "${common_path}/include/white_list_util.cpp",
-
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",

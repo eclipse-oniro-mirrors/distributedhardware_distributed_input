@@ -100,6 +100,8 @@ public:
     virtual int32_t IsStartDistributedInput(
         const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
 
+    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+
     class DInputSourceListener : public DInputSourceTransCallback {
     public:
         DInputSourceListener(DistributedInputSourceManager *manager);

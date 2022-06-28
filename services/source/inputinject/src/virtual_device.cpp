@@ -21,6 +21,7 @@
 #include "distributed_hardware_log.h"
 
 #include "constants_dinput.h"
+#include "hidumper.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -94,7 +95,7 @@ bool VirtualDevice::SetPhys(const std::string deviceName)
     return true;
 }
 
-bool VirtualDevice::SetUp()
+bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
 {
     fd_ = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (fd_ < 0) {
@@ -106,7 +107,7 @@ bool VirtualDevice::SetUp()
     if (strncpy_s(dev_.name, sizeof(dev_.name), deviceName_.c_str(), deviceName_.size()) != 0) {
         return false;
     };
-
+    HiDumper::GetInstance().SaveNodeInfo(devId, deviceName_, dhId);
     dev_.id.bustype = busTtype_;
     dev_.id.vendor = vendorId_;
     dev_.id.product = productId_;

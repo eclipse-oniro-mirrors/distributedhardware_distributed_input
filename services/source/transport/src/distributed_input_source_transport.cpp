@@ -29,6 +29,7 @@
 #include "dinput_hitrace.h"
 #include "dinput_softbus_define.h"
 #include "distributed_input_inject.h"
+#include "hidumper.h"
 #include "session.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
@@ -162,6 +163,8 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_FAIL;
     }
 
+    HiDumper::GetInstance().CreateSessionInfo(remoteDevId, sessionId, mySessionName_, peerSessionName,
+        SessionStatus::OPENING);
     {
         std::unique_lock<std::mutex> sessionLock(operationMutex_);
         sessionDevMap_[remoteDevId] = sessionId;
@@ -181,6 +184,7 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
 
     DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%s",
         GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
+    HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::OPENED);
     return DH_SUCCESS;
 }
 
@@ -196,10 +200,13 @@ void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remot
     int32_t sessionId = sessionDevMap_[remoteDevId];
 
     DHLOGI("RemoteDevId: %s, sessionId: %s", GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
+    HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::CLOSING);
     CloseSession(sessionId);
     sessionDevMap_.erase(remoteDevId);
     channelStatusMap_.erase(remoteDevId);
     DistributedInputInject::GetInstance().StopInjectThread();
+    HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::CLOSED);
+    HiDumper::GetInstance().DeleteSessionInfo(remoteDevId);
 }
 
 void DistributedInputSourceTransport::RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback)

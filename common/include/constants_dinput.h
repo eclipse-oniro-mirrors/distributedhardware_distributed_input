@@ -230,6 +230,14 @@ namespace DistributedInput {
          */
         SINK_SERVER_TYPE = 2,
     };
+
+    // Current Input Session Status
+    enum class SessionStatus : uint32_t {
+        CLOSED = 0x00,
+        OPENING = 0x01,
+        OPENED = 0x02,
+        CLOSING = 0x03,
+    };
 }
 }
 }

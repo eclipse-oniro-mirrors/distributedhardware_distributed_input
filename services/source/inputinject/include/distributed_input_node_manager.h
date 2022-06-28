@@ -46,7 +46,7 @@ public:
 
 private:
     void AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device);
-    int32_t CreateHandle(InputDevice event, const std::string& devId);
+    int32_t CreateHandle(InputDevice event, const std::string& devId, const std::string& dhId);
     void stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf);
     void InjectEvent();
     void ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent);

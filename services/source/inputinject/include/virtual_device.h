@@ -38,7 +38,7 @@ public:
     bool DoIoctl(int32_t fd, int32_t request, const uint32_t value);
     bool CreateKey();
     bool SetPhys(const std::string deviceName);
-    bool SetUp();
+    bool SetUp(const std::string& devId, const std::string& dhId);
     bool InjectInputEvent(const input_event& event);
     void SetNetWorkId(const std::string netWorkId);
 

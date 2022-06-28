@@ -44,6 +44,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//third_party/json/include",
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "${services_sink_path}/inputcollector/include",
+    "${dfx_utils_path}/include",
   ]
 
   sources = [
@@ -80,6 +81,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/openssl:libcrypto_static",
+    "${dfx_utils_path}:libdinput_dfx_utils",
   ]
 
   external_deps = [

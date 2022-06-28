@@ -56,7 +56,7 @@ int32_t DistributedInputNodeManager::openDevicesNode(const std::string& devId, c
 {
     InputDevice event;
     stringTransJsonTransStruct(parameters, event);
-    if (CreateHandle(event, devId) < 0) {
+    if (CreateHandle(event, devId, dhId) < 0) {
         return ERR_DH_INPUT_SERVER_SOURCE_OPEN_DEVICE_NODE_FAIL;
     }
 
@@ -78,7 +78,7 @@ void DistributedInputNodeManager::stringTransJsonTransStruct(const std::string& 
     recMsg.at("classes").get_to(pBuf.classes);
 }
 
-int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::string& devId)
+int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::string& devId, const std::string& dhId)
 {
     std::unique_lock<std::mutex> my_lock(operationMutex_);
     std::unique_ptr<VirtualDevice> device;
@@ -100,7 +100,7 @@ int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::
 
     device->SetNetWorkId(devId);
 
-    if (!device->SetUp()) {
+    if (!device->SetUp(devId, dhId)) {
         DHLOGE("could not create new virtual device\n");
         return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
     }

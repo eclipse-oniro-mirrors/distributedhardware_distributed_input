@@ -25,6 +25,7 @@
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "hidumper.h"
 #include "session.h"
 #include "softbus_bus_center.h"
 
@@ -281,7 +282,8 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
     }
     DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s",
         mySessionName, peerSessionName, GetAnonyString(peerDevId).c_str());
-
+    HiDumper::GetInstance().CreateSessionInfo(std::string(peerDevId), sessionId, mySessionName, peerSessionName,
+        SessionStatus::OPENED);
     return DH_SUCCESS;
 }
 
@@ -291,8 +293,14 @@ void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
     if (sessionIdSet_.count(sessionId) > 0) {
         sessionIdSet_.erase(sessionId);
     }
-
+    char peerDevId[DEVICE_ID_SIZE_MAX] = "";
+    int ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
+    if (ret != DH_SUCCESS) {
+        DHLOGI("get my peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+    }
     DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
+    HiDumper::GetInstance().SetSessionStatus(std::string(peerDevId), SessionStatus::CLOSED);
+    HiDumper::GetInstance().DeleteSessionInfo(std::string(peerDevId));
 }
 
 void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)

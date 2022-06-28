@@ -27,6 +27,7 @@ ohos_shared_library("libdinput_sink_trans") {
     "//third_party/json/include",
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "${service_common}/include",
+    "${dfx_utils_path}/include",
   ]
 
   sources = [
@@ -46,6 +47,7 @@ ohos_shared_library("libdinput_sink_trans") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
+    "${dfx_utils_path}:libdinput_dfx_utils",
   ]
 
   external_deps = [

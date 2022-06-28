@@ -30,6 +30,7 @@ ohos_shared_library("libdinput_dfx_utils") {
 
   sources = [
     "src/hisysevent_util.cpp",
+    "src/hidumper.cpp",
   ]
 
   defines = [

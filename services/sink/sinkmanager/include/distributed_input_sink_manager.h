@@ -88,6 +88,7 @@ public:
      */
     std::shared_ptr<DistributedInputSinkEventHandler> GetEventHandler();
 
+    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 private:
     bool isAlreadyInitWhiteList_ = false;
     ServiceSinkRunningState serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;

@@ -25,6 +25,7 @@ ohos_shared_library("libdinput_inject") {
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
     "//third_party/json/include",
+    "${dfx_utils_path}/include",
   ]
 
   sources = [
@@ -47,6 +48,7 @@ ohos_shared_library("libdinput_inject") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//third_party/openssl:libcrypto_static",
+    "${dfx_utils_path}:libdinput_dfx_utils",
   ]
 
   external_deps = [

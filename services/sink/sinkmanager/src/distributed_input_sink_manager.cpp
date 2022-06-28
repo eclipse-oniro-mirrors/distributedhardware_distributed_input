@@ -21,12 +21,14 @@
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
 #include "system_ability_definition.h"
+#include "string_ex.h"
 
 #include "distributed_input_collector.h"
 #include "distributed_input_sink_switch.h"
 #include "distributed_input_sink_transport.h"
 
 #include "dinput_errcode.h"
+#include "hidumper.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -355,6 +357,27 @@ void DistributedInputSinkManager::SetInputTypes(const uint32_t& inputTypes)
 {
     inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
 }
-} // namespace DistributedInput
+
+int32_t DistributedInputSinkManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
+{
+    DHLOGI("DistributedInputSinkManager Dump.");
+    std::vector<std::string> argsStr;
+    for (auto iter : args) {
+        argsStr.emplace_back(Str16ToStr8(iter));
+    }
+    std::string result("");
+    if (!HiDumper::GetInstance().HiDump(argsStr, result)) {
+        DHLOGI("Hidump error.");
+        return ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL;
+    }
+
+    int ret = dprintf(fd, "%s\n", result.c_str());
+    if (ret < 0) {
+        DHLOGE("dprintf error.");
+        return ERR_DH_INPUT_HIDUMP_DPRINTF_FAIL;
+    }
+    return DH_SUCCESS;
+}
+} // namespace DistributedInputanager
 } // namespace DistributedHardware
 } // namespace OHOS
