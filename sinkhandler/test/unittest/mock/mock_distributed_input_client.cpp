@@ -154,16 +154,6 @@ DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t&
     return serverType;
 }
 
-bool DistributedInputClient::GetDInputSourceProxy()
-{
-    return true;
-}
-
-bool DistributedInputClient::GetDInputSinkProxy()
-{
-    return true;
-}
-
 bool DistributedInputClient::IsJsonData(std::string strData) const
 {
     return true;

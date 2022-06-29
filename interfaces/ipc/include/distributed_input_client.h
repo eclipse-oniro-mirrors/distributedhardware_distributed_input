@@ -29,9 +29,9 @@
 #include "start_d_input_server_call_back_stub.h"
 #include "unregister_d_input_call_back_stub.h"
 
+#include "dinput_sa_manager.h"
 #include "idistributed_hardware_source.h"
 #include "idistributed_hardware_sink.h"
-#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -70,14 +70,6 @@ public:
 
     DInputServerType IsStartDistributedInput(const uint32_t& inputType);
 
-    bool HasDInputSourceProxy();
-
-    bool SetDInputSourceProxy(const sptr<IRemoteObject> &remoteObject);
-
-    bool HasDInputSinkProxy();
-
-    bool SetDInputSinkProxy(const sptr<IRemoteObject> &remoteObject);
-
 public:
     class RegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
     public:
@@ -114,30 +106,14 @@ public:
         void OnResult(const std::string &deviceId);
     };
 
-    class SystemAbilityListener : public SystemAbilityStatusChangeStub {
-    public:
-        void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-        void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-    };
-
 private:
     DistributedInputClient();
-    void Init();
-    bool GetDInputSourceProxy();
-    bool GetDInputSinkProxy();
     bool IsJsonData(std::string strData) const;
     void AddWhiteListInfos(const std::string &deviceId, const std::string &strJson) const;
     void DelWhiteListInfos(const std::string &deviceId) const;
 
 private:
     static std::shared_ptr<DistributedInputClient> instance;
-    std::mutex mutex_;
-    std::atomic<bool> dInputSourceSAOnline = false;
-    std::atomic<bool> dInputSinkSAOnline = false;
-    std::atomic<bool> isSubscribeSrcSAChangeListener = false;
-    std::atomic<bool> isSubscribeSinkSAChangeListener = false;
-    sptr<IDistributedSourceInput> dInputSourceProxy_ = nullptr;
-    sptr<IDistributedSinkInput> dInputSinkProxy_ = nullptr;
 
     bool m_bIsAlreadyInitWhiteList = false;
     const std::string localDevId_ = "localNodeDevice";
@@ -151,7 +127,6 @@ private:
     sptr<StartDInputServerCb> sourceTypeCallback = nullptr;
     sptr<AddWhiteListInfosCb> addWhiteListCallback = nullptr;
     sptr<DelWhiteListInfosCb> delWhiteListCallback = nullptr;
-    sptr<SystemAbilityListener> saListenerCallback = nullptr;
 
     struct DHardWareFwkRegistInfo {
         std::string devId;

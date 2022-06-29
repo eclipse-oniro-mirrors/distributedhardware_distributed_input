@@ -36,7 +36,7 @@ int32_t DistributedInputSinkHandler::InitSink(const std::string &params)
 {
     DHLOGD("InitSource");
     std::unique_lock<std::mutex> lock(proxyMutex_);
-    if (!DistributedInputClient::GetInstance().HasDInputSinkProxy()) {
+    if (!DinputSAManager::GetInstance().HasDInputSinkProxy()) {
         sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!samgr) {
             DHLOGE("Failed to get system ability mgr.");
@@ -54,7 +54,7 @@ int32_t DistributedInputSinkHandler::InitSink(const std::string &params)
     }
 
     auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOAD_SA_TIMEOUT_MS),
-        [this]() { return (DistributedInputClient::GetInstance().HasDInputSinkProxy()); });
+        [this]() { return (DinputSAManager::GetInstance().HasDInputSinkProxy()); });
     if (!waitStatus) {
         DHLOGE("dinput load sa timeout.");
         return ERR_DH_INPUT_SINK_HANDLER_INIT_SINK_SA_FAIL;
@@ -67,7 +67,7 @@ void DistributedInputSinkHandler::FinishStartSA(const std::string &params, const
 {
     DHLOGD("FinishStartSA");
     std::unique_lock<std::mutex> lock(proxyMutex_);
-    DistributedInputClient::GetInstance().SetDInputSinkProxy(remoteObject);
+    DinputSAManager::GetInstance().SetDInputSinkProxy(remoteObject);
     DistributedInputClient::GetInstance().InitSink();
     proxyConVar_.notify_all();
 }

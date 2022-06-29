@@ -33,41 +33,7 @@ std::shared_ptr<DistributedInputClient> DistributedInputClient::instance(new Dis
 
 DistributedInputClient::DistributedInputClient()
 {
-    Init();
-}
-
-void DistributedInputClient::Init()
-{
-    saListenerCallback = new(std::nothrow) SystemAbilityListener();
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-
-    if (!systemAbilityManager) {
-        DHLOGE("get system ability manager failed.");
-        return;
-    }
-
-    if (!isSubscribeSrcSAChangeListener.load()) {
-        DHLOGI("try subscribe source sa change listener, sa id: %d", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
-        int32_t ret = systemAbilityManager->SubscribeSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID,
-            saListenerCallback);
-        if (ret != DH_SUCCESS) {
-            DHLOGE("subscribe source sa change failed: %d", ret);
-            return;
-        }
-        isSubscribeSrcSAChangeListener.store(true);
-    }
-
-    if (!isSubscribeSinkSAChangeListener.load()) {
-        DHLOGI("try subscribe sink sa change listener, sa id: %d", DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID);
-        int32_t ret = systemAbilityManager->SubscribeSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID,
-            saListenerCallback);
-        if (ret != DH_SUCCESS) {
-            DHLOGE("subscribe sink sa change failed: %d", ret);
-            return;
-        }
-        isSubscribeSinkSAChangeListener.store(true);
-    }
+    DinputSAManager::GetInstance().Init();
 }
 
 DistributedInputClient &DistributedInputClient::GetInstance()
@@ -92,7 +58,6 @@ void DistributedInputClient::RegisterDInputCb::OnResult(
 
 void DistributedInputClient::UnregisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
-
 {
     for (std::vector<DHardWareFwkUnRegistInfo>::iterator iter =
         DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.begin();
@@ -132,51 +97,25 @@ void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& de
     DistributedInputClient::GetInstance().DelWhiteListInfos(deviceId);
 }
 
-void DistributedInputClient::SystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId,
-    const std::string& deviceId)
-{
-    if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID) {
-        DistributedInputClient::GetInstance().dInputSourceSAOnline.store(true);
-    } else if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
-        DistributedInputClient::GetInstance().dInputSinkSAOnline.store(true);
-    }
-    DHLOGI("sa %d is added.", systemAbilityId);
-}
-
-void DistributedInputClient::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId,
-    const std::string& deviceId)
-{
-    if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID) {
-        DistributedInputClient::GetInstance().dInputSourceSAOnline.store(false);
-        std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().mutex_);
-        DistributedInputClient::GetInstance().dInputSourceProxy_ = nullptr;
-    } else if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
-        DistributedInputClient::GetInstance().dInputSinkSAOnline.store(false);
-        std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().mutex_);
-        DistributedInputClient::GetInstance().dInputSinkProxy_ = nullptr;
-    }
-    DHLOGI("sa %d is removed.", systemAbilityId);
-}
-
 int32_t DistributedInputClient::InitSource()
 {
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-    return dInputSourceProxy_->Init();
+    return DinputSAManager::GetInstance().dInputSourceProxy_->Init();
 }
 
 int32_t DistributedInputClient::InitSink()
 {
-    if (!GetDInputSinkProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSinkProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SINK_PROXY_FAIL;
     }
-    return dInputSinkProxy_->Init();
+    return DinputSAManager::GetInstance().dInputSinkProxy_->Init();
 }
 
 int32_t DistributedInputClient::ReleaseSource()
 {
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
@@ -190,12 +129,12 @@ int32_t DistributedInputClient::ReleaseSource()
     addWhiteListCallback = nullptr;
     delWhiteListCallback = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList();
-    return dInputSourceProxy_->Release();
+    return DinputSAManager::GetInstance().dInputSourceProxy_->Release();
 }
 
 int32_t DistributedInputClient::ReleaseSink()
 {
-    if (!GetDInputSinkProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSinkProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SINK_PROXY_FAIL;
     }
     serverType = DInputServerType::NULL_SERVER_TYPE;
@@ -203,7 +142,7 @@ int32_t DistributedInputClient::ReleaseSink()
     m_bIsAlreadyInitWhiteList = false;
     sinkTypeCallback = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList(localDevId_);
-    return dInputSinkProxy_->Release();
+    return DinputSAManager::GetInstance().dInputSinkProxy_->Release();
 }
 
 int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
@@ -212,7 +151,7 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
         __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
 
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("RegisterDistributedHardware client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -234,7 +173,8 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
     dHardWareFwkRstInfos.push_back(info);
 
     callbackRegister = new(std::nothrow) RegisterDInputCb();
-    return dInputSourceProxy_->RegisterDistributedHardware(devId, dhId, parameters, callbackRegister);
+    return DinputSAManager::GetInstance().dInputSourceProxy_->RegisterDistributedHardware(devId, dhId, parameters,
+        callbackRegister);
 }
 
 int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
@@ -243,7 +183,7 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
     DHLOGI("%s called, deviceId: %s,  dhId: %s",
         __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("UnregisterDistributedHardware client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -265,7 +205,8 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
     dHardWareFwkUnRstInfos.push_back(info);
 
     callbackUnregister = new(std::nothrow) UnregisterDInputCb();
-    return dInputSourceProxy_->UnregisterDistributedHardware(devId, dhId, callbackUnregister);
+    return DinputSAManager::GetInstance().dInputSourceProxy_->UnregisterDistributedHardware(devId, dhId,
+        callbackUnregister);
 }
 
 int32_t DistributedInputClient::PrepareRemoteInput(
@@ -273,7 +214,7 @@ int32_t DistributedInputClient::PrepareRemoteInput(
 {
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
 
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -283,7 +224,8 @@ int32_t DistributedInputClient::PrepareRemoteInput(
     }
 
     addWhiteListCallback = new(std::nothrow) AddWhiteListInfosCb();
-    return dInputSourceProxy_->PrepareRemoteInput(deviceId, callback, addWhiteListCallback);
+    return DinputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(deviceId, callback,
+        addWhiteListCallback);
 }
 
 int32_t DistributedInputClient::UnprepareRemoteInput(
@@ -291,7 +233,7 @@ int32_t DistributedInputClient::UnprepareRemoteInput(
 {
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
 
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -301,7 +243,8 @@ int32_t DistributedInputClient::UnprepareRemoteInput(
     }
 
     delWhiteListCallback = new(std::nothrow) DelWhiteListInfosCb();
-    return dInputSourceProxy_->UnprepareRemoteInput(deviceId, callback, delWhiteListCallback);
+    return DinputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(deviceId, callback,
+        delWhiteListCallback);
 }
 
 int32_t DistributedInputClient::StartRemoteInput(
@@ -309,7 +252,7 @@ int32_t DistributedInputClient::StartRemoteInput(
 {
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("StartRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -321,7 +264,7 @@ int32_t DistributedInputClient::StartRemoteInput(
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
 
-    return dInputSourceProxy_->StartRemoteInput(deviceId, inputTypes, callback);
+    return DinputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(deviceId, inputTypes, callback);
 }
 
 int32_t DistributedInputClient::StopRemoteInput(
@@ -329,7 +272,7 @@ int32_t DistributedInputClient::StopRemoteInput(
 {
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
-    if (!GetDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("StopRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -341,7 +284,7 @@ int32_t DistributedInputClient::StopRemoteInput(
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
 
-    return dInputSourceProxy_->StopRemoteInput(deviceId, inputTypes, callback);
+    return DinputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(deviceId, inputTypes, callback);
 }
 
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
@@ -374,14 +317,15 @@ DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t&
     int32_t retSource = 0;
     int32_t retSink = 0;
 
-    if (sourceTypeCallback == nullptr && GetDInputSourceProxy()) {
+    if (sourceTypeCallback == nullptr && DinputSAManager::GetInstance().GetDInputSourceProxy()) {
         sourceTypeCallback = new(std::nothrow) StartDInputServerCb();
-        retSource = dInputSourceProxy_->IsStartDistributedInput(inputType, sourceTypeCallback);
+        retSource = DinputSAManager::GetInstance().dInputSourceProxy_->IsStartDistributedInput(inputType,
+            sourceTypeCallback);
     }
 
-    if (sinkTypeCallback == nullptr && GetDInputSinkProxy()) {
+    if (sinkTypeCallback == nullptr && DinputSAManager::GetInstance().GetDInputSinkProxy()) {
         sinkTypeCallback = new(std::nothrow) StartDInputServerCb();
-        retSink = dInputSinkProxy_->IsStartDistributedInput(inputType, sinkTypeCallback);
+        retSink = DinputSAManager::GetInstance().dInputSinkProxy_->IsStartDistributedInput(inputType, sinkTypeCallback);
     }
 
     if (static_cast<DInputServerType>(retSource) != DInputServerType::NULL_SERVER_TYPE) {
@@ -395,141 +339,6 @@ DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t&
     } else {
         return DInputServerType::NULL_SERVER_TYPE;
     }
-}
-
-bool DistributedInputClient::GetDInputSourceProxy()
-{
-    if (!isSubscribeSrcSAChangeListener.load()) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!isSubscribeSrcSAChangeListener.load()) {
-            sptr<ISystemAbilityManager> systemAbilityManager =
-                SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-            if (!systemAbilityManager) {
-                DHLOGE("get system ability manager failed.");
-                return false;
-            }
-
-            DHLOGI("try subscribe source sa change listener, sa id: %d", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
-            int32_t ret = systemAbilityManager->SubscribeSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID,
-                saListenerCallback);
-            if (ret != DH_SUCCESS) {
-                DHLOGE("subscribe source sa change failed: %d", ret);
-                return false;
-            }
-            isSubscribeSrcSAChangeListener.store(true);
-        }
-    }
-
-    if (dInputSourceSAOnline.load() && !dInputSourceProxy_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (dInputSourceProxy_ != nullptr) {
-            DHLOGI("dinput source proxy has already got.");
-            return true;
-        }
-        sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-
-        if (!systemAbilityManager) {
-            DHLOGE("get system ability manager failed.");
-            return false;
-        }
-        DHLOGI("%s try get sa: %d", __func__, DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
-        sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
-            DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
-        if (!remoteObject) {
-            return false;
-        }
-
-        dInputSourceProxy_ = iface_cast<IDistributedSourceInput>(remoteObject);
-
-        if ((!dInputSourceProxy_) || (!dInputSourceProxy_->AsObject())) {
-            return false;
-        }
-    }
-    return dInputSourceProxy_ != nullptr;
-}
-
-bool DistributedInputClient::HasDInputSourceProxy()
-{
-    return dInputSourceProxy_ != nullptr;
-}
-
-bool DistributedInputClient::SetDInputSourceProxy(const sptr<IRemoteObject> &remoteObject)
-{
-    dInputSourceProxy_ = iface_cast<IDistributedSourceInput>(remoteObject);
-
-    if ((!dInputSourceProxy_) || (!dInputSourceProxy_->AsObject())) {
-        DHLOGE("Failed to get dinput source proxy.");
-        return false;
-    }
-    return true;
-}
-
-bool DistributedInputClient::HasDInputSinkProxy()
-{
-    return dInputSinkProxy_ != nullptr;
-}
-
-bool DistributedInputClient::SetDInputSinkProxy(const sptr<IRemoteObject> &remoteObject)
-{
-    dInputSinkProxy_ = iface_cast<IDistributedSinkInput>(remoteObject);
-
-    if ((!dInputSinkProxy_) || (!dInputSinkProxy_->AsObject())) {
-        DHLOGE("Failed to get dinput sink proxy.");
-        return false;
-    }
-    return true;
-}
-
-bool DistributedInputClient::GetDInputSinkProxy()
-{
-    if (!isSubscribeSinkSAChangeListener.load()) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!isSubscribeSinkSAChangeListener.load()) {
-            sptr<ISystemAbilityManager> systemAbilityManager =
-                SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-            if (!systemAbilityManager) {
-                DHLOGE("get system ability manager failed.");
-                return false;
-            }
-
-            DHLOGI("try subscribe sink sa change listener, sa id: %d", DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID);
-            int32_t ret = systemAbilityManager->SubscribeSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID,
-                saListenerCallback);
-            if (ret != DH_SUCCESS) {
-                DHLOGE("subscribe sink sa change failed: %d", ret);
-                return false;
-            }
-            isSubscribeSinkSAChangeListener.store(true);
-        }
-    }
-
-    if (dInputSinkSAOnline.load() && !dInputSinkProxy_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (dInputSinkProxy_ != nullptr) {
-            DHLOGI("dinput sink proxy has already got.");
-            return true;
-        }
-        sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-        if (!systemAbilityManager) {
-            DHLOGE("get system ability manager failed.");
-            return false;
-        }
-
-        sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
-            DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID);
-        if (!remoteObject) {
-            return false;
-        }
-
-        dInputSinkProxy_ = iface_cast<IDistributedSinkInput>(remoteObject);
-
-        if ((!dInputSinkProxy_) || (!dInputSinkProxy_->AsObject())) {
-            return false;
-        }
-    }
-    return dInputSinkProxy_ != nullptr;
 }
 
 bool DistributedInputClient::IsJsonData(std::string strData) const

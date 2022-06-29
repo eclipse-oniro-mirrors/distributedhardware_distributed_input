@@ -35,7 +35,7 @@ int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
 {
     DHLOGD("InitSource");
     std::unique_lock<std::mutex> lock(proxyMutex_);
-    if (!DistributedInputClient::GetInstance().HasDInputSourceProxy()) {
+    if (!DinputSAManager::GetInstance().HasDInputSourceProxy()) {
         sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!samgr) {
             DHLOGE("Failed to get system ability mgr.");
@@ -53,7 +53,7 @@ int32_t DistributedInputSourceHandler::InitSource(const std::string &params)
     }
 
     auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(INPUT_LOAD_SA_TIMEOUT_MS),
-        [this]() { return (DistributedInputClient::GetInstance().HasDInputSourceProxy()); });
+        [this]() { return (DinputSAManager::GetInstance().HasDInputSourceProxy()); });
     if (!waitStatus) {
         DHLOGE("dinput load sa timeout.");
         return ERR_DH_INPUT_SINK_HANDLER_INIT_SOURCE_SA_FAIL;
@@ -66,7 +66,7 @@ void DistributedInputSourceHandler::FinishStartSA(const std::string &params, con
 {
     DHLOGD("FinishStartSA");
     std::unique_lock<std::mutex> lock(proxyMutex_);
-    DistributedInputClient::GetInstance().SetDInputSourceProxy(remoteObject);
+    DinputSAManager::GetInstance().SetDInputSourceProxy(remoteObject);
     DistributedInputClient::GetInstance().InitSource();
     proxyConVar_.notify_all();
 }
