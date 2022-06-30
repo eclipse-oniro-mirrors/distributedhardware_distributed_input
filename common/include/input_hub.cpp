@@ -514,17 +514,21 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
     ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(device->absBitmask)), device->absBitmask);
     ioctl(fd, EVIOCGBIT(EV_REL, sizeof(device->relBitmask)), device->relBitmask);
 
-    // See if this is a keyboard.
-    bool haveKeyboardKeys = ContainsNonZeroByte(device->keyBitmask, 0, SizeofBitArray(BTN_MISC));
-    if (haveKeyboardKeys) {
-        device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
-    }
-
     // See if this is a cursor device such as a trackball or mouse.
     if (TestBit(BTN_MOUSE, device->keyBitmask)
         && TestBit(REL_X, device->relBitmask)
         && TestBit(REL_Y, device->relBitmask)) {
         device->classes |= INPUT_DEVICE_CLASS_CURSOR;
+    }
+
+    // for Linux version 4.14.116, touchpad recognized as mouse and keyboard at same time,
+    // need to avoid device->classes to be 0x09, which mmi can't handler.
+    // See if this is a keyboard.
+    if (device->classes == 0) {
+        bool haveKeyboardKeys = ContainsNonZeroByte(device->keyBitmask, 0, SizeofBitArray(BTN_MISC));
+        if (haveKeyboardKeys) {
+            device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
+        }
     }
 
     // If the device isn't recognized as something we handle, don't monitor it.
