@@ -72,8 +72,6 @@ private:
 
 private:
     std::string deviceId_;
-    std::set<int32_t> sessionIdSet_;
-    std::map<std::string, int32_t> sessionDevMap_;
     std::string mySessionName_;
 
     std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> eventHandler_;

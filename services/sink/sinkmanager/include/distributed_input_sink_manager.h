@@ -94,7 +94,7 @@ private:
     ServiceSinkRunningState serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DInputServerType isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
     std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener_;
-    sptr<IStartDInputServerCallback>  startServerCallback_ = nullptr;
+    sptr<IStartDInputServerCallback> startServerCallback_ = nullptr;
 
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<DistributedInputSinkEventHandler> handler_;

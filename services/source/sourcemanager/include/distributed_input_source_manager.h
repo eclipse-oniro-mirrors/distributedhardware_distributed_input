@@ -236,6 +236,7 @@ private:
     std::vector<InputDeviceId> inputDevice_;
     bool InitAuto();
     void handleStartServerCallback(const std::string& devId);
+    std::mutex operationMutex_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

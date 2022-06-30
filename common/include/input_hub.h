@@ -85,6 +85,7 @@ private:
     int32_t RegisterDeviceForEpollLocked(const Device& device);
     void AddDeviceLocked(std::unique_ptr<Device> device);
     void CloseDeviceLocked(Device& device);
+    void CloseDeviceForAllLocked(Device& device);
     int32_t UnregisterDeviceFromEpollLocked(const Device& device) const;
     int32_t UnregisterFdFromEpoll(int fd) const;
     int32_t ReadNotifyLocked();
@@ -94,7 +95,7 @@ private:
     Device* GetDeviceByDescriptorLocked(const std::string& descriptor);
     Device* GetDeviceByPathLocked(const std::string& devicePath);
     Device* GetDeviceByFdLocked(int fd);
-    Device* GetDeviceByFd(int fd);
+    Device* GetSupportDeviceByFd(int fd);
 
     bool ContainsNonZeroByte(const uint8_t* array, uint32_t startIndex, uint32_t endIndex);
     int64_t ProcessEventTimestamp(const input_event& event);
@@ -106,7 +107,7 @@ private:
     bool TestBit(uint32_t bit, const uint8_t* array);
     /* this macro computes the number of bytes needed to represent a bit array of the specified size */
     uint32_t SizeofBitArray(uint32_t bit);
-    bool GetIsSupportInputTypes(uint32_t classes);
+    bool IsSupportInputTypes(uint32_t classes);
     void RecordEventLog(const RawEvent* event);
 
     int epollFd_;
@@ -114,21 +115,25 @@ private:
     int inputWd_;
 
     std::vector<std::unique_ptr<Device>> openingDevices_;
+    std::mutex openingDevicesMutex_;
     std::vector<std::unique_ptr<Device>> closingDevices_;
+    std::mutex closingDevicesMutex_;
     std::unordered_map<int32_t, std::unique_ptr<Device>> devices_;
-    bool needToScanDevices_;
+    std::mutex devicesMutex_;
+
+    std::atomic<bool> needToScanDevices_;
     std::string deviceId_;
-    int32_t nextDeviceId_;
+    std::atomic<int32_t> nextDeviceId_;
 
     // The array of pending epoll events and the index of the next event to be handled.
     struct epoll_event mPendingEventItems[EPOLL_MAX_EVENTS];
-    size_t pendingEventCount_;
-    size_t pendingEventIndex_;
-    bool pendingINotify_;
+    std::atomic<int32_t> pendingEventCount_;
+    std::atomic<int32_t> pendingEventIndex_;
+    std::atomic<bool> pendingINotify_;
     std::mutex operationMutex_;
-    std::mutex visitMutex_;
-    bool deviceChanged_;
-    uint32_t inputTypes_;
+
+    std::atomic<bool> deviceChanged_;
+    std::atomic<uint32_t> inputTypes_;
     std::atomic<bool> isStartCollectEvent_;
     std::atomic<bool> isStartCollectHandler_;
 };

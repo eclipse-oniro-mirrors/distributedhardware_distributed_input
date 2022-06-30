@@ -540,7 +540,6 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_REGISTER, devId, dhId, "dinput register call.");
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
         __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
-
     if (callback == nullptr) {
         DHLOGE(
             "%s called, deviceId: %s callback is null.",
@@ -550,6 +549,8 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
             "dinput register distributed hardware failed callback is nullptr.");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL;
     }
+
+    std::lock_guard<std::mutex> lock(operationMutex_);
 
     DInputClientRegistInfo info;
     info.devId = devId;
@@ -678,6 +679,8 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
+
+    std::lock_guard<std::mutex> lock(operationMutex_);
 
     DInputClientUnregistInfo info;
     info.devId = devId;
@@ -950,6 +953,7 @@ int32_t DistributedInputSourceManager::IsStartDistributedInput(
 void DistributedInputSourceManager::RunRegisterCallback(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
+    std::lock_guard<std::mutex> lock(operationMutex_);
     for (std::vector<DInputClientRegistInfo>::iterator iter =
         regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
         if (iter->devId == devId && iter->dhId == dhId) {
@@ -966,6 +970,7 @@ void DistributedInputSourceManager::RunRegisterCallback(
 void DistributedInputSourceManager::RunUnregisterCallback(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
+    std::lock_guard<std::mutex> lock(operationMutex_);
     for (std::vector<DInputClientUnregistInfo>::iterator iter =
         unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
         if (iter->devId == devId && iter->dhId == dhId) {

@@ -42,7 +42,6 @@ public:
     int32_t GetSwitchOpenedSession();
 
 private:
-
     std::mutex operationMutex_;
     std::vector<SwitchStateData> switchVector_;
 };

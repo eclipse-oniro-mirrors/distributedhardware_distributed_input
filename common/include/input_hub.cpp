@@ -103,24 +103,28 @@ int32_t InputHub::Release()
 
 size_t InputHub::StartCollectInputEvents(RawEvent* buffer, size_t bufferSize)
 {
-    size_t count;
-    isStartCollectEvent_.store(true);
-    while (isStartCollectEvent_.load()) {
+    size_t count = 0;
+    isStartCollectEvent_ = true;
+    while (isStartCollectEvent_) {
         if (needToScanDevices_) {
             needToScanDevices_ = false;
             ScanInputDevices(DEVICE_PATH);
         }
-        while (!openingDevices_.empty()) {
-            std::unique_lock<std::mutex> deviceLock(visitMutex_);
-            std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
-            openingDevices_.pop_back();
-            DHLOGI("Reporting device opened: id=%s, name=%s\n",
-                GetAnonyInt32(device->id).c_str(), device->path.c_str());
-            auto [dev_it, inserted] = devices_.insert_or_assign(device->id, std::move(device));
-            if (!inserted) {
-                DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
+
+        {
+            std::unique_lock<std::mutex> deviceLock(openingDevicesMutex_);
+            while (!openingDevices_.empty()) {
+                std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
+                openingDevices_.pop_back();
+                DHLOGI("Reporting device opened: id=%s, name=%s\n",
+                    GetAnonyInt32(device->id).c_str(), device->path.c_str());
+                auto [dev_it, inserted] = devices_.insert_or_assign(device->id, std::move(device));
+                if (!inserted) {
+                    DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
+                }
             }
         }
+
         deviceChanged_ = false;
         count = GetEvents(buffer, bufferSize);
         // readNotify() will modify the list of devices so this must be done after
@@ -152,7 +156,8 @@ size_t InputHub::StartCollectInputEvents(RawEvent* buffer, size_t bufferSize)
 
 void InputHub::StopCollectInputEvents()
 {
-    isStartCollectEvent_.store(false);
+    DHLOGI("Stop Collect Input Events Thread");
+    isStartCollectEvent_ = false;
 }
 
 size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
@@ -170,7 +175,7 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
             }
             continue;
         }
-        Device* device = GetDeviceByFd(eventItem.data.fd);
+        Device* device = GetSupportDeviceByFd(eventItem.data.fd);
         if (!device) {
             continue;
         }
@@ -232,48 +237,57 @@ size_t InputHub::DeviceIsExists(InputDeviceEvent* buffer, size_t bufferSize)
     InputDeviceEvent* event = buffer;
     size_t capacity = bufferSize;
     // Report any devices that had last been added/removed.
-    for (auto it = closingDevices_.begin(); it != closingDevices_.end();) {
-        std::unique_ptr<Device> device = std::move(*it);
-        DHLOGI("Reporting device closed: id=%s, name=%s\n", GetAnonyInt32(device->id).c_str(), device->path.c_str());
-        event->type = DeviceType::DEVICE_REMOVED;
-        event->deviceInfo = device->identifier;
-        event += 1;
-        it = closingDevices_.erase(it);
-        if (capacity == 0) {
-            break;
+    {
+        std::unique_lock<std::mutex> my_lock(closingDevicesMutex_);
+        for (auto it = closingDevices_.begin(); it != closingDevices_.end();) {
+            std::unique_ptr<Device> device = std::move(*it);
+            DHLOGI("Reporting device closed: id=%s, name=%s\n",
+                GetAnonyInt32(device->id).c_str(), device->path.c_str());
+            event->type = DeviceType::DEVICE_REMOVED;
+            event->deviceInfo = device->identifier;
+            event += 1;
+            it = closingDevices_.erase(it);
+            if (capacity == 0) {
+                break;
+            }
+            capacity--;
         }
-        capacity--;
     }
+
     if (needToScanDevices_) {
         needToScanDevices_ = false;
         ScanInputDevices(DEVICE_PATH);
     }
-    while (!openingDevices_.empty()) {
-        std::unique_lock<std::mutex> deviceLock(visitMutex_);
-        std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
-        openingDevices_.pop_back();
-        DHLOGI("Reporting device opened: id=%s, name=%s\n", GetAnonyInt32(device->id).c_str(), device->path.c_str());
-        event->type = DeviceType::DEVICE_ADDED;
-        event->deviceInfo = device->identifier;
-        event += 1;
 
-        auto [dev_it, inserted] = devices_.insert_or_assign(device->id, std::move(device));
-        if (!inserted) {
-            DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
+    {
+        std::unique_lock<std::mutex> deviceLock(openingDevicesMutex_);
+        while (!openingDevices_.empty()) {
+            std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
+            openingDevices_.pop_back();
+            DHLOGI("Reporting device opened: id=%s, name=%s\n",
+                GetAnonyInt32(device->id).c_str(), device->path.c_str());
+            event->type = DeviceType::DEVICE_ADDED;
+            event->deviceInfo = device->identifier;
+            event += 1;
+
+            auto [dev_it, inserted] = devices_.insert_or_assign(device->id, std::move(device));
+            if (!inserted) {
+                DHLOGI("Device id %s exists, replaced. \n", GetAnonyInt32(device->id).c_str());
+            }
+            if (capacity == 0) {
+                break;
+            }
+            capacity--;
         }
-        if (capacity == 0) {
-            break;
-        }
-        capacity--;
     }
     return event - buffer;
 }
 
 size_t InputHub::StartCollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize)
 {
-    size_t count;
-    isStartCollectHandler_.store(true);
-    while (isStartCollectHandler_.load()) {
+    size_t count = 0;
+    isStartCollectHandler_ = true;
+    while (isStartCollectHandler_) {
         count = DeviceIsExists(buffer, bufferSize);
         deviceChanged_ = false;
         GetDeviceHandler();
@@ -302,7 +316,8 @@ size_t InputHub::StartCollectInputHandler(InputDeviceEvent* buffer, size_t buffe
 
 void InputHub::StopCollectInputHandler()
 {
-    isStartCollectHandler_.store(false);
+    DHLOGI("Stop Collect Input Handler Thread");
+    isStartCollectHandler_ = false;
 }
 
 void InputHub::GetDeviceHandler()
@@ -359,14 +374,14 @@ int32_t InputHub::RefreshEpollItem()
         }
     } else {
         // Some events occurred.
-        pendingEventCount_ = size_t(pollResult);
+        pendingEventCount_ = pollResult;
     }
     return DH_SUCCESS;
 }
 
 std::vector<InputDevice> InputHub::GetAllInputDevices()
 {
-    std::unique_lock<std::mutex> deviceLock(visitMutex_);
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     std::vector<InputDevice> vecDevice;
     for (const auto& [id, device] : devices_) {
         vecDevice.push_back(device->identifier);
@@ -380,7 +395,7 @@ void InputHub::ScanInputDevices(const std::string& dirname)
     struct dirent *de;
     dir = opendir(dirname.c_str());
     if (dir == nullptr) {
-        DHLOGE("error opendir dev/input :%{public}s\n", ConvertErrNo().c_str());
+        DHLOGE("error opendir /dev/input :%{public}s\n", ConvertErrNo().c_str());
         return;
     }
     size_t dirNameFirstPos = 0;
@@ -404,7 +419,7 @@ void InputHub::ScanInputDevices(const std::string& dirname)
 int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
 {
     {
-        std::unique_lock<std::mutex> deviceLock(visitMutex_);
+        std::unique_lock<std::mutex> deviceLock(devicesMutex_);
         for (const auto& [deviceId, device] : devices_) {
             if (device->path == devicePath) {
                 return DH_SUCCESS; // device was already registered
@@ -653,20 +668,35 @@ int32_t InputHub::RegisterFdForEpoll(int fd)
 
 void InputHub::AddDeviceLocked(std::unique_ptr<Device> device)
 {
-    std::unique_lock<std::mutex> deviceLock(visitMutex_);
+    std::unique_lock<std::mutex> deviceLock(openingDevicesMutex_);
     openingDevices_.push_back(std::move(device));
 }
 
 void InputHub::CloseDeviceLocked(Device& device)
 {
-    DHLOGI(
-        "Removed device: path=%s name=%s id=%s fd=%d classes=0x%x",
+    DHLOGI("Removed device: path=%s name=%s id=%s fd=%d classes=0x%x",
         device.path.c_str(), device.identifier.name.c_str(), GetAnonyInt32(device.id).c_str(),
         device.fd, device.classes);
 
     UnregisterDeviceFromEpollLocked(device);
     device.Close();
-    std::unique_lock<std::mutex> deviceLock(visitMutex_);
+    {
+        std::unique_lock<std::mutex> devicesLock(devicesMutex_);
+        std::unique_lock<std::mutex> closingDevicesLock(closingDevicesMutex_);
+        closingDevices_.push_back(std::move(devices_[device.id]));
+        devices_.erase(device.id);
+    }
+}
+
+void InputHub::CloseDeviceForAllLocked(Device& device)
+{
+    DHLOGI("Removed device: path=%s name=%s id=%s fd=%d classes=0x%x",
+        device.path.c_str(), device.identifier.name.c_str(), GetAnonyInt32(device.id).c_str(),
+        device.fd, device.classes);
+
+    UnregisterDeviceFromEpollLocked(device);
+    device.Close();
+    std::unique_lock<std::mutex> deviceLock(closingDevicesMutex_);
     closingDevices_.push_back(std::move(devices_[device.id]));
     devices_.erase(device.id);
 }
@@ -676,8 +706,8 @@ int32_t InputHub::UnregisterDeviceFromEpollLocked(const Device& device) const
     if (device.HasValidFd()) {
         int32_t result = UnregisterFdFromEpoll(device.fd);
         if (result != DH_SUCCESS) {
-            DHLOGE(
-                "Could not remove input device fd from epoll for device %s", GetAnonyInt32(device.id).c_str());
+            DHLOGE("Could not remove input device fd from epoll for device %s",
+                GetAnonyInt32(device.id).c_str());
             return result;
         }
     }
@@ -687,8 +717,7 @@ int32_t InputHub::UnregisterDeviceFromEpollLocked(const Device& device) const
 int32_t InputHub::UnregisterFdFromEpoll(int fd) const
 {
     if (epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, nullptr)) {
-        DHLOGE(
-            "Could not remove fd from epoll instance: %s", ConvertErrNo().c_str());
+        DHLOGE("Could not remove fd from epoll instance: %s", ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_UNREGISTER_FD_FAIL;
     }
     return DH_SUCCESS;
@@ -752,14 +781,16 @@ void InputHub::CloseDeviceByPathLocked(const std::string& devicePath)
 
 void InputHub::CloseAllDevicesLocked()
 {
+    DHLOGI("Close All Devices");
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     while (!devices_.empty()) {
-        CloseDeviceLocked(*(devices_.begin()->second));
+        CloseDeviceForAllLocked(*(devices_.begin()->second));
     }
 }
 
 InputHub::Device* InputHub::GetDeviceByDescriptorLocked(const std::string& descriptor)
 {
-    std::unique_lock<std::mutex> deviceLock(visitMutex_);
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto& [id, device] : devices_) {
         if (descriptor == device->identifier.descriptor) {
             return device.get();
@@ -770,7 +801,7 @@ InputHub::Device* InputHub::GetDeviceByDescriptorLocked(const std::string& descr
 
 InputHub::Device* InputHub::GetDeviceByPathLocked(const std::string& devicePath)
 {
-    std::unique_lock<std::mutex> deviceLock(visitMutex_);
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto& [id, device] : devices_) {
         if (device->path == devicePath) {
             return device.get();
@@ -781,7 +812,7 @@ InputHub::Device* InputHub::GetDeviceByPathLocked(const std::string& devicePath)
 
 InputHub::Device* InputHub::GetDeviceByFdLocked(int fd)
 {
-    std::unique_lock<std::mutex> deviceLock(visitMutex_);
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto& [id, device] : devices_) {
         if (device->fd == fd) {
             return device.get();
@@ -790,12 +821,12 @@ InputHub::Device* InputHub::GetDeviceByFdLocked(int fd)
     return nullptr;
 }
 
-InputHub::Device* InputHub::GetDeviceByFd(int fd)
+InputHub::Device* InputHub::GetSupportDeviceByFd(int fd)
 {
-    std::unique_lock<std::mutex> deviceLock(visitMutex_);
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto& [id, device] : devices_) {
         if (device->fd == fd) {
-            if (GetIsSupportInputTypes(device->classes)) {
+            if (IsSupportInputTypes(device->classes)) {
                 return device.get();
             }
         }
@@ -834,14 +865,14 @@ uint32_t InputHub::SizeofBitArray(uint32_t bit)
     return ((bit) + round) / divisor;
 }
 
-bool InputHub::GetIsSupportInputTypes(uint32_t classes)
+bool InputHub::IsSupportInputTypes(uint32_t classes)
 {
     return classes & inputTypes_;
 }
 void InputHub::SetSupportInputType(const uint32_t& inputTypes)
 {
     inputTypes_ = inputTypes;
-    DHLOGI("SetSupportInputType: inputTypes=0x%x,", inputTypes_);
+    DHLOGI("SetSupportInputType: inputTypes=0x%x,", inputTypes_.load());
 }
 
 void InputHub::RecordEventLog(const RawEvent* event)

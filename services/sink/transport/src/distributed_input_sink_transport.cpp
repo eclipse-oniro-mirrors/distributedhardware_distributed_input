@@ -43,7 +43,6 @@ DistributedInputSinkTransport::DistributedInputSinkTransport()
 DistributedInputSinkTransport::~DistributedInputSinkTransport()
 {
     DHLOGI("~DistributedInputSinkTransport");
-    sessionDevMap_.clear();
     (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
 }
 
@@ -253,9 +252,6 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
 {
     if (result != DH_SUCCESS) {
         DHLOGE("session open failed, sessionId %s", GetAnonyInt32(sessionId).c_str());
-        if (sessionIdSet_.count(sessionId) > 0) {
-            sessionIdSet_.erase(sessionId);
-        }
         return DH_SUCCESS;
     }
 
@@ -290,9 +286,7 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
 void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
 {
     DHLOGI("OnSessionClosed, sessionId:%s", GetAnonyInt32(sessionId).c_str());
-    if (sessionIdSet_.count(sessionId) > 0) {
-        sessionIdSet_.erase(sessionId);
-    }
+
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
