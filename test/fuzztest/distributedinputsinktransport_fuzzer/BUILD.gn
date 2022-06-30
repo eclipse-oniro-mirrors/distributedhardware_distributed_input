@@ -32,6 +32,7 @@ ohos_fuzztest("DistributedInputSinkTransportFuzzTest") {
     "${fwk_utils_path}/include",
     "${service_common}/include",
     "//third_party/json/include",
+    "${dfx_utils_path}/include",
   ]
 
   cflags = [
@@ -51,6 +52,7 @@ ohos_fuzztest("DistributedInputSinkTransportFuzzTest") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
+    "${dfx_utils_path}:libdinput_dfx_utils",
     ]
 
   external_deps = [
