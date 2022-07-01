@@ -76,7 +76,6 @@ private:
     // the unordered_map's key is remoteDevId.
     std::unordered_map<std::string, SessionInfo> sessionInfos_;
     std::mutex sessionMutex_;
-    std::mutex operationMutex_;
 };
 }
 }

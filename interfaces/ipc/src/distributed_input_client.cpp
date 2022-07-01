@@ -44,7 +44,6 @@ DistributedInputClient &DistributedInputClient::GetInstance()
 void DistributedInputClient::RegisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
-    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
     for (std::vector<DHardWareFwkRegistInfo>::iterator iter =
         DistributedInputClient::GetInstance().dHardWareFwkRstInfos.begin();
         iter != DistributedInputClient::GetInstance().dHardWareFwkRstInfos.end();
@@ -60,7 +59,6 @@ void DistributedInputClient::RegisterDInputCb::OnResult(
 void DistributedInputClient::UnregisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
-    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
     for (std::vector<DHardWareFwkUnRegistInfo>::iterator iter =
         DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.begin();
         iter != DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.end();
@@ -162,7 +160,6 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
         return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
     }
 
-    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
     for (auto iter : dHardWareFwkRstInfos) {
         if (iter.devId == devId && iter.dhId == dhId) {
             return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
@@ -195,7 +192,6 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
         return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
     }
 
-    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
     for (auto iter : dHardWareFwkUnRstInfos) {
         if (iter.devId == devId && iter.dhId == dhId) {
             return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
