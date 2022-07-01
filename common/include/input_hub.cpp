@@ -892,7 +892,7 @@ void InputHub::RecordEventLog(const RawEvent* event)
             eventType = "other type";
             break;
     }
-    DHLOGD("1.E2E-Test Sink collect event, EventType: %s, Code: %d, Value: %d, Path: %s, When: " PRId64"",
+    DHLOGD("1.E2E-Test Sink collect event, EventType: %s, Code: %d, Value: %d, Path: %s, When:%" PRId64 "",
         eventType.c_str(), event->code, event->value, event->path.c_str(), event->when);
 }
 
