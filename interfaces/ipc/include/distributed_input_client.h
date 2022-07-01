@@ -142,6 +142,7 @@ private:
 
     std::vector<DHardWareFwkRegistInfo> dHardWareFwkRstInfos;
     std::vector<DHardWareFwkUnRegistInfo> dHardWareFwkUnRstInfos;
+    std::mutex operationMutex_;
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware
