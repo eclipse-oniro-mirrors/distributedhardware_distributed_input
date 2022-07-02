@@ -121,8 +121,6 @@ private:
     DInputServerType serverType = DInputServerType::NULL_SERVER_TYPE;
     DInputDeviceType inputTypes_ = DInputDeviceType::NONE;
 
-    sptr<RegisterDInputCb> callbackRegister = nullptr;
-    sptr<UnregisterDInputCb> callbackUnregister = nullptr;
     sptr<StartDInputServerCb> sinkTypeCallback = nullptr;
     sptr<StartDInputServerCb> sourceTypeCallback = nullptr;
     sptr<AddWhiteListInfosCb> addWhiteListCallback = nullptr;
@@ -142,6 +140,7 @@ private:
 
     std::vector<DHardWareFwkRegistInfo> dHardWareFwkRstInfos;
     std::vector<DHardWareFwkUnRegistInfo> dHardWareFwkUnRstInfos;
+    std::mutex operationMutex_;
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware

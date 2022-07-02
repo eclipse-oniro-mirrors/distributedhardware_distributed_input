@@ -44,6 +44,7 @@ DistributedInputClient &DistributedInputClient::GetInstance()
 void DistributedInputClient::RegisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
+    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
     for (std::vector<DHardWareFwkRegistInfo>::iterator iter =
         DistributedInputClient::GetInstance().dHardWareFwkRstInfos.begin();
         iter != DistributedInputClient::GetInstance().dHardWareFwkRstInfos.end();
@@ -59,6 +60,7 @@ void DistributedInputClient::RegisterDInputCb::OnResult(
 void DistributedInputClient::UnregisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
+    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
     for (std::vector<DHardWareFwkUnRegistInfo>::iterator iter =
         DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.begin();
         iter != DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.end();
@@ -122,8 +124,6 @@ int32_t DistributedInputClient::ReleaseSource()
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
     m_bIsAlreadyInitWhiteList = false;
-    callbackRegister = nullptr;
-    callbackUnregister = nullptr;
     sinkTypeCallback = nullptr;
     sourceTypeCallback = nullptr;
     addWhiteListCallback = nullptr;
@@ -160,21 +160,23 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
         return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
     }
 
-    for (auto iter : dHardWareFwkRstInfos) {
-        if (iter.devId == devId && iter.dhId == dhId) {
-            return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
+    {
+        std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
+        for (auto iter : dHardWareFwkRstInfos) {
+            if (iter.devId == devId && iter.dhId == dhId) {
+                return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
+            }
         }
+
+        DHardWareFwkRegistInfo info;
+        info.devId = devId;
+        info.dhId = dhId;
+        info.callback = callback;
+        dHardWareFwkRstInfos.push_back(info);
     }
 
-    DHardWareFwkRegistInfo info;
-    info.devId = devId;
-    info.dhId = dhId;
-    info.callback = callback;
-    dHardWareFwkRstInfos.push_back(info);
-
-    callbackRegister = new(std::nothrow) RegisterDInputCb();
     return DinputSAManager::GetInstance().dInputSourceProxy_->RegisterDistributedHardware(devId, dhId, parameters,
-        callbackRegister);
+        new(std::nothrow) RegisterDInputCb());
 }
 
 int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
@@ -192,21 +194,23 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
         return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
     }
 
-    for (auto iter : dHardWareFwkUnRstInfos) {
-        if (iter.devId == devId && iter.dhId == dhId) {
-            return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
+    {
+        std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
+        for (auto iter : dHardWareFwkUnRstInfos) {
+            if (iter.devId == devId && iter.dhId == dhId) {
+                return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
+            }
         }
+
+        DHardWareFwkUnRegistInfo info;
+        info.devId = devId;
+        info.dhId = dhId;
+        info.callback = callback;
+        dHardWareFwkUnRstInfos.push_back(info);
     }
 
-    DHardWareFwkUnRegistInfo info;
-    info.devId = devId;
-    info.dhId = dhId;
-    info.callback = callback;
-    dHardWareFwkUnRstInfos.push_back(info);
-
-    callbackUnregister = new(std::nothrow) UnregisterDInputCb();
     return DinputSAManager::GetInstance().dInputSourceProxy_->UnregisterDistributedHardware(devId, dhId,
-        callbackUnregister);
+        new(std::nothrow) UnregisterDInputCb());
 }
 
 int32_t DistributedInputClient::PrepareRemoteInput(

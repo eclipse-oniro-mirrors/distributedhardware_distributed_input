@@ -62,12 +62,18 @@ int32_t HiDumper::ProcessDump(const std::string& args, std::string& result)
     DHLOGI("ProcessDump Dump.");
     int32_t ret = ERR_DH_INPUT_HIDUMP_INVALID_ARGS;
     result.clear();
-    auto operatorIter = ARGS_MAP.find(args);
-    if (operatorIter == ARGS_MAP.end()) {
-        result.append("unknown command");
-        DHLOGI("ProcessDump");
-        return ret;
+
+    std::map<std::string, HiDumperFlag>::const_iterator operatorIter;
+    {
+        std::lock_guard<std::mutex> lock(operationMutex_);
+        operatorIter = ARGS_MAP.find(args);
+        if (operatorIter == ARGS_MAP.end()) {
+            result.append("unknown command");
+            DHLOGI("ProcessDump");
+            return ret;
+        }
     }
+
     HiDumperFlag hidumperFlag = operatorIter->second;
     switch (hidumperFlag) {
         case HiDumperFlag::GET_HELP: {
