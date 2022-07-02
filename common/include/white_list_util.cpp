@@ -30,14 +30,20 @@ namespace DistributedInput {
 namespace {
     const char* const SPLIT_LINE = "|";
     const char* const SPLIT_COMMA = ",";
+    const int32_t COMB_KEY_VEC_MIN_LEN = 2;
+    const int32_t LAST_KEY_ACTION_LEN = 1;
+    const int32_t LAST_KEY_LEN = 1;
 }
 
 WhiteListUtil::WhiteListUtil()
 {
+    DHLOGI("Ctor WhiteListUtil, addr: %p", this);
+    Init();
 }
 
 WhiteListUtil::~WhiteListUtil()
 {
+    DHLOGI("Dtor WhiteListUtil, addr: %p", this);
 }
 
 WhiteListUtil &WhiteListUtil::GetInstance(void)
@@ -46,18 +52,9 @@ WhiteListUtil &WhiteListUtil::GetInstance(void)
     return instance;
 }
 
-int32_t WhiteListUtil::Init(const std::string &deviceId)
+int32_t WhiteListUtil::Init()
 {
-    DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
-    ClearWhiteList();
     const char* const whiteListFilePath = "/etc/dinput_business_event_whitelist.cfg";
-
-    if (deviceId.empty()) {
-        // device id error
-        DHLOGE("%s error, deviceId empty", __func__);
-        return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
-    }
-
     std::ifstream inFile(whiteListFilePath, std::ios::in | std::ios::binary);
     if (!inFile.is_open()) {
         // file open error
@@ -104,11 +101,9 @@ int32_t WhiteListUtil::Init(const std::string &deviceId)
     }
 
     inFile.close();
+    SyncWhiteList(LOCAL_DEV_ID, vecWhiteList);
 
-    std::lock_guard<std::mutex> lock(mutex_);
-    mapDeviceWhiteList_[deviceId] = vecWhiteList;
-
-    DHLOGI("success, deviceId=%s", GetAnonyString(deviceId).c_str());
+    DHLOGI("Local WhiteListUtil init success");
     return DH_SUCCESS;
 }
 
@@ -155,7 +150,58 @@ int32_t WhiteListUtil::SyncWhiteList(const std::string &deviceId, const TYPE_WHI
 
     std::lock_guard<std::mutex> lock(mutex_);
     mapDeviceWhiteList_[deviceId] = vecWhiteList;
+    for (auto combKeys : vecWhiteList) {
+        GetCombKeysHash(combKeys, combKeysHashMap_[deviceId]);
+    }
+
     return DH_SUCCESS;
+}
+
+void WhiteListUtil::GetCombKeysHash(TYPE_COMBINATION_KEY_VEC combKeys, std::unordered_set<std::string> &targetSet)
+{
+    if (combKeys.size() < COMB_KEY_VEC_MIN_LEN) {
+        DHLOGE("white list item length invalid");
+        return;
+    }
+
+    TYPE_KEY_CODE_VEC lastKeyAction = combKeys.back();
+    if (lastKeyAction.size() != LAST_KEY_ACTION_LEN) {
+        DHLOGE("last key action invalid");
+        return;
+    }
+    combKeys.pop_back();
+    TYPE_KEY_CODE_VEC lastKey = combKeys.back();
+    if (lastKey.size() != LAST_KEY_LEN) {
+        DHLOGE("last key invalid");
+        return;
+    }
+    combKeys.pop_back();
+
+    std::unordered_set<std::string> hashSets;
+    WhiteListItemHash hash;
+    GetAllComb(combKeys, hash, combKeys.size(), hashSets);
+
+    for (auto &hash : hashSets) {
+        targetSet.insert(hash + std::to_string(lastKey[0]) + std::to_string(lastKeyAction[0]));
+    }
+}
+
+void WhiteListUtil::GetAllComb(TYPE_COMBINATION_KEY_VEC vecs, WhiteListItemHash hash,
+    int32_t targetLen, std::unordered_set<std::string> &hashSets)
+{
+    for (int32_t i = 0; i < vecs.size(); i++) {
+        TYPE_KEY_CODE_VEC nowVec = vecs[i];
+        for (int32_t code : nowVec) {
+            WhiteListItemHash newHash = { hash.hash + std::to_string(code), hash.len + 1 };
+            TYPE_COMBINATION_KEY_VEC leftVecs = vecs;
+            leftVecs.erase(leftVecs.begin() + i);
+            GetAllComb(leftVecs, newHash, targetLen, hashSets);
+        }
+    }
+
+    if (hash.len == targetLen) {
+        hashSets.insert(hash.hash);
+    }
 }
 
 int32_t WhiteListUtil::ClearWhiteList(const std::string &deviceId)
@@ -203,56 +249,38 @@ bool WhiteListUtil::CheckSubVecData(const TYPE_COMBINATION_KEY_VEC::iterator &it
     return bIsMatching;
 }
 
+std::string WhiteListUtil::GetBusinessEventHash(const BusinessEvent &event)
+{
+    std::string hash = "";
+    for (auto &p : event.pressedKeys) {
+        hash += std::to_string(p);
+    }
+    hash += std::to_string(event.keyCode);
+    hash += std::to_string(event.keyAction);
+
+    return hash;
+}
+
 bool WhiteListUtil::IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event)
 {
     DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
-    if (mapDeviceWhiteList_.empty()) {
+    if (combKeysHashMap_.empty()) {
         DHLOGE("%s called, whilte list is empty!", __func__);
         return false;
     }
 
-    TYPE_DEVICE_WHITE_LIST_MAP::const_iterator iter = mapDeviceWhiteList_.find(deviceId);
-    if (iter == mapDeviceWhiteList_.end()) {
+    auto iter = combKeysHashMap_.find(deviceId);
+    if (iter == combKeysHashMap_.end()) {
         DHLOGE("%s called, not find by deviceId!", __func__);
         return false;
     }
 
-    TYPE_KEY_CODE_VEC vecKeyCode = event.pressedKeys;
-    vecKeyCode.push_back(event.keyCode);
-    vecKeyCode.push_back(event.keyAction);
-    if (vecKeyCode.empty()) {
-        DHLOGE("%s called, vecKeyCode is empty!", __func__);
-        return false;
-    }
+    std::string hash = GetBusinessEventHash(event);
+    DHLOGI("Searched business event hash: %s", hash.c_str());
 
-    bool bIsMatching = false;
-    TYPE_WHITE_LIST_VEC vecWhiteList = iter->second;
-    for (TYPE_WHITE_LIST_VEC::iterator iter1 = vecWhiteList.begin(); iter1 != vecWhiteList.end(); ++iter1) {
-        if (vecKeyCode.size() != iter1->size()) {
-            DHLOGI(
-                "%s called, vecKeyCodeSize=%d, iter1Size=%d",
-                __func__, vecKeyCode.size(), iter1->size());
-            continue;
-        }
-
-        TYPE_COMBINATION_KEY_VEC::iterator iter2 = iter1->begin();
-        TYPE_KEY_CODE_VEC::iterator iter3 = vecKeyCode.begin();
-        for (; iter2 != iter1->end() && iter3 != vecKeyCode.end(); ++iter2, ++iter3) {
-            bIsMatching = false;
-            bIsMatching = CheckSubVecData(iter2, iter3);
-            if (!bIsMatching) {
-                break;
-            }
-        }
-        if (bIsMatching) {
-            break;
-        }
-    }
-
-    DHLOGI("%s called, bIsMatching=%d", __func__, bIsMatching);
-    return bIsMatching;
+    return combKeysHashMap_[deviceId].find(hash) != combKeysHashMap_[deviceId].end();
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

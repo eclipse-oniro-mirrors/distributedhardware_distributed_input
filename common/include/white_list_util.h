@@ -17,6 +17,7 @@
 #define WHITE_LIST_UTIL_H
 
 #include <mutex>
+#include <unordered_set>
 
 #include "constants_dinput.h"
 
@@ -27,17 +28,37 @@ using TYPE_KEY_CODE_VEC = std::vector<int32_t>;
 using TYPE_COMBINATION_KEY_VEC = std::vector<TYPE_KEY_CODE_VEC>;
 using TYPE_WHITE_LIST_VEC = std::vector<TYPE_COMBINATION_KEY_VEC>;
 using TYPE_DEVICE_WHITE_LIST_MAP = std::map<std::string, TYPE_WHITE_LIST_VEC>;
+
+struct WhiteListItemHash {
+    std::string hash;
+
+    // the keys num
+    int32_t len;
+
+    WhiteListItemHash() : hash(""), len(0) {}
+
+    WhiteListItemHash(std::string hash, int32_t len) : hash(hash), len(len) {}
+};
+
 class WhiteListUtil {
 public:
     static WhiteListUtil &GetInstance(void);
-    int32_t Init(const std::string &deviceId);
-    int32_t UnInit(void);
     int32_t SyncWhiteList(const std::string &deviceId, const TYPE_WHITE_LIST_VEC &vecWhiteList);
     int32_t ClearWhiteList(const std::string &deviceId);
     int32_t ClearWhiteList(void);
     int32_t GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST_VEC &vecWhiteList);
+
+    /*
+     * check is event in white list of deviceId
+     *
+     * Return:
+     *   true: event in white list of this device
+     *   false: event not in white list of this device, or white list of this device not exist
+     */
     bool IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event);
 private:
+    int32_t Init();
+    int32_t UnInit(void);
     WhiteListUtil();
     ~WhiteListUtil();
     WhiteListUtil(const WhiteListUtil &other) = delete;
@@ -46,8 +67,13 @@ private:
                              TYPE_COMBINATION_KEY_VEC &vecCombinationKey) const;
     bool CheckSubVecData(const TYPE_COMBINATION_KEY_VEC::iterator &iter2,
                          const TYPE_KEY_CODE_VEC::iterator &iter3) const;
+    void GetCombKeysHash(TYPE_COMBINATION_KEY_VEC combKeys, std::unordered_set<std::string> &targetSet);
+    void GetAllComb(TYPE_COMBINATION_KEY_VEC vecs, WhiteListItemHash hash,
+        int32_t targetLen, std::unordered_set<std::string> &hashSets);
+    std::string GetBusinessEventHash(const BusinessEvent &event);
 private:
     TYPE_DEVICE_WHITE_LIST_MAP mapDeviceWhiteList_;
+    std::map<std::string, std::unordered_set<std::string>> combKeysHashMap_;
     std::mutex mutex_;
 };
 } // namespace DistributedInput

@@ -115,9 +115,6 @@ private:
 private:
     static std::shared_ptr<DistributedInputClient> instance;
 
-    bool m_bIsAlreadyInitWhiteList = false;
-    const std::string localDevId_ = "localNodeDevice";
-
     DInputServerType serverType = DInputServerType::NULL_SERVER_TYPE;
     DInputDeviceType inputTypes_ = DInputDeviceType::NONE;
 

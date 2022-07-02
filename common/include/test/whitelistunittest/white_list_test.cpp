@@ -41,27 +41,6 @@ void WhiteListTest::TearDownTestCase()
 {
 }
 
-HWTEST_F(WhiteListTest, Init01, testing::ext::TestSize.Level0)
-{
-    std::string deviceId = "whitelist";
-    int32_t ret = WhiteListUtil::GetInstance().Init(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
-}
-
-HWTEST_F(WhiteListTest, Init02, testing::ext::TestSize.Level0)
-{
-    std::string deviceId;
-    int32_t ret = WhiteListUtil::GetInstance().Init(deviceId);
-    EXPECT_EQ(ERR_DH_INPUT_WHILTELIST_INIT_FAIL, ret);
-}
-
-HWTEST_F(WhiteListTest, Init03, testing::ext::TestSize.Level0)
-{
-    std::string deviceId = "test";
-    int32_t ret = WhiteListUtil::GetInstance().Init(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
-}
-
 HWTEST_F(WhiteListTest, SyncWhiteList01, testing::ext::TestSize.Level0)
 {
     // 11|22,33|44,55,66
@@ -364,12 +343,6 @@ HWTEST_F(WhiteListTest, ClearWhiteList03, testing::ext::TestSize.Level0)
 {
     std::string deviceId;
     int32_t ret = WhiteListUtil::GetInstance().ClearWhiteList(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
-}
-
-HWTEST_F(WhiteListTest, UnInit01, testing::ext::TestSize.Level0)
-{
-    int32_t ret = WhiteListUtil::GetInstance().UnInit();
     EXPECT_EQ(SUCCESS, ret);
 }
 }

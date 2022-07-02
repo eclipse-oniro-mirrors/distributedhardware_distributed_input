@@ -123,7 +123,6 @@ int32_t DistributedInputClient::ReleaseSource()
 
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
-    m_bIsAlreadyInitWhiteList = false;
     sinkTypeCallback = nullptr;
     sourceTypeCallback = nullptr;
     addWhiteListCallback = nullptr;
@@ -139,9 +138,8 @@ int32_t DistributedInputClient::ReleaseSink()
     }
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
-    m_bIsAlreadyInitWhiteList = false;
     sinkTypeCallback = nullptr;
-    WhiteListUtil::GetInstance().ClearWhiteList(localDevId_);
+    WhiteListUtil::GetInstance().ClearWhiteList(LOCAL_DEV_ID);
     return DinputSAManager::GetInstance().dInputSinkProxy_->Release();
 }
 
@@ -294,25 +292,7 @@ int32_t DistributedInputClient::StopRemoteInput(
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
 {
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
-    if (serverType == DInputServerType::NULL_SERVER_TYPE) {
-        DHLOGE("No sa start using.");
-        return true;
-    }
-
-    if (serverType == DInputServerType::SINK_SERVER_TYPE) {
-        if (m_bIsAlreadyInitWhiteList) {
-            return WhiteListUtil::GetInstance().IsNeedFilterOut(localDevId_, event);
-        }
-
-        if (WhiteListUtil::GetInstance().Init(localDevId_) != DH_SUCCESS) {
-            return false;
-        }
-        m_bIsAlreadyInitWhiteList = true;
-
-        return WhiteListUtil::GetInstance().IsNeedFilterOut(localDevId_, event);
-    }
-
-    return !WhiteListUtil::GetInstance().IsNeedFilterOut(deviceId, event);
+    return WhiteListUtil::GetInstance().IsNeedFilterOut(deviceId, event);
 }
 
 DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t& inputType)
@@ -371,7 +351,8 @@ void DistributedInputClient::AddWhiteListInfos(
 {
     nlohmann::json inputData = nlohmann::json::parse(strJson);
     size_t jsonSize = inputData.size();
-    DHLOGI("AddWhiteListInfosCb OnResult json size:%d.\n", jsonSize);
+    DHLOGI("AddWhiteListInfosCb OnResult deviceId: %s, json str: %s, json size:%d.\n",
+        GetAnonyString(deviceId).c_str(), GetAnonyString(strJson).c_str(), jsonSize);
     TYPE_WHITE_LIST_VEC vecWhiteList = inputData;
     WhiteListUtil::GetInstance().SyncWhiteList(deviceId, vecWhiteList);
 }

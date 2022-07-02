@@ -61,7 +61,6 @@ public:
         const std::string& peerSessionName, const SessionStatus& sessionStatus);
     void SetSessionStatus(const std::string& remoteDevId, const SessionStatus& sessionStatus);
     void DeleteSessionInfo(const std::string& remoteDevId);
-    std::string GetLocalDeviceId();
 private:
     explicit HiDumper() = default;
     ~HiDumper() = default;

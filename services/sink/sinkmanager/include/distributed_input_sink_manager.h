@@ -73,10 +73,6 @@ public:
 
     void SetStartTransFlag(const DInputServerType flag);
 
-    bool GetInitWhiteListFlag();
-
-    void SetInitWhiteListFlag(bool isInit);
-
     uint32_t GetInputTypes();
 
     void SetInputTypes(const uint32_t& inputTypess);
@@ -90,7 +86,6 @@ public:
 
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 private:
-    bool isAlreadyInitWhiteList_ = false;
     ServiceSinkRunningState serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DInputServerType isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
     std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener_;

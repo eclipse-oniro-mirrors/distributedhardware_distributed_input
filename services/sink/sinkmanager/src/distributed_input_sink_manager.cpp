@@ -79,18 +79,6 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
 
     // send prepare result and if result ok, send white list
     TYPE_WHITE_LIST_VEC vecFilter;
-    if (sinkManagerObj_->GetInitWhiteListFlag() == false) {
-        if (WhiteListUtil::GetInstance().Init(deviceId) != DH_SUCCESS) {
-            DHLOGE("%s called, init white list fail!", __func__);
-            jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
-            jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
-            smsg = jsonStr.dump();
-            DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
-            return;
-        }
-        sinkManagerObj_->SetInitWhiteListFlag(true);
-    }
-
     WhiteListUtil::GetInstance().GetWhiteList(deviceId, vecFilter);
     if (vecFilter.empty() || vecFilter[0].empty() || vecFilter[0][0].empty()) {
         DHLOGE("onPrepareRemoteInput called, white list is null.");
@@ -336,16 +324,6 @@ DInputServerType DistributedInputSinkManager::GetStartTransFlag()
 void DistributedInputSinkManager::SetStartTransFlag(const DInputServerType flag)
 {
     isStartTrans_ = flag;
-}
-
-bool DistributedInputSinkManager::GetInitWhiteListFlag()
-{
-    return isAlreadyInitWhiteList_;
-}
-
-void DistributedInputSinkManager::SetInitWhiteListFlag(bool isInit)
-{
-    isAlreadyInitWhiteList_ = isInit;
 }
 
 uint32_t DistributedInputSinkManager::GetInputTypes()
