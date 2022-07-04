@@ -75,6 +75,7 @@ void DistributedInputClient::UnregisterDInputCb::OnResult(
 
 void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status, const uint32_t& inputTypes)
 {
+    DHLOGI("StartDInputServerCb status: %d, inputTypes: %d, addr: %p", status, inputTypes, this);
     if (DInputServerType::SOURCE_SERVER_TYPE == static_cast<DInputServerType>(status)) {
         DistributedInputClient::GetInstance().serverType = DInputServerType::SOURCE_SERVER_TYPE;
         DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
@@ -302,12 +303,14 @@ DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t&
     int32_t retSink = 0;
 
     if (sourceTypeCallback == nullptr && DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGI("Init sourceTypeCallback");
         sourceTypeCallback = new(std::nothrow) StartDInputServerCb();
         retSource = DinputSAManager::GetInstance().dInputSourceProxy_->IsStartDistributedInput(inputType,
             sourceTypeCallback);
     }
 
     if (sinkTypeCallback == nullptr && DinputSAManager::GetInstance().GetDInputSinkProxy()) {
+        DHLOGI("Init sinkTypeCallback");
         sinkTypeCallback = new(std::nothrow) StartDInputServerCb();
         retSink = DinputSAManager::GetInstance().dInputSinkProxy_->IsStartDistributedInput(inputType, sinkTypeCallback);
     }

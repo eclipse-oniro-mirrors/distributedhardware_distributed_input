@@ -357,6 +357,8 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     uint32_t inputTypes = innerMsg[INPUT_SOURCEMANAGER_KEY_ITP];
     bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
+    DHLOGI("Start DInput Recv Callback ret: %s, devId: %s, inputTypes: %d",
+        result ? "true" : "false", GetAnonyString(deviceId).c_str(), inputTypes);
     if (result) {
         sourceManagerObj_->SetInputTypesMap(
             deviceId, sourceManagerObj_->GetInputTypesMap(deviceId) | inputTypes);
@@ -384,6 +386,8 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStopC
     uint32_t inputTypes = innerMsg[INPUT_SOURCEMANAGER_KEY_ITP];
     bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
 
+    DHLOGI("Stop DInput Recv Callback ret: %B, devId: %s, inputTypes: %d",
+        result, GetAnonyString(deviceId).c_str(), inputTypes);
     if (result && (sourceManagerObj_->GetInputTypesMap(deviceId) & inputTypes)) {
         sourceManagerObj_->SetInputTypesMap(
             deviceId, sourceManagerObj_->GetInputTypesMap(deviceId) -
@@ -397,6 +401,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStopC
     // DeviceMap_ all sink device switch is off,call isstart's callback
     bool isAllDevSwitchOff = sourceManagerObj_->GetDeviceMapAllDevSwitchOff();
     if (isAllDevSwitchOff) {
+        DHLOGI("All Dev Switch Off");
         sourceManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
     }
     if (sourceManagerObj_->GetStartDInputServerCback() != nullptr) {
@@ -941,8 +946,12 @@ int32_t DistributedInputSourceManager::IsStartDistributedInput(
 {
     if (callback != nullptr) {
         startServerCallback_ = callback;
+        if (GetStartTransFlag() != DInputServerType::NULL_SERVER_TYPE) {
+            startServerCallback_->OnResult(static_cast<int32_t>(GetStartTransFlag()), GetAllInputTypesMap());
+        }
     }
 
+    DHLOGI("param inputType: %d, allInputTypes: %d", inputType, GetAllInputTypesMap());
     if (inputType & GetAllInputTypesMap()) {
         return static_cast<int32_t>(isStartTrans_);
     } else {
@@ -1066,6 +1075,7 @@ DInputServerType DistributedInputSourceManager::GetStartTransFlag()
 
 void DistributedInputSourceManager::SetStartTransFlag(const DInputServerType flag)
 {
+    DHLOGI("Set Source isStartTrans_ %d", (int32_t)flag);
     isStartTrans_ = flag;
 }
 

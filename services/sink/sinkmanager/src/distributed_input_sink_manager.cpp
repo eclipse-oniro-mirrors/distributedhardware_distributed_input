@@ -59,7 +59,8 @@ DistributedInputSinkManager::DInputSinkListener::~DInputSinkListener()
 void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     const int32_t& sessionId, const std::string &deviceId)
 {
-    DHLOGI("onPrepareRemoteInput called, sessionId: %s", GetAnonyInt32(sessionId).c_str());
+    DHLOGI("onPrepareRemoteInput called, sessionId: %s, devId: %s",
+        GetAnonyInt32(sessionId).c_str(), GetAnonyString(deviceId).c_str());
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONPREPARE;
@@ -79,7 +80,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
 
     // send prepare result and if result ok, send white list
     TYPE_WHITE_LIST_VEC vecFilter;
-    WhiteListUtil::GetInstance().GetWhiteList(deviceId, vecFilter);
+    WhiteListUtil::GetInstance().GetWhiteList(LOCAL_DEV_ID, vecFilter);
     if (vecFilter.empty() || vecFilter[0].empty() || vecFilter[0][0].empty()) {
         DHLOGE("onPrepareRemoteInput called, white list is null.");
         jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
@@ -303,6 +304,9 @@ int32_t DistributedInputSinkManager::IsStartDistributedInput(
 {
     if (callback != nullptr) {
         startServerCallback_ = callback;
+        if (GetStartTransFlag() != DInputServerType::NULL_SERVER_TYPE) {
+            startServerCallback_->OnResult(static_cast<int32_t>(GetStartTransFlag()), GetInputTypes());
+        }
     }
 
     if (inputType & GetInputTypes()) {
@@ -323,6 +327,7 @@ DInputServerType DistributedInputSinkManager::GetStartTransFlag()
 }
 void DistributedInputSinkManager::SetStartTransFlag(const DInputServerType flag)
 {
+    DHLOGI("Set Sink isStartTrans_ %d", (int32_t)flag);
     isStartTrans_ = flag;
 }
 
