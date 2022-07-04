@@ -46,6 +46,11 @@ namespace {
 
 bool HiDumper::HiDump(const std::vector<std::string>& args, std::string& result)
 {
+    if (args.empty()) {
+        DHLOGE("args is empty");
+        return false;
+    }
+
     result.clear();
     int32_t argsSize = static_cast<int32_t>(args.size());
     for (int32_t i = 0; i < argsSize; i++) {
