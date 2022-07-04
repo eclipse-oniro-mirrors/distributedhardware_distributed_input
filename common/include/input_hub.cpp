@@ -588,7 +588,7 @@ std::string InputHub::StringPrintf(const char* format, ...) const
     va_list ap;
     va_start(ap, format);
     std::string result;
-    int ret = vsnprintf_s(space, sizeof(space), sizeof(space) - 1, format, ap);
+    size_t ret = vsnprintf_s(space, sizeof(space), sizeof(space) - 1, format, ap);
     if (ret >= DH_SUCCESS && ret < sizeof(space)) {
         result = space;
     } else {

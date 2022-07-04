@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-DistributedInputCollector::DistributedInputCollector() : mEventBuffer{0x00}, collectThreadID_(-1),
+DistributedInputCollector::DistributedInputCollector() : mEventBuffer{}, collectThreadID_(-1),
     isCollectingEvents_(false), isStartGetDeviceHandlerThread(false), inputTypes_(0)
 {
     inputHub_ = std::make_unique<InputHub>();

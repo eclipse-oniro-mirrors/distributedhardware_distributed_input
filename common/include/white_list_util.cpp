@@ -189,7 +189,7 @@ void WhiteListUtil::GetCombKeysHash(TYPE_COMBINATION_KEY_VEC combKeys, std::unor
 void WhiteListUtil::GetAllComb(TYPE_COMBINATION_KEY_VEC vecs, WhiteListItemHash hash,
     int32_t targetLen, std::unordered_set<std::string> &hashSets)
 {
-    for (int32_t i = 0; i < vecs.size(); i++) {
+    for (size_t i = 0; i < vecs.size(); i++) {
         TYPE_KEY_CODE_VEC nowVec = vecs[i];
         for (int32_t code : nowVec) {
             WhiteListItemHash newHash = { hash.hash + std::to_string(code), hash.len + 1 };
