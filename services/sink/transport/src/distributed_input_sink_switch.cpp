@@ -121,7 +121,6 @@ void DistributedInputSinkSwitch::AddSession(int32_t sessionId)
         bool findOld = false;
         for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
             if ((*it).sessionId == sessionId) {
-                (*it).switchState = false;
                 findOld = true;
                 break;
             }
