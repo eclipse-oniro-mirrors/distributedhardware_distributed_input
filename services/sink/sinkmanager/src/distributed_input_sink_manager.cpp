@@ -28,6 +28,7 @@
 #include "distributed_input_sink_transport.h"
 
 #include "dinput_errcode.h"
+#include "dinput_sa_process_state.h"
 #include "dinput_utils_tool.h"
 #include "hidumper.h"
 #include "white_list_util.h"
@@ -300,7 +301,7 @@ int32_t DistributedInputSinkManager::Release()
 
     serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DHLOGI("exit dinput sink sa.");
-    exit(0);
+    SetSinkProcessExit();
 
     return DH_SUCCESS;
 }

@@ -74,8 +74,6 @@ void DistributedInputSinkHandler::FinishStartSA(const std::string &params, const
 
 int32_t DistributedInputSinkHandler::ReleaseSink()
 {
-    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT,
-        "dinput exit sink sa release.");
     return DistributedInputClient::GetInstance().ReleaseSink();
 }
 

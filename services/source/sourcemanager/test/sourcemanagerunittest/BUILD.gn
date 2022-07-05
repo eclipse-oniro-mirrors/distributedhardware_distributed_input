@@ -53,6 +53,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_manager.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_event_handler.cpp",
     "distributed_input_sourcemanager_test.cpp",
+    "${common_path}/include/dinput_sa_process_state.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_inject.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_node_manager.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_device.cpp",

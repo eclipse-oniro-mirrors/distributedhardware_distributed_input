@@ -73,8 +73,6 @@ void DistributedInputSourceHandler::FinishStartSA(const std::string &params, con
 
 int32_t DistributedInputSourceHandler::ReleaseSource()
 {
-    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT,
-        "dinput exit source sa release.");
     return DistributedInputClient::GetInstance().ReleaseSource();
 }
 

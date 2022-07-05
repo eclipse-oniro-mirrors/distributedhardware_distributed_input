@@ -588,8 +588,8 @@ std::string InputHub::StringPrintf(const char* format, ...) const
     va_list ap;
     va_start(ap, format);
     std::string result;
-    size_t ret = vsnprintf_s(space, sizeof(space), sizeof(space) - 1, format, ap);
-    if (ret >= DH_SUCCESS && ret < sizeof(space)) {
+    int32_t ret = vsnprintf_s(space, sizeof(space), sizeof(space) - 1, format, ap);
+    if (ret >= DH_SUCCESS && (size_t)ret < sizeof(space)) {
         result = space;
     } else {
         return "the buffer is overflow!";

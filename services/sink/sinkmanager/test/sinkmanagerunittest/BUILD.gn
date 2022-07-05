@@ -51,6 +51,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
   sources = [
     "${common_path}/include/white_list_util.cpp",
     "${common_path}/include/input_hub.cpp",
+    "${common_path}/include/dinput_sa_process_state.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
@@ -91,6 +92,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
     "samgr_standard:samgr_proxy",
+    "hisysevent_native:libhisysevent",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

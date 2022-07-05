@@ -28,6 +28,7 @@
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 #include "dinput_hitrace.h"
+#include "dinput_sa_process_state.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
 #include "hisysevent_util.h"
@@ -535,7 +536,7 @@ int32_t DistributedInputSourceManager::Release()
 
     serviceRunningState_ = ServiceSourceRunningState::STATE_NOT_START;
     DHLOGI("exit dinput source sa.");
-    exit(0);
+    SetSourceProcessExit();
     return DH_SUCCESS;
 }
 

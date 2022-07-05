@@ -42,6 +42,7 @@ ohos_shared_library("libdinput_sink") {
     "src/distributed_input_sink_event_handler.cpp",
     "${ipc_path}/src/distributed_input_sink_stub.cpp",
     "${common_path}/include/white_list_util.cpp",
+    "${common_path}/include/dinput_sa_process_state.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
   ]
@@ -68,6 +69,7 @@ ohos_shared_library("libdinput_sink") {
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
     "samgr_standard:samgr_proxy",
+    "hisysevent_native:libhisysevent",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
