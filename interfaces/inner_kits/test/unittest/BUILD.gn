@@ -41,6 +41,7 @@ ohos_unittest("distributed_input_inner_test") {
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
     "//third_party/json/include",
+    "${utils_path}/include",
   ]
 
   sources = [
@@ -63,9 +64,7 @@ ohos_unittest("distributed_input_inner_test") {
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/distributed_input_source_proxy.cpp",
-
     "//foundation/distributedhardware/distributed_input/interfaces/inner_kits/test/unittest/mock/mock_distributed_input_client.cpp",
-
     "distributed_input_inner_test.cpp",
   ]
 
@@ -87,6 +86,7 @@ ohos_unittest("distributed_input_inner_test") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
+    "${utils_path}:libdinput_utils",
   ]
 
   external_deps = [

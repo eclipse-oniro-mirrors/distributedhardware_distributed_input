@@ -33,6 +33,7 @@ ohos_shared_library("libdinput_source") {
     "${services_source_path}/inputinject/include",
     "${services_source_path}/transport/include",
     "${dfx_utils_path}/include",
+    "${utils_path}/include",
     "//third_party/json/include",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
   ]
@@ -79,6 +80,7 @@ ohos_shared_library("libdinput_source") {
     "//foundation/distributedhardware/distributed_input/services/source/transport:libdinput_source_trans",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "${dfx_utils_path}:libdinput_dfx_utils",
+    "${utils_path}:libdinput_utils",
   ]
 
   external_deps = [

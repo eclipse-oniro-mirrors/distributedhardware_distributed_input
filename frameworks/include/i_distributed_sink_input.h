@@ -29,8 +29,6 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class IDistributedSinkInput : public IRemoteBroker {
 public:
-    static const int32_t SA_ID_DISTRIBUTED_INPUT_SINK_SERVICE = 4810;
-
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.IDistributedSinkInput");
 
     virtual int32_t Init() = 0;

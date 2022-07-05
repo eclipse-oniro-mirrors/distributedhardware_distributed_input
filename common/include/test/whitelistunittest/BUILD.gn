@@ -42,6 +42,7 @@ ohos_unittest("distributed_input_white_list_test") {
     "${service_common}/include",
     "//third_party/json/include",
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
+    "${utils_path}/include",
   ]
 
   sources = [
@@ -68,6 +69,7 @@ ohos_unittest("distributed_input_white_list_test") {
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
+    "${utils_path}:libdinput_utils",
   ]
 
   external_deps = [

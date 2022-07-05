@@ -28,6 +28,7 @@
 #include "distributed_input_sink_transport.h"
 
 #include "dinput_errcode.h"
+#include "dinput_utils_tool.h"
 #include "hidumper.h"
 #include "white_list_util.h"
 
@@ -80,7 +81,12 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
 
     // send prepare result and if result ok, send white list
     TYPE_WHITE_LIST_VEC vecFilter;
-    WhiteListUtil::GetInstance().GetWhiteList(LOCAL_DEV_ID, vecFilter);
+    std::string localNetworkId = GetLocalDeviceInfo().networkId;
+    if (!localNetworkId.empty()) {
+        WhiteListUtil::GetInstance().GetWhiteList(localNetworkId, vecFilter);
+    } else {
+        DHLOGE("query local network id from softbus failed");
+    }
     if (vecFilter.empty() || vecFilter[0].empty() || vecFilter[0][0].empty()) {
         DHLOGE("onPrepareRemoteInput called, white list is null.");
         jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;

@@ -15,6 +15,8 @@
 
 #include "distributed_input_inner_test.h"
 
+#include "system_ability_definition.h"
+
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
 using namespace std;
@@ -82,7 +84,7 @@ int DistributedInputInnerTest::CheckSourceProxy() const
     }
 
     OHOS::sptr<OHOS::IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
-        IDistributedSourceInput::SA_ID_DISTRIBUTED_INPUT_SOURCE_SERVICE);
+        DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
     if (!remoteObject) {
         return SUCCESS;
     }
@@ -106,7 +108,7 @@ int DistributedInputInnerTest::CheckSinkProxy() const
     }
 
     OHOS::sptr<OHOS::IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
-        IDistributedSinkInput::SA_ID_DISTRIBUTED_INPUT_SINK_SERVICE);
+        DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID);
     if (!remoteObject) {
         return SUCCESS;
     }

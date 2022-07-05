@@ -37,8 +37,6 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class IDistributedSourceInput : public IRemoteBroker {
 public:
-    static const int32_t SA_ID_DISTRIBUTED_INPUT_SOURCE_SERVICE = 4809;
-
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.IDistributedSourceInput");
 
     virtual int32_t Init() = 0;

@@ -140,7 +140,7 @@ int32_t DistributedInputClient::ReleaseSink()
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
     sinkTypeCallback = nullptr;
-    WhiteListUtil::GetInstance().ClearWhiteList(LOCAL_DEV_ID);
+    WhiteListUtil::GetInstance().ClearWhiteList();
     return DinputSAManager::GetInstance().dInputSinkProxy_->Release();
 }
 

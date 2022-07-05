@@ -34,6 +34,7 @@ ohos_shared_library("libdinput_sink") {
     "${services_sink_path}/inputcollector/include",
     "//third_party/json/include",
     "${dfx_utils_path}/include",
+    "${utils_path}/include",
   ]
 
   sources = [
@@ -59,6 +60,7 @@ ohos_shared_library("libdinput_sink") {
     "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",
     "//foundation/distributedhardware/distributed_input/services/sink/inputcollector:libdinput_collector",
     "${dfx_utils_path}:libdinput_dfx_utils",
+    "${utils_path}:libdinput_utils",
   ]
 
   external_deps = [

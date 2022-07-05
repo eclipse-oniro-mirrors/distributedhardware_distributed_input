@@ -23,6 +23,7 @@
 #include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
+#include "dinput_utils_tool.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -101,7 +102,13 @@ int32_t WhiteListUtil::Init()
     }
 
     inFile.close();
-    SyncWhiteList(LOCAL_DEV_ID, vecWhiteList);
+
+    std::string localNetworkId = GetLocalDeviceInfo().networkId;
+    if (!localNetworkId.empty()) {
+        SyncWhiteList(localNetworkId, vecWhiteList);
+    } else {
+        DHLOGE("query local network id from softbus failed");
+    }
 
     DHLOGI("Local WhiteListUtil init success");
     return DH_SUCCESS;

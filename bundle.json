@@ -59,7 +59,8 @@
                 "//foundation/distributedhardware/distributed_input/sourcehandler:libdinput_source_handler",
                 "//foundation/distributedhardware/distributed_input/sinkhandler:libdinput_sink_handler",
                 "//foundation/distributedhardware/distributed_input/inputdevicehandler:libdinput_handler",
-                "//foundation/distributedhardware/distributed_input/dfx_utils:libdinput_dfx_utils"
+                "//foundation/distributedhardware/distributed_input/dfx_utils:libdinput_dfx_utils",
+                "//foundation/distributedhardware/distributed_input/utils:libdinput_utils"
             ],
             "inner_kits":[
                 {
