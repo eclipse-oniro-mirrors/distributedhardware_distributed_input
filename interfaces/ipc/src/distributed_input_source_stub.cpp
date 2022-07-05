@@ -15,6 +15,8 @@
 
 #include "distributed_input_source_stub.h"
 
+#include "distributed_hardware_log.h"
+
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 
@@ -31,7 +33,8 @@ int32_t DistributedInputSourceStub::HandleInitDistributedHardware(MessageParcel 
 {
     int32_t ret = Init();
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub Init write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -40,7 +43,8 @@ int32_t DistributedInputSourceStub::HandleReleaseDistributedHardware(MessageParc
 {
     int32_t ret = Release();
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub release write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -53,7 +57,8 @@ int32_t DistributedInputSourceStub::HandleRegisterDistributedHardware(MessagePar
     sptr<IRegisterDInputCallback> callback = iface_cast<IRegisterDInputCallback>(data.ReadRemoteObject());
     int32_t ret = RegisterDistributedHardware(devId, dhId, params, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub registerDistributedHardware write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -65,7 +70,8 @@ int32_t DistributedInputSourceStub::HandleUnregisterDistributedHardware(MessageP
     sptr<IUnregisterDInputCallback> callback = iface_cast<IUnregisterDInputCallback>(data.ReadRemoteObject());
     int32_t ret = UnregisterDistributedHardware(devId, dhId, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub unregisterDistributedHardware write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -79,7 +85,8 @@ int32_t DistributedInputSourceStub::HandlePrepareRemoteInput(MessageParcel &data
         iface_cast<IAddWhiteListInfosCallback>(data.ReadRemoteObject());
     int32_t ret = PrepareRemoteInput(deviceId, callback, addCallback);
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub prepareRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -93,7 +100,8 @@ int32_t DistributedInputSourceStub::HandleUnprepareRemoteInput(MessageParcel &da
         iface_cast<IDelWhiteListInfosCallback>(data.ReadRemoteObject());
     int32_t ret = UnprepareRemoteInput(deviceId, callback, delCallback);
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub unprepareRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -105,7 +113,8 @@ int32_t DistributedInputSourceStub::HandleStartRemoteInput(MessageParcel &data, 
     sptr<IStartDInputCallback> callback = iface_cast<IStartDInputCallback>(data.ReadRemoteObject());
     int32_t ret = StartRemoteInput(deviceId, inputTypes, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub startRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -117,7 +126,8 @@ int32_t DistributedInputSourceStub::HandleStopRemoteInput(MessageParcel &data, M
     sptr<IStopDInputCallback> callback = iface_cast<IStopDInputCallback>(data.ReadRemoteObject());
     int32_t ret = StopRemoteInput(deviceId, inputTypes, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub stopRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -128,7 +138,8 @@ int32_t DistributedInputSourceStub::HandleIsStartDistributedInput(MessageParcel 
     sptr<IStartDInputServerCallback> callback = iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
     int32_t ret = IsStartDistributedInput(inputType, callback);
     if (!reply.WriteInt32(ret)) {
-        return ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL;
+        DHLOGE("DistributedInputSourceStub isStartDistributedInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -136,6 +147,10 @@ int32_t DistributedInputSourceStub::HandleIsStartDistributedInput(MessageParcel 
 int32_t DistributedInputSourceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        DHLOGE("DistributedInputSourceStub read token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     switch (code) {
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::INIT): {
             return HandleInitDistributedHardware(reply);

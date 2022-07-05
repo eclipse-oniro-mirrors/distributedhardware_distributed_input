@@ -15,6 +15,7 @@
 
 #include "del_white_list_infos_call_back_stub.h"
 
+#include "distributed_hardware_log.h"
 #include "string_ex.h"
 
 #include "constants_dinput.h"
@@ -34,9 +35,9 @@ DelWhiteListInfosCallbackStub::~DelWhiteListInfosCallbackStub()
 int32_t DelWhiteListInfosCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::u16string descriptor = data.ReadInterfaceToken();
-    if (descriptor != IDelWhiteListInfosCallback::GetDescriptor()) {
-        return ERR_DH_INPUT_IPC_INVALID_DESCRIPTOR;
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        DHLOGE("DelWhiteListInfosCallbackStub read token valid failed");
+        return ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL;
     }
     IDelWhiteListInfosCallback::Message msgCode = static_cast<IDelWhiteListInfosCallback::Message>(code);
     switch (msgCode) {

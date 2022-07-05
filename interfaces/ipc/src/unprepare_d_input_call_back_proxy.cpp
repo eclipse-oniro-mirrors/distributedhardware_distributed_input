@@ -15,6 +15,7 @@
 
 #include "unprepare_d_input_call_back_proxy.h"
 
+#include "distributed_hardware_log.h"
 #include "ipc_types.h"
 #include "parcel.h"
 
@@ -40,11 +41,16 @@ void UnprepareDInputCallbackProxy::OnResult(const std::string& deviceId, const i
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(IUnprepareDInputCallback::GetDescriptor());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("UnprepareDInputCallbackProxy write token valid failed");
+        return;
+    }
     if (!data.WriteString(deviceId)) {
+        DHLOGE("UnprepareDInputCallbackProxy write deviceId failed");
         return;
     }
     if (!data.WriteInt32(status)) {
+        DHLOGE("UnprepareDInputCallbackProxy write status failed");
         return;
     }
     int32_t ret = remote->SendRequest(

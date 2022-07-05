@@ -15,6 +15,7 @@
 
 #include "start_d_input_server_call_back_stub.h"
 
+#include "distributed_hardware_log.h"
 #include "string_ex.h"
 
 #include "constants_dinput.h"
@@ -34,9 +35,9 @@ StartDInputServerCallbackStub::~StartDInputServerCallbackStub()
 int32_t StartDInputServerCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::u16string descriptor = data.ReadInterfaceToken();
-    if (descriptor != IStartDInputServerCallback::GetDescriptor()) {
-        return ERR_DH_INPUT_IPC_INVALID_DESCRIPTOR;
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        DHLOGE("StartDInputServerCallbackStub read token valid failed");
+        return ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL;
     }
     IStartDInputServerCallback::Message msgCode = static_cast<IStartDInputServerCallback::Message>(code);
     switch (msgCode) {

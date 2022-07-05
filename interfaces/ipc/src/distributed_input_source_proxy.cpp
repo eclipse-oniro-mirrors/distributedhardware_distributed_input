@@ -15,6 +15,8 @@
 
 #include "distributed_input_source_proxy.h"
 
+#include "distributed_hardware_log.h"
+
 #include "dinput_errcode.h"
 
 namespace OHOS {
@@ -31,6 +33,10 @@ int32_t DistributedInputSourceProxy::Init()
 {
     MessageParcel data;
     MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_INIT_FAIL;
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::INIT, data, reply);
     if (ret) {
@@ -44,6 +50,10 @@ int32_t DistributedInputSourceProxy::Release()
     MessageParcel data;
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_RELEASE_FAIL;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     bool ret = SendRequest(IDistributedSourceInput::MessageCode::RELEASE, data, reply);
     if (ret) {
         result = reply.ReadInt32();
@@ -55,17 +65,25 @@ int32_t DistributedInputSourceProxy::RegisterDistributedHardware(const std::stri
     const std::string& parameters, sptr<IRegisterDInputCallback> callback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteString(devId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write devId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteString(dhId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write dhId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteString(parameters)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write parameters failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_REGISTER_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_REGISTER_FAIL;
@@ -80,14 +98,21 @@ int32_t DistributedInputSourceProxy::UnregisterDistributedHardware(const std::st
     sptr<IUnregisterDInputCallback> callback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteString(devId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write devId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteString(dhId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write dhId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_UNREGISTER_FAIL;
@@ -103,14 +128,21 @@ int32_t DistributedInputSourceProxy::PrepareRemoteInput(
     sptr<IAddWhiteListInfosCallback> addWhiteListCallback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteString(deviceId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_PREPARE_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write deviceId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_PREPARE_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(addWhiteListCallback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_PREPARE_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write addWhiteListCallback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_PREPARE_FAIL;
@@ -126,14 +158,21 @@ int32_t DistributedInputSourceProxy::UnprepareRemoteInput(
     sptr<IDelWhiteListInfosCallback> delWhiteListCallback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteString(deviceId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write deviceId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(delWhiteListCallback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write delWhiteListCallback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_UNPREPARE_FAIL;
@@ -148,14 +187,21 @@ int32_t DistributedInputSourceProxy::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteString(deviceId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_START_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write deviceId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteUint32(inputTypes)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_START_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write inputTypes failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_START_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_START_FAIL;
@@ -170,14 +216,21 @@ int32_t DistributedInputSourceProxy::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteString(deviceId)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_STOP_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write deviceId failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteUint32(inputTypes)) {
-        return ERR_DH_INPUT_SOURCE_PROXY_STOP_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write inputTypes failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return ERR_DH_INPUT_SOURCE_PROXY_STOP_WRITE_MSG_FAIL;
+        DHLOGE("DistributedInputSourceProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_STOP_FAIL;
@@ -192,11 +245,17 @@ int32_t DistributedInputSourceProxy::IsStartDistributedInput(
     const uint32_t& inputType, sptr<IStartDInputServerCallback> callback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSourceProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteUint32(inputType)) {
-        return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
+        DHLOGE("DistributedInputSourceProxy write inputType failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
+        DHLOGE("DistributedInputSourceProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SOURCE_PROXY_IS_START_INPUT_FAIL;

@@ -15,6 +15,8 @@
 
 #include "distributed_input_sink_proxy.h"
 
+#include "distributed_hardware_log.h"
+
 #include "dinput_errcode.h"
 
 namespace OHOS {
@@ -31,6 +33,10 @@ int32_t DistributedInputSinkProxy::Init()
 {
     MessageParcel data;
     MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSinkProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     int32_t result = ERR_DH_INPUT_SINK_PROXY_INIT_FAIL;
     bool ret = SendRequest(IDistributedSinkInput::MessageCode::INIT, data, reply);
     if (ret) {
@@ -43,6 +49,10 @@ int32_t DistributedInputSinkProxy::Release()
 {
     MessageParcel data;
     MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSinkProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     int32_t result = ERR_DH_INPUT_SINK_PROXY_RELEASE_FAIL;
     bool ret = SendRequest(IDistributedSinkInput::MessageCode::RELEASE, data, reply);
     if (ret) {
@@ -55,11 +65,17 @@ int32_t DistributedInputSinkProxy::IsStartDistributedInput(
     const uint32_t& inputType, sptr<IStartDInputServerCallback> callback)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("DistributedInputSinkProxy write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
     if (!data.WriteUint32(inputType)) {
-        return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
+        DHLOGE("DistributedInputSinkProxy write inputType failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     if (!data.WriteRemoteObject(callback->AsObject())) {
-        return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
+        DHLOGE("DistributedInputSinkProxy write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SINK_PROXY_IS_START_INPUT_FAIL;

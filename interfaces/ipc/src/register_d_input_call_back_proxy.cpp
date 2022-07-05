@@ -15,6 +15,7 @@
 
 #include "register_d_input_call_back_proxy.h"
 
+#include "distributed_hardware_log.h"
 #include "ipc_types.h"
 #include "parcel.h"
 
@@ -40,7 +41,10 @@ void RegisterDInputCallbackProxy::OnResult(const std::string& devId, const std::
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(IRegisterDInputCallback::GetDescriptor());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("RegisterDInputCallbackProxy write token valid failed");
+        return;
+    }
     if (!data.WriteString(devId)) {
         return;
     }

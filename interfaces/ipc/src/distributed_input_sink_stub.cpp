@@ -15,6 +15,8 @@
 
 #include "distributed_input_sink_stub.h"
 
+#include "distributed_hardware_log.h"
+
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 
@@ -30,11 +32,16 @@ DistributedInputSinkStub::~DistributedInputSinkStub()
 int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        DHLOGE("DistributedInputSinkStub read token valid failed");
+        return ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL;
+    }
     switch (code) {
         case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::INIT): {
             int32_t ret = Init();
             if (!reply.WriteInt32(ret)) {
-                return ERR_DH_INPUT_SINK_STUB_ON_REMOTE_REQUEST_FAIL;
+                DHLOGE("DistributedInputSourceStub init write ret failed");
+                return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
             }
             break;
         }
@@ -42,7 +49,8 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
         case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::RELEASE): {
             int32_t ret = Release();
             if (!reply.WriteInt32(ret)) {
-                return ERR_DH_INPUT_SINK_STUB_ON_REMOTE_REQUEST_FAIL;
+                DHLOGE("DistributedInputSourceStub release write ret failed");
+                return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
             }
             break;
         }
@@ -53,7 +61,8 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
                 iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
             int32_t ret = IsStartDistributedInput(inputType, callback);
             if (!reply.WriteInt32(ret)) {
-                return ERR_DH_INPUT_SINK_STUB_ON_REMOTE_REQUEST_FAIL;
+                DHLOGE("DistributedInputSourceStub isStartDistributedInput write ret failed");
+                return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
             }
             break;
         }

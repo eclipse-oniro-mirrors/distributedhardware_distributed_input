@@ -15,6 +15,7 @@
 
 #include "stop_d_input_call_back_proxy.h"
 
+#include "distributed_hardware_log.h"
 #include "ipc_types.h"
 #include "parcel.h"
 
@@ -40,14 +41,20 @@ void StopDInputCallbackProxy::OnResult(const std::string& devId, const uint32_t&
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(IStopDInputCallback::GetDescriptor());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("StopDInputCallbackProxy write token valid failed");
+        return;
+    }
     if (!data.WriteString(devId)) {
+        DHLOGE("StopDInputCallbackProxy write devId failed");
         return;
     }
     if (!data.WriteUint32(inputTypes)) {
+        DHLOGE("StopDInputCallbackProxy write inputTypes failed");
         return;
     }
     if (!data.WriteInt32(status)) {
+        DHLOGE("StopDInputCallbackProxy write status failed");
         return;
     }
     int32_t ret = remote->SendRequest(

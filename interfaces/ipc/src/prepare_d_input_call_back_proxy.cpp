@@ -15,6 +15,8 @@
 
 #include "prepare_d_input_call_back_proxy.h"
 
+#include "distributed_hardware_log.h"
+
 #include "ipc_types.h"
 #include "parcel.h"
 
@@ -40,7 +42,10 @@ void PrepareDInputCallbackProxy::OnResult(const std::string& deviceId, const int
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(IPrepareDInputCallback::GetDescriptor());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("PrepareDInputCallbackProxy write token valid failed");
+        return;
+    }
     if (!data.WriteString(deviceId)) {
         return;
     }

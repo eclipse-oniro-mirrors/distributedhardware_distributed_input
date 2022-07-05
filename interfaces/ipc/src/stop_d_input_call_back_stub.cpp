@@ -15,6 +15,7 @@
 
 #include "stop_d_input_call_back_stub.h"
 
+#include "distributed_hardware_log.h"
 #include "string_ex.h"
 
 #include "constants_dinput.h"
@@ -34,9 +35,9 @@ StopDInputCallbackStub::~StopDInputCallbackStub()
 int32_t StopDInputCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::u16string descriptor = data.ReadInterfaceToken();
-    if (descriptor != IStopDInputCallback::GetDescriptor()) {
-        return ERR_DH_INPUT_IPC_INVALID_DESCRIPTOR;
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        DHLOGE("StopDInputCallbackStub read token valid failed");
+        return ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL;
     }
     IStopDInputCallback::Message msgCode = static_cast<IStopDInputCallback::Message>(code);
     switch (msgCode) {

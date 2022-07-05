@@ -116,6 +116,8 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_SOURCE_PROXY_STOP_FAIL = -67026;
     constexpr int32_t ERR_DH_INPUT_SOURCE_PROXY_IS_START_INPUT_FAIL = -67027;
     constexpr int32_t ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL = -67028;
+    constexpr int32_t ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL = -67029;
+    constexpr int32_t ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL = -67030;
 
     // Hidump Helper error code
     constexpr int32_t ERR_DH_INPUT_HIDUMP_INVALID_ARGS = -68000;

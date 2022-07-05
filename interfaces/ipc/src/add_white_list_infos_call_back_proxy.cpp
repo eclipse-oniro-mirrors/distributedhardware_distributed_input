@@ -15,6 +15,7 @@
 
 #include "add_white_list_infos_call_back_proxy.h"
 
+#include "distributed_hardware_log.h"
 #include "ipc_types.h"
 #include "parcel.h"
 
@@ -40,11 +41,16 @@ void AddWhiteListInfosCallbackProxy::OnResult(const std::string& deviceId, const
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(IAddWhiteListInfosCallback::GetDescriptor());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("AddWhiteListInfosCallbackProxy write token valid failed");
+        return;
+    }
     if (!data.WriteString(deviceId)) {
+        DHLOGE("AddWhiteListInfosCallbackProxy write deviceId failed");
         return;
     }
     if (!data.WriteString(strJson)) {
+        DHLOGE("AddWhiteListInfosCallbackProxy write strJson failed");
         return;
     }
     remote->SendRequest(static_cast<int32_t>(IAddWhiteListInfosCallback::Message::RESULT), data, reply, option);

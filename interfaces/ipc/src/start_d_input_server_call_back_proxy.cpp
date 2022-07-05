@@ -15,6 +15,7 @@
 
 #include "start_d_input_server_call_back_proxy.h"
 
+#include "distributed_hardware_log.h"
 #include "ipc_types.h"
 #include "parcel.h"
 
@@ -40,11 +41,16 @@ void StartDInputServerCallbackProxy::OnResult(const int32_t& status, const uint3
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(IStartDInputServerCallback::GetDescriptor());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("StartDInputServerCallbackProxy write token valid failed");
+        return;
+    }
     if (!data.WriteInt32(status)) {
+        DHLOGE("StartDInputServerCallbackProxy write status failed");
         return;
     }
     if (!data.WriteUint32(inputTypes)) {
+        DHLOGE("StartDInputServerCallbackProxy write inputTypes failed");
         return;
     }
     int32_t ret = remote->SendRequest(

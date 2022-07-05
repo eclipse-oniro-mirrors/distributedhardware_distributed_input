@@ -15,6 +15,7 @@
 
 #include "unregister_d_input_call_back_proxy.h"
 
+#include "distributed_hardware_log.h"
 #include "ipc_types.h"
 #include "parcel.h"
 
@@ -40,14 +41,20 @@ void UnregisterDInputCallbackProxy::OnResult(const std::string& devId, const std
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(IUnregisterDInputCallback::GetDescriptor());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("UnregisterDInputCallbackProxy write token valid failed");
+        return;
+    }
     if (!data.WriteString(devId)) {
+        DHLOGE("UnregisterDInputCallbackProxy write devId failed");
         return;
     }
     if (!data.WriteString(dhId)) {
+        DHLOGE("UnregisterDInputCallbackProxy write dhId failed");
         return;
     }
     if (!data.WriteInt32(status)) {
+        DHLOGE("UnregisterDInputCallbackProxy write status failed");
         return;
     }
     int32_t ret = remote->SendRequest(
