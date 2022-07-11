@@ -112,7 +112,7 @@ size_t InputHub::StartCollectInputEvents(RawEvent* buffer, size_t bufferSize)
         }
 
         {
-            std::unique_lock<std::mutex> deviceLock(openingDevicesMutex_);
+            std::unique_lock<std::mutex> deviceLock(devicesMutex_);
             while (!openingDevices_.empty()) {
                 std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
                 openingDevices_.pop_back();
@@ -238,7 +238,7 @@ size_t InputHub::DeviceIsExists(InputDeviceEvent* buffer, size_t bufferSize)
     size_t capacity = bufferSize;
     // Report any devices that had last been added/removed.
     {
-        std::unique_lock<std::mutex> my_lock(closingDevicesMutex_);
+        std::unique_lock<std::mutex> deviceLock(devicesMutex_);
         for (auto it = closingDevices_.begin(); it != closingDevices_.end();) {
             std::unique_ptr<Device> device = std::move(*it);
             DHLOGI("Reporting device closed: id=%s, name=%s\n",
@@ -260,7 +260,7 @@ size_t InputHub::DeviceIsExists(InputDeviceEvent* buffer, size_t bufferSize)
     }
 
     {
-        std::unique_lock<std::mutex> deviceLock(openingDevicesMutex_);
+        std::unique_lock<std::mutex> deviceLock(devicesMutex_);
         while (!openingDevices_.empty()) {
             std::unique_ptr<Device> device = std::move(*openingDevices_.rbegin());
             openingDevices_.pop_back();
@@ -668,7 +668,7 @@ int32_t InputHub::RegisterFdForEpoll(int fd)
 
 void InputHub::AddDeviceLocked(std::unique_ptr<Device> device)
 {
-    std::unique_lock<std::mutex> deviceLock(openingDevicesMutex_);
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     openingDevices_.push_back(std::move(device));
 }
 
@@ -682,7 +682,6 @@ void InputHub::CloseDeviceLocked(Device& device)
     device.Close();
     {
         std::unique_lock<std::mutex> devicesLock(devicesMutex_);
-        std::unique_lock<std::mutex> closingDevicesLock(closingDevicesMutex_);
         closingDevices_.push_back(std::move(devices_[device.id]));
         devices_.erase(device.id);
     }
@@ -696,7 +695,6 @@ void InputHub::CloseDeviceForAllLocked(Device& device)
 
     UnregisterDeviceFromEpollLocked(device);
     device.Close();
-    std::unique_lock<std::mutex> deviceLock(closingDevicesMutex_);
     closingDevices_.push_back(std::move(devices_[device.id]));
     devices_.erase(device.id);
 }
@@ -791,11 +789,18 @@ void InputHub::CloseAllDevicesLocked()
 InputHub::Device* InputHub::GetDeviceByDescriptorLocked(const std::string& descriptor)
 {
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
-    for (const auto& [id, device] : devices_) {
-        if (descriptor == device->identifier.descriptor) {
+    for (const auto& device : openingDevices_) {
+        if (device && descriptor == device->identifier.descriptor) {
             return device.get();
         }
     }
+
+    for (const auto& [id, device] : devices_) {
+        if (device && descriptor == device->identifier.descriptor) {
+            return device.get();
+        }
+    }
+
     return nullptr;
 }
 

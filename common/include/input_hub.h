@@ -115,9 +115,7 @@ private:
     int inputWd_;
 
     std::vector<std::unique_ptr<Device>> openingDevices_;
-    std::mutex openingDevicesMutex_;
     std::vector<std::unique_ptr<Device>> closingDevices_;
-    std::mutex closingDevicesMutex_;
     std::unordered_map<int32_t, std::unique_ptr<Device>> devices_;
     std::mutex devicesMutex_;
 
