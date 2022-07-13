@@ -516,6 +516,7 @@ int32_t DistributedInputSourceManager::Release()
     DistributedInputSourceTransport::GetInstance().Release();
 
     // 3.delete all device node data
+    DHLOGI("inputDevice clear");
     inputDevice_.clear();
     DeviceMap_.clear();
     InputTypesMap_.clear();
@@ -565,6 +566,8 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     regCallbacks_.push_back(info);
 
     InputDeviceId inputDeviceId {devId, dhId};
+    DHLOGI("RegisterDistributedHardware deviceId: %s, dhId: %s",
+        GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     // 1.Find out if the dh exists
     std::vector<InputDeviceId>::iterator it  = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
@@ -592,6 +595,8 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     }
 
     // 3.save device
+    DHLOGI("inputDevice push deviceId: %s, dhId: %s", GetAnonyString(inputDeviceId.devId).c_str(),
+        GetAnonyString(inputDeviceId.dhId).c_str());
     inputDevice_.push_back(inputDeviceId);
 
     // 4.notify source distributedfwk register hardware success
@@ -695,6 +700,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     unregCallbacks_.push_back(info);
 
     InputDeviceId inputDeviceId {devId, dhId};
+    DHLOGI("Unregister deviceId: %s, dhId: %s", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     std::vector<InputDeviceId>::iterator it = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
     if (it == inputDevice_.end()) {
@@ -1095,6 +1101,8 @@ void DistributedInputSourceManager::RemoveInputDeviceId(const std::string device
     }
 
     // delete device
+    DHLOGI("inputDevice erase deviceId: %s, dhId: %s", GetAnonyString(it->devId).c_str(),
+        GetAnonyString(it->dhId).c_str());
     inputDevice_.erase(it);
 }
 

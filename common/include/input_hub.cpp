@@ -30,6 +30,7 @@
 
 #include "anonymous_string.h"
 #include "distributed_hardware_log.h"
+#include "constants_dinput.h"
 
 #include "dinput_errcode.h"
 
@@ -639,7 +640,7 @@ std::string InputHub::GenerateDescriptor(InputDevice& identifier) const
             rawDescriptor += identifier.location;
         }
     }
-    identifier.descriptor = Sha256(rawDescriptor);
+    identifier.descriptor = DH_ID_PREFIX + Sha256(rawDescriptor);
     return rawDescriptor;
 }
 

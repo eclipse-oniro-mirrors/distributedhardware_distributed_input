@@ -133,6 +133,8 @@ namespace DistributedInput {
     /* The input device is external (not built-in). */
     constexpr uint32_t INPUT_DEVICE_CLASS_EXTERNAL      = 0x80000000;
 
+    const std::string DH_ID_PREFIX = "Input_";
+
     enum class EHandlerMsgType {
         DINPUT_SINK_EVENT_HANDLER_MSG = 1,
         DINPUT_SOURCE_EVENT_HANDLER_MSG = 2

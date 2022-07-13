@@ -21,6 +21,7 @@ ohos_shared_library("libdinput_utils") {
     "${fwk_utils_path}/include",
     "${fwk_utils_path}/include/log",
     "${utils_path}/include",
+    "${common_path}/include",
   ]
 
   sources = [
