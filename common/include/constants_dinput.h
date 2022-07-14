@@ -163,7 +163,7 @@ namespace DistributedInput {
      */
     struct InputDevice {
         inline InputDevice() : name(""), location(""), uniqueId(""), bus(0), vendor(0), product(0),
-            version(0), descriptor(""), nonce(0), classes(0) {}
+            version(0), descriptor(""), classes(0) {}
         std::string name;
         std::string location;
         std::string uniqueId;
@@ -172,7 +172,6 @@ namespace DistributedInput {
         uint16_t product;
         uint16_t version;
         std::string descriptor;
-        uint16_t nonce;
         uint32_t classes;
     };
 

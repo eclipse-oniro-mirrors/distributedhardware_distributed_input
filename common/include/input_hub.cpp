@@ -447,7 +447,7 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     if (QueryInputDeviceInfo(fd, identifier) < 0) {
         return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
     }
-    AssignDescriptorLocked(identifier);
+    GenerateDescriptor(identifier);
 
     // Allocate device.  (The device object takes ownership of the fd at this point.)
     int32_t deviceId = nextDeviceId_++;
@@ -564,23 +564,6 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
     return DH_SUCCESS;
 }
 
-void InputHub::AssignDescriptorLocked(InputDevice& identifier)
-{
-    identifier.nonce = 0;
-    std::string rawDescriptor = GenerateDescriptor(identifier);
-    if (identifier.uniqueId.empty()) {
-        // If it didn't have a unique id check for conflicts and enforce
-        // uniqueness if necessary.
-        while (GetDeviceByDescriptorLocked(identifier.descriptor) != nullptr) {
-            identifier.nonce++;
-            rawDescriptor = GenerateDescriptor(identifier);
-        }
-    }
-    DHLOGI(
-        "Created descriptor: raw=%s, cooked=%s", rawDescriptor.c_str(),
-        identifier.descriptor.c_str());
-}
-
 std::string InputHub::StringPrintf(const char* format, ...) const
 {
     static const int kSpaceLength = 1024;
@@ -614,7 +597,7 @@ std::string InputHub::Sha256(const std::string& in) const
     return out;
 }
 
-std::string InputHub::GenerateDescriptor(InputDevice& identifier) const
+void InputHub::GenerateDescriptor(InputDevice& identifier) const
 {
     std::string rawDescriptor;
     rawDescriptor += StringPrintf(":%04x:%04x:", identifier.vendor,
@@ -623,25 +606,23 @@ std::string InputHub::GenerateDescriptor(InputDevice& identifier) const
     if (!identifier.uniqueId.empty()) {
         rawDescriptor += "uniqueId:";
         rawDescriptor += identifier.uniqueId;
-    } else if (identifier.nonce != 0) {
-        rawDescriptor += StringPrintf("nonce:%04x", identifier.nonce);
+    } else if (!identifier.location.empty()) {
+        rawDescriptor += "location:";
+        rawDescriptor += identifier.location;
     }
 
     if (identifier.vendor == 0 && identifier.product == 0) {
         // If we don't know the vendor and product id, then the device is probably
         // built-in so we need to rely on other information to uniquely identify
-        // the input device.  Usually we try to avoid relying on the device name or
-        // location but for built-in input device, they are unlikely to ever change.
+        // the input device.  Usually we try to avoid relying on the device name
+        // but for built-in input device, they are unlikely to ever change.
         if (!identifier.name.empty()) {
             rawDescriptor += "name:";
             rawDescriptor += identifier.name;
-        } else if (!identifier.location.empty()) {
-            rawDescriptor += "location:";
-            rawDescriptor += identifier.location;
         }
     }
     identifier.descriptor = DH_ID_PREFIX + Sha256(rawDescriptor);
-    return rawDescriptor;
+    DHLOGI("Created descriptor: raw=%s, cooked=%s", rawDescriptor.c_str(), identifier.descriptor.c_str());
 }
 
 int32_t InputHub::RegisterDeviceForEpollLocked(const Device& device)

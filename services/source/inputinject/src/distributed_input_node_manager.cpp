@@ -74,7 +74,6 @@ void DistributedInputNodeManager::stringTransJsonTransStruct(const std::string& 
     recMsg.at("product").get_to(pBuf.product);
     recMsg.at("version").get_to(pBuf.version);
     recMsg.at("descriptor").get_to(pBuf.descriptor);
-    recMsg.at("nonce").get_to(pBuf.nonce);
     recMsg.at("classes").get_to(pBuf.classes);
 }
 

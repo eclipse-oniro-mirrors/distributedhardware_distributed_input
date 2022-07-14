@@ -76,8 +76,7 @@ private:
     int32_t OpenInputDeviceLocked(const std::string& devicePath);
     int32_t QueryInputDeviceInfo(int fd, InputDevice& identifier);
     int32_t MakeDevice(int fd, std::unique_ptr<Device> device);
-    void AssignDescriptorLocked(InputDevice& identifier);
-    std::string GenerateDescriptor(InputDevice& identifier) const;
+    void GenerateDescriptor(InputDevice& identifier) const;
     std::string StringPrintf(const char* format, ...) const;
     std::string Sha256(const std::string& in) const;
 

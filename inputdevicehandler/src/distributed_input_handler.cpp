@@ -65,7 +65,6 @@ void DistributedInputHandler::StructTransJson(const InputDevice& pBuf, std::stri
     tmpJson["product"] = pBuf.product;
     tmpJson["version"] = pBuf.version;
     tmpJson["descriptor"] = pBuf.descriptor;
-    tmpJson["nonce"] = pBuf.nonce;
     tmpJson["classes"] = pBuf.classes;
 
     std::ostringstream stream;

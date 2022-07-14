@@ -60,7 +60,6 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware01, testin
     pBuffer.version = 1;
     pBuffer.location = "usb-hiusb-ehci-2.1/input1";
     pBuffer.uniqueId = "1";
-    pBuffer.nonce = 0;
     pBuffer.classes = INPUT_DEVICE_CLASS_KEYBOARD;
     pBuffer.descriptor = "afv4s8b1dr1b8er1bd65fb16redb1dfb18d1b56df1b68d";
 
@@ -82,7 +81,6 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware02, testin
     pBuffer.version = 2;
     pBuffer.location = "usb-hiusb-ehci-2.1/input1";
     pBuffer.uniqueId = "2";
-    pBuffer.nonce = 0;
     pBuffer.classes = INPUT_DEVICE_CLASS_CURSOR;
     pBuffer.descriptor = "rt12r1nr81n521be8rb1erbe1w8bg1erb18";
 
@@ -104,7 +102,6 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware03, testin
     pBuffer.version = 3;
     pBuffer.location = "usb-hiusb-ehci-2.1/input1";
     pBuffer.uniqueId = "3";
-    pBuffer.nonce = 0;
     pBuffer.classes = INPUT_DEVICE_CLASS_TOUCH;
     pBuffer.descriptor = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
 

@@ -131,7 +131,6 @@ int32_t DistributedInputSourceManagerTest::StructTransJson(const InputDevice& pB
     tmpJson["product"] = pBuf.product;
     tmpJson["version"] = pBuf.version;
     tmpJson["descriptor"] = pBuf.descriptor;
-    tmpJson["nonce"] = pBuf.nonce;
     tmpJson["classes"] = pBuf.classes;
 
     std::ostringstream stream;
@@ -156,7 +155,6 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware01, testi
     pBuffer.version = 3;
     pBuffer.location = "usb-hiusb-ehci-2.1/input1";
     pBuffer.uniqueId = "3";
-    pBuffer.nonce = 0;
     pBuffer.classes = INPUT_DEVICE_CLASS_TOUCH;
     pBuffer.descriptor = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
 
@@ -181,7 +179,6 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware02, testi
     pBuffer.version = 2;
     pBuffer.location = "usb-hiusb-ehci-2.1/input1";
     pBuffer.uniqueId = "2";
-    pBuffer.nonce = 0;
     pBuffer.classes = INPUT_DEVICE_CLASS_CURSOR;
     pBuffer.descriptor = "rt12r1nr81n521be8rb1erbe1w8bg1erb18";
 
@@ -204,7 +201,6 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware03, testi
     pBuffer.version = 1;
     pBuffer.location = "usb-hiusb-ehci-2.1/input1";
     pBuffer.uniqueId = "1";
-    pBuffer.nonce = 0;
     pBuffer.classes = INPUT_DEVICE_CLASS_KEYBOARD;
     pBuffer.descriptor = "afv4s8b1dr1b8er1bd65fb16redb1dfb18d1b56df1b68d";
 
