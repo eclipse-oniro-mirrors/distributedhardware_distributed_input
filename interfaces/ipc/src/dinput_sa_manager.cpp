@@ -25,34 +25,33 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-IMPLEMENT_SINGLE_INSTANCE(DinputSAManager);
+IMPLEMENT_SINGLE_INSTANCE(DInputSAManager);
 
-void DinputSAManager::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId,
-    const std::string& deviceId)
+void DInputSAManager::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID) {
-        DinputSAManager::GetInstance().dInputSourceSAOnline.store(false);
-        std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sourceMutex_);
-        DinputSAManager::GetInstance().dInputSourceProxy_ = nullptr;
+        DInputSAManager::GetInstance().dInputSourceSAOnline.store(false);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
+        DInputSAManager::GetInstance().dInputSourceProxy_ = nullptr;
     } else if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
-        DinputSAManager::GetInstance().dInputSinkSAOnline.store(false);
-        std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sinkMutex_);
-        DinputSAManager::GetInstance().dInputSinkProxy_ = nullptr;
+        DInputSAManager::GetInstance().dInputSinkSAOnline.store(false);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
+        DInputSAManager::GetInstance().dInputSinkProxy_ = nullptr;
     }
     DHLOGI("sa %d is removed.", systemAbilityId);
 }
 
-void DinputSAManager::SystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+void DInputSAManager::SystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID) {
-        DinputSAManager::GetInstance().dInputSourceSAOnline.store(true);
+        DInputSAManager::GetInstance().dInputSourceSAOnline.store(true);
     } else if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
-        DinputSAManager::GetInstance().dInputSinkSAOnline.store(true);
+        DInputSAManager::GetInstance().dInputSinkSAOnline.store(true);
     }
     DHLOGI("sa %d is added.", systemAbilityId);
 }
 
-void DinputSAManager::Init()
+void DInputSAManager::Init()
 {
     saListenerCallback = new(std::nothrow) SystemAbilityListener();
     sptr<ISystemAbilityManager> systemAbilityManager =
@@ -86,10 +85,10 @@ void DinputSAManager::Init()
     }
 }
 
-bool DinputSAManager::GetDInputSourceProxy()
+bool DInputSAManager::GetDInputSourceProxy()
 {
     if (!isSubscribeSrcSAChangeListener.load()) {
-        std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sourceMutex_);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
         if (!isSubscribeSrcSAChangeListener.load()) {
             sptr<ISystemAbilityManager> systemAbilityManager =
                 SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -110,7 +109,7 @@ bool DinputSAManager::GetDInputSourceProxy()
     }
 
     if (dInputSourceSAOnline.load() && !dInputSourceProxy_) {
-        std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sourceMutex_);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
         if (dInputSourceProxy_ != nullptr) {
             DHLOGI("dinput source proxy has already got.");
             return true;
@@ -135,19 +134,19 @@ bool DinputSAManager::GetDInputSourceProxy()
             return false;
         }
     }
-    std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sourceMutex_);
+    std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
     return dInputSourceProxy_ != nullptr;
 }
 
-bool DinputSAManager::HasDInputSourceProxy()
+bool DInputSAManager::HasDInputSourceProxy()
 {
-    std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sourceMutex_);
+    std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
     return dInputSourceProxy_ != nullptr;
 }
 
-bool DinputSAManager::SetDInputSourceProxy(const sptr<IRemoteObject> &remoteObject)
+bool DInputSAManager::SetDInputSourceProxy(const sptr<IRemoteObject> &remoteObject)
 {
-    std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sourceMutex_);
+    std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
     dInputSourceProxy_ = iface_cast<IDistributedSourceInput>(remoteObject);
 
     if ((!dInputSourceProxy_) || (!dInputSourceProxy_->AsObject())) {
@@ -157,10 +156,10 @@ bool DinputSAManager::SetDInputSourceProxy(const sptr<IRemoteObject> &remoteObje
     return true;
 }
 
-bool DinputSAManager::GetDInputSinkProxy()
+bool DInputSAManager::GetDInputSinkProxy()
 {
     if (!isSubscribeSinkSAChangeListener.load()) {
-        std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sinkMutex_);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
         if (!isSubscribeSinkSAChangeListener.load()) {
             sptr<ISystemAbilityManager> systemAbilityManager =
                 SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -181,7 +180,7 @@ bool DinputSAManager::GetDInputSinkProxy()
     }
 
     if (dInputSinkSAOnline.load() && !dInputSinkProxy_) {
-        std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sinkMutex_);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
         if (dInputSinkProxy_ != nullptr) {
             DHLOGI("dinput sink proxy has already got.");
             return true;
@@ -205,19 +204,19 @@ bool DinputSAManager::GetDInputSinkProxy()
             return false;
         }
     }
-    std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sinkMutex_);
+    std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
     return dInputSinkProxy_ != nullptr;
 }
 
-bool DinputSAManager::HasDInputSinkProxy()
+bool DInputSAManager::HasDInputSinkProxy()
 {
-    std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sinkMutex_);
+    std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
     return dInputSinkProxy_ != nullptr;
 }
 
-bool DinputSAManager::SetDInputSinkProxy(const sptr<IRemoteObject> &remoteObject)
+bool DInputSAManager::SetDInputSinkProxy(const sptr<IRemoteObject> &remoteObject)
 {
-    std::lock_guard<std::mutex> lock(DinputSAManager::GetInstance().sinkMutex_);
+    std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
     dInputSinkProxy_ = iface_cast<IDistributedSinkInput>(remoteObject);
 
     if ((!dInputSinkProxy_) || (!dInputSinkProxy_->AsObject())) {

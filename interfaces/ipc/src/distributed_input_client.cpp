@@ -33,7 +33,7 @@ std::shared_ptr<DistributedInputClient> DistributedInputClient::instance(new Dis
 
 DistributedInputClient::DistributedInputClient()
 {
-    DinputSAManager::GetInstance().Init();
+    DInputSAManager::GetInstance().Init();
 }
 
 DistributedInputClient &DistributedInputClient::GetInstance()
@@ -102,23 +102,23 @@ void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& de
 
 int32_t DistributedInputClient::InitSource()
 {
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-    return DinputSAManager::GetInstance().dInputSourceProxy_->Init();
+    return DInputSAManager::GetInstance().dInputSourceProxy_->Init();
 }
 
 int32_t DistributedInputClient::InitSink()
 {
-    if (!DinputSAManager::GetInstance().GetDInputSinkProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSinkProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SINK_PROXY_FAIL;
     }
-    return DinputSAManager::GetInstance().dInputSinkProxy_->Init();
+    return DInputSAManager::GetInstance().dInputSinkProxy_->Init();
 }
 
 int32_t DistributedInputClient::ReleaseSource()
 {
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
@@ -129,19 +129,19 @@ int32_t DistributedInputClient::ReleaseSource()
     addWhiteListCallback = nullptr;
     delWhiteListCallback = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList();
-    return DinputSAManager::GetInstance().dInputSourceProxy_->Release();
+    return DInputSAManager::GetInstance().dInputSourceProxy_->Release();
 }
 
 int32_t DistributedInputClient::ReleaseSink()
 {
-    if (!DinputSAManager::GetInstance().GetDInputSinkProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSinkProxy()) {
         return ERR_DH_INPUT_CLIENT_GET_SINK_PROXY_FAIL;
     }
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
     sinkTypeCallback = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList();
-    return DinputSAManager::GetInstance().dInputSinkProxy_->Release();
+    return DInputSAManager::GetInstance().dInputSinkProxy_->Release();
 }
 
 int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
@@ -150,7 +150,7 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
         __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
 
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("RegisterDistributedHardware client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -174,17 +174,16 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
         dHardWareFwkRstInfos.push_back(info);
     }
 
-    return DinputSAManager::GetInstance().dInputSourceProxy_->RegisterDistributedHardware(devId, dhId, parameters,
+    return DInputSAManager::GetInstance().dInputSourceProxy_->RegisterDistributedHardware(devId, dhId, parameters,
         new(std::nothrow) RegisterDInputCb());
 }
 
 int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::shared_ptr<UnregisterCallback>& callback)
 {
-    DHLOGI("%s called, deviceId: %s,  dhId: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
+    DHLOGI("%s called, deviceId: %s,  dhId: %s", __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("UnregisterDistributedHardware client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -208,7 +207,7 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
         dHardWareFwkUnRstInfos.push_back(info);
     }
 
-    return DinputSAManager::GetInstance().dInputSourceProxy_->UnregisterDistributedHardware(devId, dhId,
+    return DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterDistributedHardware(devId, dhId,
         new(std::nothrow) UnregisterDInputCb());
 }
 
@@ -217,7 +216,7 @@ int32_t DistributedInputClient::PrepareRemoteInput(
 {
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
 
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -227,16 +226,16 @@ int32_t DistributedInputClient::PrepareRemoteInput(
     }
 
     addWhiteListCallback = new(std::nothrow) AddWhiteListInfosCb();
-    return DinputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(deviceId, callback,
+    return DInputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(deviceId, callback,
         addWhiteListCallback);
 }
 
-int32_t DistributedInputClient::UnprepareRemoteInput(
-    const std::string& deviceId, sptr<IUnprepareDInputCallback> callback)
+int32_t DistributedInputClient::UnprepareRemoteInput(const std::string& deviceId,
+    sptr<IUnprepareDInputCallback> callback)
 {
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
 
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -246,7 +245,7 @@ int32_t DistributedInputClient::UnprepareRemoteInput(
     }
 
     delWhiteListCallback = new(std::nothrow) DelWhiteListInfosCb();
-    return DinputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(deviceId, callback,
+    return DInputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(deviceId, callback,
         delWhiteListCallback);
 }
 
@@ -255,7 +254,7 @@ int32_t DistributedInputClient::StartRemoteInput(
 {
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("StartRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -267,15 +266,15 @@ int32_t DistributedInputClient::StartRemoteInput(
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
 
-    return DinputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(deviceId, inputTypes, callback);
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(deviceId, inputTypes, callback);
 }
 
-int32_t DistributedInputClient::StopRemoteInput(
-    const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
+int32_t DistributedInputClient::StopRemoteInput(const std::string& deviceId, const uint32_t& inputTypes,
+    sptr<IStopDInputCallback> callback)
 {
     DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
 
-    if (!DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("StopRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
@@ -287,7 +286,7 @@ int32_t DistributedInputClient::StopRemoteInput(
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
 
-    return DinputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(deviceId, inputTypes, callback);
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(deviceId, inputTypes, callback);
 }
 
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
@@ -302,17 +301,17 @@ DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t&
     int32_t retSource = 0;
     int32_t retSink = 0;
 
-    if (sourceTypeCallback == nullptr && DinputSAManager::GetInstance().GetDInputSourceProxy()) {
+    if (sourceTypeCallback == nullptr && DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGI("Init sourceTypeCallback");
         sourceTypeCallback = new(std::nothrow) StartDInputServerCb();
-        retSource = DinputSAManager::GetInstance().dInputSourceProxy_->IsStartDistributedInput(inputType,
+        retSource = DInputSAManager::GetInstance().dInputSourceProxy_->IsStartDistributedInput(inputType,
             sourceTypeCallback);
     }
 
-    if (sinkTypeCallback == nullptr && DinputSAManager::GetInstance().GetDInputSinkProxy()) {
+    if (sinkTypeCallback == nullptr && DInputSAManager::GetInstance().GetDInputSinkProxy()) {
         DHLOGI("Init sinkTypeCallback");
         sinkTypeCallback = new(std::nothrow) StartDInputServerCb();
-        retSink = DinputSAManager::GetInstance().dInputSinkProxy_->IsStartDistributedInput(inputType, sinkTypeCallback);
+        retSink = DInputSAManager::GetInstance().dInputSinkProxy_->IsStartDistributedInput(inputType, sinkTypeCallback);
     }
 
     if (static_cast<DInputServerType>(retSource) != DInputServerType::NULL_SERVER_TYPE) {
@@ -349,8 +348,7 @@ bool DistributedInputClient::IsJsonData(std::string strData) const
     return false;
 }
 
-void DistributedInputClient::AddWhiteListInfos(
-    const std::string &deviceId, const std::string &strJson) const
+void DistributedInputClient::AddWhiteListInfos(const std::string &deviceId, const std::string &strJson) const
 {
     nlohmann::json inputData = nlohmann::json::parse(strJson);
     size_t jsonSize = inputData.size();
@@ -360,8 +358,7 @@ void DistributedInputClient::AddWhiteListInfos(
     WhiteListUtil::GetInstance().SyncWhiteList(deviceId, vecWhiteList);
 }
 
-void DistributedInputClient::DelWhiteListInfos(
-    const std::string &deviceId) const
+void DistributedInputClient::DelWhiteListInfos(const std::string &deviceId) const
 {
     WhiteListUtil::GetInstance().ClearWhiteList(deviceId);
 }

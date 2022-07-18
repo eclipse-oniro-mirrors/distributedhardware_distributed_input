@@ -461,7 +461,7 @@ void DistributedInputSinkTransport::DInputSinkEventHandler::RecordEventLog(
         int32_t code = event[INPUT_KEY_CODE];
         int32_t value = event[INPUT_KEY_VALUE];
         std::string path = event[INPUT_KEY_PATH];
-        DHLOGD("2.E2E-Test Sink softBus send, EventType:%s, Code: %d, Value: %d, Path: %s, When: %" PRId64 "",
+        DHLOGD("2.E2E-Test Sink softBus send, EventType: %s, Code: %d, Value: %d, Path: %s, When: %" PRId64 "",
             eventType.c_str(), code, value, path.c_str(), when);
     }
 }

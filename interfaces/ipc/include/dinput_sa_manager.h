@@ -30,8 +30,8 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class DinputSAManager {
-DECLARE_SINGLE_INSTANCE_BASE(DinputSAManager);
+class DInputSAManager {
+DECLARE_SINGLE_INSTANCE_BASE(DInputSAManager);
 public:
     void Init();
     bool GetDInputSourceProxy();
@@ -43,14 +43,14 @@ public:
 
 public:
 class SystemAbilityListener : public SystemAbilityStatusChangeStub {
-    public:
-        void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-        void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+public:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     };
 
 private:
-    DinputSAManager() = default;
-    ~DinputSAManager() = default;
+    DInputSAManager() = default;
+    ~DInputSAManager() = default;
 
 public:
     std::atomic<bool> dInputSourceSAOnline = false;
@@ -67,5 +67,4 @@ public:
 }  // namespace DistributedInput
 }  // namespace DistributedHardware
 }  // namespace OHOS
-
-#endif  // DINPUT_SA_MANAGER_H
+#endif

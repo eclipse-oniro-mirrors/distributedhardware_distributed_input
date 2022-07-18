@@ -26,7 +26,7 @@ namespace {
 
 DevInfo GetLocalDeviceInfo()
 {
-    DevInfo devInfo { "", "", 0 };
+    DevInfo devInfo{"", "", 0};
     auto info = std::make_unique<NodeBasicInfo>();
     auto ret = GetLocalNodeDeviceInfo(DINPUT_PKG_NAME.c_str(), info.get());
     if (ret != 0) {

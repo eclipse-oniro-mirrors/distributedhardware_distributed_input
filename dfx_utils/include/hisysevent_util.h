@@ -17,6 +17,7 @@
 #define OHOS_DISTRIBUTED_INPUT_HISYSEVENT_UTILS_H
 
 #include <cstring>
+
 #include "single_instance.h"
 #include "hisysevent.h"
 #include "constants_dinput.h"
@@ -52,8 +53,7 @@ private:
     HisyseventUtil() = default;
     ~HisyseventUtil() = default;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
-
-#endif  // OHOS_DISTRIBUTED_INPUT_HISYSEVENT_UTILS_H
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+#endif

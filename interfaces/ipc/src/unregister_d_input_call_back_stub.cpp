@@ -36,7 +36,7 @@ int32_t UnregisterDInputCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        DHLOGE("UnRegisterDInputCallbackStub read token valid failed");
+        DHLOGE("UnregisterDInputCallbackStub read token valid failed");
         return ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL;
     }
     IUnregisterDInputCallback::Message msgCode = static_cast<IUnregisterDInputCallback::Message>(code);

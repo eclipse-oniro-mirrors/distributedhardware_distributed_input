@@ -40,7 +40,7 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
         case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::INIT): {
             int32_t ret = Init();
             if (!reply.WriteInt32(ret)) {
-                DHLOGE("DistributedInputSourceStub init write ret failed");
+                DHLOGE("DistributedInputSinkStub write ret failed");
                 return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
             }
             break;
@@ -49,7 +49,7 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
         case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::RELEASE): {
             int32_t ret = Release();
             if (!reply.WriteInt32(ret)) {
-                DHLOGE("DistributedInputSourceStub release write ret failed");
+                DHLOGE("DistributedInputSinkStub write ret failed");
                 return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
             }
             break;
@@ -61,7 +61,7 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
                 iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
             int32_t ret = IsStartDistributedInput(inputType, callback);
             if (!reply.WriteInt32(ret)) {
-                DHLOGE("DistributedInputSourceStub isStartDistributedInput write ret failed");
+                DHLOGE("DistributedInputSinkStub write ret failed");
                 return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
             }
             break;

@@ -175,11 +175,11 @@ int32_t HiDumper::ShowHelp(std::string &result)
 {
     DHLOGI("ShowHelp Dump.");
     result.append("Usage:dump  <command> [options]\n")
-          .append("Description:\n")
-          .append("-nodeinfo        ")
-          .append("dump all input node information in the system\n")
-          .append("-sessioninfo     ")
-          .append("dump all input session information in the system\n");
+        .append("Description:\n")
+        .append("-nodeinfo        ")
+        .append("dump all input node information in the system\n")
+        .append("-sessioninfo     ")
+        .append("dump all input session information in the system\n");
     return DH_SUCCESS;
 }
 
@@ -220,6 +220,7 @@ void HiDumper::SetSessionStatus(const std::string& remoteDevId, const SessionSta
     }
     sessionInfos_[remoteDevId].sessionStatus_ = sessionStatus;
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+

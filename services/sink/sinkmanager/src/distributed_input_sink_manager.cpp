@@ -368,6 +368,6 @@ int32_t DistributedInputSinkManager::Dump(int32_t fd, const std::vector<std::u16
     }
     return DH_SUCCESS;
 }
-} // namespace DistributedInputanager
+} // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

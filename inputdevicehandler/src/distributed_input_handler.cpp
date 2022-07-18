@@ -166,7 +166,7 @@ void *DistributedInputHandler::CollectEventsThread(void *param)
 void DistributedInputHandler::StartInputMonitorDeviceThread(const std::string deviceId)
 {
     while (isCollectingEvents_) {
-        size_t count = inputHub_->StartCollectInputHandler(mEventBuffer, INPUT_DEVICR_BUFFER_SIZE);
+        size_t count = inputHub_->StartCollectInputHandler(mEventBuffer, INPUT_DEVICE_BUFFER_SIZE);
         if (count > 0) {
             DHLOGI("Count: %zu", count);
             for (size_t iCnt = 0; iCnt < count; iCnt++) {

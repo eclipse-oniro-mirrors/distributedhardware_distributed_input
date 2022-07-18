@@ -274,7 +274,7 @@ bool WhiteListUtil::IsNeedFilterOut(const std::string &deviceId, const BusinessE
 
     std::lock_guard<std::mutex> lock(mutex_);
     if (combKeysHashMap_.empty()) {
-        DHLOGE("%s called, whilte list is empty!", __func__);
+        DHLOGE("%s called, white list is empty!", __func__);
         return false;
     }
 

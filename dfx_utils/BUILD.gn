@@ -59,5 +59,4 @@ ohos_shared_library("libdinput_dfx_utils") {
   subsystem_name = "distributedhardware"
 
   part_name = "distributed_input"
-
 }
