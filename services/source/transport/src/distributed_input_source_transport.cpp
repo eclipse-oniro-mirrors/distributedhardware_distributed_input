@@ -27,6 +27,7 @@
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 #include "dinput_hitrace.h"
+#include "dinput_low_latency_utils.h"
 #include "dinput_softbus_define.h"
 #include "distributed_input_inject.h"
 #include "hidumper.h"
@@ -184,6 +185,7 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
 
     DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%s",
         GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
+    DInputLowLatencyUtils::GetInstance().EnableSourceLowLatency();
     HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::OPENED);
     return DH_SUCCESS;
 }
@@ -205,6 +207,7 @@ void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remot
     sessionDevMap_.erase(remoteDevId);
     channelStatusMap_.erase(remoteDevId);
     DistributedInputInject::GetInstance().StopInjectThread();
+    DInputLowLatencyUtils::GetInstance().DisableSourceLowLatency();
     HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::CLOSED);
     HiDumper::GetInstance().DeleteSessionInfo(remoteDevId);
 }

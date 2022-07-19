@@ -16,6 +16,7 @@ import("//foundation/distributedhardware/distributed_input/distributedinput.gni"
 
 ohos_shared_library("libdinput_utils") {
   include_dirs = [
+    "${fwk_common_path}/utils/include",
     "${fwk_common_path}/log/include",
     "${fwk_utils_path}/include",
     "${fwk_utils_path}/include/log",
@@ -25,6 +26,7 @@ ohos_shared_library("libdinput_utils") {
 
   sources = [
     "src/dinput_utils_tool.cpp",
+    "src/dinput_low_latency_utils.cpp",
   ]
 
   defines = [

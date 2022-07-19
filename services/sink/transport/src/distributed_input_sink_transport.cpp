@@ -25,6 +25,7 @@
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_low_latency_utils.h"
 #include "hidumper.h"
 #include "session.h"
 #include "softbus_bus_center.h"
@@ -255,6 +256,8 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
         return DH_SUCCESS;
     }
 
+    DInputLowLatencyUtils::GetInstance().EnableSinkLowLatency();
+
     // return 1 is client
     int32_t sessionSide = GetSessionSide(sessionId);
     DHLOGI("session open succeed, sessionId %s, sessionSide %d", GetAnonyInt32(sessionId).c_str(), sessionSide);
@@ -286,6 +289,8 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
 void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
 {
     DHLOGI("OnSessionClosed, sessionId:%s", GetAnonyInt32(sessionId).c_str());
+
+    DInputLowLatencyUtils::GetInstance().DisableSinkLowLatency();
 
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));

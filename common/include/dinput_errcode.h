@@ -32,6 +32,9 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_HUB_GET_EVENT_FAIL = -60006;
     constexpr int32_t ERR_DH_INPUT_HUB_DEVICE_ENABLE_FAIL = -60007;
     constexpr int32_t ERR_DH_INPUT_HUB_IS_VIRTUAL_DEVICE = -60008;
+    constexpr int32_t ERR_DH_INPUT_DLOPEN_FAIL = -60009;
+    constexpr int32_t ERR_DH_INPUT_DLSYM_FAIL = -60010;
+    constexpr int32_t ERR_DH_INPUT_LOW_LATENCY_LIB_NULL = -60011;
     // whilte list error code
     constexpr int32_t ERR_DH_INPUT_WHILTELIST_INIT_FAIL = -61001;
     constexpr int32_t ERR_DH_INPUT_WHILTELIST_GET_WHILTELIST_FAIL = -61002;

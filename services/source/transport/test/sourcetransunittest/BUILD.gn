@@ -41,6 +41,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "${dfx_utils_path}/include",
+    "${utils_path}/include",
   ]
 
   sources = [
@@ -70,6 +71,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${dfx_utils_path}:libdinput_dfx_utils",
+    "${utils_path}:libdinput_utils",
   ]
 
   external_deps = [
