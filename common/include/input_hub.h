@@ -70,7 +70,7 @@ private:
     size_t GetEvents(RawEvent* buffer, size_t bufferSize);
     size_t ReadInputEvent(int32_t readSize, Device& device);
     void GetDeviceHandler();
-    int32_t RefreshEpollItem();
+    int32_t RefreshEpollItem(bool isSleep);
 
     void ScanInputDevices(const std::string& dirname);
     int32_t OpenInputDeviceLocked(const std::string& devicePath);

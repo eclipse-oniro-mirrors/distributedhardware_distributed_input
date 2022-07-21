@@ -39,7 +39,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
 const char *DEVICE_PATH = "/dev/input";
-const uint32_t SLEEP_TIME_MS = 100000;
+const uint32_t SLEEP_TIME_US = 100 * 1000;
 const uint32_t ERROR_MSG_MAX_LEN = 256;
 }
 
@@ -146,7 +146,7 @@ size_t InputHub::StartCollectInputEvents(RawEvent* buffer, size_t bufferSize)
             break;
         }
 
-        if (RefreshEpollItem() < 0) {
+        if (RefreshEpollItem(false) < 0) {
             break;
         }
     }
@@ -306,7 +306,7 @@ size_t InputHub::StartCollectInputHandler(InputDeviceEvent* buffer, size_t buffe
         if (count > 0) {
             break;
         }
-        if (RefreshEpollItem() < 0) {
+        if (RefreshEpollItem(true) < 0) {
             break;
         }
     }
@@ -353,7 +353,7 @@ void InputHub::GetDeviceHandler()
     }
 }
 
-int32_t InputHub::RefreshEpollItem()
+int32_t InputHub::RefreshEpollItem(bool isSleep)
 {
     pendingEventIndex_ = 0;
     int pollResult = epoll_wait(epollFd_, mPendingEventItems, EPOLL_MAX_EVENTS, 0);
@@ -371,11 +371,14 @@ int32_t InputHub::RefreshEpollItem()
         // Hopefully the error is transient.
         if (errno != EINTR) {
             DHLOGE("poll failed (errno=%d)\n", errno);
-            usleep(SLEEP_TIME_MS);
+            usleep(SLEEP_TIME_US);
         }
     } else {
         // Some events occurred.
         pendingEventCount_ = pollResult;
+    }
+    if (isSleep) {
+        usleep(SLEEP_TIME_US);
     }
     return DH_SUCCESS;
 }
