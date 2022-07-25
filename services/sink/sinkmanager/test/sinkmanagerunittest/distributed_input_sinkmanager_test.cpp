@@ -42,12 +42,6 @@ void DistributedInputSinkManagerTest::SetUpTestCase()
 void DistributedInputSinkManagerTest::TearDownTestCase()
 {
 }
-
-HWTEST_F(DistributedInputSinkManagerTest, Init01, testing::ext::TestSize.Level0)
-{
-    int32_t ret = sinkManager_->Init();
-    EXPECT_EQ(SUCCESS, ret);
-}
 }
 }
 }

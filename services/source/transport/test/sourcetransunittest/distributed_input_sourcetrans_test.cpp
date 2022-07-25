@@ -38,13 +38,6 @@ void DistributedInputSourceTransTest::TearDownTestCase()
 {
 }
 
-HWTEST_F(DistributedInputSourceTransTest, Init, testing::ext::TestSize.Level0)
-{
-    int32_t ret = DistributedInputSourceTransport::GetInstance().Init();
-
-    EXPECT_EQ(SUCCESS, ret);
-}
-
 HWTEST_F(DistributedInputSourceTransTest, PrepareRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "";

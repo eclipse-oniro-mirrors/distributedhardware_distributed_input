@@ -139,12 +139,6 @@ int32_t DistributedInputSourceManagerTest::StructTransJson(const InputDevice& pB
     return SUCCESS;
 }
 
-HWTEST_F(DistributedInputSourceManagerTest, Init01, testing::ext::TestSize.Level0)
-{
-    int32_t ret = sourceManager_->Init();
-    EXPECT_EQ(SUCCESS, ret);
-}
-
 HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware01, testing::ext::TestSize.Level0)
 {
     InputDevice pBuffer;
