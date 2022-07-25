@@ -27,11 +27,11 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 IMPLEMENT_SINGLE_INSTANCE(DInputLowLatencyUtils);
-const std::string LIB_NAME = "libdinput_low_latency.z.so";
-const std::string FUNC_GET_ENABLE_SOURCE = "EnableSourceLowLatency";
-const std::string FUNC_GET_DISABLE_SOURCE = "DisableSourceLowLatency";
-const std::string FUNC_GET_ENABLE_SINK = "EnableSinkLowLatency";
-const std::string FUNC_GET_DISABLE_SINK = "DisableSinkLowLatency";
+constexpr const char* LIB_NAME = "libdinput_low_latency.z.so";
+constexpr const char* FUNC_GET_ENABLE_SOURCE = "EnableSourceLowLatency";
+constexpr const char* FUNC_GET_DISABLE_SOURCE = "DisableSourceLowLatency";
+constexpr const char* FUNC_GET_ENABLE_SINK = "EnableSinkLowLatency";
+constexpr const char* FUNC_GET_DISABLE_SINK = "DisableSinkLowLatency";
 
 using GetLowLatencyFunc = void *(*)();
 
@@ -47,9 +47,9 @@ void DInputLowLatencyUtils::EnableSourceLowLatency()
         DHLOGE("load library failed");
         return;
     }
-    auto enableSourceLowLatency = reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_ENABLE_SOURCE.c_str()));
+    auto enableSourceLowLatency = reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_ENABLE_SOURCE));
     if (enableSourceLowLatency == nullptr) {
-        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_ENABLE_SOURCE.c_str(), dlerror());
+        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_ENABLE_SOURCE, dlerror());
         return;
     }
 
@@ -64,9 +64,9 @@ void DInputLowLatencyUtils::DisableSourceLowLatency()
         return;
     }
     auto disableSourceLowLatency =
-        reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_DISABLE_SOURCE.c_str()));
+        reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_DISABLE_SOURCE));
     if (disableSourceLowLatency == nullptr) {
-        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_DISABLE_SOURCE.c_str(), dlerror());
+        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_DISABLE_SOURCE, dlerror());
         return;
     }
 
@@ -80,9 +80,9 @@ void DInputLowLatencyUtils::EnableSinkLowLatency()
         DHLOGE("load library failed");
         return;
     }
-    auto enableSinkLowLatency = reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_ENABLE_SINK.c_str()));
+    auto enableSinkLowLatency = reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_ENABLE_SINK));
     if (enableSinkLowLatency == nullptr) {
-        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_ENABLE_SINK.c_str(), dlerror());
+        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_ENABLE_SINK, dlerror());
         return;
     }
 
@@ -96,9 +96,9 @@ void DInputLowLatencyUtils::DisableSinkLowLatency()
         DHLOGE("load library failed");
         return;
     }
-    auto disableSinkLowLatency = reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_DISABLE_SINK.c_str()));
+    auto disableSinkLowLatency = reinterpret_cast<GetLowLatencyFunc>(dlsym(handler_, FUNC_GET_DISABLE_SINK));
     if (disableSinkLowLatency == nullptr) {
-        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_DISABLE_SINK.c_str(), dlerror());
+        DHLOGE("can not find %s, failed reason : %s", FUNC_GET_DISABLE_SINK, dlerror());
         return;
     }
 
@@ -113,9 +113,9 @@ int32_t DInputLowLatencyUtils::LoadLibrary()
         return DH_SUCCESS;
     }
 
-    handler_ = dlopen(LIB_NAME.c_str(), RTLD_NOW | RTLD_NODELETE);
+    handler_ = dlopen(LIB_NAME, RTLD_NOW | RTLD_NODELETE);
     if (handler_ == nullptr) {
-        DHLOGE("open %s failed, fail reason : %s", LIB_NAME.c_str(), dlerror());
+        DHLOGE("open %s failed, fail reason : %s", LIB_NAME, dlerror());
         return ERR_DH_INPUT_DLOPEN_FAIL;
     }
     return DH_SUCCESS;
@@ -124,12 +124,12 @@ int32_t DInputLowLatencyUtils::LoadLibrary()
 void DInputLowLatencyUtils::CloseLibrary()
 {
     if (handler_ == nullptr) {
-        DHLOGI("%s is already closed.", LIB_NAME.c_str());
+        DHLOGI("%s is already closed.", LIB_NAME);
         return;
     }
     dlclose(handler_);
     handler_ = nullptr;
-    DHLOGI("%s is closed.", LIB_NAME.c_str());
+    DHLOGI("%s is closed.", LIB_NAME);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware
