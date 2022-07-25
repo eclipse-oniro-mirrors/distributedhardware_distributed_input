@@ -86,6 +86,10 @@ namespace DistributedInput {
 
     constexpr int32_t INPUT_LOAD_SA_TIMEOUT_MS = 10000;
 
+    constexpr int32_t INPUT_LATENCY_DELAYTIME_US = 50 * 1000;
+
+    constexpr int32_t INPUT_LATENCY_DELAY_TIMES = 60;
+
     constexpr int32_t SESSION_WAIT_TIMEOUT_SECOND = 5;
 
     /* The input device is a keyboard or has buttons. */
@@ -134,6 +138,8 @@ namespace DistributedInput {
     constexpr uint32_t INPUT_DEVICE_CLASS_EXTERNAL      = 0x80000000;
 
     const std::string DH_ID_PREFIX = "Input_";
+
+    const std::string DINPUT_SPLIT_COMMA = ", ";
 
     enum class EHandlerMsgType {
         DINPUT_SINK_EVENT_HANDLER_MSG = 1,

@@ -45,6 +45,7 @@ public:
     int32_t RespUnprepareRemoteInput(const int32_t sessionId, std::string &smsg);
     int32_t RespStartRemoteInput(const int32_t sessionId, std::string &smsg);
     int32_t RespStopRemoteInput(const int32_t sessionId, std::string &smsg);
+    int32_t RespLatency(const int32_t sessionId, std::string &smsg);
 
     int32_t OnSessionOpened(int32_t sessionId, int32_t result);
     void OnSessionClosed(int32_t sessionId);
@@ -69,6 +70,7 @@ private:
     void NotifyUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyStopRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyLatency(int32_t sessionId, const nlohmann::json &recMsg);
 
 private:
     std::string deviceId_;

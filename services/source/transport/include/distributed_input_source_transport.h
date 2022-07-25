@@ -22,6 +22,7 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <thread>
 
 #include "constants.h"
 #include "event_handler.h"
@@ -48,6 +49,10 @@ public:
     int32_t UnprepareRemoteInput(const std::string& deviceId);
     int32_t StartRemoteInput(const std::string& deviceId, const uint32_t& inputTypes);
     int32_t StopRemoteInput(const std::string& deviceId, const uint32_t& inputTypes);
+    int32_t LatencyCount(const std::string& deviceId);
+    void StartLatencyCount(const std::string& deviceId);
+    void StartLatencyThread(const std::string& deviceId);
+    void StopLatencyThread();
 
     int32_t OnSessionOpened(int32_t sessionId, int32_t result);
     void OnSessionClosed(int32_t sessionId);
@@ -58,11 +63,13 @@ private:
     int32_t SendMsg(int32_t sessionId, std::string &message);
     int32_t CheckDeviceSessionState(const std::string &remoteDevId);
     void HandleSessionData(int32_t sessionId, const std::string& messageData);
+    bool CheckRecivedData(const std::string& messageData);
     void NotifyResponsePrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseStopRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyReceivedEventRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void CalculateLatency(int32_t sessionId, const nlohmann::json &recMsg);
 
 private:
     std::map<std::string, int32_t> sessionDevMap_;
@@ -72,6 +79,14 @@ private:
     std::shared_ptr<DInputSourceTransCallback> callback_;
     std::string mySessionName_ = "";
     std::condition_variable openSessionWaitCond_;
+    uint64_t deltaTime_ = 0;
+    uint64_t deltaTimeAll_ = 0;
+    uint64_t sendTime_ = 0;
+    int32_t sendNum_ = 0;
+    int32_t recvNum_ = 0;
+    std::atomic<bool> isLatencyThreadRunning_ = false;
+    std::thread latencyThread_;
+    std::string eachLatencyDetails_ = "";
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware

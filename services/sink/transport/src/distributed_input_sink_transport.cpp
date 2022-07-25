@@ -225,6 +225,23 @@ int32_t DistributedInputSinkTransport::RespStopRemoteInput(
     }
 }
 
+int32_t DistributedInputSinkTransport::RespLatency(const int32_t sessionId, std::string &smsg)
+{
+    if (sessionId <= 0) {
+        DHLOGE("RespLatency error, sessionId <= 0.");
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL;
+    }
+
+    int32_t ret = SendMessage(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("RespLatency error, SendMessage fail.");
+        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL;
+    }
+
+    DHLOGI("RespLatency sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
 int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::string &message)
 {
     DHLOGI("start SendMessage");
@@ -381,6 +398,25 @@ void DistributedInputSinkTransport::NotifyStopRemoteInput(int32_t sessionId, con
     callback_->onStopRemoteInput(sessionId, inputTypes);
 }
 
+void DistributedInputSinkTransport::NotifyLatency(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) != true) {
+        DHLOGE("OnBytesReceived message is error, not contain deviceId.");
+        return;
+    }
+
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_LATENCY, data type is error.");
+        return;
+    }
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_LATENCY;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
+    std::string smsg = jsonStr.dump();
+    RespLatency(sessionId, smsg);
+}
+
 void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const std::string& message)
 {
     if (callback_ == nullptr) {
@@ -420,6 +456,10 @@ void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const s
         }
         case TRANS_SOURCE_MSG_STOP: {
             NotifyStopRemoteInput(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_LATENCY: {
+            NotifyLatency(sessionId, recMsg);
             break;
         }
         default:

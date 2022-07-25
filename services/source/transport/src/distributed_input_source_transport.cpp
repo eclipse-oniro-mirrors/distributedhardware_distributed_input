@@ -29,6 +29,7 @@
 #include "dinput_hitrace.h"
 #include "dinput_low_latency_utils.h"
 #include "dinput_softbus_define.h"
+#include "dinput_utils_tool.h"
 #include "distributed_input_inject.h"
 #include "hidumper.h"
 #include "session.h"
@@ -183,6 +184,8 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
         }
     }
 
+    StartLatencyThread(remoteDevId);
+
     DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%s",
         GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
     DInputLowLatencyUtils::GetInstance().EnableSourceLowLatency();
@@ -200,6 +203,8 @@ void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remot
         return;
     }
     int32_t sessionId = sessionDevMap_[remoteDevId];
+
+    StopLatencyThread();
 
     DHLOGI("RemoteDevId: %s, sessionId: %s", GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
     HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::CLOSING);
@@ -328,6 +333,71 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(
         DHLOGE("StopRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
     }
+}
+
+int32_t DistributedInputSourceTransport::LatencyCount(const std::string& deviceId)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    if (sessionDevMap_.count(deviceId) <= 0) {
+        DHLOGE("LatencyCount error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_LATENCY_FAIL;
+    }
+
+    int32_t sessionId = sessionDevMap_[deviceId];
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_LATENCY;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("LatencyCount deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_LATENCY_FAIL;
+    }
+
+    DHLOGI("LatencyCount deviceId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+void DistributedInputSourceTransport::StartLatencyCount(const std::string& deviceId)
+{
+    DHLOGI("start");
+    while (isLatencyThreadRunning_.load()) {
+        if (sendNum_ >= INPUT_LATENCY_DELAY_TIMES) {
+            int32_t latency = deltaTimeAll_ / 2 / INPUT_LATENCY_DELAY_TIMES;
+            DHLOGI("LatencyCount average single-channel latency is %d, send times is %d, recive times is %d,\
+                each RTT latency details is %s", latency, sendNum_, recvNum_, eachLatencyDetails_.c_str());
+            deltaTimeAll_ = 0;
+            sendNum_ = 0;
+            recvNum_ = 0;
+            eachLatencyDetails_ = "";
+        }
+        sendTime_ = GetCurrentTime();
+        LatencyCount(deviceId);
+        sendNum_ += 1;
+        usleep(INPUT_LATENCY_DELAYTIME_US);
+    }
+    DHLOGI("end");
+}
+
+void DistributedInputSourceTransport::StartLatencyThread(const std::string& deviceId)
+{
+    DHLOGI("start");
+    isLatencyThreadRunning_.store(true);
+    latencyThread_ = std::thread(&DistributedInputSourceTransport::StartLatencyCount, this, deviceId);
+    DHLOGI("end");
+}
+
+void DistributedInputSourceTransport::StopLatencyThread()
+{
+    DHLOGI("start");
+    isLatencyThreadRunning_.store(false);
+    if (latencyThread_.joinable()) {
+        latencyThread_.join();
+    }
+    DHLOGI("end");
 }
 
 std::string DistributedInputSourceTransport::FindDeviceBySession(int32_t sessionId)
@@ -489,6 +559,21 @@ void DistributedInputSourceTransport::NotifyReceivedEventRemoteInput(int32_t ses
     callback_->onReceivedEventRemoteInput(deviceId, inputDataStr);
 }
 
+void DistributedInputSourceTransport::CalculateLatency(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_LATENCY.");
+    std::string deviceId = FindDeviceBySession(sessionId);
+    if (deviceId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_LATENCY, deviceId is error.");
+        return;
+    }
+
+    deltaTime_ = GetCurrentTime() - sendTime_;
+    deltaTimeAll_ += deltaTime_;
+    recvNum_ += 1;
+    eachLatencyDetails_ += (std::to_string(deltaTime_) + DINPUT_SPLIT_COMMA);
+}
+
 void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const std::string& message)
 {
     if (callback_ == nullptr) {
@@ -496,19 +581,7 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
         return;
     }
     nlohmann::json recMsg = nlohmann::json::parse(message);
-    if (recMsg.is_discarded()) {
-        DHLOGE("OnBytesReceived jsonStr error.");
-        return;
-    }
-
-    if (recMsg.contains(DINPUT_SOFTBUS_KEY_CMD_TYPE) != true) {
-        DHLOGE("OnBytesReceived message:%s is error, not contain cmdType.",
-            message.c_str());
-        return;
-    }
-
-    if (recMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE].is_number() != true) {
-        DHLOGE("OnBytesReceived cmdType is not number type.");
+    if (CheckRecivedData(message) != true) {
         return;
     }
 
@@ -534,11 +607,37 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
             NotifyReceivedEventRemoteInput(sessionId, recMsg);
             break;
         }
+        case TRANS_SINK_MSG_LATENCY: {
+            CalculateLatency(sessionId, recMsg);
+            break;
+        }
         default: {
             DHLOGE("OnBytesReceived cmdType is undefined.");
             break;
         }
     }
+}
+
+bool DistributedInputSourceTransport::CheckRecivedData(const std::string& message)
+{
+    nlohmann::json recMsg = nlohmann::json::parse(message);
+    if (recMsg.is_discarded()) {
+        DHLOGE("OnBytesReceived jsonStr error.");
+        return false;
+    }
+
+    if (recMsg.contains(DINPUT_SOFTBUS_KEY_CMD_TYPE) != true) {
+        DHLOGE("OnBytesReceived message:%s is error, not contain cmdType.",
+            message.c_str());
+        return false;
+    }
+
+    if (recMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE].is_number() != true) {
+        DHLOGE("OnBytesReceived cmdType is not number type.");
+        return false;
+    }
+
+    return true;
 }
 
 void DistributedInputSourceTransport::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)

@@ -60,10 +60,12 @@ namespace DistributedInput {
     const uint32_t TRANS_SINK_MSG_ONSTART      = 3;
     const uint32_t TRANS_SINK_MSG_ONSTOP       = 4;
     const uint32_t TRANS_SINK_MSG_BODY_DATA    = 5;
+    const uint32_t TRANS_SINK_MSG_LATENCY      = 6;
     const uint32_t TRANS_SOURCE_MSG_PREPARE    = 11;
     const uint32_t TRANS_SOURCE_MSG_UNPREPARE  = 12;
     const uint32_t TRANS_SOURCE_MSG_START      = 13;
     const uint32_t TRANS_SOURCE_MSG_STOP       = 14;
+    const uint32_t TRANS_SOURCE_MSG_LATENCY    = 15;
 }  // namespace DistributedInput
 }  // namespace DistributedHardware
 }  // namespace OHOS

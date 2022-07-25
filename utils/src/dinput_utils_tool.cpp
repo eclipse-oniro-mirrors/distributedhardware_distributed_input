@@ -15,6 +15,8 @@
 
 #include "dinput_utils_tool.h"
 
+#include <sys/time.h>
+
 #include "softbus_bus_center.h"
 
 namespace OHOS {
@@ -22,6 +24,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
     const std::string DINPUT_PKG_NAME = "ohos.dhardware.dinput";
+    constexpr int32_t MS_ONE_SECOND = 1000;
 }
 
 DevInfo GetLocalDeviceInfo()
@@ -39,6 +42,13 @@ DevInfo GetLocalDeviceInfo()
     devInfo.deviceType = info->deviceTypeId;
 
     return devInfo;
+}
+
+uint64_t GetCurrentTime()
+{
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return tv.tv_sec * MS_ONE_SECOND + tv.tv_usec / MS_ONE_SECOND;
 }
 }
 }

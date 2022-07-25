@@ -31,6 +31,7 @@ struct DevInfo {
 };
 
 DevInfo GetLocalDeviceInfo();
+uint64_t GetCurrentTime();
 }
 }
 }
