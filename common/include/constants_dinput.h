@@ -88,7 +88,7 @@ namespace DistributedInput {
 
     constexpr int32_t INPUT_LATENCY_DELAYTIME_US = 50 * 1000;
 
-    constexpr int32_t INPUT_LATENCY_DELAY_TIMES = 60;
+    constexpr uint32_t INPUT_LATENCY_DELAY_TIMES = 60;
 
     constexpr int32_t SESSION_WAIT_TIMEOUT_SECOND = 5;
 

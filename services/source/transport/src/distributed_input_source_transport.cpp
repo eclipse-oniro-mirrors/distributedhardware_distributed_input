@@ -366,7 +366,7 @@ void DistributedInputSourceTransport::StartLatencyCount(const std::string& devic
     DHLOGI("start");
     while (isLatencyThreadRunning_.load()) {
         if (sendNum_ >= INPUT_LATENCY_DELAY_TIMES) {
-            int32_t latency = deltaTimeAll_ / 2 / INPUT_LATENCY_DELAY_TIMES;
+            uint64_t latency = (uint64_t)(deltaTimeAll_ / 2 / INPUT_LATENCY_DELAY_TIMES);
             DHLOGI("LatencyCount average single-channel latency is %d, send times is %d, recive times is %d,\
                 each RTT latency details is %s", latency, sendNum_, recvNum_, eachLatencyDetails_.c_str());
             deltaTimeAll_ = 0;
