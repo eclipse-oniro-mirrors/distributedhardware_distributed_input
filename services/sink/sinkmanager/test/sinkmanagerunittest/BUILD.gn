@@ -46,6 +46,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "${services_sink_path}/inputcollector/include",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
+    "${low_latency_path}/include",
   ]
 
   sources = [
@@ -77,6 +78,12 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "LOG_DOMAIN=0xD004100",
   ]
 
+  if (distributed_input_low_latency) {
+    defines += [
+      "DINPUT_LOW_LATENCY",
+    ]
+  }
+
   deps = [
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
@@ -85,6 +92,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//third_party/openssl:libcrypto_static",
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${utils_path}:libdinput_utils",
+    "${low_latency_path}:libdinput_low_latency",
   ]
 
   external_deps = [

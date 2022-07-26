@@ -48,6 +48,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${dfx_utils_path}/include",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "${utils_path}/include",
+    "${low_latency_path}/include",
   ]
 
   sources = [
@@ -100,6 +101,12 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "LOG_DOMAIN=0xD004100",
   ]
 
+  if (distributed_input_low_latency) {
+    defines += [
+      "DINPUT_LOW_LATENCY",
+    ]
+  }
+
   deps = [
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
@@ -108,6 +115,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${utils_path}:libdinput_utils",
+    "${low_latency_path}:libdinput_low_latency",
   ]
 
   external_deps = [

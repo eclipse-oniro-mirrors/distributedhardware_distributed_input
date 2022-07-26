@@ -20,7 +20,7 @@
 #include "distributed_hardware_log.h"
 
 #include "constants_dinput.h"
-#include "dinput_low_latency_utils.h"
+#include "dinput_low_latency.h"
 #include "hisysevent_util.h"
 
 namespace OHOS {
@@ -46,7 +46,9 @@ void SetSinkProcessExit()
     }
     DHLOGI("exit sa process success.");
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT, "dinput sink sa exit success.");
-    DInputLowLatencyUtils::GetInstance().DisableSinkLowLatency();
+#ifdef DINPUT_LOW_LATENCY
+    DInputLowLatency::GetInstance().DisableSinkLowLatency();
+#endif
     exit(0);
 }
 
@@ -61,7 +63,9 @@ void SetSourceProcessExit()
     }
     DHLOGI("exit sa process success.");
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT, "dinput source sa exit success.");
-    DInputLowLatencyUtils::GetInstance().DisableSourceLowLatency();
+#ifdef DINPUT_LOW_LATENCY
+    DInputLowLatency::GetInstance().DisableSourceLowLatency();
+#endif
     exit(0);
 }
 } // namespace DistributedInput

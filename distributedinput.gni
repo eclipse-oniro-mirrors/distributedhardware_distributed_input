@@ -33,8 +33,14 @@ frameworks_path = "${distributedinput_path}/frameworks"
 
 service_common = "${distributedinput_path}/services/common"
 
+low_latency_path = "${distributedinput_path}/low_latency"
+
 fwk_common_path = "${distributedhardwarefwk_path}/common"
 
 fwk_utils_path = "${distributedhardwarefwk_path}/utils"
 
 distributedinput_ldflags = [ "-lpthread" ]
+
+declare_args() {
+  distributed_input_low_latency = false
+}

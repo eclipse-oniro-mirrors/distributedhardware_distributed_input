@@ -32,6 +32,7 @@ ohos_shared_library("libdinput_source_trans") {
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
+    "${low_latency_path}/include",
   ]
 
   sources = [
@@ -44,6 +45,12 @@ ohos_shared_library("libdinput_source_trans") {
     "LOG_DOMAIN=0xD004100",
   ]
 
+  if (distributed_input_low_latency) {
+    defines += [
+      "DINPUT_LOW_LATENCY",
+    ]
+  }
+
   deps = [
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
@@ -53,6 +60,7 @@ ohos_shared_library("libdinput_source_trans") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${utils_path}:libdinput_utils",
+    "${low_latency_path}:libdinput_low_latency",
   ]
 
   external_deps = [

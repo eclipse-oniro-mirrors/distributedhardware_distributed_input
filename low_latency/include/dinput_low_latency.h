@@ -13,36 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef DINPUT_LOW_LATENCY_UTILS_H
-#define DINPUT_LOW_LATENCY_UTILS_H
-
-#include <cstring>
-#include <mutex>
+#ifndef DINPUT_LOW_LATENCY_H
+#define DINPUT_LOW_LATENCY_H
 
 #include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class DInputLowLatencyUtils {
-DECLARE_SINGLE_INSTANCE_BASE(DInputLowLatencyUtils);
+class DInputLowLatency {
+DECLARE_SINGLE_INSTANCE_BASE(DInputLowLatency);
 public:
     void EnableSourceLowLatency();
     void DisableSourceLowLatency();
     void EnableSinkLowLatency();
     void DisableSinkLowLatency();
 private:
-    DInputLowLatencyUtils() = default;
-    ~DInputLowLatencyUtils();
-    int32_t LoadLibrary();
-    void CloseLibrary();
-
-private:
-    void *handler_ { nullptr };
-    std::mutex mutex_;
+    DInputLowLatency() = default;
+    ~DInputLowLatency() = default;
 };
 }  // namespace DistributedInput
 }  // namespace DistributedHardware
 }  // namespace OHOS
-
-#endif  // DINPUT_LOW_LATENCY_UTILS_H
+#endif  // DINPUT_LOW_LATENCY_H

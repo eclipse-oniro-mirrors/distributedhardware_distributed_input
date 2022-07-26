@@ -40,6 +40,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "//foundation/distributedhardware/distributed_input/services/sink/transport/test/sinktransunittest/mock",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
+    "${low_latency_path}/include",
   ]
 
   sources = [
@@ -69,6 +70,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${utils_path}:libdinput_utils",
+    "${low_latency_path}:libdinput_low_latency",
   ]
 
   external_deps = [

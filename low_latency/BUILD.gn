@@ -14,36 +14,51 @@
 import("//build/ohos.gni")
 import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
-ohos_shared_library("libdinput_utils") {
+ohos_shared_library("libdinput_low_latency") {
   include_dirs = [
-    "${fwk_common_path}/utils/include",
-    "${fwk_common_path}/log/include",
-    "${fwk_utils_path}/include",
-    "${fwk_utils_path}/include/log",
-    "${utils_path}/include",
+    "include",
     "${common_path}/include",
+    "//utils/native/base/include",
+    "//utils/system/safwk/native/include",
+    "${fwk_common_path}/log/include",
+    "${fwk_common_path}/utils/include",
+    "${fwk_utils_path}/include/log",
+    "${fwk_utils_path}/include",
+    "${frameworks_path}/include",
+    "${distributedinput_path}/low_latency/include",
+    "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/innerkits/ressched_client/include",
   ]
 
   sources = [
-    "src/dinput_utils_tool.cpp",
+    "src/dinput_low_latency.cpp",
   ]
 
   defines = [
     "HI_LOG_ENABLE",
-    "DH_LOG_TAG=\"dinpututils\"",
+    "DH_LOG_TAG=\"distributedinputlowlatency\"",
     "LOG_DOMAIN=0xD004100",
   ]
 
   deps = [
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
+    "//third_party/openssl:libcrypto_static",
+    "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/innerkits/ressched_client:ressched_client",
+    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
-    "dsoftbus:softbus_client",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
+    "samgr_standard:samgr_proxy",
   ]
+
+  cflags_cc = [ "-DHILOG_ENABLE" ]
 
   subsystem_name = "distributedhardware"
 
   part_name = "distributed_input"
+
 }
