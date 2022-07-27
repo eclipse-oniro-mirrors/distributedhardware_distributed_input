@@ -35,8 +35,8 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(UnprepareDInputCallbackStub);
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // UNPREPARE_D_INPUT_CALL_BACK_STUB_H
+#endif // UNPREPARE_D_INPUT_CALL_BACK_STUB_H

@@ -61,8 +61,8 @@ private:
     std::condition_variable conditionVariable_;
     std::queue<std::shared_ptr<RawEvent>> injectQueue_;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_INJECT_H
+#endif // DISTRIBUTED_INPUT_INJECT_H

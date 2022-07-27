@@ -16,6 +16,7 @@
 #include "hisysevent_util.h"
 
 #include "anonymous_string.h"
+#include "dinput_errcode.h"
 #include "distributed_hardware_log.h"
 
 namespace OHOS {
@@ -30,7 +31,7 @@ void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string msg)
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "MSG", msg);
-    if (res != SUCCESS) {
+    if (res != DH_SUCCESS) {
         DHLOGE("Write HiSysEvent error, res:%d", res);
     }
 }
@@ -43,7 +44,7 @@ void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string devId
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "DEVID", GetAnonyString(devId),
         "MSG", msg);
-    if (res != SUCCESS) {
+    if (res != DH_SUCCESS) {
         DHLOGE("Write HiSysEvent error, res:%d", res);
     }
 }
@@ -57,7 +58,7 @@ void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string devId
         "DEVID", GetAnonyString(devId),
         "DHID", GetAnonyString(dhId),
         "MSG", msg);
-    if (res != SUCCESS) {
+    if (res != DH_SUCCESS) {
         DHLOGE("Write HiSysEvent error, res:%d", res);
     }
 }
@@ -69,7 +70,7 @@ void HisyseventUtil::SysEventWriteFault(std::string status, std::string msg)
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         "MSG", msg);
-    if (res != SUCCESS) {
+    if (res != DH_SUCCESS) {
         DHLOGE("Write HiSysEvent error, res:%d", res);
     }
 }
@@ -83,7 +84,7 @@ void HisyseventUtil::SysEventWriteFault(std::string status, std::string devId, i
         "DEVID", GetAnonyString(devId),
         "ERROR_CODE", errorCode,
         "MSG", msg);
-    if (res != SUCCESS) {
+    if (res != DH_SUCCESS) {
         DHLOGE("Write HiSysEvent error, res:%d", res);
     }
 }
@@ -99,7 +100,7 @@ void HisyseventUtil::SysEventWriteFault(std::string status, std::string devId, s
         "DHID", GetAnonyString(dhId),
         "ERROR_CODE", errorCode,
         "MSG", msg);
-    if (res != SUCCESS) {
+    if (res != DH_SUCCESS) {
         DHLOGE("Write HiSysEvent error, res:%d", res);
     }
 }

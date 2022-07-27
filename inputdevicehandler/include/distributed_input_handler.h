@@ -73,8 +73,8 @@ __attribute__((visibility("default"))) IHardwareHandler* GetHardwareHandler();
 #ifdef __cplusplus
 }
 #endif
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_HANDLER_H
+#endif // DISTRIBUTED_INPUT_HANDLER_H

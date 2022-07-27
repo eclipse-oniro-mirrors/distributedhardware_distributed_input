@@ -14,6 +14,7 @@
  */
 
 #include "distributed_input_sinkhandler_test.h"
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -41,32 +42,32 @@ void DistributedInputSinkHandlerTest::TearDownTestCase()
 HWTEST_F(DistributedInputSinkHandlerTest, InitSink01, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSinkHandler::GetInstance().InitSink("params");
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, InitSink02, testing::ext::TestSize.Level0)
 {
     std::string params = "";
     int32_t ret = DistributedInputSinkHandler::GetInstance().InitSink(params);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 HWTEST_F(DistributedInputSinkHandlerTest, InitSink03, testing::ext::TestSize.Level0)
 {
     std::string params = "params";
     int32_t ret = DistributedInputSinkHandler::GetInstance().InitSink(params);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, ReleaseSink01, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSinkHandler::GetInstance().ReleaseSink();
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, SubscribeLocalHardware01, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSinkHandler::GetInstance().SubscribeLocalHardware("dhId", "params");
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, SubscribeLocalHardware02, testing::ext::TestSize.Level0)
@@ -74,7 +75,7 @@ HWTEST_F(DistributedInputSinkHandlerTest, SubscribeLocalHardware02, testing::ext
     std::string dhId = "SubscribeLocalHardware02";
     std::string params = "test2";
     int32_t ret = DistributedInputSinkHandler::GetInstance().SubscribeLocalHardware(dhId, params);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, SubscribeLocalHardware03, testing::ext::TestSize.Level0)
@@ -82,28 +83,28 @@ HWTEST_F(DistributedInputSinkHandlerTest, SubscribeLocalHardware03, testing::ext
     std::string dhId = "SubscribeLocalHardware03";
     std::string params = "test3";
     int32_t ret = DistributedInputSinkHandler::GetInstance().SubscribeLocalHardware(dhId, params);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, UnsubscribeLocalHardware01, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSinkHandler::GetInstance().UnsubscribeLocalHardware("dhId");
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, UnsubscribeLocalHardware02, testing::ext::TestSize.Level0)
 {
     std::string dhId = "UnsubscribeLocalHardware02";
     int32_t ret = DistributedInputSinkHandler::GetInstance().UnsubscribeLocalHardware(dhId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkHandlerTest, UnsubscribeLocalHardware03, testing::ext::TestSize.Level0)
 {
     std::string dhId = "UnsubscribeLocalHardware03";
     int32_t ret = DistributedInputSinkHandler::GetInstance().UnsubscribeLocalHardware(dhId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

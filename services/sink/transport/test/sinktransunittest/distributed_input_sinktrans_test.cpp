@@ -114,7 +114,7 @@ HWTEST_F(DistributedInputSinkTransTest, StartSwitch01, testing::ext::TestSize.Le
     int32_t sessionId = 1000;
     DistributedInputSinkSwitch::GetInstance().AddSession(sessionId);
     int32_t ret = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, StartSwitch02, testing::ext::TestSize.Level1)
@@ -124,6 +124,6 @@ HWTEST_F(DistributedInputSinkTransTest, StartSwitch02, testing::ext::TestSize.Le
     int32_t ret = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId+10);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL, ret);
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

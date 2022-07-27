@@ -80,4 +80,4 @@ private:
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif  // WHITE_LIST_UTIL_H
+#endif // WHITE_LIST_UTIL_H

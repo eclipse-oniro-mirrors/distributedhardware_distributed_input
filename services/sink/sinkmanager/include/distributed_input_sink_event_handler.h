@@ -37,7 +37,8 @@ public:
 
 private:
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
-#endif  // DISRIBUTED_INPUT_SINK_EVENT_HANDLER_H
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // DISRIBUTED_INPUT_SINK_EVENT_HANDLER_H

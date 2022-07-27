@@ -42,4 +42,5 @@ public:
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
+
 #endif // DISRIBUTED_INPUT_SINKHANDLER_TEST_H

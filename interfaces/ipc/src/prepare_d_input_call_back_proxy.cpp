@@ -58,6 +58,6 @@ void PrepareDInputCallbackProxy::OnResult(const std::string& deviceId, const int
         return;
     }
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

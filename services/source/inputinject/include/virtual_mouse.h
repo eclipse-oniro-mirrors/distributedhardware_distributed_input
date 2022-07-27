@@ -33,7 +33,8 @@ protected:
     const std::vector<uint32_t>& GetProperties() const override;
     const std::vector<uint32_t>& GetAbs() const override;
 };
-};
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-#endif  // VIRTUALKEYBOARD_H
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // VIRTUALKEYBOARD_H

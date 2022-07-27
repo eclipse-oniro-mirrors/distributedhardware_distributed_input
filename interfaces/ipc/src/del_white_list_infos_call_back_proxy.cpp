@@ -51,6 +51,6 @@ void DelWhiteListInfosCallbackProxy::OnResult(const std::string& deviceId)
     }
     remote->SendRequest(static_cast<int32_t>(IDelWhiteListInfosCallback::Message::RESULT), data, reply, option);
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

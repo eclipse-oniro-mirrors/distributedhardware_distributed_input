@@ -30,7 +30,8 @@ public:
 private:
     std::string params_;
 };
-}
-}
-}
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // LOAD_D_INPUT_SOURCE_CALLBACK_H

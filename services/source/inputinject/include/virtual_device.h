@@ -65,7 +65,8 @@ protected:
 private:
     void RecordEventLog(const input_event& event);
 };
-}
-}
-}
-#endif  // OHOS_VIRTUAL_DEVICE_H
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_VIRTUAL_DEVICE_H

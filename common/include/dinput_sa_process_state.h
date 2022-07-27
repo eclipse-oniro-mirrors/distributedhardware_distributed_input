@@ -24,4 +24,5 @@ void SetSourceProcessExit();
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
+
 #endif // DINPUT_SA_PROCESS_STATE_H

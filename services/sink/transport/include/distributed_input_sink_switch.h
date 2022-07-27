@@ -45,8 +45,8 @@ private:
     std::mutex operationMutex_;
     std::vector<SwitchStateData> switchVector_;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_SINK_SWITCH_H
+#endif // DISTRIBUTED_INPUT_SINK_SWITCH_H

@@ -26,6 +26,7 @@
 #include "event_handler.h"
 #include "nlohmann/json.hpp"
 
+#include "dinput_errcode.h"
 #include "softbus_bus_center.h"
 
 using namespace testing::ext;
@@ -68,7 +69,7 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware01, testin
     std::string parameters;
     DistributedInputInject::GetInstance().StructTransJson(pBuffer, parameters);
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedHardware(devId, dhId, parameters);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware02, testing::ext::TestSize.Level1)
@@ -89,7 +90,7 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware02, testin
     std::string parameters;
     DistributedInputInject::GetInstance().StructTransJson(pBuffer, parameters);
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedHardware(devId, dhId, parameters);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware03, testing::ext::TestSize.Level1)
@@ -110,7 +111,7 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware03, testin
     std::string parameters;
     DistributedInputInject::GetInstance().StructTransJson(pBuffer, parameters);
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedHardware(devId, dhId, parameters);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent01, testing::ext::TestSize.Level1)
@@ -147,7 +148,7 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent01, testing::
 
     size_t count = (size_t)(sizeof(writeBuffer) / sizeof(RawEvent));
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedEvent(writeBuffer, count);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent02, testing::ext::TestSize.Level1)
@@ -190,7 +191,7 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent02, testing::
 
     size_t count = (size_t)(sizeof(writeBuffer) / sizeof(RawEvent));
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedEvent(writeBuffer, count);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent03, testing::ext::TestSize.Level1)
@@ -227,7 +228,7 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent03, testing::
 
     size_t count = (size_t)(sizeof(writeBuffer) / sizeof(RawEvent));
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedEvent(writeBuffer, count);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

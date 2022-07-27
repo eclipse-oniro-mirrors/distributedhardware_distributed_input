@@ -63,4 +63,5 @@ public:
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
+
 #endif // DISRIBUTED_INPUT_SOURCEHANDLER_TEST_H

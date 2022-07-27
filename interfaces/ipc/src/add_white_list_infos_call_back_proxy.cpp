@@ -55,6 +55,6 @@ void AddWhiteListInfosCallbackProxy::OnResult(const std::string& deviceId, const
     }
     remote->SendRequest(static_cast<int32_t>(IAddWhiteListInfosCallback::Message::RESULT), data, reply, option);
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

@@ -36,8 +36,8 @@ public:
 private:
     static inline BrokerDelegator<AddWhiteListInfosCallbackProxy> delegator_;
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // ADD_WHITE_LIST_INFOS_CALL_BACK_PROXY_H
+#endif // ADD_WHITE_LIST_INFOS_CALL_BACK_PROXY_H

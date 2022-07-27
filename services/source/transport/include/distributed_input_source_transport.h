@@ -88,8 +88,8 @@ private:
     std::thread latencyThread_;
     std::string eachLatencyDetails_ = "";
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_SOURCE_TRANSPORT_H
+#endif // DISTRIBUTED_INPUT_SOURCE_TRANSPORT_H

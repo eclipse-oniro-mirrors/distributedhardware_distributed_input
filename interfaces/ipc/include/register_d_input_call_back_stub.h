@@ -35,8 +35,8 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(RegisterDInputCallbackStub);
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // REGIST_D_INPUT_CALL_BACK_STUB_H
+#endif // REGIST_D_INPUT_CALL_BACK_STUB_H

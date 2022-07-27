@@ -52,6 +52,6 @@ int32_t AddWhiteListInfosCallbackStub::OnRemoteRequest(
     }
     return DH_SUCCESS;
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

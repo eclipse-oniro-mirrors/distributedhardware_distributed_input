@@ -136,7 +136,7 @@ int32_t DistributedInputSourceManagerTest::StructTransJson(const InputDevice& pB
     std::ostringstream stream;
     stream << tmpJson.dump();
     strDescriptor = stream.str();
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware01, testing::ext::TestSize.Level0)
@@ -160,7 +160,7 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware01, testi
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
 
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware02, testing::ext::TestSize.Level0)
@@ -182,7 +182,7 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware02, testi
     StructTransJson(pBuffer, parameters);
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware03, testing::ext::TestSize.Level0)
@@ -204,7 +204,7 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware03, testi
     StructTransJson(pBuffer, parameters);
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     int32_t ret = sourceManager_->RegisterDistributedHardware(devId, dhId, parameters, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput01, testing::ext::TestSize.Level0)
@@ -335,6 +335,6 @@ HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware03, tes
     int32_t ret = sourceManager_->UnregisterDistributedHardware(devId, dhId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, ret);
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

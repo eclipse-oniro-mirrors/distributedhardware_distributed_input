@@ -46,8 +46,8 @@ private:
     // The event queue.
     static const int EVENT_BUFFER_SIZE = 16;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_INJECT_H
+#endif // DISTRIBUTED_INPUT_INJECT_H

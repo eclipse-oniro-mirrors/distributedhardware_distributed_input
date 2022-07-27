@@ -56,8 +56,8 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> sinkHandler_;
     uint32_t inputTypes_;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_COLLECTOR_H
+#endif // DISTRIBUTED_INPUT_COLLECTOR_H

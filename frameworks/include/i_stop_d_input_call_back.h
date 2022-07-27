@@ -33,8 +33,8 @@ public:
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.IStopDInputCallback");
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // I_STOP_D_INPUT_CALL_BACK_H
+#endif // I_STOP_D_INPUT_CALL_BACK_H

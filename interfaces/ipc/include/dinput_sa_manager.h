@@ -64,7 +64,8 @@ public:
     sptr<IDistributedSinkInput> dInputSinkProxy_ = nullptr;
     sptr<SystemAbilityListener> saListenerCallback = nullptr;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // DINPUT_SA_MANAGER_H

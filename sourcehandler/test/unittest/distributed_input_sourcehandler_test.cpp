@@ -14,6 +14,7 @@
  */
 
 #include "distributed_input_sourcehandler_test.h"
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -41,32 +42,32 @@ void DistributedInputSourceHandlerTest::TearDownTestCase()
 int32_t DistributedInputSourceHandlerTest::TestRegisterDInputCallback::OnRegisterResult(const std::string &devId,
     const std::string &dhId, int32_t status, const std::string &data)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceHandlerTest::TestUnregisterDInputCallback::OnUnregisterResult(const std::string &devId,
     const std::string &dhId, int32_t status, const std::string &data)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, InitSource01, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSourceHandler::GetInstance().InitSource("");
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, InitSource02, testing::ext::TestSize.Level0)
 {
     std::string dhId = "test";
     int32_t ret = DistributedInputSourceHandler::GetInstance().InitSource(dhId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, ReleaseSource01, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSourceHandler::GetInstance().ReleaseSource();
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware01, testing::ext::TestSize.Level0)
@@ -79,7 +80,7 @@ HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware01, testi
             "version", "attrs"
         },
         registerCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware02, testing::ext::TestSize.Level0)
@@ -89,7 +90,7 @@ HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware02, testi
     std::string dhId = "";
     int32_t ret = DistributedInputSourceHandler::GetInstance().RegisterDistributedHardware(
         devId, dhId, OHOS::DistributedHardware::EnableParam {"version", "attrs" }, registerCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware03, testing::ext::TestSize.Level0)
@@ -102,7 +103,7 @@ HWTEST_F(DistributedInputSourceHandlerTest, RegisterDistributedHardware03, testi
             "version", "attrs"
         },
         registerCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 HWTEST_F(DistributedInputSourceHandlerTest, UnregisterDistributedHardware01, testing::ext::TestSize.Level0)
 {
@@ -110,7 +111,7 @@ HWTEST_F(DistributedInputSourceHandlerTest, UnregisterDistributedHardware01, tes
             std::make_shared<TestUnregisterDInputCallback>();
     int32_t ret = DistributedInputSourceHandler::GetInstance().UnregisterDistributedHardware("devId",
         "dhId", unregisterDInputCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, UnregisterDistributedHardware02, testing::ext::TestSize.Level0)
@@ -120,25 +121,24 @@ HWTEST_F(DistributedInputSourceHandlerTest, UnregisterDistributedHardware02, tes
     std::string dhId = "";
     int32_t ret = DistributedInputSourceHandler::GetInstance().UnregisterDistributedHardware("devId",
         "dhId", unregisterDInputCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, UnregisterDistributedHardware03, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<TestUnregisterDInputCallback> unregisterDInputCallback =
             std::make_shared<TestUnregisterDInputCallback>();
-    
     int32_t ret = DistributedInputSourceHandler::GetInstance().UnregisterDistributedHardware("devId",
         "dhId", unregisterDInputCallback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceHandlerTest, ConfigDistributedHardware01, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSourceHandler::GetInstance().ConfigDistributedHardware("devId",
         "dhId", "key", "value");
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

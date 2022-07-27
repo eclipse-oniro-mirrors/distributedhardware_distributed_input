@@ -139,8 +139,8 @@ private:
     std::vector<DHardWareFwkUnRegistInfo> dHardWareFwkUnRstInfos;
     std::mutex operationMutex_;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_CLIENT_H
+#endif // DISTRIBUTED_INPUT_CLIENT_H

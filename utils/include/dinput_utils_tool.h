@@ -32,7 +32,8 @@ struct DevInfo {
 
 DevInfo GetLocalDeviceInfo();
 uint64_t GetCurrentTime();
-}
-}
-}
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_DISTRIBUTED_INPUT_UTILS_TOOL_H

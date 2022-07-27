@@ -221,7 +221,8 @@ void DistributedInputSinkManager::OnStart()
     serviceRunningState_ = ServiceSinkRunningState::STATE_RUNNING;
     runner_->Run();
     /* Publish service maybe failed, so we need call this function at the last,
-     * so it can't affect the TDD test program */
+     * so it can't affect the TDD test program.
+     */
     bool ret = Publish(this);
     if (!ret) {
         return;
@@ -250,7 +251,7 @@ void DistributedInputSinkManager::OnStop()
     serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
 }
 
-/**
+/*
  * get event handler
  *
  * @return event handler object.

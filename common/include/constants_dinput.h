@@ -32,38 +32,7 @@ namespace DistributedInput {
 
 #define VIRTUAL_DEVICE_NAME "Hos Distributed Virtual Device "
 
-    /**
-     * Status code.
-     */
-    constexpr int32_t NO_ERROR = 0;
-    constexpr int32_t ERROR = -1;
-
-    /**
-     * Status code, indicates general success.
-     */
-    constexpr int32_t SUCCESS = 0;
-
-    /**
-     * Status code, indicates general failure.
-     */
-    constexpr int32_t FAILURE = -60000;
-
-    /**
-     * Status code, DISERVER general failure.
-     */
-    constexpr int32_t FAILURE_DIS = -60001;
-
-    /**
-     * Status code, hardware is resigtring.
-     */
-    constexpr int32_t FAILURE_REGISTING = -60002;
-
-    /**
-     * Status code, hardware is unresigtring.
-     */
-    constexpr int32_t FAILURE_UNREGISTING = -60003;
-
-    /**
+    /*
      * Device Type definitions
      */
     enum class DInputDeviceType : uint32_t {
@@ -74,12 +43,12 @@ namespace DistributedInput {
         ALL = MOUSE | KEYBOARD,
     };
 
-    /**
+    /*
      * Maximum number of signalled FDs to handle at a time.
      */
     constexpr uint32_t EPOLL_MAX_EVENTS = 16;
 
-    /**
+    /*
      * Maximum number of event buffer size.
      */
     constexpr uint32_t INPUT_EVENT_BUFFER_SIZE = 256;
@@ -218,21 +187,21 @@ namespace DistributedInput {
         InputDevice deviceInfo;
     };
 
-    /**
+    /*
      * Device Type definitions
      */
     enum class DInputServerType {
-        /**
+        /*
          * null server
          */
         NULL_SERVER_TYPE = 0,
 
-        /**
+        /*
          * source server
          */
         SOURCE_SERVER_TYPE = 1,
 
-        /**
+        /*
          * sink server.
          */
         SINK_SERVER_TYPE = 2,
@@ -245,7 +214,8 @@ namespace DistributedInput {
         OPENED = 0x02,
         CLOSING = 0x03,
     };
-}
-}
-}
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_DISTRIBUTED_INPUT_CONSTANTS_H

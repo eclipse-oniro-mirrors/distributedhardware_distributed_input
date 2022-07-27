@@ -35,8 +35,8 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(StartDInputServerCallbackStub);
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // START_D_INPUT_SERVER_CALL_BACK_STUB_H
+#endif // START_D_INPUT_SERVER_CALL_BACK_STUB_H

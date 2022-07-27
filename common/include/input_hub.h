@@ -99,10 +99,10 @@ private:
     bool ContainsNonZeroByte(const uint8_t* array, uint32_t startIndex, uint32_t endIndex);
     int64_t ProcessEventTimestamp(const input_event& event);
     /* this macro is used to tell if "bit" is set in "array"
-    * it selects a byte from the array, and does a boolean AND
-    * operation with a byte that only has the relevant bit set.
-    * eg. to check for the 12th bit, we do (array[1] & 1<<4)
-    */
+     * it selects a byte from the array, and does a boolean AND
+     * operation with a byte that only has the relevant bit set.
+     * eg. to check for the 12th bit, we do (array[1] & 1<<4)
+     */
     bool TestBit(uint32_t bit, const uint8_t* array);
     /* this macro computes the number of bytes needed to represent a bit array of the specified size */
     uint32_t SizeofBitArray(uint32_t bit);
@@ -138,4 +138,4 @@ private:
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif  // INPUT_HUB_H
+#endif // INPUT_HUB_H

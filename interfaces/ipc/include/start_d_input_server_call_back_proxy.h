@@ -36,8 +36,8 @@ public:
 private:
     static inline BrokerDelegator<StartDInputServerCallbackProxy> delegator_;
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // START_D_INPUT_CALL_BACK_PROXY_H
+#endif // START_D_INPUT_CALL_BACK_PROXY_H

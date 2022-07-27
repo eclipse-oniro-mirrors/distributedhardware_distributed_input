@@ -79,8 +79,8 @@ private:
     std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> eventHandler_;
     std::shared_ptr<DInputSinkTransCallback> callback_;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_SINK_TRANSPORT_H
+#endif // DISTRIBUTED_INPUT_SINK_TRANSPORT_H

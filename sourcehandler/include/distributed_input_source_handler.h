@@ -83,8 +83,8 @@ __attribute__((visibility("default"))) IDistributedHardwareSource *GetSourceHard
 #ifdef __cplusplus
 }
 #endif // __cplusplus
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_SOURCE_HANDLER_H
+#endif // DISTRIBUTED_INPUT_SOURCE_HANDLER_H

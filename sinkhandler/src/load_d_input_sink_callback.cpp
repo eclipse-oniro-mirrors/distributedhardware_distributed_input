@@ -42,6 +42,6 @@ void LoadDInputSinkCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
         "dinput sink LoadSystemAbility call failed.");
     DHLOGE("load dinput SA failed, systemAbilityId:%d", systemAbilityId);
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

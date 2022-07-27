@@ -37,4 +37,5 @@ constexpr int32_t DINPUT_STOP_TASK = 3;
 constexpr int32_t DINPUT_UNPREPARE_TASK = 4;
 } // namespace DistributedHardware
 } // namespace OHOS
-#endif
+
+#endif // OHOS_DINPUT_HITRACE_H

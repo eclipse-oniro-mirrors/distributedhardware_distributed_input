@@ -77,7 +77,7 @@ public:
 
     void SetInputTypes(const uint32_t& inputTypess);
 
-    /**
+    /*
      * GetEventHandler, get the ui_service manager service's handler.
      *
      * @return Returns EventHandler ptr.

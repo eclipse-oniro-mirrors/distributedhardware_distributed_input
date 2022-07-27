@@ -43,6 +43,6 @@ void LoadDInputSourceCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
     HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_INIT_FAIL,
         "dinput source LoadSystemAbility call failed.");
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

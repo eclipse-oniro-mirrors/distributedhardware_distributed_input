@@ -59,6 +59,6 @@ void StartDInputServerCallbackProxy::OnResult(const int32_t& status, const uint3
         return;
     }
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

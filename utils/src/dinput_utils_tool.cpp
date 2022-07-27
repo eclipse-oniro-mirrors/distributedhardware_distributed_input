@@ -50,6 +50,6 @@ uint64_t GetCurrentTime()
     gettimeofday(&tv, nullptr);
     return tv.tv_sec * MS_ONE_SECOND + tv.tv_usec / MS_ONE_SECOND;
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

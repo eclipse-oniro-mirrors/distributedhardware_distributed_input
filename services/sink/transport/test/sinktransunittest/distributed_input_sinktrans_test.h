@@ -36,7 +36,8 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 };
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
 #endif // DISRIBUTED_INPUT_INNER_TEST_H

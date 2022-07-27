@@ -112,6 +112,6 @@ HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput02, testing::ext::TestS
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL, ret);
     DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(deviceId);
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

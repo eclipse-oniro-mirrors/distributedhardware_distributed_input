@@ -33,8 +33,8 @@ public:
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.IDelWhiteListInfosCallback");
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // I_ADD_WHITE_LIST_INFOS_CALL_BACK_H
+#endif // I_ADD_WHITE_LIST_INFOS_CALL_BACK_H

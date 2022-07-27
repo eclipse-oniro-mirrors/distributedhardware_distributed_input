@@ -29,7 +29,8 @@ public:
     virtual void onStopRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes) = 0;
     virtual ~DInputSinkTransCallback() {}
 };
-}
-}
-}
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_DISTRIBUTED_INPUT_SINK_TANTS_H

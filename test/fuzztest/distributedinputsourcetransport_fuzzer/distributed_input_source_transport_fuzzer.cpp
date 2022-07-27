@@ -64,8 +64,8 @@ void OnBytesReceivedFuzzTest(const uint8_t* data, size_t size)
     uint16_t dataLen = *(reinterpret_cast<const uint16_t*>(data));
     DistributedInput::DistributedInputSourceTransport::GetInstance().OnBytesReceived(sessionId, msg, dataLen);
 }
-}
-}
+} // namespace DistributedHardware
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

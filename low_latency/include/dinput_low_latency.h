@@ -32,7 +32,9 @@ private:
     DInputLowLatency() = default;
     ~DInputLowLatency() = default;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
-#endif  // DINPUT_LOW_LATENCY_H
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // DINPUT_LOW_LATENCY_H
+

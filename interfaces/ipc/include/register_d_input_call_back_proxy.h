@@ -36,8 +36,8 @@ public:
 private:
     static inline BrokerDelegator<RegisterDInputCallbackProxy> delegator_;
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // REGIST_D_INPUT_CALL_BACK_PROXY_H
+#endif // REGIST_D_INPUT_CALL_BACK_PROXY_H

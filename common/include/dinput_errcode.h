@@ -35,11 +35,14 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_DLOPEN_FAIL = -60009;
     constexpr int32_t ERR_DH_INPUT_DLSYM_FAIL = -60010;
     constexpr int32_t ERR_DH_INPUT_LOW_LATENCY_LIB_NULL = -60011;
+
     // whilte list error code
     constexpr int32_t ERR_DH_INPUT_WHILTELIST_INIT_FAIL = -61001;
     constexpr int32_t ERR_DH_INPUT_WHILTELIST_GET_WHILTELIST_FAIL = -61002;
+
     // handler error code
     constexpr int32_t ERR_DH_INPUT_HANDLER_GET_DEVICE_ID_FAIL = -63000;
+
     // service sink error code
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_COLLECTOR_INIT_FAIL = -64000;
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_MANAGER_INIT_FAIL = -64001;
@@ -52,11 +55,12 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTOP_FAIL = -64008;
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL = -64009;
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL = -64010;
+
     // service source error code
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_REGISTER_FAIL = -65000;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_UNREGISTER_FAIL = -65001;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_PREPARE_FAIL = -65002;
-    constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL = -65003;//
+    constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL = -65003;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_OPEN_DEVICE_NODE_FAIL = -65004;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL = -65005;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_CLOSE_DEVICE_FAIL = -65006;
@@ -88,9 +92,11 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_MSG_IS_BAD = -65032;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD = -65033;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_LATENCY_FAIL = -65034;
+
     // handler error code
     constexpr int32_t ERR_DH_INPUT_SINK_HANDLER_INIT_SINK_SA_FAIL = -66000;
     constexpr int32_t ERR_DH_INPUT_SINK_HANDLER_INIT_SOURCE_SA_FAIL = -66001;
+
     // interface error code
     constexpr int32_t ERR_DH_INPUT_IPC_INVALID_DESCRIPTOR = -67000;
     constexpr int32_t ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL = -67001;
@@ -128,7 +134,8 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_HIDUMP_INVALID_ARGS = -68000;
     constexpr int32_t ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL = -68001;
     constexpr int32_t ERR_DH_INPUT_HIDUMP_DPRINTF_FAIL = -68002;
-}
-}
-}
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_DINPUT_ERRCODE_H

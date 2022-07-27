@@ -63,6 +63,6 @@ void StopDInputCallbackProxy::OnResult(const std::string& devId, const uint32_t&
         return;
     }
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

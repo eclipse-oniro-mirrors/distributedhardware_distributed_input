@@ -66,7 +66,7 @@ namespace DistributedInput {
     const uint32_t TRANS_SOURCE_MSG_START      = 13;
     const uint32_t TRANS_SOURCE_MSG_STOP       = 14;
     const uint32_t TRANS_SOURCE_MSG_LATENCY    = 15;
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
-#endif  // DISTRIBUTED_INPUT_SOFTBUS_DEFINE_H
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+#endif // DISTRIBUTED_INPUT_SOFTBUS_DEFINE_H

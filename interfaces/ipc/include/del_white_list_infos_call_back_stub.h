@@ -35,8 +35,8 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(DelWhiteListInfosCallbackStub);
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // ADD_WHITE_LIST_INFOS_CALL_BACK_STUB_H
+#endif // ADD_WHITE_LIST_INFOS_CALL_BACK_STUB_H

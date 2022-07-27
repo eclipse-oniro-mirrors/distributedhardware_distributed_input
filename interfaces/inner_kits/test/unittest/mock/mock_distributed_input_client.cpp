@@ -19,6 +19,7 @@
 #include "nlohmann/json.hpp"
 
 #include "constants_dinput.h"
+#include "dinput_errcode.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -94,58 +95,58 @@ void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& de
 
 int32_t DistributedInputClient::InitSource()
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::InitSink()
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::ReleaseSource()
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::ReleaseSink()
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::string& parameters, const std::shared_ptr<RegisterCallback>& callback)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::shared_ptr<UnregisterCallback>& callback)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::PrepareRemoteInput(
     const std::string& deviceId, sptr<IPrepareDInputCallback> callback)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::UnprepareRemoteInput(
     const std::string& deviceId, sptr<IUnprepareDInputCallback> callback)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputClient::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
 {
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)

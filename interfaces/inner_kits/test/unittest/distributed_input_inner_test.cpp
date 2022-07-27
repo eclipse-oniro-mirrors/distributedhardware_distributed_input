@@ -16,6 +16,7 @@
 #include "distributed_input_inner_test.h"
 
 #include "system_ability_definition.h"
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -80,23 +81,23 @@ int DistributedInputInnerTest::CheckSourceProxy() const
     OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
         OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
     OHOS::sptr<OHOS::IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
         DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
     if (!remoteObject) {
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
     OHOS::sptr<IDistributedSourceInput> proxyTest;
 
     proxyTest = OHOS::iface_cast<IDistributedSourceInput>(remoteObject);
     if ((!proxyTest) || (!proxyTest->AsObject())) {
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 int DistributedInputInnerTest::CheckSinkProxy() const
@@ -104,23 +105,23 @@ int DistributedInputInnerTest::CheckSinkProxy() const
     OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
         OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
     OHOS::sptr<OHOS::IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
         DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID);
     if (!remoteObject) {
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
     OHOS::sptr<IDistributedSinkInput> proxyTest;
 
     proxyTest = OHOS::iface_cast<IDistributedSinkInput>(remoteObject);
     if ((!proxyTest) || (!proxyTest->AsObject())) {
-        return SUCCESS;
+        return DH_SUCCESS;
     }
 
-    return SUCCESS;
+    return DH_SUCCESS;
 }
 
 HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput01, testing::ext::TestSize.Level0)
@@ -128,7 +129,7 @@ HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput01, testing::ext::TestSize
     string deviceId = "PrepareRemoteInput01";
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
     int32_t ret = DistributedInputKit::PrepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput02, testing::ext::TestSize.Level0)
@@ -136,7 +137,7 @@ HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput02, testing::ext::TestSize
     string deviceId = "";
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
     int32_t ret = DistributedInputKit::PrepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput03, testing::ext::TestSize.Level0)
@@ -144,7 +145,7 @@ HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput03, testing::ext::TestSize
     string deviceId = "PrepareRemoteInput01";
     sptr<TestPrepareDInputCallback> callback = nullptr;
     int32_t ret = DistributedInputKit::PrepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput04, testing::ext::TestSize.Level0)
@@ -152,7 +153,7 @@ HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput04, testing::ext::TestSize
     string deviceId = "";
     sptr<TestPrepareDInputCallback> callback = nullptr;
     int32_t ret = DistributedInputKit::PrepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput01, testing::ext::TestSize.Level0)
@@ -160,7 +161,7 @@ HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput01, testing::ext::TestSi
     string deviceId = "UnprepareRemoteInput01";
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
     int32_t ret = DistributedInputKit::UnprepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput02, testing::ext::TestSize.Level0)
@@ -168,7 +169,7 @@ HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput02, testing::ext::TestSi
     string deviceId = "";
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
     int32_t ret = DistributedInputKit::UnprepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput03, testing::ext::TestSize.Level0)
@@ -176,7 +177,7 @@ HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput03, testing::ext::TestSi
     string deviceId = "UnprepareRemoteInput01";
     sptr<TestUnprepareDInputCallback> callback = nullptr;
     int32_t ret = DistributedInputKit::UnprepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput04, testing::ext::TestSize.Level0)
@@ -184,7 +185,7 @@ HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput04, testing::ext::TestSi
     string deviceId = "";
     sptr<TestUnprepareDInputCallback> callback = nullptr;
     int32_t ret = DistributedInputKit::UnprepareRemoteInput(deviceId, callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput01, testing::ext::TestSize.Level0)
@@ -193,7 +194,7 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput01, testing::ext::TestSize.L
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
     int32_t ret =
         DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput02, testing::ext::TestSize.Level0)
@@ -202,7 +203,7 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput02, testing::ext::TestSize.L
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
     int32_t ret =
         DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput03, testing::ext::TestSize.Level0)
@@ -211,7 +212,7 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput03, testing::ext::TestSize.L
     sptr<TestStartDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput04, testing::ext::TestSize.Level0)
@@ -220,7 +221,7 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput04, testing::ext::TestSize.L
     sptr<TestStartDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput01, testing::ext::TestSize.Level0)
@@ -229,7 +230,7 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput01, testing::ext::TestSize.Le
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
     int32_t ret =
         DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput02, testing::ext::TestSize.Level0)
@@ -238,7 +239,7 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput02, testing::ext::TestSize.Le
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
     int32_t ret =
         DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput03, testing::ext::TestSize.Level0)
@@ -247,7 +248,7 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput03, testing::ext::TestSize.Le
     sptr<TestStopDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput04, testing::ext::TestSize.Level0)
@@ -256,7 +257,7 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput04, testing::ext::TestSize.Le
     sptr<TestStopDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, IsNeedFilterOut01, testing::ext::TestSize.Level0)
@@ -298,9 +299,9 @@ HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput1, testing::ext::Test
     DInputServerType ret = DistributedInputKit::IsStartDistributedInput(static_cast<uint32_t>(DInputDeviceType::ALL));
 
     if (ret == DInputServerType::NULL_SERVER_TYPE) {
-        EXPECT_EQ(SUCCESS, 0);
+        EXPECT_EQ(DH_SUCCESS, 0);
     } else {
-        EXPECT_EQ(SUCCESS, -1);
+        EXPECT_EQ(DH_SUCCESS, -1);
     }
 }
 
@@ -309,11 +310,11 @@ HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput2, testing::ext::Test
     DInputServerType ret = DistributedInputKit::IsStartDistributedInput(static_cast<uint32_t>(DInputDeviceType::ALL));
 
     if (ret == DInputServerType::NULL_SERVER_TYPE) {
-        EXPECT_EQ(SUCCESS, 0);
+        EXPECT_EQ(DH_SUCCESS, 0);
     } else {
-        EXPECT_EQ(SUCCESS, -1);
+        EXPECT_EQ(DH_SUCCESS, -1);
     }
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

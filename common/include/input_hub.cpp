@@ -452,7 +452,7 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     }
     GenerateDescriptor(identifier);
 
-    // Allocate device.  (The device object takes ownership of the fd at this point.)
+    // Allocate device. (The device object takes ownership of the fd at this point.)
     int32_t deviceId = nextDeviceId_++;
     std::unique_ptr<Device> device = std::make_unique<Device>(fd, deviceId, devicePath, identifier);
 

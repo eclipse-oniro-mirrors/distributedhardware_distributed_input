@@ -82,4 +82,5 @@ public:
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
+
 #endif // DISRIBUTED_INPUT_INNER_TEST_H

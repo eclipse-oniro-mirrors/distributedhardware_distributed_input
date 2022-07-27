@@ -33,7 +33,8 @@ protected:
     const std::vector<uint32_t>& GetProperties() const override;
     const std::vector<uint32_t>& GetRelBits() const override;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_VIRTUAL_TOUCHPAD_H

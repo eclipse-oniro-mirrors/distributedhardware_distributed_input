@@ -56,4 +56,5 @@ private:
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
-#endif
+
+#endif // OHOS_DISTRIBUTED_INPUT_HISYSEVENT_UTILS_H

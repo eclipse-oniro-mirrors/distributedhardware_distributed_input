@@ -53,6 +53,6 @@ int32_t StopDInputCallbackStub::OnRemoteRequest(
     }
     return DH_SUCCESS;
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

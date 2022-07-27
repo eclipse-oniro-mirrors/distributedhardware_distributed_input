@@ -77,7 +77,8 @@ private:
     std::mutex sessionMutex_;
     std::mutex operationMutex_;
 };
-}
-}
-}
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // HIDUMP_HELPER_H

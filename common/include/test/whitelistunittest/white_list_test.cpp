@@ -66,7 +66,7 @@ HWTEST_F(WhiteListTest, SyncWhiteList01, testing::ext::TestSize.Level0)
     vecKeyCode.clear();
     vecCombinationKey.clear();
     int32_t ret = WhiteListUtil::GetInstance().SyncWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(WhiteListTest, SyncWhiteList02, testing::ext::TestSize.Level0)
@@ -94,7 +94,7 @@ HWTEST_F(WhiteListTest, SyncWhiteList02, testing::ext::TestSize.Level0)
     vecKeyCode.clear();
     vecCombinationKey.clear();
     int32_t ret = WhiteListUtil::GetInstance().SyncWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(WhiteListTest, SyncWhiteList03, testing::ext::TestSize.Level0)
@@ -120,7 +120,7 @@ HWTEST_F(WhiteListTest, SyncWhiteList03, testing::ext::TestSize.Level0)
     vecKeyCode.clear();
     vecCombinationKey.clear();
     int32_t ret = WhiteListUtil::GetInstance().SyncWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(WhiteListTest, SyncWhiteList04, testing::ext::TestSize.Level0)
@@ -146,15 +146,15 @@ HWTEST_F(WhiteListTest, SyncWhiteList04, testing::ext::TestSize.Level0)
     vecKeyCode.clear();
     vecCombinationKey.clear();
     int32_t ret = WhiteListUtil::GetInstance().SyncWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
- 
+
 HWTEST_F(WhiteListTest, GetWhiteList01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "test";
     TYPE_WHITE_LIST_VEC vecWhiteList;
     int32_t ret = WhiteListUtil::GetInstance().GetWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(WhiteListTest, GetWhiteList02, testing::ext::TestSize.Level0)
@@ -162,7 +162,7 @@ HWTEST_F(WhiteListTest, GetWhiteList02, testing::ext::TestSize.Level0)
     std::string deviceId = "test1";
     TYPE_WHITE_LIST_VEC vecWhiteList;
     int32_t ret = WhiteListUtil::GetInstance().GetWhiteList(deviceId, vecWhiteList);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(WhiteListTest, GetWhiteList03, testing::ext::TestSize.Level0)
@@ -329,22 +329,22 @@ HWTEST_F(WhiteListTest, ClearWhiteList01, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "test";
     int32_t ret = WhiteListUtil::GetInstance().ClearWhiteList(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(WhiteListTest, ClearWhiteList02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "test1";
     int32_t ret = WhiteListUtil::GetInstance().ClearWhiteList(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(WhiteListTest, ClearWhiteList03, testing::ext::TestSize.Level0)
 {
     std::string deviceId;
     int32_t ret = WhiteListUtil::GetInstance().ClearWhiteList(deviceId);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

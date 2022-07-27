@@ -78,8 +78,8 @@ __attribute__((visibility("default"))) IDistributedHardwareSink *GetSinkHardware
 #ifdef __cplusplus
 }
 #endif
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISTRIBUTED_INPUT_SINK_HANDLER_H
+#endif // DISTRIBUTED_INPUT_SINK_HANDLER_H

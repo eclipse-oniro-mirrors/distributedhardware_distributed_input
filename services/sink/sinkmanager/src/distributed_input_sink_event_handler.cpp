@@ -40,6 +40,6 @@ void DistributedInputSinkEventHandler::ProxyRemoveTask(const std::string &name)
 {
     AppExecFwk::EventHandler::RemoveTask(name);
 }
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

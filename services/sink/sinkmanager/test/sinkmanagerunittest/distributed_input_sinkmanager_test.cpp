@@ -42,6 +42,6 @@ void DistributedInputSinkManagerTest::SetUpTestCase()
 void DistributedInputSinkManagerTest::TearDownTestCase()
 {
 }
-}
-}
-}
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

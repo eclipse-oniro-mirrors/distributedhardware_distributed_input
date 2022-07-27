@@ -243,7 +243,8 @@ void DistributedInputSourceManager::OnStart()
     serviceRunningState_ = ServiceSourceRunningState::STATE_RUNNING;
     runner_->Run();
     /* Publish service maybe failed, so we need call this function at the last,
-     * so it can't affect the TDD test program */
+     * so it can't affect the TDD test program.
+     */
     bool ret = Publish(this);
     if (!ret) {
         return;

@@ -31,7 +31,8 @@ public:
     virtual void onResponseStopRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result) = 0;
     virtual void onReceivedEventRemoteInput(const std::string deviceId, const std::string &object) = 0;
 };
-}
-}
-}
-#endif
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_DISTRIBUTED_INPUT_SOURCE_TRANS_H

@@ -33,7 +33,8 @@ protected:
     const std::vector<uint32_t>& GetAbs() const override;
     const std::vector<uint32_t>& GetRelBits() const override;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
-#endif  // OHOS_VIRTUAL_KEYBOARD_H
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
+#endif // OHOS_VIRTUAL_KEYBOARD_H

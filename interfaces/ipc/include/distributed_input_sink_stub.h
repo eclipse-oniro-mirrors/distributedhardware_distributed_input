@@ -36,8 +36,8 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(DistributedInputSinkStub);
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // DISRIBUTED_INPUT_STUB_H
+#endif // DISRIBUTED_INPUT_STUB_H

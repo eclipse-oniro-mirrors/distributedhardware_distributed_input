@@ -63,6 +63,6 @@ void UnregisterDInputCallbackProxy::OnResult(const std::string& devId, const std
         return;
     }
 }
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS

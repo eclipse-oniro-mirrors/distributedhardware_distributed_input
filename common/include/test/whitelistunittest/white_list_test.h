@@ -28,7 +28,8 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 };
-}  // namespace DistributedInput
-}  // namespace DistributedHardware
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
+
 #endif // WHITE_LIST_TEST_H

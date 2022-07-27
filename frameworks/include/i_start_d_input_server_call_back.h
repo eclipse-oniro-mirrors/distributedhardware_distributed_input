@@ -35,8 +35,8 @@ public:
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.IStartDInputServerCallback");
 };
-}  // namespace DistributedHardware
-}  // namespace DistributedInput
-}  // namespace OHOS
+} // namespace DistributedInput
+} // namespace DistributedHardware
+} // namespace OHOS
 
-#endif  // I_START_D_INPUT_SERVER_CALL_BACK_H
+#endif // I_START_D_INPUT_SERVER_CALL_BACK_H

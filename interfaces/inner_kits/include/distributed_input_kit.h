@@ -52,4 +52,5 @@ public:
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
+
 #endif // DISTRIBUTED_INPUT_KIT_H

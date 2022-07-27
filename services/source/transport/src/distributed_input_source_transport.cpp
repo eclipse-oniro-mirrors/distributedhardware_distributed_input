@@ -231,11 +231,11 @@ void DistributedInputSourceTransport::RegisterSourceRespCallback(std::shared_ptr
     callback_ = callback;
 }
 
-/**
-* PrepareRemoteInput.
-* @param  deviceId is remote device
-* @return Returns 0 is success, other is fail.
-*/
+/*
+ * PrepareRemoteInput.
+ * @param  deviceId is remote device
+ * @return Returns 0 is success, other is fail.
+ */
 int32_t DistributedInputSourceTransport::PrepareRemoteInput(const std::string& deviceId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
