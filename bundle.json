@@ -33,7 +33,7 @@
                 "hiviewdfx_hilog_native",
                 "ipc",
                 "safwk",
-                "samgr_standard",
+                "samgr",
                 "dsoftbus",
                 "utils_base",
                 "distributed_hardware_fwk"

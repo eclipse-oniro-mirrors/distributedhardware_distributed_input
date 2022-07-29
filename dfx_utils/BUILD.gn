@@ -50,7 +50,7 @@ ohos_shared_library("libdinput_dfx_utils") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     "hisysevent_native:libhisysevent",
   ]
 

@@ -82,7 +82,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

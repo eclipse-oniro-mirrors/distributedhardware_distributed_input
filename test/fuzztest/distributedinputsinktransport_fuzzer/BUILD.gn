@@ -64,7 +64,7 @@ ohos_fuzztest("DistributedInputSinkTransportFuzzTest") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "hiviewdfx_hilog_native:libhilog",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     ]
 
   defines = [
