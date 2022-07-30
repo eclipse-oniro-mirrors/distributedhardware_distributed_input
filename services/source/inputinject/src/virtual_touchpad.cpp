@@ -18,6 +18,20 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
+namespace {
+const std::vector<uint32_t> EVT_TYPES {
+        EV_KEY, EV_ABS
+    };
+const std::vector<uint32_t> KEYS {
+        BTN_0, BTN_1, BTN_2, BTN_3, BTN_4, BTN_5, BTN_6, BTN_STYLUS, BTN_TOOL_PEN
+    };
+const std::vector<uint32_t> PROPERTIES {};
+const std::vector<uint32_t> ABS {
+    ABS_X, ABS_Y, ABS_WHEEL, ABS_MISC
+};
+const std::vector<uint32_t> RELBITS {};
+}
+
 VirtualTouchpad::VirtualTouchpad(const std::string &device_name, uint16_t busType,
     uint16_t vendorId, uint16_t product_id, uint16_t version) : VirtualDevice(
     device_name, busType, vendorId, product_id, version)
@@ -49,40 +63,27 @@ VirtualTouchpad::~VirtualTouchpad() {}
 
 const std::vector<uint32_t>& VirtualTouchpad::GetEventTypes() const
 {
-    static const std::vector<uint32_t> evt_types {
-        EV_KEY, EV_ABS
-    };
-    return evt_types;
+    return EVT_TYPES;
 }
 
 const std::vector<uint32_t>& VirtualTouchpad::GetKeys() const
 {
-    static const std::vector<uint32_t> keys {
-        BTN_0, BTN_1, BTN_2, BTN_3, BTN_4, BTN_5, BTN_6, BTN_STYLUS, BTN_TOOL_PEN
-    };
-    return keys;
+    return KEYS;
 }
 
 const std::vector<uint32_t>& VirtualTouchpad::GetProperties() const
 {
-    static const std::vector<uint32_t> properties {
-    };
-    return properties;
+    return PROPERTIES;
 }
 
 const std::vector<uint32_t>& VirtualTouchpad::GetAbs() const
 {
-    static const std::vector<uint32_t> abs {
-        ABS_X, ABS_Y, ABS_WHEEL, ABS_MISC
-    };
-    return abs;
+    return ABS;
 }
 
 const std::vector<uint32_t>& VirtualTouchpad::GetRelBits() const
 {
-    static const std::vector<uint32_t> relBits {
-    };
-    return relBits;
+    return RELBITS;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

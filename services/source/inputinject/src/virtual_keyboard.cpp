@@ -18,13 +18,11 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-VirtualKeyboard::VirtualKeyboard(const std::string &device_name, uint16_t busType,
-    uint16_t vendorId, uint16_t product_id, uint16_t version) : VirtualDevice(
-    device_name, busType, vendorId, product_id, version) {}
-
-VirtualKeyboard::~VirtualKeyboard() {}
-
-static std::vector<uint32_t> g_virtualKey = {
+namespace {
+const std::vector<uint32_t> EVT_TYPES {
+        EV_KEY, EV_MSC, EV_LED, EV_REP, EV_SYN
+    };
+const std::vector<uint32_t> KEYS {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
     31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
     58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 85,
@@ -34,42 +32,41 @@ static std::vector<uint32_t> g_virtualKey = {
     186, 187, 188, 189, 190, 191, 192, 193, 194, 240, 211, 213, 214, 215, 218, 220, 221, 222, 223, 226, 227, 231,
     232, 233, 236, 237, 238, 239, 242, 243, 245, 246, 247, 248, 464, 522, 523, 141, 145, 146, 147, 148, 149, 151,
     153, 154, 157, 160, 162, 170, 175, 182, 200, 201, 202, 203, 204, 205, 101, 112, 118, 120
-};
+    };
+const std::vector<uint32_t> PROPERTIES {};
+const std::vector<uint32_t> ABS {};
+const std::vector<uint32_t> RELBITS {};
+}
+
+VirtualKeyboard::VirtualKeyboard(const std::string &device_name, uint16_t busType,
+    uint16_t vendorId, uint16_t product_id, uint16_t version) : VirtualDevice(
+    device_name, busType, vendorId, product_id, version) {}
+
+VirtualKeyboard::~VirtualKeyboard() {}
 
 const std::vector<uint32_t>& VirtualKeyboard::GetEventTypes() const
 {
-    static const std::vector<uint32_t> evt_types {
-        EV_KEY, EV_MSC, EV_LED, EV_REP, EV_SYN
-    };
-    return evt_types;
+    return EVT_TYPES;
 }
 
 const std::vector<uint32_t>& VirtualKeyboard::GetKeys() const
 {
-    static const std::vector<uint32_t> keys(g_virtualKey.begin(), g_virtualKey.end());
-
-    return keys;
+    return KEYS;
 }
 
 const std::vector<uint32_t>& VirtualKeyboard::GetProperties() const
 {
-    static const std::vector<uint32_t> properties {
-    };
-    return properties;
+    return PROPERTIES;
 }
 
 const std::vector<uint32_t>& VirtualKeyboard::GetAbs() const
 {
-    static const std::vector<uint32_t> abs {
-    };
-    return abs;
+    return ABS;
 }
 
 const std::vector<uint32_t>& VirtualKeyboard::GetRelBits() const
 {
-    static const std::vector<uint32_t> relBits {
-    };
-    return relBits;
+    return RELBITS;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

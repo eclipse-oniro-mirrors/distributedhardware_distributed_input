@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_VIRTUAL_TOUCHPAD_H
-#define OHOS_VIRTUAL_TOUCHPAD_H
+#ifndef OHOS_VIRTUAL_TOUCHSCREEN_H
+#define OHOS_VIRTUAL_TOUCHSCREEN_H
 
 #include "virtual_device.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class VirtualTouchpad : public VirtualDevice {
+class VirtualTouchScreen : public VirtualDevice {
 public:
-    VirtualTouchpad(const std::string &device_name, uint16_t busType,
+    VirtualTouchScreen(const std::string &device_name, uint16_t busType,
         uint16_t vendorId, uint16_t product_id, uint16_t version);
-    ~VirtualTouchpad();
+    ~VirtualTouchScreen();
 protected:
     const std::vector<uint32_t>& GetEventTypes() const override;
     const std::vector<uint32_t>& GetKeys() const override;
@@ -33,8 +33,7 @@ protected:
     const std::vector<uint32_t>& GetProperties() const override;
     const std::vector<uint32_t>& GetRelBits() const override;
 };
-} // namespace DistributedInput
-} // namespace DistributedHardware
-} // namespace OHOS
-
-#endif // OHOS_VIRTUAL_TOUCHPAD_H
+}  // namespace DistributedInput
+}  // namespace DistributedHardware
+}  // namespace OHOS
+#endif

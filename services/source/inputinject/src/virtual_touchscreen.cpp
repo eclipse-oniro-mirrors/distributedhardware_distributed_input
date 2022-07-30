@@ -13,52 +13,56 @@
  * limitations under the License.
  */
 
-#include "virtual_mouse.h"
+#include "virtual_touchscreen.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
 const std::vector<uint32_t> EVT_TYPES {
-        EV_KEY, EV_REL, EV_MSC, EV_SYN
+        EV_KEY, EV_ABS
     };
 const std::vector<uint32_t> KEYS {
-        BTN_MOUSE, BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, BTN_SIDE, BTN_EXTRA, BTN_FORWARD, BTN_BACK, BTN_TASK
+        KEY_F1, KEY_VOLUMEDOWN, KEY_VOLUMEUP, KEY_POWER, BTN_TOOL_FINGER, BTN_TOUCH, BTN_TRIGGER_HAPPY2,
+        BTN_TRIGGER_HAPPY3
     };
-const std::vector<uint32_t> PROPERTIES {};
-const std::vector<uint32_t> ABS {};
-const std::vector<uint32_t> RELBITS {
-    REL_X, REL_Y, REL_WHEEL, REL_WHEEL_HI_RES
-};
+const std::vector<uint32_t> PROPERTIES {
+        INPUT_PROP_DIRECT
+    };
+const std::vector<uint32_t> ABS {
+        ABS_X, ABS_Y, ABS_PRESSURE, ABS_MT_TOUCH_MAJOR, ABS_MT_TOUCH_MINOR, ABS_MT_ORIENTATION, ABS_MT_POSITION_X,
+        ABS_MT_POSITION_Y, ABS_MT_BLOB_ID, ABS_MT_TRACKING_ID, ABS_MT_PRESSURE
+    };
+const std::vector<uint32_t> RELBITS {};
 }
 
-VirtualMouse::VirtualMouse(const std::string &device_name, uint16_t busType,
+VirtualTouchScreen::VirtualTouchScreen(const std::string &device_name, uint16_t busType,
     uint16_t vendorId, uint16_t product_id, uint16_t version) : VirtualDevice(
     device_name, busType, vendorId, product_id, version) {}
 
-VirtualMouse::~VirtualMouse() {}
+VirtualTouchScreen::~VirtualTouchScreen() {}
 
-const std::vector<uint32_t>& VirtualMouse::GetEventTypes() const
+const std::vector<uint32_t>& VirtualTouchScreen::GetEventTypes() const
 {
     return EVT_TYPES;
 }
 
-const std::vector<uint32_t>& VirtualMouse::GetKeys() const
+const std::vector<uint32_t>& VirtualTouchScreen::GetKeys() const
 {
     return KEYS;
 }
 
-const std::vector<uint32_t>& VirtualMouse::GetProperties() const
+const std::vector<uint32_t>& VirtualTouchScreen::GetProperties() const
 {
     return PROPERTIES;
 }
 
-const std::vector<uint32_t>& VirtualMouse::GetAbs() const
+const std::vector<uint32_t>& VirtualTouchScreen::GetAbs() const
 {
     return ABS;
 }
 
-const std::vector<uint32_t>& VirtualMouse::GetRelBits() const
+const std::vector<uint32_t>& VirtualTouchScreen::GetRelBits() const
 {
     return RELBITS;
 }
