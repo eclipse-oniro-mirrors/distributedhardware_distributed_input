@@ -35,6 +35,8 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_DLOPEN_FAIL = -60009;
     constexpr int32_t ERR_DH_INPUT_DLSYM_FAIL = -60010;
     constexpr int32_t ERR_DH_INPUT_LOW_LATENCY_LIB_NULL = -60011;
+    constexpr int32_t ERR_DH_INPUT_CONTEXT_KEY_NOT_EXIST = -60012;
+    constexpr int32_t ERR_DH_INPUT_CONTEXT_CALCULATE_FAIL = -60013;
 
     // whilte list error code
     constexpr int32_t ERR_DH_INPUT_WHILTELIST_INIT_FAIL = -61001;

@@ -82,8 +82,8 @@ private:
     uint64_t deltaTime_ = 0;
     uint64_t deltaTimeAll_ = 0;
     uint64_t sendTime_ = 0;
-    int32_t sendNum_ = 0;
-    int32_t recvNum_ = 0;
+    uint32_t sendNum_ = 0;
+    uint32_t recvNum_ = 0;
     std::atomic<bool> isLatencyThreadRunning_ = false;
     std::thread latencyThread_;
     std::string eachLatencyDetails_ = "";

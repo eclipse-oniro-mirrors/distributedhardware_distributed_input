@@ -26,6 +26,7 @@ ohos_shared_library("libdinput_utils") {
 
   sources = [
     "src/dinput_utils_tool.cpp",
+    "src/dinput_context.cpp",
   ]
 
   defines = [
