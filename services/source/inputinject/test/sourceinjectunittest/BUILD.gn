@@ -52,6 +52,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_keyboard.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_mouse.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchscreen.cpp",
     "distributed_input_sourceinject_test.cpp",
   ]
 

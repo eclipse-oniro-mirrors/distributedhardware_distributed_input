@@ -29,6 +29,7 @@
 #include "virtual_keyboard.h"
 #include "virtual_mouse.h"
 #include "virtual_touchpad.h"
+#include "virtual_touchscreen.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -87,6 +88,9 @@ int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::
         device = std::make_unique<VirtualMouse>(event.name, event.bus, event.vendor, event.product, event.version);
     } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH) {
         device = std::make_unique<VirtualTouchpad>(event.name, event.bus, event.vendor, event.product, event.version);
+    } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH_MT) {
+        device = std::make_unique<VirtualTouchScreen>(event.name, event.bus, event.vendor, event.product,
+            event.version);
     } else {
         DHLOGW("could not find the deviceType\n");
         return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;

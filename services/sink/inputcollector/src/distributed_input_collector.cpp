@@ -147,6 +147,9 @@ void DistributedInputCollector::SetInputTypes(const uint32_t& inputType)
     if ((inputType & static_cast<uint32_t>(DInputDeviceType::KEYBOARD)) != 0) {
         inputTypes_ |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
+    if ((inputType & static_cast<uint32_t>(DInputDeviceType::TOUCHSCREEN)) != 0) {
+        inputTypes_ |= INPUT_DEVICE_CLASS_TOUCH_MT;
+    }
 
     inputHub_->SetSupportInputType(inputTypes_);
 }

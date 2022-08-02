@@ -39,8 +39,9 @@ namespace DistributedInput {
         NONE = 0x0000,
         MOUSE = 0x0001,
         KEYBOARD = 0x0002,
+        TOUCHSCREEN = 0x0004,
         TOUCHPAD = MOUSE,
-        ALL = MOUSE | KEYBOARD,
+        ALL = MOUSE | KEYBOARD | TOUCHSCREEN,
     };
 
     /*

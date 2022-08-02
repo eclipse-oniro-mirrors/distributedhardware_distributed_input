@@ -35,6 +35,7 @@ ohos_shared_library("libdinput_inject") {
     "src/virtual_keyboard.cpp",
     "src/virtual_mouse.cpp",
     "src/virtual_touchpad.cpp",
+    "src/virtual_touchscreen.cpp",
   ]
 
   defines = [
