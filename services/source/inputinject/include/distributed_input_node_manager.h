@@ -25,6 +25,7 @@
 #include <thread>
 
 #include "constants_dinput.h"
+#include "input_hub.h"
 #include "virtual_device.h"
 
 namespace OHOS {
@@ -60,6 +61,7 @@ private:
     std::mutex injectThreadMutex_;
     std::condition_variable conditionVariable_;
     std::queue<std::shared_ptr<RawEvent>> injectQueue_;
+    std::unique_ptr<InputHub> inputHub_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

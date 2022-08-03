@@ -71,6 +71,12 @@ SinkScreenInfo DInputContext::GetSinkScreenInfo(const std::string &sourceWinId)
     return sinkScreenInfoMap_[sourceWinId];
 }
 
+const std::unordered_map<std::string, SinkScreenInfo>& DInputContext::GetAllSinkScreenInfo()
+{
+    std::lock_guard<std::mutex> lock(sinkMapMutex_);
+    return sinkScreenInfoMap_;
+}
+
 int32_t DInputContext::RemoveSrcScreenInfo(const std::string &sourceWinId)
 {
     std::lock_guard<std::mutex> lock(srcMapMutex_);

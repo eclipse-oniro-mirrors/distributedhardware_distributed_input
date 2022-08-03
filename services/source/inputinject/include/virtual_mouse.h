@@ -23,8 +23,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class VirtualMouse : public VirtualDevice {
 public:
-    VirtualMouse(const std::string &device_name, uint16_t busType,
-        uint16_t vendorId, uint16_t product_id, uint16_t version);
+    VirtualMouse(const InputDevice& event);
     ~VirtualMouse();
 protected:
     const std::vector<uint32_t>& GetEventTypes() const override;

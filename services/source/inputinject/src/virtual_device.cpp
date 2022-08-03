@@ -20,20 +20,18 @@
 #include "anonymous_string.h"
 #include "distributed_hardware_log.h"
 
-#include "constants_dinput.h"
 #include "hidumper.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 VirtualDevice::VirtualDevice()
-    : deviceName_(""), netWorkId_(""), busTtype_(0), vendorId_(0), productId_(0), version_(0)
+    : deviceName_(""), netWorkId_(""), busType_(0), vendorId_(0), productId_(0), version_(0)
 {
 }
 
-VirtualDevice::VirtualDevice(const std::string &device_name, uint16_t busType,
-    uint16_t vendorId, uint16_t product_id, uint16_t version) : deviceName_(
-    device_name), busTtype_(busType), vendorId_(vendorId), productId_(product_id), version_(version)
+VirtualDevice::VirtualDevice(const InputDevice& event) : deviceName_(
+    event.name), busType_(event.bus), vendorId_(event.vendor), productId_(event.product), version_(event.version)
 {
 }
 
@@ -108,7 +106,7 @@ bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
         return false;
     };
     HiDumper::GetInstance().SaveNodeInfo(devId, deviceName_, dhId);
-    dev_.id.bustype = busTtype_;
+    dev_.id.bustype = busType_;
     dev_.id.vendor = vendorId_;
     dev_.id.product = productId_;
     dev_.id.version = version_;

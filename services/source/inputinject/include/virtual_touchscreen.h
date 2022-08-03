@@ -16,6 +16,7 @@
 #ifndef OHOS_VIRTUAL_TOUCHSCREEN_H
 #define OHOS_VIRTUAL_TOUCHSCREEN_H
 
+#include "dinput_context.h"
 #include "virtual_device.h"
 
 namespace OHOS {
@@ -23,8 +24,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class VirtualTouchScreen : public VirtualDevice {
 public:
-    VirtualTouchScreen(const std::string &device_name, uint16_t busType,
-        uint16_t vendorId, uint16_t product_id, uint16_t version);
+    VirtualTouchScreen(const InputDevice& event, LocalAbsInfo& absInfo, uint32_t phyWidth, uint32_t phyHeight);
     ~VirtualTouchScreen();
 protected:
     const std::vector<uint32_t>& GetEventTypes() const override;

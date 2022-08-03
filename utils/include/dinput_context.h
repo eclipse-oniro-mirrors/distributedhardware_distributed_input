@@ -26,32 +26,35 @@
 
 #include "distributed_hardware_log.h"
 
+#include "input_hub.h"
+
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 struct LocalAbsInfo {
-    int32_t abs_x_min = 0;
-    int32_t abs_x_max = 0;
-    int32_t abs_y_min = 0;
-    int32_t abs_y_max = 0;
-    int32_t abs_pressure_min = 0;
-    int32_t abs_pressure_max = 0;
-    int32_t abs_mt_touch_major_min = 0;
-    int32_t abs_mt_touch_major_max = 0;
-    int32_t abs_mt_touch_minor_min = 0;
-    int32_t abs_mt_touch_minor_max = 0;
-    int32_t abs_mt_orientation_min = 0;
-    int32_t abs_mt_orientation_max = 0;
-    int32_t abs_mt_position_x_min = 0;
-    int32_t abs_mt_position_x_max = 0;
-    int32_t abs_mt_position_y_min = 0;
-    int32_t abs_mt_position_y_max = 0;
-    int32_t abs_mt_blob_id_min = 0;
-    int32_t abs_mt_blob_id_max = 0;
-    int32_t abs_mt_tracking_id_min = 0;
-    int32_t abs_mt_tracking_id_max = 0;
-    int32_t abs_mt_pressure_min = 0;
-    int32_t abs_mt_pressure_max = 0;
+    int32_t absXMin = 0;
+    int32_t absXMax = 0;
+    int32_t absYMin = 0;
+    int32_t absYMax = 0;
+    int32_t absPressureMin = 0;
+    int32_t absPressureMax = 0;
+    int32_t absMtTouchMajorMin = 0;
+    int32_t absMtTouchMajorMax = 0;
+    int32_t absMtTouchMinorMin = 0;
+    int32_t absMtTouchMinorMax = 0;
+    int32_t absMtOrientationMin = 0;
+    int32_t absMtOrientationMax = 0;
+    int32_t absMtPositionXMin = 0;
+    int32_t absMtPositionXMax = 0;
+    int32_t absMtPositionYMin = 0;
+    int32_t absMtPositionYMax = 0;
+    int32_t absMtBlobIdMin = 0;
+    int32_t absMtBlobIdMax = 0;
+    int32_t absMtTrackingIdMin = 0;
+    int32_t absMtTrackingIdMax = 0;
+    int32_t absMtPressureMin = 0;
+    int32_t absMtPressureMax = 0;
+    InputDevice deviceInfo;
 };
 
 struct LocalTouchScreenInfo {
@@ -103,6 +106,7 @@ public:
     int32_t RemoveSinkScreenInfo(const std::string &sourceWinId);
     int32_t UpdateSinkScreenInfo(const std::string &sourceWinId, const SinkScreenInfo &sinkScreenInfo);
     SinkScreenInfo GetSinkScreenInfo(const std::string &sourceWinId);
+    const std::unordered_map<std::string, SinkScreenInfo>& GetAllSinkScreenInfo();
 
     int32_t RemoveSrcScreenInfo(const std::string &sourceWinId);
     int32_t UpdateSrcScreenInfo(const std::string &sourceWinId, const SrcScreenInfo &srcScreenInfo);

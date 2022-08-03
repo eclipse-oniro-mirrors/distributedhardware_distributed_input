@@ -86,6 +86,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
     "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
     "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
+    "${common_path}/include/input_hub.cpp",
   ]
 
   cflags = [
@@ -117,6 +118,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${utils_path}:libdinput_utils",
     "${low_latency_path}:libdinput_low_latency",
+    "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [

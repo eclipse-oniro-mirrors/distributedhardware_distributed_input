@@ -41,6 +41,7 @@ public:
     size_t DeviceIsExists(InputDeviceEvent* event, size_t capacity);
     std::vector<InputDevice> GetAllInputDevices();
     void SetSupportInputType(const uint32_t& inputType);
+    void ScanInputDevices(const std::string& dirname);
 private:
     struct Device  {
         Device* next;
@@ -72,7 +73,6 @@ private:
     void GetDeviceHandler();
     int32_t RefreshEpollItem(bool isSleep);
 
-    void ScanInputDevices(const std::string& dirname);
     int32_t OpenInputDeviceLocked(const std::string& devicePath);
     int32_t QueryInputDeviceInfo(int fd, InputDevice& identifier);
     int32_t MakeDevice(int fd, std::unique_ptr<Device> device);
@@ -108,6 +108,11 @@ private:
     uint32_t SizeofBitArray(uint32_t bit);
     bool IsSupportInputTypes(uint32_t classes);
     void RecordEventLog(const RawEvent* event);
+    void HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count, std::vector<bool>& needFilted);
+    int32_t QueryLocalTouchScreenInfo(int fd);
+    bool CheckTouchPointRegion(struct input_event readBuffer[], uint32_t absX, uint32_t absY,
+                                int32_t absXIndex, int32_t absYIndex);
+    size_t CollectEvent(RawEvent* buffer, size_t& capacity, size_t bufferSize, Device* device);
 
     int epollFd_;
     int iNotifyFd_;

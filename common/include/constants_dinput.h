@@ -44,6 +44,8 @@ namespace DistributedInput {
         ALL = MOUSE | KEYBOARD | TOUCHSCREEN,
     };
 
+    const char * const DEVICE_PATH = "/dev/input";
+
     /*
      * Maximum number of signalled FDs to handle at a time.
      */

@@ -55,6 +55,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchscreen.cpp",
     "distributed_input_sourceinject_test.cpp",
+    "${common_path}/include/input_hub.cpp",
   ]
 
   cflags = [
@@ -64,7 +65,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "-Dprivate=public",
     "-Dprotected=public",
   ]
-  
+
   defines = [
     "HI_LOG_ENABLE",
     "DH_LOG_TAG=\"distributedinpututtest\"",
@@ -78,6 +79,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${utils_path}:libdinput_utils",
+    "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [

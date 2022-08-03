@@ -56,6 +56,12 @@ uint64_t GetCurrentTime()
 
 std::string SetAnonyId(const std::string &message)
 {
+    nlohmann::json jsonObj = nlohmann::json::parse(message, nullptr, false);
+    if (jsonObj.is_discarded()) {
+        DHLOGE("jsonObj parse failed!");
+        return "";
+    }
+
     nlohmann::json jsonStr = nlohmann::json::parse(message);
     if (jsonStr.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID)) {
         jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = GetAnonyString(jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID]);

@@ -38,9 +38,7 @@ const std::vector<uint32_t> ABS {};
 const std::vector<uint32_t> RELBITS {};
 }
 
-VirtualKeyboard::VirtualKeyboard(const std::string &device_name, uint16_t busType,
-    uint16_t vendorId, uint16_t product_id, uint16_t version) : VirtualDevice(
-    device_name, busType, vendorId, product_id, version) {}
+VirtualKeyboard::VirtualKeyboard(const InputDevice& event) : VirtualDevice(event) {}
 
 VirtualKeyboard::~VirtualKeyboard() {}
 

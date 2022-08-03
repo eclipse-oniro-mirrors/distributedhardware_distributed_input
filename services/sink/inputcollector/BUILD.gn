@@ -24,6 +24,7 @@ ohos_shared_library("libdinput_collector") {
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
+    "${utils_path}/include",
     "//third_party/json/include",
   ]
 
@@ -42,6 +43,7 @@ ohos_shared_library("libdinput_collector") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
+    "${utils_path}:libdinput_utils",
     "//third_party/openssl:libcrypto_static",
   ]
 

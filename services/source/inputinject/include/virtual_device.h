@@ -27,13 +27,14 @@
 #include <linux/input.h>
 #include "linux/uinput.h"
 
+#include "constants_dinput.h"
+
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 class VirtualDevice {
 public:
-    VirtualDevice(const std::string &device_name, uint16_t busType,
-        uint16_t vendorId, uint16_t product_id, uint16_t version);
+    VirtualDevice(const InputDevice& event);
     virtual ~VirtualDevice();
     bool DoIoctl(int32_t fd, int32_t request, const uint32_t value);
     bool CreateKey();
@@ -53,7 +54,7 @@ protected:
     int32_t fd_ = -1;
     std::string deviceName_;
     std::string netWorkId_;
-    const uint16_t busTtype_;
+    const uint16_t busType_;
     const uint16_t vendorId_;
     const uint16_t productId_;
     const uint16_t version_;

@@ -25,6 +25,7 @@
 #include "distributed_hardware_log.h"
 #include "nlohmann/json.hpp"
 
+#include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "virtual_keyboard.h"
 #include "virtual_mouse.h"
@@ -34,7 +35,8 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-DistributedInputNodeManager::DistributedInputNodeManager() : isInjectThreadRunning_(false)
+DistributedInputNodeManager::DistributedInputNodeManager() : isInjectThreadRunning_(false),
+    inputHub_(std::make_unique<InputHub>())
 {
 }
 
@@ -83,14 +85,15 @@ int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::
     std::unique_lock<std::mutex> my_lock(operationMutex_);
     std::unique_ptr<VirtualDevice> device;
     if (event.classes & INPUT_DEVICE_CLASS_KEYBOARD) {
-        device = std::make_unique<VirtualKeyboard>(event.name, event.bus, event.vendor, event.product, event.version);
+        device = std::make_unique<VirtualKeyboard>(event);
     } else if (event.classes & INPUT_DEVICE_CLASS_CURSOR) {
-        device = std::make_unique<VirtualMouse>(event.name, event.bus, event.vendor, event.product, event.version);
+        device = std::make_unique<VirtualMouse>(event);
     } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH) {
-        device = std::make_unique<VirtualTouchpad>(event.name, event.bus, event.vendor, event.product, event.version);
+        device = std::make_unique<VirtualTouchpad>(event);
     } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH_MT) {
-        device = std::make_unique<VirtualTouchScreen>(event.name, event.bus, event.vendor, event.product,
-            event.version);
+        inputHub_->ScanInputDevices(DEVICE_PATH);
+        LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
+        device = std::make_unique<VirtualTouchScreen>(event, info, info.absMtPositionXMax, info.absMtPositionYMax);
     } else {
         DHLOGW("could not find the deviceType\n");
         return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;

@@ -19,6 +19,7 @@
 #include <cstring>
 #include <filesystem>
 #include <sstream>
+#include <utility>
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -30,15 +31,15 @@
 
 #include "anonymous_string.h"
 #include "distributed_hardware_log.h"
-#include "constants_dinput.h"
 
+#include "constants_dinput.h"
+#include "dinput_context.h"
 #include "dinput_errcode.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-const char *DEVICE_PATH = "/dev/input";
 const uint32_t SLEEP_TIME_US = 100 * 1000;
 const uint32_t ERROR_MSG_MAX_LEN = 256;
 }
@@ -181,31 +182,51 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
             continue;
         }
         if (eventItem.events & EPOLLIN) {
-            struct input_event readBuffer[bufferSize];
-            int32_t readSize = read(device->fd, readBuffer, sizeof(struct input_event) * capacity);
-            size_t count = ReadInputEvent(readSize, *device);
-            for (size_t i = 0; i < count; i++) {
-                struct input_event& iev = readBuffer[i];
-                event->when = ProcessEventTimestamp(iev);
-                event->type = iev.type;
-                event->code = iev.code;
-                event->value = iev.value;
-                event->path = device->path;
-                RecordEventLog(event);
-                event->descriptor = device->identifier.descriptor;
-                event += 1;
-                capacity -= 1;
-            }
+            event += CollectEvent(event, capacity, bufferSize, device);
+
             if (capacity == 0) {
                 pendingEventIndex_ -= 1;
                 break;
             }
         } else if (eventItem.events & EPOLLHUP) {
-            DHLOGI("Removing device %s due to epoll hang-up event.",
-                device->identifier.name.c_str());
+            DHLOGI("Removing device %s due to epoll hang-up event.", device->identifier.name.c_str());
             deviceChanged_ = true;
             CloseDeviceLocked(*device);
         }
+    }
+    return event - buffer;
+}
+
+size_t InputHub::CollectEvent(RawEvent* buffer, size_t& capacity, size_t bufferSize, Device* device)
+{
+    struct input_event readBuffer[bufferSize];
+    if (bufferSize < capacity) {
+        DHLOGE("capacity: %d should not lager than bufferSize: %d\n", capacity, bufferSize);
+        return 0;
+    }
+    int32_t readSize = read(device->fd, readBuffer, sizeof(struct input_event) * capacity);
+    size_t count = ReadInputEvent(readSize, *device);
+
+    std::vector<bool> needFilted(bufferSize, false);
+    if (device->classes == INPUT_DEVICE_CLASS_TOUCH_MT) {
+        HandleTouchScreenEvent(readBuffer, count, needFilted);
+    }
+
+    RawEvent* event = buffer;
+    for (size_t i = 0; i < count; i++) {
+        if (needFilted[i]) {
+            continue;
+        }
+        struct input_event& iev = readBuffer[i];
+        event->when = ProcessEventTimestamp(iev);
+        event->type = iev.type;
+        event->code = iev.code;
+        event->value = iev.value;
+        event->path = device->path;
+        event->descriptor = device->identifier.descriptor;
+        RecordEventLog(event);
+        event += 1;
+        capacity -= 1;
     }
     return event - buffer;
 }
@@ -533,6 +554,14 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
     ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(device->absBitmask)), device->absBitmask);
     ioctl(fd, EVIOCGBIT(EV_REL, sizeof(device->relBitmask)), device->relBitmask);
 
+    // See if this is a multi-touch touchscreen device.
+    if (TestBit(BTN_TOUCH, device->keyBitmask)
+        && TestBit(ABS_MT_POSITION_X, device->absBitmask)
+        && TestBit(ABS_MT_POSITION_Y, device->absBitmask)) {
+        QueryLocalTouchScreenInfo(fd);
+        device->classes |= INPUT_DEVICE_CLASS_TOUCH_MT;
+    }
+
     // See if this is a cursor device such as a trackball or mouse.
     if (TestBit(BTN_MOUSE, device->keyBitmask)
         && TestBit(REL_X, device->relBitmask)
@@ -564,6 +593,62 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
         fd, device->identifier.name.c_str(), device->classes);
     device->identifier.classes = device->classes;
     AddDeviceLocked(std::move(device));
+    return DH_SUCCESS;
+}
+
+int32_t InputHub::QueryLocalTouchScreenInfo(int fd)
+{
+    LocalTouchScreenInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo();
+
+    InputDevice identifier;
+    if (QueryInputDeviceInfo(fd, identifier) < 0) {
+        return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
+    }
+    identifier.classes |= INPUT_DEVICE_CLASS_TOUCH_MT;
+    info.localAbsInfo.deviceInfo = identifier;
+
+    struct input_absinfo absInfo;
+    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_X), &absInfo);
+    info.localAbsInfo.absXMin = absInfo.minimum;
+    info.localAbsInfo.absXMax = absInfo.maximum;
+    info.localAbsInfo.absMtPositionXMin = absInfo.minimum;
+    info.localAbsInfo.absMtPositionXMax = absInfo.maximum;
+    info.sinkPhyWidth = absInfo.maximum + 1;
+
+    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_Y), &absInfo);
+    info.localAbsInfo.absYMin = absInfo.minimum;
+    info.localAbsInfo.absYMax = absInfo.maximum;
+    info.localAbsInfo.absMtPositionYMin = absInfo.minimum;
+    info.localAbsInfo.absMtPositionYMax = absInfo.maximum;
+    info.sinkPhyHeight = absInfo.maximum + 1;
+
+    ioctl(fd, EVIOCGABS(ABS_PRESSURE), &absInfo);
+    info.localAbsInfo.absPressureMin = absInfo.minimum;
+    info.localAbsInfo.absPressureMax = absInfo.maximum;
+    info.localAbsInfo.absMtPressureMin = absInfo.minimum;
+    info.localAbsInfo.absMtPressureMax = absInfo.maximum;
+
+    ioctl(fd, EVIOCGABS(ABS_MT_TOUCH_MAJOR), &absInfo);
+    info.localAbsInfo.absMtTouchMajorMin = absInfo.minimum;
+    info.localAbsInfo.absMtTouchMajorMax = absInfo.maximum;
+
+    ioctl(fd, EVIOCGABS(ABS_MT_TOUCH_MINOR), &absInfo);
+    info.localAbsInfo.absMtTouchMinorMin = absInfo.minimum;
+    info.localAbsInfo.absMtTouchMinorMax = absInfo.maximum;
+
+    ioctl(fd, EVIOCGABS(ABS_MT_ORIENTATION), &absInfo);
+    info.localAbsInfo.absMtOrientationMin = absInfo.minimum;
+    info.localAbsInfo.absMtOrientationMax = absInfo.maximum;
+
+    ioctl(fd, EVIOCGABS(ABS_MT_BLOB_ID), &absInfo);
+    info.localAbsInfo.absMtBlobIdMin = absInfo.minimum;
+    info.localAbsInfo.absMtBlobIdMax = absInfo.maximum;
+
+    ioctl(fd, EVIOCGABS(ABS_MT_TRACKING_ID), &absInfo);
+    info.localAbsInfo.absMtTrackingIdMin = absInfo.minimum;
+    info.localAbsInfo.absMtTrackingIdMax = absInfo.maximum;
+
+    DInputContext::GetInstance().SetLocalTouchScreenInfo(info);
     return DH_SUCCESS;
 }
 
@@ -879,12 +964,90 @@ void InputHub::RecordEventLog(const RawEvent* event)
         case EV_ABS:
             eventType = "EV_ABS";
             break;
+            break;
+        case EV_SYN:
+            eventType = "EV_SYN";
+            break;
         default:
-            eventType = "other type";
+            eventType = "other type " + std::to_string(event->type);
             break;
     }
     DHLOGD("1.E2E-Test Sink collect event, EventType: %s, Code: %d, Value: %d, Path: %s, When:%" PRId64 "",
         eventType.c_str(), event->code, event->value, event->path.c_str(), event->when);
+}
+
+void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count,
+    std::vector<bool>& needFilted)
+{
+    std::vector<std::pair<size_t, size_t>> absIndexs;
+    uint32_t typePre = 0;
+    uint32_t typeCurr = 0;
+    size_t firstIndex = 0;
+    size_t lastIndex = 0;
+
+    for (size_t i = 0; i < count; i++) {
+        struct input_event& iev = readBuffer[i];
+        typePre = typeCurr;
+        typeCurr = iev.type;
+        if ((typePre != EV_ABS) && (typeCurr == EV_ABS)) {
+            firstIndex = i;
+        }
+        if (typeCurr == EV_SYN) {
+            lastIndex = i;
+            absIndexs.emplace_back(std::make_pair(firstIndex, lastIndex));
+        }
+    }
+
+    int32_t absXIndex = -1;
+    int32_t absYIndex = -1;
+    uint32_t absX = 0;
+    uint32_t absY = 0;
+    for (auto iter : absIndexs) {
+        absXIndex = -1;
+        absYIndex = -1;
+
+        for (size_t j = iter.first; j <= iter.second; j++) {
+            struct input_event &iev = readBuffer[j];
+            if (iev.code == ABS_MT_POSITION_X) {
+                absX = iev.value;
+                absXIndex = j;
+            }
+            if (iev.code == ABS_MT_POSITION_Y) {
+                absY = iev.value;
+                absYIndex = j;
+            }
+        }
+
+        if ((absXIndex < 0) || (absYIndex < 0)) {
+            for (size_t j = iter.first; j <= iter.second; j++) {
+                needFilted[j] = true;
+            }
+            continue;
+        }
+
+        if (!CheckTouchPointRegion(readBuffer, absX, absY, absXIndex, absYIndex)) {
+            for (size_t j = iter.first; j <= iter.second; j++) {
+                needFilted[j] = true;
+            }
+        }
+    }
+}
+
+bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], uint32_t absX, uint32_t absY,
+    int32_t absXIndex, int32_t absYIndex)
+{
+    auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
+
+    for (const auto& [id, sinkInfo] : sinkInfos) {
+        auto info = sinkInfo.transformInfo;
+        if ((absX >= info.sinkWinPhyX) && (absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
+            && (absY >= info.sinkWinPhyY)  && (absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
+            readBuffer[absXIndex].value = (absX - info.sinkWinPhyX) * info.coeffWidth;
+            readBuffer[absYIndex].value = (absY - info.sinkWinPhyY) * info.coeffHeight;
+            return true;
+        }
+    }
+    return false;
 }
 
 InputHub::Device::Device(int fd, int32_t id, const std::string& path,
