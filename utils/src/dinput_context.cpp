@@ -30,7 +30,7 @@ DInputContext::~DInputContext()
     srcScreenInfoMap_.clear();
 }
 
-std::string GetSourceWindId(const std::string &devId, const std::string &sourceWinId)
+std::string DInputContext::GetScreenInfoKey(const std::string &devId, const std::string &sourceWinId)
 {
     return devId + RESOURCE_SEPARATOR + sourceWinId;
 }
@@ -102,7 +102,7 @@ SrcScreenInfo DInputContext::GetSrcScreenInfo(const std::string &sourceWinId)
     return srcScreenInfoMap_[sourceWinId];
 }
 
-void DInputContext::SetLocalTouchScrennInfo(const LocalTouchScreenInfo &localTouchScreenInfo)
+void DInputContext::SetLocalTouchScreenInfo(const LocalTouchScreenInfo &localTouchScreenInfo)
 {
     std::lock_guard<std::mutex> lock(localTouchScreenInfoMutex_);
     localTouchScreenInfo_ = localTouchScreenInfo;
@@ -121,23 +121,29 @@ int32_t DInputContext::CalculateTransformInfo(SinkScreenInfo &sinkScreenInfo)
         return ERR_DH_INPUT_CONTEXT_CALCULATE_FAIL;
     }
     TransformInfo transformInfo;
-    transformInfo.sinkWinPhyX = (sinkScreenInfo.sinkWinShowX / sinkScreenInfo.sinkShowWidth) *
+    transformInfo.sinkWinPhyX = (uint32_t)(sinkScreenInfo.sinkWinShowX / (double)(sinkScreenInfo.sinkShowWidth)) *
         sinkScreenInfo.sinkPhyWidth;
-    transformInfo.sinkWinPhyY = (sinkScreenInfo.sinkWinShowY / sinkScreenInfo.sinkShowHeight) *
+    transformInfo.sinkWinPhyY = (uint32_t)(sinkScreenInfo.sinkWinShowY / (double)(sinkScreenInfo.sinkShowHeight)) *
         sinkScreenInfo.sinkPhyHeight;
-    transformInfo.sinkProjPhyWidth = (sinkScreenInfo.sinkProjShowWidth / sinkScreenInfo.sinkShowWidth) *
-        sinkScreenInfo.sinkPhyWidth;
-    transformInfo.sinkProjPhyHeight = (sinkScreenInfo.sinkProjShowHeight / sinkScreenInfo.sinkShowHeight) *
-        sinkScreenInfo.sinkPhyHeight;
+    transformInfo.sinkProjPhyWidth = (uint32_t)((sinkScreenInfo.sinkProjShowWidth /
+        (double)sinkScreenInfo.sinkShowWidth) * sinkScreenInfo.sinkPhyWidth);
+    transformInfo.sinkProjPhyHeight = (uint32_t)((sinkScreenInfo.sinkProjShowHeight /
+        (double)sinkScreenInfo.sinkShowHeight) * sinkScreenInfo.sinkPhyHeight);
     if (transformInfo.sinkProjPhyWidth == 0 || transformInfo.sinkProjPhyHeight == 0) {
         DHLOGE("can not calculate transform infomation");
         return ERR_DH_INPUT_CONTEXT_CALCULATE_FAIL;
     }
 
     // coefficient of the sink projection area in the source touch driver
-    transformInfo.coeffWidth = sinkScreenInfo.srcScreenInfo.sourcePhyWidth / transformInfo.sinkProjPhyWidth;
-    transformInfo.coeffHeight = sinkScreenInfo.srcScreenInfo.sourcePhyHeight  / transformInfo.sinkProjPhyHeight;
+    transformInfo.coeffWidth = (double)(sinkScreenInfo.srcScreenInfo.sourcePhyWidth /
+        (double)(transformInfo.sinkProjPhyWidth));
+    transformInfo.coeffHeight = (double)(sinkScreenInfo.srcScreenInfo.sourcePhyHeight /
+        (double)(transformInfo.sinkProjPhyHeight));
 
+    DHLOGI("CalculateTransformInfo sinkWinPhyX = %d, sinkWinPhyY = %d, sinkProjPhyWidth = %d, " +
+        "sinkProjPhyHeight = %d, coeffWidth = %f, coeffHeight = %f", transformInfo.sinkWinPhyX,
+        transformInfo.sinkWinPhyY, transformInfo.sinkProjPhyWidth, transformInfo.sinkProjPhyHeight,
+        transformInfo.coeffWidth, transformInfo.coeffHeight);
     sinkScreenInfo.transformInfo = transformInfo;
     return DH_SUCCESS;
 }

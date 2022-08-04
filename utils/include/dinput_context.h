@@ -30,68 +30,68 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 struct LocalAbsInfo {
-    int32_t abs_x_min;
-    int32_t abs_x_max;
-    int32_t abs_y_min;
-    int32_t abs_y_max;
-    int32_t abs_pressure_min;
-    int32_t abs_pressure_max;
-    int32_t abs_mt_touch_major_min;
-    int32_t abs_mt_touch_major_max;
-    int32_t abs_mt_touch_minor_min;
-    int32_t abs_mt_touch_minor_max;
-    int32_t abs_mt_orientation_min;
-    int32_t abs_mt_orientation_max;
-    int32_t abs_mt_position_x_min;
-    int32_t abs_mt_position_x_max;
-    int32_t abs_mt_position_y_min;
-    int32_t abs_mt_position_y_max;
-    int32_t abs_mt_blob_id_min;
-    int32_t abs_mt_blob_id_max;
-    int32_t abs_mt_tracking_id_min;
-    int32_t abs_mt_tracking_id_max;
-    int32_t abs_mt_pressure_min;
-    int32_t abs_mt_pressure_max;
+    int32_t abs_x_min = 0;
+    int32_t abs_x_max = 0;
+    int32_t abs_y_min = 0;
+    int32_t abs_y_max = 0;
+    int32_t abs_pressure_min = 0;
+    int32_t abs_pressure_max = 0;
+    int32_t abs_mt_touch_major_min = 0;
+    int32_t abs_mt_touch_major_max = 0;
+    int32_t abs_mt_touch_minor_min = 0;
+    int32_t abs_mt_touch_minor_max = 0;
+    int32_t abs_mt_orientation_min = 0;
+    int32_t abs_mt_orientation_max = 0;
+    int32_t abs_mt_position_x_min = 0;
+    int32_t abs_mt_position_x_max = 0;
+    int32_t abs_mt_position_y_min = 0;
+    int32_t abs_mt_position_y_max = 0;
+    int32_t abs_mt_blob_id_min = 0;
+    int32_t abs_mt_blob_id_max = 0;
+    int32_t abs_mt_tracking_id_min = 0;
+    int32_t abs_mt_tracking_id_max = 0;
+    int32_t abs_mt_pressure_min = 0;
+    int32_t abs_mt_pressure_max = 0;
 };
 
 struct LocalTouchScreenInfo {
-    uint32_t sinkShowWidth;
-    uint32_t sinkShowHeight;
-    uint32_t sinkPhyWidth;
-    uint32_t sinkPhyHeight;
+    uint32_t sinkShowWidth = 0;
+    uint32_t sinkShowHeight = 0;
+    uint32_t sinkPhyWidth = 0;
+    uint32_t sinkPhyHeight = 0;
     LocalAbsInfo localAbsInfo;
 };
 
 struct SrcScreenInfo {
-    std::string devId;            // source device id
-    std::string sourceWinId;      // source projection window id
-    uint32_t sourceWinWidth;      // source projection window width
-    uint32_t sourceWinHeight;     // source projection window height
-    std::string sourcePhyId;      // source virtual screen driver id
-    uint32_t sourcePhyFd;         // source virtual screen driver fd
-    uint32_t sourcePhyWidth;      // source virtual screen driver width
-    uint32_t sourcePhyHeight;     // source virtual screen driver height
+    std::string devId = "";             // source device id
+    std::string sourceWinId = "";       // source projection window id
+    uint32_t sourceWinWidth = 0;        // source projection window width
+    uint32_t sourceWinHeight = 0;       // source projection window height
+    std::string sourcePhyId = "";       // source virtual screen driver id
+    uint32_t sourcePhyFd = 0;           // source virtual screen driver fd
+    uint32_t sourcePhyWidth = 0;        // source virtual screen driver width
+    uint32_t sourcePhyHeight = 0;       // source virtual screen driver height
 };
 
 struct TransformInfo {
-    uint32_t sinkWinPhyX;         // projection area X coordinate in touch coordinate
-    uint32_t sinkWinPhyY;         // projection area Y coordinate in touch coordinate
-    uint32_t sinkProjPhyWidth;    // projection area width in touch coordinate
-    uint32_t sinkProjPhyHeight;   // projection area height in touch coordinate
-    float coeffWidth;             // sink width transform source coefficient
-    float coeffHeight;            // sink height transform source coefficient
+    uint32_t sinkWinPhyX = 0;           // projection area X coordinate in touch coordinate
+    uint32_t sinkWinPhyY = 0;           // projection area Y coordinate in touch coordinate
+    uint32_t sinkProjPhyWidth = 0;      // projection area width in touch coordinate
+    uint32_t sinkProjPhyHeight = 0;     // projection area height in touch coordinate
+    double coeffWidth = 0.0;            // sink width transform source coefficient
+    double coeffHeight = 0.0;           // sink height transform source coefficient
 };
 
 struct SinkScreenInfo {
-    uint32_t sinkShowWidth;       // sink show width
-    uint32_t sinkShowHeight;      // sink show height
-    uint32_t sinkPhyWidth;        // sink touch screen width
-    uint32_t sinkPhyHeight;       // sink touch screen height
-    std::string sinkShowWinId;    // sink show window id
-    uint32_t sinkWinShowX;        // sink show window x coordinate
-    uint32_t sinkWinShowY;        // sink show window y coordinate
-    uint32_t sinkProjShowWidth;   // sink show window width
-    uint32_t sinkProjShowHeight;  // sink show window height
+    uint32_t sinkShowWidth = 0;         // sink show width
+    uint32_t sinkShowHeight = 0;        // sink show height
+    uint32_t sinkPhyWidth = 0;          // sink touch screen width
+    uint32_t sinkPhyHeight = 0;         // sink touch screen height
+    std::string sinkShowWinId = "";     // sink show window id
+    uint32_t sinkWinShowX = 0;          // sink show window x coordinate
+    uint32_t sinkWinShowY = 0;          // sink show window y coordinate
+    uint32_t sinkProjShowWidth = 0;     // sink show window width
+    uint32_t sinkProjShowHeight = 0;    // sink show window height
     SrcScreenInfo srcScreenInfo;
     TransformInfo transformInfo;
 };
@@ -99,7 +99,7 @@ struct SinkScreenInfo {
 class DInputContext {
 DECLARE_SINGLE_INSTANCE_BASE(DInputContext);
 public:
-    std::string GetSourceWindId(const std::string &devId, const std::string &sourceWinId);
+    std::string GetScreenInfoKey(const std::string &devId, const std::string &sourceWinId);
     int32_t RemoveSinkScreenInfo(const std::string &sourceWinId);
     int32_t UpdateSinkScreenInfo(const std::string &sourceWinId, const SinkScreenInfo &sinkScreenInfo);
     SinkScreenInfo GetSinkScreenInfo(const std::string &sourceWinId);
@@ -108,7 +108,7 @@ public:
     int32_t UpdateSrcScreenInfo(const std::string &sourceWinId, const SrcScreenInfo &srcScreenInfo);
     SrcScreenInfo GetSrcScreenInfo(const std::string &sourceWinId);
 
-    void SetLocalTouchScrennInfo(const LocalTouchScreenInfo &localTouchScreenInfo);
+    void SetLocalTouchScreenInfo(const LocalTouchScreenInfo &localTouchScreenInfo);
     LocalTouchScreenInfo GetLocalTouchScreenInfo();
 private:
     int32_t CalculateTransformInfo(SinkScreenInfo &sinkScreenInfo);
