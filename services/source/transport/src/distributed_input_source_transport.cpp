@@ -480,6 +480,7 @@ void DistributedInputSourceTransport::OnSessionClosed(int32_t sessionId)
         sessionDevMap_.erase(deviceId);
     }
     channelStatusMap_.erase(deviceId);
+    StopLatencyThread();
     DistributedInputInject::GetInstance().StopInjectThread();
 }
 
