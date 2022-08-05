@@ -32,6 +32,7 @@ struct DevInfo {
 
 DevInfo GetLocalDeviceInfo();
 uint64_t GetCurrentTime();
+std::string SetAnonyId(const std::string &message);
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

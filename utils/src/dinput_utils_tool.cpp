@@ -15,16 +15,19 @@
 
 #include "dinput_utils_tool.h"
 
+#include "anonymous_string.h"
 #include <sys/time.h>
+#include "nlohmann/json.hpp"
 
+#include "dinput_softbus_define.h"
 #include "softbus_bus_center.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-    const std::string DINPUT_PKG_NAME = "ohos.dhardware.dinput";
     constexpr int32_t MS_ONE_SECOND = 1000;
+    const char *const DESCRIPTOR = "descriptor";
 }
 
 DevInfo GetLocalDeviceInfo()
@@ -49,6 +52,21 @@ uint64_t GetCurrentTime()
     struct timeval tv;
     gettimeofday(&tv, nullptr);
     return tv.tv_sec * MS_ONE_SECOND + tv.tv_usec / MS_ONE_SECOND;
+}
+
+std::string SetAnonyId(const std::string &message)
+{
+    nlohmann::json jsonStr = nlohmann::json::parse(message);
+    if (jsonStr.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID)) {
+        jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = GetAnonyString(jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID]);
+    }
+    if (jsonStr.contains(DINPUT_SOFTBUS_KEY_SESSION_ID)) {
+        jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = GetAnonyInt32(jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID]);
+    }
+    if (jsonStr.contains(DESCRIPTOR)) {
+        jsonStr[DESCRIPTOR] = GetAnonyString(jsonStr[DESCRIPTOR]);
+    }
+    return jsonStr.dump();
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

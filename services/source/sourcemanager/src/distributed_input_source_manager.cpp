@@ -31,6 +31,7 @@
 #include "dinput_sa_process_state.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
+#include "dinput_utils_tool.h"
 #include "hisysevent_util.h"
 #include "hidumper.h"
 #include "white_list_util.h"
@@ -547,7 +548,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
 {
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_REGISTER, devId, dhId, "dinput register call.");
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
     if (callback == nullptr) {
         DHLOGE(
             "%s called, deviceId: %s callback is null.",
@@ -801,7 +802,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId, "dinput unprepare call");
-    DHLOGI("%s called, deviceId: %s", __func__, deviceId.c_str());
+    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
 
     if (callback == nullptr) {
         DHLOGE("%s called, deviceId: %s callback is null.", __func__, GetAnonyString(deviceId).c_str());

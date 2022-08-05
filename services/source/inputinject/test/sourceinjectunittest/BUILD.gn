@@ -43,6 +43,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//third_party/json/include",
     "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "${dfx_utils_path}/include",
+    "${utils_path}/include",
   ]
 
   sources = [
@@ -76,6 +77,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "${fwk_utils_path}:distributedhardwareutils",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${dfx_utils_path}:libdinput_dfx_utils",
+    "${utils_path}:libdinput_utils",
   ]
 
   external_deps = [

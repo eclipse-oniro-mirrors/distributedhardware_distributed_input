@@ -52,7 +52,7 @@ int32_t DistributedInputSinkSwitch::StartSwitch(int32_t sessionId)
 {
     std::unique_lock<std::mutex> switchLock(operationMutex_);
     if (switchVector_.empty()) {
-        DHLOGE("StartSwitch sessionId:%d fail,switchVector_ is null.", sessionId);
+        DHLOGE("StartSwitch sessionId:%s fail,switchVector_ is null.", GetAnonyInt32(sessionId).c_str());
         return ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL;
     } else {
         bool findOld = false;

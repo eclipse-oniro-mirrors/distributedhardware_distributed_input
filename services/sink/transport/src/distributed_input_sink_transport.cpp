@@ -26,6 +26,7 @@
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 #include "dinput_low_latency.h"
+#include "dinput_utils_tool.h"
 #include "hidumper.h"
 #include "session.h"
 #include "softbus_bus_center.h"
@@ -344,7 +345,7 @@ void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const voi
     }
 
     std::string message(buf, buf + dataLen);
-    DHLOGI("OnBytesReceived message:%s.", message.c_str());
+    DHLOGI("OnBytesReceived message:%s.", SetAnonyId(message).c_str());
     HandleSessionData(sessionId, message);
 
     free(buf);
@@ -424,7 +425,7 @@ void DistributedInputSinkTransport::NotifyLatency(int32_t sessionId, const nlohm
 void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const std::string& message)
 {
     if (callback_ == nullptr) {
-        DHLOGE("OnBytesReceived the callback_ is null, the message:%s abort.", message.c_str());
+        DHLOGE("OnBytesReceived the callback_ is null, the message:%s abort.", SetAnonyId(message).c_str());
         return;
     }
 
@@ -435,7 +436,7 @@ void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const s
     }
 
     if (recMsg.contains(DINPUT_SOFTBUS_KEY_CMD_TYPE) != true) {
-        DHLOGE("OnBytesReceived message:%s is error, not contain cmdType.", message.c_str());
+        DHLOGE("OnBytesReceived message:%s is error, not contain cmdType.", SetAnonyId(message).c_str());
         return;
     }
 

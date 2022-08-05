@@ -22,6 +22,7 @@
 #include "nlohmann/json.hpp"
 
 #include "dinput_errcode.h"
+#include "dinput_utils_tool.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -46,7 +47,7 @@ int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& d
     const std::string& parameters)
 {
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
 
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");

@@ -20,8 +20,10 @@ ohos_shared_library("libdinput_utils") {
     "${fwk_common_path}/log/include",
     "${fwk_utils_path}/include",
     "${fwk_utils_path}/include/log",
+    "//third_party/json/include",
     "${utils_path}/include",
     "${common_path}/include",
+    "${service_common}/include",
   ]
 
   sources = [

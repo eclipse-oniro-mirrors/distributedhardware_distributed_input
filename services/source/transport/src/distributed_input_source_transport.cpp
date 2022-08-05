@@ -249,11 +249,11 @@ int32_t DistributedInputSourceTransport::PrepareRemoteInput(const std::string& d
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("PrepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
         }
-        DHLOGI("PrepareRemoteInput devId:%s, sessionId:%s, msg:%s.",
-            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+        DHLOGI("PrepareRemoteInput devId:%s, sessionId:%s, smsg:%s.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str());
         return DH_SUCCESS;
     } else {
         DHLOGE("PrepareRemoteInput error, not find this device:%s.",
@@ -275,11 +275,11 @@ int32_t DistributedInputSourceTransport::UnprepareRemoteInput(const std::string&
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("UnprepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
         }
         DHLOGI("UnprepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
-            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str());
         return DH_SUCCESS;
     } else {
         DHLOGE("UnprepareRemoteInput error, not find this device:%s.",
@@ -303,11 +303,11 @@ int32_t DistributedInputSourceTransport::StartRemoteInput(
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
         }
         DHLOGI("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
-            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str());
         return DH_SUCCESS;
     } else {
         DHLOGE("StartRemoteInput error, not find this device:%s.",
@@ -331,11 +331,11 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(
         int32_t ret = SendMsg(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+                GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str(), ret);
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
         }
         DHLOGI("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
-            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str());
         return DH_SUCCESS;
     } else {
         DHLOGE("StopRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
@@ -360,12 +360,12 @@ int32_t DistributedInputSourceTransport::LatencyCount(const std::string& deviceI
     int32_t ret = SendMsg(sessionId, smsg);
     if (ret != DH_SUCCESS) {
         DHLOGE("LatencyCount deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
-            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str(), ret);
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_LATENCY_FAIL;
     }
 
     DHLOGI("LatencyCount deviceId:%s, sessionId:%s, smsg:%s.",
-        GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+        GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), SetAnonyId(smsg).c_str());
     return DH_SUCCESS;
 }
 

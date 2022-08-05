@@ -23,6 +23,7 @@
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_utils_tool.h"
 #include "softbus_bus_center.h"
 #include "white_list_util.h"
 
@@ -148,7 +149,7 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
     const std::string& parameters, const std::shared_ptr<RegisterCallback>& callback)
 {
     DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), parameters.c_str());
+        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
 
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("RegisterDistributedHardware client fail");

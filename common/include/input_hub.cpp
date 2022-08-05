@@ -625,7 +625,8 @@ void InputHub::GenerateDescriptor(InputDevice& identifier) const
         }
     }
     identifier.descriptor = DH_ID_PREFIX + Sha256(rawDescriptor);
-    DHLOGI("Created descriptor: raw=%s, cooked=%s", rawDescriptor.c_str(), identifier.descriptor.c_str());
+    DHLOGI("Created descriptor: raw=%s, cooked=%s", rawDescriptor.c_str(),
+        GetAnonyString(identifier.descriptor).c_str());
 }
 
 int32_t InputHub::RegisterDeviceForEpollLocked(const Device& device)
