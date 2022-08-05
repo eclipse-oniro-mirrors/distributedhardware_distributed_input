@@ -55,7 +55,8 @@ WhiteListUtil &WhiteListUtil::GetInstance(void)
 
 int32_t WhiteListUtil::Init()
 {
-    const char* const whiteListFilePath = "/etc/dinput_business_event_whitelist.cfg";
+    const char* const whiteListFilePath =
+        "/vendor/etc/distributedhardware/dinput_business_event_whitelist.cfg";
     std::ifstream inFile(whiteListFilePath, std::ios::in | std::ios::binary);
     if (!inFile.is_open()) {
         // file open error
