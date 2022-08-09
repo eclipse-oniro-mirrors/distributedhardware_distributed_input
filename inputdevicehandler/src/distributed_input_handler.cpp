@@ -54,8 +54,8 @@ DistributedInputHandler::~DistributedInputHandler()
 
 void DistributedInputHandler::StructTransJson(const InputDevice& pBuf, std::string& strDescriptor)
 {
-    DHLOGI("[%s] %d, %d, %d, %d, %s.\n",
-        (pBuf.name).c_str(), pBuf.bus, pBuf.vendor, pBuf.product, pBuf.version, (pBuf.descriptor).c_str());
+    DHLOGI("[%s] %d, %d, %d, %d, %s.\n", (pBuf.name).c_str(), pBuf.bus, pBuf.vendor, pBuf.product, pBuf.version,
+        GetAnonyString(pBuf.descriptor).c_str());
     nlohmann::json tmpJson;
     tmpJson["name"] = pBuf.name;
     tmpJson["location"] = pBuf.location;

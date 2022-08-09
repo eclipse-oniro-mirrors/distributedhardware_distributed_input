@@ -486,7 +486,7 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     DHLOGI("  name:       \"%s\"\n", identifier.name.c_str());
     DHLOGI("  location:   \"%s\"\n", identifier.location.c_str());
     DHLOGI("  unique id:  \"%s\"\n", identifier.uniqueId.c_str());
-    DHLOGI("  descriptor: \"%s\"\n", identifier.descriptor.c_str());
+    DHLOGI("  descriptor: \"%s\"\n", GetAnonyString(identifier.descriptor).c_str());
 
     if (MakeDevice(fd, std::move(device)) < 0) {
         return ERR_DH_INPUT_HUB_MAKE_DEVICE_FAIL;
