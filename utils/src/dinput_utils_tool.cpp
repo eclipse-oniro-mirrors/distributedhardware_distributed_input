@@ -26,7 +26,7 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
-    constexpr int32_t MS_ONE_SECOND = 1000;
+    constexpr int32_t US_ONE_SECOND = 1000 * 1000;
     const char *const DESCRIPTOR = "descriptor";
 }
 
@@ -51,7 +51,7 @@ uint64_t GetCurrentTime()
 {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
-    return tv.tv_sec * MS_ONE_SECOND + tv.tv_usec / MS_ONE_SECOND;
+    return tv.tv_sec * US_ONE_SECOND + tv.tv_usec;
 }
 
 std::string SetAnonyId(const std::string &message)
