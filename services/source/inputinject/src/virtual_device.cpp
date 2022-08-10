@@ -96,6 +96,7 @@ bool VirtualDevice::SetPhys(const std::string deviceName)
 bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
 {
     fd_ = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+    DHLOGI("open fd %d", fd_);
     if (fd_ < 0) {
         DHLOGE("Failed to open uinput %s", __func__);
         return false;
@@ -133,12 +134,13 @@ bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
         DHLOGE("Unable to create input device : %s", __func__);
         return false;
     }
+    DHLOGI("create fd %d", fd_);
 
     char sysfs_device_name[16];
     if (ioctl(fd_, UI_GET_SYSNAME(sizeof(sysfs_device_name)), sysfs_device_name) < 0) {
         DHLOGE("Unable to get input device name: %s", __func__);
     }
-    DHLOGI("get input device name: %s", GetAnonyString(sysfs_device_name).c_str());
+    DHLOGI("get input device name: %s, fd: %d", GetAnonyString(sysfs_device_name).c_str(), fd_);
     return true;
 }
 
@@ -160,6 +162,11 @@ void VirtualDevice::SetNetWorkId(const std::string netWorkId)
 {
     DHLOGI("SetNetWorkId %s\n", GetAnonyString(netWorkId).c_str());
     netWorkId_.append(netWorkId);
+}
+
+int32_t VirtualDevice::GetFd()
+{
+    return fd_;
 }
 
 void VirtualDevice::RecordEventLog(const input_event& event)

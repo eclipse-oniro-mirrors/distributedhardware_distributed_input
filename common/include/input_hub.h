@@ -65,6 +65,13 @@ private:
         const bool isVirtual; // set if fd < 0 is passed to constructor
     };
 
+    struct AbsInfo {
+        uint32_t absX;
+        uint32_t absY;
+        int32_t absXIndex;
+        int32_t absYIndex;
+    };
+
     int32_t Initialize();
     int32_t Release();
 
@@ -78,7 +85,6 @@ private:
     int32_t MakeDevice(int fd, std::unique_ptr<Device> device);
     void GenerateDescriptor(InputDevice& identifier) const;
     std::string StringPrintf(const char* format, ...) const;
-    std::string Sha256(const std::string& in) const;
 
     int32_t RegisterFdForEpoll(int fd);
     int32_t RegisterDeviceForEpollLocked(const Device& device);
@@ -108,10 +114,10 @@ private:
     uint32_t SizeofBitArray(uint32_t bit);
     bool IsSupportInputTypes(uint32_t classes);
     void RecordEventLog(const RawEvent* event);
-    void HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count, std::vector<bool>& needFilted);
+    void HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count, std::vector<bool>& needFilted,
+        Device* device);
     int32_t QueryLocalTouchScreenInfo(int fd);
-    bool CheckTouchPointRegion(struct input_event readBuffer[], uint32_t absX, uint32_t absY,
-                                int32_t absXIndex, int32_t absYIndex);
+    bool CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo, Device* device);
     size_t CollectEvent(RawEvent* buffer, size_t& capacity, size_t bufferSize, Device* device);
 
     int epollFd_;

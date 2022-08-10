@@ -33,6 +33,10 @@ ohos_shared_library("libdinput_source_handler") {
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
     "${dfx_utils_path}/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
+    "${utils_path}/include",
+    "${services_source_path}/inputinject/include",
   ]
 
   sources = [
@@ -52,6 +56,10 @@ ohos_shared_library("libdinput_source_handler") {
     "${innerkits_path}:libdinput_sdk",
     "${services_source_path}/sourcemanager:libdinput_source",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "${dfx_utils_path}:libdinput_dfx_utils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
+    "${utils_path}:libdinput_utils",
+    "${distributedinput_path}/services/source/inputinject:libdinput_inject",
   ]
 
   external_deps = [

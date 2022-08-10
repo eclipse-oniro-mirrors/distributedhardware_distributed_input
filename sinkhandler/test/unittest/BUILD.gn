@@ -44,6 +44,10 @@ ohos_unittest("distributed_input_sink_handler_test") {
     "${fwk_utils_path}/include",
     "//third_party/json/include",
     "${dfx_utils_path}/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
+    "${services_source_path}/inputinject/include",
+    "${utils_path}/include",
   ]
 
   sources = [
@@ -73,6 +77,8 @@ ohos_unittest("distributed_input_sink_handler_test") {
     "${innerkits_path}:libdinput_sdk",
     "${services_source_path}/sourcemanager:libdinput_source",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "${utils_path}:libdinput_utils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [

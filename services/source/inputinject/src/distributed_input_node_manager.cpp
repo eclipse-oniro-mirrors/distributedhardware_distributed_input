@@ -114,8 +114,43 @@ int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::
     return DH_SUCCESS;
 }
 
+int32_t DistributedInputNodeManager::CreateVirtualTouchScreenNode(const std::string& devId, const std::string& dhId,
+    const uint64_t srcWinId, const uint32_t sourcePhyWidth, const uint32_t sourcePhyHeight)
+{
+    std::unique_lock<std::mutex> my_lock(operationMutex_);
+    std::unique_ptr<VirtualDevice> device;
+    LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
+    DHLOGI("CreateVirtualTouchScreenNode start, dhId: %s, sourcePhyWidth: %d, sourcePhyHeight: %d",
+        GetAnonyString(dhId).c_str(), sourcePhyWidth, sourcePhyHeight);
+    device = std::make_unique<VirtualTouchScreen>(info.deviceInfo, info, sourcePhyWidth - 1, sourcePhyHeight - 1);
+    if (device == nullptr) {
+        DHLOGE("could not create new virtual touch Screen");
+        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
+    }
+    if (!device->SetUp(devId, dhId)) {
+        DHLOGE("Virtual touch Screen setUp fail, devId: %s, dhId: %s", GetAnonyString(devId).c_str(),
+            GetAnonyString(dhId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
+    }
+    virtualTouchScreenFd_ = device->GetFd();
+    AddDeviceLocked(dhId, std::move(device));
+    DHLOGI("CreateVirtualTouchScreenNode end, dhId: %s", GetAnonyString(dhId).c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputNodeManager::RemoveVirtualTouchScreenNode(const std::string& dhId)
+{
+    return CloseDeviceLocked(dhId);
+}
+
+int32_t DistributedInputNodeManager::GetVirtualTouchScreenFd()
+{
+    return virtualTouchScreenFd_;
+}
+
 void DistributedInputNodeManager::AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device)
 {
+    DHLOGI("dhId=%s", GetAnonyString(dhId).c_str());
     std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
     auto [dev_it, inserted] = virtualDeviceMap_.insert_or_assign(dhId, std::move(device));
     if (!inserted) {
@@ -129,6 +164,7 @@ int32_t DistributedInputNodeManager::CloseDeviceLocked(const std::string &dhId)
     std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
     std::map<std::string, std::unique_ptr<VirtualDevice>>::iterator iter = virtualDeviceMap_.find(dhId);
     if (iter != virtualDeviceMap_.end()) {
+        DHLOGI("%s called success, dhId=%s", __func__, GetAnonyString(dhId).c_str());
         virtualDeviceMap_.erase(iter);
         return DH_SUCCESS;
     }

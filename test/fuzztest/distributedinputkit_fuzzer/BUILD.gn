@@ -43,6 +43,10 @@ ohos_fuzztest("DistributedInputKitFuzzTest") {
     "//foundation/distributedhardware/distributed_hardware_fwk/common/utils/include",
     "//foundation/distributedhardware/distributed_hardware_fwk/utils/include/log",
     "//foundation/distributedhardware/distributed_hardware_fwk/utils/include",
+    "${utils_path}/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
+    "${services_source_path}/inputinject/include",
   ]
 
   cflags = [
@@ -66,6 +70,8 @@ ohos_fuzztest("DistributedInputKitFuzzTest") {
     "${distributedinput_path}/sinkhandler:libdinput_sink_handler",
     "${distributedinput_path}/sourcehandler:libdinput_source_handler",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "${utils_path}:libdinput_utils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [

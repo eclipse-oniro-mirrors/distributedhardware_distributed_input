@@ -44,6 +44,10 @@ public:
     int32_t CloseDeviceLocked(const std::string& dhId);
     void StartInjectThread();
     void StopInjectThread();
+    int32_t CreateVirtualTouchScreenNode(const std::string& devId, const std::string& dhId, const uint64_t srcWinId,
+        const uint32_t sourcePhyWidth, const uint32_t sourcePhyHeight);
+    int32_t RemoveVirtualTouchScreenNode(const std::string& dhId);
+    int32_t GetVirtualTouchScreenFd();
 
 private:
     void AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device);
@@ -62,6 +66,7 @@ private:
     std::condition_variable conditionVariable_;
     std::queue<std::shared_ptr<RawEvent>> injectQueue_;
     std::unique_ptr<InputHub> inputHub_;
+    int32_t virtualTouchScreenFd_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

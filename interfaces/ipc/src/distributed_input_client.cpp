@@ -363,6 +363,64 @@ void DistributedInputClient::DelWhiteListInfos(const std::string &deviceId) cons
 {
     WhiteListUtil::GetInstance().ClearWhiteList(deviceId);
 }
+
+int32_t DistributedInputClient::NotifyStartDScreen(const std::string &sinkDevId, const std::string& srcDevId,
+    const uint64_t srcWinId)
+{
+    sptr<IDistributedSinkInput> remoteDInput = GetRemoteDInput(sinkDevId);
+    if (remoteDInput == nullptr || !remoteDInput->AsObject()) {
+        DHLOGE("GetRemoteDInput failed, networkId = %s", GetAnonyString(sinkDevId).c_str());
+        return ERR_DH_INPUT_RPC_GET_REMOTE_DINPUT_FAIL;
+    }
+    std::string srcScreenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcDevId, srcWinId);
+    SrcScreenInfo srcScreenInfo = DInputContext::GetInstance().GetSrcScreenInfo(srcScreenInfoKey);
+    DHLOGI("DistributedInputSinkProxy the data: devId: %s, sourceWinId: %d, sourceWinWidth: %d, sourceWinHeight: %d,"
+        "sourcePhyId: %s, sourcePhyFd: %d, sourcePhyWidth: %d, sourcePhyHeight: %d",
+        GetAnonyString(srcScreenInfo.devId).c_str(), srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth,
+        srcScreenInfo.sourceWinHeight, GetAnonyString(srcScreenInfo.sourcePhyId).c_str(), srcScreenInfo.sourcePhyFd,
+        srcScreenInfo.sourcePhyWidth, srcScreenInfo.sourcePhyHeight);
+    auto ret = remoteDInput->NotifyStartDScreen(srcScreenInfo);
+    DHLOGI("NotifyStartDScreen, retCode = %d", ret);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyStartDScreen failed, errCode = %d", ret);
+    }
+    return ret;
+}
+
+int32_t DistributedInputClient::NotifyStopDScreen(const std::string &networkId, const std::string& srcScreenInfoKey)
+{
+    sptr<IDistributedSinkInput> remoteDInput = GetRemoteDInput(networkId);
+    if (remoteDInput == nullptr || !remoteDInput->AsObject()) {
+        DHLOGE("GetRemoteDInput failed, networkId = %s", GetAnonyString(networkId).c_str());
+        return ERR_DH_INPUT_RPC_GET_REMOTE_DINPUT_FAIL;
+    }
+    auto ret = remoteDInput->NotifyStopDScreen(srcScreenInfoKey);
+    DHLOGI("NotifyStopDScreen, retCode = %d", ret);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyStopDScreen failed, errCode = %d", ret);
+    }
+    return ret;
+}
+
+sptr<IDistributedSinkInput> DistributedInputClient::GetRemoteDInput(const std::string &networkId) const
+{
+    DHLOGI("start, networkId = %s", GetAnonyString(networkId).c_str());
+    if (networkId.empty()) {
+        DHLOGE("networkId is empty");
+        return nullptr;
+    }
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        DHLOGE("GetSystemAbilityManager failed");
+        return nullptr;
+    }
+    auto object = samgr->CheckSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID, networkId);
+    if (object == nullptr) {
+        DHLOGE("CheckSystemAbility failed");
+        return nullptr;
+    }
+    return iface_cast<IDistributedSinkInput>(object);
+}
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

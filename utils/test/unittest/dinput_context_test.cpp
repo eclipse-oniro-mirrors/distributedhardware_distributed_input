@@ -47,9 +47,9 @@ void DInputContextTest::TearDownTestCase()
 HWTEST_F(DInputContextTest, GetSourceWindId001, testing::ext::TestSize.Level0)
 {
     std::string devId = "hello";
-    std::string sourceWinId = "hello";
+    uint64_t sourceWinId = 1;
     std::string ret = DInputContext::GetInstance().GetScreenInfoKey(devId, sourceWinId);
-    EXPECT_EQ("hello###hello", ret);
+    EXPECT_EQ("hello###1", ret);
 }
 
 HWTEST_F(DInputContextTest, RemoveSinkScreenInfo001, testing::ext::TestSize.Level0)

@@ -36,12 +36,19 @@ public:
     int32_t StructTransJson(const InputDevice& pBuf, std::string& strDescriptor);
     void StartInjectThread();
     void StopInjectThread();
+    std::string GenerateVirtualTouchScreenDHId(const uint64_t sourceWinId, const uint32_t sourceWinWidth,
+        const uint32_t sourceWinHeight);
+    int32_t CreateVirtualTouchScreenNode(const std::string& devId, const std::string& dhId, const uint64_t srcWinId,
+        const uint32_t sourcePhyWidth, const uint32_t sourcePhyHeight);
+    int32_t RemoveVirtualTouchScreenNode(const std::string& dhId);
+    int32_t GetVirtualTouchScreenFd();
 
 private:
     DistributedInputInject();
     ~DistributedInputInject();
 
     std::unique_ptr<DistributedInputNodeManager> inputNodeManager_;
+    std::mutex inputNodeManagerMutex_;
 
     // The event queue.
     static const int EVENT_BUFFER_SIZE = 16;

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef I_DISTRIBUTED_INPUT_H
-#define I_DISTRIBUTED_INPUT_H
+#ifndef I_DISTRIBUTED_SOURCE_INPUT_H
+#define I_DISTRIBUTED_SOURCE_INPUT_H
 
 #include <string>
 
@@ -84,4 +84,4 @@ public:
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif // DISTRIBUTED_INPUT_INNERKITS_INCLUDE_I_DISTRIBUTED_INPUT_H
+#endif // I_DISTRIBUTED_SOURCE_INPUT_H

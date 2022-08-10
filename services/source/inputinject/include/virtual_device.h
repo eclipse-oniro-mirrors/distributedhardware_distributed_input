@@ -42,6 +42,7 @@ public:
     bool SetUp(const std::string& devId, const std::string& dhId);
     bool InjectInputEvent(const input_event& event);
     void SetNetWorkId(const std::string netWorkId);
+    int32_t GetFd();
 
 protected:
     VirtualDevice();

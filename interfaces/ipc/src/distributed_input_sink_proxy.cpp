@@ -15,6 +15,7 @@
 
 #include "distributed_input_sink_proxy.h"
 
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
@@ -38,10 +39,12 @@ int32_t DistributedInputSinkProxy::Init()
         return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     int32_t result = ERR_DH_INPUT_SINK_PROXY_INIT_FAIL;
-    bool ret = SendRequest(IDistributedSinkInput::MessageCode::INIT, data, reply);
-    if (ret) {
-        result = reply.ReadInt32();
+    bool ret = SendRequest(INIT, data, reply);
+    if (!ret) {
+        DHLOGE("SendRequest fail!");
+        return ERR_DH_INPUT_SINK_PROXY_INIT_FAIL;
     }
+    result = reply.ReadInt32();
     return result;
 }
 
@@ -54,10 +57,12 @@ int32_t DistributedInputSinkProxy::Release()
         return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     int32_t result = ERR_DH_INPUT_SINK_PROXY_RELEASE_FAIL;
-    bool ret = SendRequest(IDistributedSinkInput::MessageCode::RELEASE, data, reply);
-    if (ret) {
-        result = reply.ReadInt32();
+    bool ret = SendRequest(RELEASE, data, reply);
+    if (!ret) {
+        DHLOGE("SendRequest fail!");
+        return ERR_DH_INPUT_SINK_PROXY_RELEASE_FAIL;
     }
+    result = reply.ReadInt32();
     return result;
 }
 
@@ -79,22 +84,75 @@ int32_t DistributedInputSinkProxy::IsStartDistributedInput(
     }
     MessageParcel reply;
     int32_t result = ERR_DH_INPUT_SINK_PROXY_IS_START_INPUT_FAIL;
-    bool ret = SendRequest(IDistributedSinkInput::MessageCode::ISSTART_REMOTE_INPUT, data, reply);
-    if (ret) {
-        result = reply.ReadInt32();
+    bool ret = SendRequest(IS_START_REMOTE_INPUT, data, reply);
+    if (!ret) {
+        DHLOGE("SendRequest fail!");
+        return ERR_DH_INPUT_SINK_PROXY_IS_START_INPUT_FAIL;
     }
+    result = reply.ReadInt32();
     return result;
 }
 
-bool DistributedInputSinkProxy::SendRequest(
-    IDistributedSinkInput::MessageCode code, MessageParcel &data, MessageParcel &reply)
+int32_t DistributedInputSinkProxy::NotifyStartDScreen(const SrcScreenInfo &remoteCtrlInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("WriteInterfaceToken fail!");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    DHLOGI("DistributedInputSinkProxy the data: devId: %s, sourceWinId: %d, sourceWinWidth: %d, sourceWinHeight: %d, "
+        "sourcePhyId: %s, sourcePhyFd: %d, sourcePhyWidth: %d, sourcePhyHeight: %d",
+        GetAnonyString(remoteCtrlInfo.devId).c_str(), remoteCtrlInfo.sourceWinId, remoteCtrlInfo.sourceWinWidth,
+        remoteCtrlInfo.sourceWinHeight, GetAnonyString(remoteCtrlInfo.sourcePhyId).c_str(),
+        remoteCtrlInfo.sourcePhyFd, remoteCtrlInfo.sourcePhyWidth, remoteCtrlInfo.sourcePhyHeight);
+    if (!data.WriteString(remoteCtrlInfo.devId) || !data.WriteUint64(remoteCtrlInfo.sourceWinId) ||
+        !data.WriteUint32(remoteCtrlInfo.sourceWinWidth) || !data.WriteUint32(remoteCtrlInfo.sourceWinHeight) ||
+        !data.WriteString(remoteCtrlInfo.sourcePhyId) || !data.WriteUint32(remoteCtrlInfo.sourcePhyFd) ||
+        !data.WriteUint32(remoteCtrlInfo.sourcePhyWidth) || !data.WriteUint32(remoteCtrlInfo.sourcePhyHeight)) {
+        DHLOGE("DistributedInputSinkProxy write params failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    int32_t result = ERR_DH_INPUT_NOTIFY_START_DSCREEN_FAIL;
+    bool ret = SendRequest(NOTIFY_START_DSCREEN, data, reply);
+    if (!ret) {
+        DHLOGE("SendRequest fail!");
+        return ERR_DH_INPUT_NOTIFY_START_DSCREEN_FAIL;
+    }
+    result = reply.ReadInt32();
+    return result;
+}
+
+int32_t DistributedInputSinkProxy::NotifyStopDScreen(const std::string &srcScreenInfoKey)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("WriteInterfaceToken fail!");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    if (!data.WriteString(srcScreenInfoKey)) {
+        DHLOGE("DistributedInputSinkProxy write params failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    int32_t result = ERR_DH_INPUT_NOTIFY_STOP_DSCREEN_FAIL;
+    bool ret = SendRequest(NOTIFY_STOP_DSCREEN, data, reply);
+    if (!ret) {
+        DHLOGE("SendRequest fail!");
+        return ERR_DH_INPUT_NOTIFY_STOP_DSCREEN_FAIL;
+    }
+    result = reply.ReadInt32();
+    return result;
+}
+
+bool DistributedInputSinkProxy::SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         return false;
     }
     MessageOption option(MessageOption::TF_SYNC);
-    int32_t result = remote->SendRequest(static_cast<uint32_t>(code), data, reply, option);
+    int32_t result = remote->SendRequest(code, data, reply, option);
     if (result != DH_SUCCESS) {
         return false;
     }

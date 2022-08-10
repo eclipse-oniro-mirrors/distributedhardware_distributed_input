@@ -21,8 +21,9 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 
-#include "i_start_d_input_server_call_back.h"
 #include "constants_dinput.h"
+#include "dinput_context.h"
+#include "i_start_d_input_server_call_back.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -31,6 +32,10 @@ class IDistributedSinkInput : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.IDistributedSinkInput");
 
+    /*
+     * Init, Release and IsStartDistributedInput are IPC interface,
+     * which are used for interacting by dhareware and dinput
+     */
     virtual int32_t Init() = 0;
 
     virtual int32_t Release() = 0;
@@ -38,10 +43,20 @@ public:
     virtual int32_t IsStartDistributedInput(
         const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) = 0;
 
-    enum class MessageCode {
-        INIT = 0xf011,
-        RELEASE = 0xf012,
-        ISSTART_REMOTE_INPUT = 0xf013,
+    /*
+     * NotifyStartDScreen and NotifyStopDScreen are RPC interface,
+     * which are used for interacting by dinput source and dinput sink
+     */
+    virtual int32_t NotifyStartDScreen(const SrcScreenInfo& remoteCtrlInfo) = 0;
+
+    virtual int32_t NotifyStopDScreen(const std::string &srcScreenInfoKey) = 0;
+
+    enum {
+        INIT = 0xf011U,
+        RELEASE = 0xf012U,
+        IS_START_REMOTE_INPUT = 0xf013U,
+        NOTIFY_START_DSCREEN = 0xf014U,
+        NOTIFY_STOP_DSCREEN = 0xf015U,
     };
 };
 } // namespace DistributedInput

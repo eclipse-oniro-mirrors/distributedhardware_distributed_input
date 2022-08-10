@@ -37,6 +37,7 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_LOW_LATENCY_LIB_NULL = -60011;
     constexpr int32_t ERR_DH_INPUT_CONTEXT_KEY_NOT_EXIST = -60012;
     constexpr int32_t ERR_DH_INPUT_CONTEXT_CALCULATE_FAIL = -60013;
+    constexpr int32_t ERR_DH_INPUT_JSON_PARSE_FAIL = -60014;
 
     // whilte list error code
     constexpr int32_t ERR_DH_INPUT_WHILTELIST_INIT_FAIL = -61001;
@@ -57,6 +58,7 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTOP_FAIL = -64008;
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL = -64009;
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL = -64010;
+    constexpr int32_t ERR_DH_INPUT_SERVER_SINK_SCREEN_INFO_IS_EMPTY = -64011;
 
     // service source error code
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_REGISTER_FAIL = -65000;
@@ -131,6 +133,11 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_SOURCE_STUB_ON_REMOTE_REQUEST_FAIL = -67028;
     constexpr int32_t ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL = -67029;
     constexpr int32_t ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL = -67030;
+    constexpr int32_t ERR_DH_INPUT_RPC_GET_REMOTE_DINPUT_FAIL = -67035;
+    constexpr int32_t ERR_DH_INPUT_NOTIFY_START_DSCREEN_FAIL = -67036;
+    constexpr int32_t ERR_DH_INPUT_NOTIFY_STOP_DSCREEN_FAIL = -67037;
+    constexpr int32_t ERR_DH_INPUT_RPC_REPLY_FAIL = -67038;
+    constexpr int32_t ERR_DH_INPUT_SA_REQUEST_CODE_INVALID = -67039;
 
     // Hidump Helper error code
     constexpr int32_t ERR_DH_INPUT_HIDUMP_INVALID_ARGS = -68000;

@@ -37,6 +37,10 @@ ohos_shared_library("libdinput_sink") {
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "${low_latency_path}/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/utils/include/",
   ]
 
   sources = [
@@ -68,6 +72,9 @@ ohos_shared_library("libdinput_sink") {
     "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
     "//foundation/distributedhardware/distributed_input/services/sink/inputcollector:libdinput_collector",
     "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [

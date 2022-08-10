@@ -25,6 +25,9 @@ ohos_shared_library("libdinput_utils") {
     "${utils_path}/include",
     "${common_path}/include",
     "${service_common}/include",
+    "//third_party/json/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
   ]
 
   sources = [
@@ -38,11 +41,16 @@ ohos_shared_library("libdinput_utils") {
     "LOG_DOMAIN=0xD004100",
   ]
 
-  deps = [ "${fwk_utils_path}:distributedhardwareutils" ]
+  deps = [
+    "${fwk_utils_path}:distributedhardwareutils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
+    "//third_party/openssl:libcrypto_static",
+  ]
 
   external_deps = [
     "dsoftbus:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
   ]
 
   subsystem_name = "distributedhardware"

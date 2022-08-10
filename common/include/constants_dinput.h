@@ -113,6 +113,32 @@ namespace DistributedInput {
 
     const std::string DINPUT_SPLIT_COMMA = ", ";
 
+    const std::string SOURCE_DEVICE_ID = "sourceDevId";
+
+    const std::string SINK_DEVICE_ID = "sinkDevId";
+
+    const std::string SOURCE_WINDOW_ID = "sourceWinId";
+
+    const std::string SINK_SHOW_WINDOW_ID = "sinkShowWinId";
+
+    const std::string SOURCE_WINDOW_WIDTH = "sourceWinWidth";
+
+    const std::string SOURCE_WINDOW_HEIGHT = "sourceWinHeight";
+
+    const std::string SINK_PROJECT_SHOW_WIDTH = "sinkProjShowWidth";
+
+    const std::string SINK_PROJECT_SHOW_HEIGHT = "sinkProjShowHeight";
+
+    const std::string SINK_WINDOW_SHOW_X = "sinkWinShowX";
+
+    const std::string SINK_WINDOW_SHOW_Y = "sinkWinShowY";
+
+    constexpr uint32_t SCREEN_ID_DEFAULT = 0;
+
+    constexpr uint32_t DEFAULT_VALUE = 0;
+
+    constexpr int32_t UNINIT_FD_VALUE = -1;
+
     enum class EHandlerMsgType {
         DINPUT_SINK_EVENT_HANDLER_MSG = 1,
         DINPUT_SOURCE_EVENT_HANDLER_MSG = 2

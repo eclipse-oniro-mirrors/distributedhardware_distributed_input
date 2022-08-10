@@ -28,6 +28,8 @@ ohos_shared_library("libdinput_handler") {
     "${frameworks_path}/include",
     "${utils_path}/include",
     "//third_party/json/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
   ]
 
   sources = [
@@ -46,6 +48,7 @@ ohos_shared_library("libdinput_handler") {
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/openssl:libcrypto_static",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [

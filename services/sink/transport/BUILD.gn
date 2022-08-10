@@ -31,6 +31,8 @@ ohos_shared_library("libdinput_sink_trans") {
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "${low_latency_path}/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
   ]
 
   sources = [
@@ -56,6 +58,7 @@ ohos_shared_library("libdinput_sink_trans") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [

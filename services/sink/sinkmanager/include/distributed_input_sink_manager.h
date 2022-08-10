@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISRIBUTED_INPUT_SINK_MANAGER_SERVICE_H
-#define DISRIBUTED_INPUT_SINK_MANAGER_SERVICE_H
+#ifndef DISTRIBUTED_INPUT_SINK_MANAGER_SERVICE_H
+#define DISTRIBUTED_INPUT_SINK_MANAGER_SERVICE_H
 
 #include <cstring>
 #include <set>
@@ -23,6 +23,9 @@
 #include <unistd.h>
 
 #include "event_handler.h"
+#include "ipublisher_listener.h"
+#include "publisher_listener_stub.h"
+#include "screen.h"
 #include "singleton.h"
 #include "system_ability.h"
 
@@ -41,7 +44,7 @@ class DistributedInputSinkManager : public SystemAbility, public DistributedInpu
 
 public:
     DistributedInputSinkManager(int32_t saId, bool runOnCreate);
-    ~DistributedInputSinkManager() = default;
+    ~DistributedInputSinkManager();
 
     class DInputSinkListener : public DInputSinkTransCallback {
     public:
@@ -53,6 +56,25 @@ public:
         void onStopRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes);
     private:
         DistributedInputSinkManager *sinkManagerObj_;
+    };
+
+    class ProjectWindowListener : public PublisherListenerStub {
+    public:
+        ProjectWindowListener();
+        ~ProjectWindowListener();
+        void OnMessage(const DHTopic topic, const std::string& message) override;
+
+    private:
+        int32_t ParseMessage(const std::string& message, std::string& srcDeviceId, uint64_t& srcWinId,
+            SinkScreenInfo& sinkScreenInfo);
+        int32_t UpdateSinkScreenInfoCache(const std::string& srcDevId, const uint64_t srcWinId,
+            const SinkScreenInfo& sinkScreenInfoTmp);
+        uint32_t GetScreenWidth();
+        uint32_t GetScreenHeight();
+
+    private:
+        sptr<Rosen::Screen> screen_;
+        std::mutex handleScreenMutex_;
     };
 
 public:
@@ -84,7 +106,12 @@ public:
      */
     std::shared_ptr<DistributedInputSinkEventHandler> GetEventHandler();
 
+    int32_t NotifyStartDScreen(const SrcScreenInfo& srcScreenInfo) override;
+
+    int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
+
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+
 private:
     ServiceSinkRunningState serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DInputServerType isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
@@ -95,9 +122,10 @@ private:
     std::shared_ptr<DistributedInputSinkEventHandler> handler_;
     bool InitAuto();
     DInputDeviceType inputTypes_;
+    sptr<ProjectWindowListener> projectWindowListener_ = nullptr;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif // DISRIBUTED_INPUT_SINK_MANAGER_SERVICE_H
+#endif // DISTRIBUTED_INPUT_SINK_MANAGER_SERVICE_H

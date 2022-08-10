@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISRIBUTED_INPUT_SOURCE_MANAGER_SERVICE_H
-#define DISRIBUTED_INPUT_SOURCE_MANAGER_SERVICE_H
+#ifndef DISTRIBUTED_INPUT_SOURCE_MANAGER_SERVICE_H
+#define DISTRIBUTED_INPUT_SOURCE_MANAGER_SERVICE_H
 
 #include <cstring>
 #include <mutex>
@@ -23,12 +23,16 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#include "dinput_context.h"
 #include "event_handler.h"
+#include "ipublisher_listener.h"
+#include "publisher_listener_stub.h"
 #include "singleton.h"
 #include "system_ability.h"
 
 #include "constants_dinput.h"
 #include "dinput_source_trans_callback.h"
+#include "distributed_input_node_manager.h"
 #include "distributed_input_source_stub.h"
 #include "distributed_input_source_event_handler.h"
 
@@ -69,7 +73,7 @@ typedef struct InputDeviceId {
 
 public:
     DistributedInputSourceManager(int32_t saId, bool runOnCreate);
-    ~DistributedInputSourceManager() = default;
+    ~DistributedInputSourceManager();
 
     void OnStart() override;
 
@@ -135,6 +139,27 @@ public:
         void NotifyStartServerCallback(const AppExecFwk::InnerEvent::Pointer &event);
 
         DistributedInputSourceManager *sourceManagerObj_;
+    };
+
+    class StartDScreenListener : public PublisherListenerStub {
+    public:
+        StartDScreenListener();
+        ~StartDScreenListener();
+        void OnMessage(const DHTopic topic, const std::string& message) override;
+
+    private:
+        int32_t ParseMessage(const std::string& message, std::string& sinkDevId, SrcScreenInfo& srcScreenInfo);
+        int32_t UpdateSrcScreenInfoCache(const SrcScreenInfo& TmpInfo);
+    };
+
+    class StopDScreenListener : public PublisherListenerStub {
+    public:
+        StopDScreenListener();
+        ~StopDScreenListener();
+        void OnMessage(const DHTopic topic, const std::string& message) override;
+
+    private:
+        int32_t ParseMessage(const std::string& message, std::string& sinkDevId, uint64_t& sourceWinId);
     };
 
     std::shared_ptr<DInputSourceManagerEventHandler> GetCallbackEventHandler()
@@ -237,9 +262,11 @@ private:
     bool InitAuto();
     void handleStartServerCallback(const std::string& devId);
     std::mutex operationMutex_;
+    sptr<StartDScreenListener> startDScreenListener_ = nullptr;
+    sptr<StopDScreenListener> stopDScreenListener_ = nullptr;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif // DISRIBUTED_INPUT_SOURCE_MANAGER_SERVICE_H
+#endif // DISTRIBUTED_INPUT_SOURCE_MANAGER_SERVICE_H

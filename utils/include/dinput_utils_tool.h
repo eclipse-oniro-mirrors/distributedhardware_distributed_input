@@ -20,6 +20,7 @@
 #include <string>
 
 #include "distributed_hardware_log.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -31,8 +32,14 @@ struct DevInfo {
 };
 
 DevInfo GetLocalDeviceInfo();
+std::string GetLocalNetworkId();
 uint64_t GetCurrentTime();
 std::string SetAnonyId(const std::string &message);
+/* IsString, IsUint32 and IsUint64 are used to valid json key */
+bool IsString(const nlohmann::json& jsonObj, const std::string& key);
+bool IsInt32(const nlohmann::json& jsonObj, const std::string& key);
+bool IsUint32(const nlohmann::json& jsonObj, const std::string& key);
+bool IsUint64(const nlohmann::json& jsonObj, const std::string& key);
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

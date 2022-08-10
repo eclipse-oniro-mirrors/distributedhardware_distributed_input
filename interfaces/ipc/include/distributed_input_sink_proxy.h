@@ -39,8 +39,12 @@ public:
     virtual int32_t IsStartDistributedInput(
         const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
 
+    virtual int32_t NotifyStartDScreen(const SrcScreenInfo& srcScreenRemoteCtrlInfo) override;
+
+    virtual int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
+
 private:
-    bool SendRequest(IDistributedSinkInput::MessageCode code, MessageParcel &data, MessageParcel &reply);
+    bool SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply);
 
     static inline BrokerDelegator<DistributedInputSinkProxy> delegator_;
 };

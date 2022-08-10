@@ -34,6 +34,8 @@ ohos_unittest("distributed_input_utils_test") {
     "${utils_path}/include",
     "${utils_path}/test/unittest",
     "${common_path}/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
   ]
 
   sources = [ "dinput_context_test.cpp" ]
@@ -55,11 +57,13 @@ ohos_unittest("distributed_input_utils_test") {
   deps = [
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [
     "dsoftbus:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

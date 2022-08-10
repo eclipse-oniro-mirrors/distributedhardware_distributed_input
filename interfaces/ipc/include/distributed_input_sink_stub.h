@@ -33,8 +33,21 @@ public:
     virtual int32_t OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
+    int32_t InitInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
+    int32_t ReleaseInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
+    int32_t IsStartDistributedInputInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
+    int32_t NotifyStartDScreenInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
+    int32_t NotifyStopDScreenInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
 private:
     DISALLOW_COPY_AND_MOVE(DistributedInputSinkStub);
+    using DistributedInputSinkFunc = int32_t (DistributedInputSinkStub::*)(MessageParcel &data, MessageParcel &reply,
+        MessageOption &option);
+    std::map<int32_t, DistributedInputSinkFunc> memberFuncMap_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

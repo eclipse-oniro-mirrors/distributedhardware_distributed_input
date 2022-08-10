@@ -29,11 +29,15 @@
 #include "dinput_errcode.h"
 #include "dinput_hitrace.h"
 #include "dinput_sa_process_state.h"
+#include "dinput_utils_tool.h"
+#include "distributed_hardware_fwk_kit.h"
+#include "distributed_input_client.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
 #include "dinput_utils_tool.h"
 #include "hisysevent_util.h"
 #include "hidumper.h"
+#include "ipublisher_listener.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -44,6 +48,14 @@ REGISTER_SYSTEM_ABILITY_BY_ID(DistributedInputSourceManager, DISTRIBUTED_HARDWAR
 DistributedInputSourceManager::DistributedInputSourceManager(int32_t saId, bool runOnCreate)
     : SystemAbility(saId, runOnCreate)
 {
+    DHLOGI("DistributedInputSourceManager ctor!");
+}
+
+DistributedInputSourceManager::~DistributedInputSourceManager()
+{
+    DHLOGI("DistributedInputSourceManager dtor!");
+    startDScreenListener_ = nullptr;
+    stopDScreenListener_ = nullptr;
 }
 
 DistributedInputSourceManager::DInputSourceListener::DInputSourceListener(DistributedInputSourceManager *manager)
@@ -495,6 +507,16 @@ int32_t DistributedInputSourceManager::Init()
     DistributedInputSourceTransport::GetInstance().RegisterSourceRespCallback(statuslistener_);
 
     serviceRunningState_ = ServiceSourceRunningState::STATE_RUNNING;
+
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit == nullptr) {
+        DHLOGE("dhFwkKit obtain fail!");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_INIT_FAIL;
+    }
+    startDScreenListener_ = new StartDScreenListener;
+    stopDScreenListener_ = new StopDScreenListener;
+    dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_START_DSCREEN, startDScreenListener_);
+    dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_STOP_DSCREEN, stopDScreenListener_);
     return DH_SUCCESS;
 }
 
@@ -538,6 +560,12 @@ int32_t DistributedInputSourceManager::Release()
     callBackHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 
     serviceRunningState_ = ServiceSourceRunningState::STATE_NOT_START;
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr && startDScreenListener_ != nullptr && stopDScreenListener_ != nullptr) {
+        DHLOGI("UnPublish StartDScreenListener and StopDScreenListener");
+        dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_START_DSCREEN, startDScreenListener_);
+        dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_STOP_DSCREEN, stopDScreenListener_);
+    }
     DHLOGI("exit dinput source sa.");
     SetSourceProcessExit();
     return DH_SUCCESS;
@@ -1177,6 +1205,172 @@ void DistributedInputSourceManager::DInputSourceListener::RecordEventLog(int64_t
     }
     DHLOGD("3.E2E-Test Source softBus receive event, EventType: %s, Code: %d, Value: %d, Path: %s, When: %" PRId64 "",
         eventType.c_str(), code, value, path.c_str(), when);
+}
+
+DistributedInputSourceManager::StartDScreenListener::StartDScreenListener()
+{
+    DHLOGI("StartDScreenListener ctor!");
+}
+
+DistributedInputSourceManager::StartDScreenListener::~StartDScreenListener()
+{
+    DHLOGI("StartDScreenListener dtor!");
+}
+
+void DistributedInputSourceManager::StartDScreenListener::OnMessage(const DHTopic topic, const std::string& message)
+{
+    DHLOGI("StartDScreenListener OnMessage!");
+    std::string sinkDevId = "";
+    SrcScreenInfo srcScreenInfo = {};
+    int32_t parseRes = ParseMessage(message, sinkDevId, srcScreenInfo);
+    if (parseRes != DH_SUCCESS) {
+        DHLOGE("Parse message failed!");
+        return;
+    }
+
+    std::string srcDevId = GetLocalNetworkId();
+    std::string virtualTouchScreenDHId = DistributedInputInject::GetInstance().GenerateVirtualTouchScreenDHId(
+        srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth, srcScreenInfo.sourceWinHeight);
+    int32_t createNodeRes = DistributedInputInject::GetInstance().CreateVirtualTouchScreenNode(srcDevId,
+        virtualTouchScreenDHId, srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth,
+        srcScreenInfo.sourceWinHeight);
+    if (createNodeRes != DH_SUCCESS) {
+        DHLOGE("Create virtual touch screen Node failed!");
+        return;
+    }
+
+    int32_t cacheRes = UpdateSrcScreenInfoCache(srcScreenInfo);
+    if (cacheRes != DH_SUCCESS) {
+        DHLOGE("Update SrcScreenInfo cache failed!");
+        return;
+    }
+
+    int32_t rpcRes = DistributedInputClient::GetInstance().NotifyStartDScreen(sinkDevId, srcDevId,
+        srcScreenInfo.sourceWinId);
+    if (rpcRes != DH_SUCCESS) {
+        DHLOGE("Rpc invoke failed!");
+        return;
+    }
+}
+
+int32_t DistributedInputSourceManager::StartDScreenListener::ParseMessage(const std::string& message,
+    std::string& sinkDevId, SrcScreenInfo& srcScreenInfo)
+{
+    nlohmann::json jsonObj = nlohmann::json::parse(message, nullptr, false);
+    if (jsonObj.is_discarded()) {
+        DHLOGE("jsonObj parse failed!");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    if (!IsString(jsonObj, SINK_DEVICE_ID)) {
+        DHLOGE("devId key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sinkDevId = jsonObj[SINK_DEVICE_ID].get<std::string>();
+    if (!IsUint64(jsonObj, SOURCE_WINDOW_ID)) {
+        DHLOGE("sourceWinId key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    srcScreenInfo.sourceWinId = jsonObj[SOURCE_WINDOW_ID].get<uint64_t>();
+    if (!IsUint32(jsonObj, SOURCE_WINDOW_WIDTH)) {
+        DHLOGE("sourceWinWidth key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    srcScreenInfo.sourceWinWidth = jsonObj[SOURCE_WINDOW_WIDTH].get<std::uint32_t>();
+    if (!IsUint32(jsonObj, SOURCE_WINDOW_HEIGHT)) {
+        DHLOGE("sourceWinHeight key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    srcScreenInfo.sourceWinHeight = jsonObj[SOURCE_WINDOW_HEIGHT].get<std::uint32_t>();
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::StartDScreenListener::UpdateSrcScreenInfoCache(const SrcScreenInfo& TmpInfo)
+{
+    std::string srcDevId = GetLocalNetworkId();
+    std::string srcScreenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcDevId, TmpInfo.sourceWinId);
+    SrcScreenInfo srcScreenInfo = DInputContext::GetInstance().GetSrcScreenInfo(srcScreenInfoKey);
+    srcScreenInfo.devId = srcDevId;
+    srcScreenInfo.sourceWinId = TmpInfo.sourceWinId;
+    srcScreenInfo.sourceWinWidth = TmpInfo.sourceWinWidth;
+    srcScreenInfo.sourceWinHeight = TmpInfo.sourceWinHeight;
+    srcScreenInfo.sourcePhyId = DistributedInputInject::GetInstance().GenerateVirtualTouchScreenDHId(
+        srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth, srcScreenInfo.sourceWinHeight);
+    srcScreenInfo.sourcePhyFd = DistributedInputInject::GetInstance().GetVirtualTouchScreenFd();
+    srcScreenInfo.sourcePhyWidth = TmpInfo.sourceWinWidth;
+    srcScreenInfo.sourcePhyHeight = TmpInfo.sourceWinHeight;
+    DHLOGI("StartDScreenListener UpdateSrcScreenInfo the data: devId: %s, sourceWinId: %d, sourceWinWidth: %d,"
+        "sourceWinHeight: %d, sourcePhyId: %s, sourcePhyFd: %d, sourcePhyWidth: %d, sourcePhyHeight: %d",
+        GetAnonyString(srcScreenInfo.devId).c_str(), srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth,
+        srcScreenInfo.sourceWinHeight, GetAnonyString(srcScreenInfo.sourcePhyId).c_str(), srcScreenInfo.sourcePhyFd,
+        srcScreenInfo.sourcePhyWidth, srcScreenInfo.sourcePhyHeight);
+    return DInputContext::GetInstance().UpdateSrcScreenInfo(srcScreenInfoKey, srcScreenInfo);
+}
+
+DistributedInputSourceManager::StopDScreenListener::StopDScreenListener()
+{
+    DHLOGI("StopDScreenListener ctor!");
+}
+
+DistributedInputSourceManager::StopDScreenListener::~StopDScreenListener()
+{
+    DHLOGI("StopDScreenListener dtor!");
+}
+
+void DistributedInputSourceManager::StopDScreenListener::OnMessage(const DHTopic topic, const std::string& message)
+{
+    DHLOGI("StopDScreenListener OnMessage!");
+    std::string sinkDevId = "";
+    uint64_t sourceWinId = 0;
+    int32_t parseRes = ParseMessage(message, sinkDevId, sourceWinId);
+    if (parseRes != DH_SUCCESS) {
+        DHLOGE("Message parse failed!");
+        return;
+    }
+
+    std::string sourceDevId = GetLocalNetworkId();
+    std::string screenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(sourceDevId, sourceWinId);
+    DHLOGI("screenInfoKey: %s", GetAnonyString(screenInfoKey).c_str());
+    SrcScreenInfo srcScreenInfo = DInputContext::GetInstance().GetSrcScreenInfo(screenInfoKey);
+
+    int32_t removeNodeRes = DistributedInputInject::GetInstance().RemoveVirtualTouchScreenNode(
+        srcScreenInfo.sourcePhyId);
+    if (removeNodeRes != DH_SUCCESS) {
+        DHLOGE("Remove virtual touch screen node failed!");
+        return;
+    }
+
+    int32_t removeCacheRes = DInputContext::GetInstance().RemoveSrcScreenInfo(screenInfoKey);
+    if (removeCacheRes != DH_SUCCESS) {
+        DHLOGE("Remove src cache failed!");
+        return;
+    }
+
+    int32_t rpcRes = DistributedInputClient::GetInstance().NotifyStopDScreen(sinkDevId, screenInfoKey);
+    if (rpcRes != DH_SUCCESS) {
+        DHLOGE("Rpc invoke failed!");
+        return;
+    }
+}
+
+int32_t DistributedInputSourceManager::StopDScreenListener::ParseMessage(const std::string& message,
+    std::string& sinkDevId, uint64_t& sourceWinId)
+{
+    nlohmann::json jsonObj = nlohmann::json::parse(message, nullptr, false);
+    if (jsonObj.is_discarded()) {
+        DHLOGE("jsonObj parse failed!");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    if (!IsString(jsonObj, SINK_DEVICE_ID)) {
+        DHLOGE("sourceWinId key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sinkDevId = jsonObj[SINK_DEVICE_ID].get<std::string>();
+    if (!IsUint64(jsonObj, SOURCE_WINDOW_ID)) {
+        DHLOGE("sourceWinId key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sourceWinId = jsonObj[SOURCE_WINDOW_ID].get<uint64_t>();
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceManager::Dump(int32_t fd, const std::vector<std::u16string>& args)

@@ -16,12 +16,14 @@
 #include "distributed_input_sink_manager.h"
 
 #include "anonymous_string.h"
+#include "distributed_hardware_fwk_kit.h"
 #include "distributed_hardware_log.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
-#include "system_ability_definition.h"
+#include "screen_manager.h"
 #include "string_ex.h"
+#include "system_ability_definition.h"
 
 #include "distributed_input_collector.h"
 #include "distributed_input_sink_switch.h"
@@ -41,7 +43,14 @@ REGISTER_SYSTEM_ABILITY_BY_ID(DistributedInputSinkManager, DISTRIBUTED_HARDWARE_
 DistributedInputSinkManager::DistributedInputSinkManager(int32_t saId, bool runOnCreate)
     : SystemAbility(saId, runOnCreate)
 {
+    DHLOGI("DistributedInputSinkManager ctor!");
     inputTypes_ = DInputDeviceType::NONE;
+}
+
+DistributedInputSinkManager::~DistributedInputSinkManager()
+{
+    DHLOGI("DistributedInputSinkManager dtor!");
+    projectWindowListener_ = nullptr;
 }
 
 DistributedInputSinkManager::DInputSinkListener::DInputSinkListener(DistributedInputSinkManager *manager)
@@ -276,6 +285,13 @@ int32_t DistributedInputSinkManager::Init()
 
     serviceRunningState_ = ServiceSinkRunningState::STATE_RUNNING;
 
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit == nullptr) {
+        DHLOGE("dhFwkKit obtain fail!");
+        return ERR_DH_INPUT_SERVER_SINK_MANAGER_INIT_FAIL;
+    }
+    projectWindowListener_ = new ProjectWindowListener;
+    dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_SINK_PROJECT_WINDOW_INFO, projectWindowListener_);
     return DH_SUCCESS;
 }
 
@@ -301,6 +317,11 @@ int32_t DistributedInputSinkManager::Release()
     DistributedInputCollector::GetInstance().Release();
 
     serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr && projectWindowListener_ != nullptr) {
+        DHLOGI("UnPublish ProjectWindowListener");
+        dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_SINK_PROJECT_WINDOW_INFO, projectWindowListener_);
+    }
     DHLOGI("exit dinput sink sa.");
     SetSinkProcessExit();
 
@@ -347,6 +368,154 @@ uint32_t DistributedInputSinkManager::GetInputTypes()
 void DistributedInputSinkManager::SetInputTypes(const uint32_t& inputTypes)
 {
     inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
+}
+
+DistributedInputSinkManager::ProjectWindowListener::ProjectWindowListener()
+{
+    DHLOGI("ProjectWindowListener ctor!");
+    std::lock_guard<std::mutex> lock(handleScreenMutex_);
+    if (screen_ == nullptr) {
+        std::vector<sptr<Rosen::Screen>> screens = Rosen::ScreenManager::GetInstance().GetAllScreens();
+        screen_ = screens[SCREEN_ID_DEFAULT];
+    }
+}
+
+DistributedInputSinkManager::ProjectWindowListener::~ProjectWindowListener()
+{
+    DHLOGI("ProjectWindowListener dtor!");
+    std::lock_guard<std::mutex> lock(handleScreenMutex_);
+    screen_ = nullptr;
+}
+
+void DistributedInputSinkManager::ProjectWindowListener::OnMessage(const DHTopic topic, const std::string& message)
+{
+    std::string srcDeviceId = "";
+    uint64_t srcWinId = 0;
+    SinkScreenInfo sinkScreenInfo = {};
+    int32_t parseRes = ParseMessage(message, srcDeviceId, srcWinId, sinkScreenInfo);
+    if (parseRes != DH_SUCCESS) {
+        DHLOGE("message parse failed!");
+        return;
+    }
+    int32_t saveRes = UpdateSinkScreenInfoCache(srcDeviceId, srcWinId, sinkScreenInfo);
+    if (saveRes != DH_SUCCESS) {
+        DHLOGE("Save sink screen info failed!");
+        return;
+    }
+}
+
+int32_t DistributedInputSinkManager::ProjectWindowListener::ParseMessage(const std::string& message,
+    std::string& srcDeviceId, uint64_t& srcWinId, SinkScreenInfo& sinkScreenInfo)
+{
+    nlohmann::json jsonObj = nlohmann::json::parse(message, nullptr, false);
+    if (jsonObj.is_discarded()) {
+        DHLOGE("jsonObj parse failed!");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    if (!IsString(jsonObj, SOURCE_DEVICE_ID)) {
+        DHLOGE("sourceDevId key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    srcDeviceId = jsonObj[SOURCE_DEVICE_ID].get<std::string>();
+    if (!IsUint64(jsonObj, SOURCE_WINDOW_ID)) {
+        DHLOGE("sourceWinId key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    srcWinId = jsonObj[SOURCE_WINDOW_ID].get<uint64_t>();
+    if (!IsUint64(jsonObj, SINK_SHOW_WINDOW_ID)) {
+        DHLOGE("sinkWinId key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sinkScreenInfo.sinkShowWinId = jsonObj[SINK_SHOW_WINDOW_ID].get<uint64_t>();
+    if (!IsUint32(jsonObj, SINK_PROJECT_SHOW_WIDTH)) {
+        DHLOGE("sourceWinHeight key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sinkScreenInfo.sinkProjShowWidth = jsonObj[SINK_PROJECT_SHOW_WIDTH].get<std::uint32_t>();
+    if (!IsUint32(jsonObj, SINK_PROJECT_SHOW_HEIGHT)) {
+        DHLOGE("sourceWinHeight key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sinkScreenInfo.sinkProjShowHeight = jsonObj[SINK_PROJECT_SHOW_HEIGHT].get<std::uint32_t>();
+    if (!IsUint32(jsonObj, SINK_WINDOW_SHOW_X)) {
+        DHLOGE("sourceWinHeight key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sinkScreenInfo.sinkWinShowX = jsonObj[SINK_WINDOW_SHOW_X].get<std::uint32_t>();
+    if (!IsUint32(jsonObj, SINK_WINDOW_SHOW_Y)) {
+        DHLOGE("sourceWinHeight key is invalid");
+        return ERR_DH_INPUT_JSON_PARSE_FAIL;
+    }
+    sinkScreenInfo.sinkWinShowY = jsonObj[SINK_WINDOW_SHOW_Y].get<std::uint32_t>();
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSinkManager::ProjectWindowListener::UpdateSinkScreenInfoCache(const std::string& srcDevId,
+    const uint64_t srcWinId, const SinkScreenInfo& sinkScreenInfoTmp)
+{
+    std::string srcScreenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcDevId, srcWinId);
+    SinkScreenInfo sinkScreenInfo = DInputContext::GetInstance().GetSinkScreenInfo(srcScreenInfoKey);
+    sinkScreenInfo.sinkShowWinId = sinkScreenInfoTmp.sinkShowWinId;
+    sinkScreenInfo.sinkProjShowWidth = sinkScreenInfoTmp.sinkProjShowWidth;
+    sinkScreenInfo.sinkProjShowHeight = sinkScreenInfoTmp.sinkProjShowHeight;
+    sinkScreenInfo.sinkWinShowX = sinkScreenInfoTmp.sinkWinShowX;
+    sinkScreenInfo.sinkWinShowY = sinkScreenInfoTmp.sinkWinShowY;
+    sinkScreenInfo.sinkShowWidth = GetScreenWidth();
+    sinkScreenInfo.sinkShowHeight = GetScreenHeight();
+    LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
+    sinkScreenInfo.sinkPhyWidth = info.absMtPositionXMax + 1;
+    sinkScreenInfo.sinkPhyHeight = info.absMtPositionYMax + 1;
+    DHLOGI("sinkShowWinId: %d, sinkProjShowWidth: %d, sinkProjShowHeight: %d, sinkWinShowX: %d, sinkWinShowY: %d,"
+        "sinkShowWidth: %d, sinkShowHeight: %d, sinkPhyWidth: %d, sinkPhyHeight: %d", sinkScreenInfo.sinkShowWinId,
+        sinkScreenInfo.sinkProjShowWidth, sinkScreenInfo.sinkProjShowHeight, sinkScreenInfo.sinkWinShowX,
+        sinkScreenInfo.sinkWinShowY, sinkScreenInfo.sinkShowWidth, sinkScreenInfo.sinkShowHeight,
+        sinkScreenInfo.sinkPhyWidth, sinkScreenInfo.sinkPhyHeight);
+    return DInputContext::GetInstance().UpdateSinkScreenInfo(srcScreenInfoKey, sinkScreenInfo);
+}
+
+uint32_t DistributedInputSinkManager::ProjectWindowListener::GetScreenWidth()
+{
+    std::lock_guard<std::mutex> lock(handleScreenMutex_);
+    if (screen_ == nullptr) {
+        DHLOGE("screen is nullptr!");
+        return DEFAULT_VALUE;
+    }
+    return screen_->GetWidth();
+}
+
+uint32_t DistributedInputSinkManager::ProjectWindowListener::GetScreenHeight()
+{
+    std::lock_guard<std::mutex> lock(handleScreenMutex_);
+    if (screen_ == nullptr) {
+        DHLOGE("screen is nullptr!");
+        return DEFAULT_VALUE;
+    }
+    return screen_->GetHeight();
+}
+
+int32_t DistributedInputSinkManager::NotifyStartDScreen(const SrcScreenInfo& srcScreenInfo)
+{
+    DHLOGI("NotifyStartDScreen start!");
+    std::string screenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcScreenInfo.devId,
+        srcScreenInfo.sourceWinId);
+    SinkScreenInfo sinkScreenInfo = DInputContext::GetInstance().GetSinkScreenInfo(screenInfoKey);
+    sinkScreenInfo.srcScreenInfo = srcScreenInfo;
+    DHLOGI("OnRemoteRequest the data: devId: %s, sourceWinId: %d, sourceWinWidth: %d, sourceWinHeight: %d,"
+        "sourcePhyId: %s, sourcePhyFd: %d, sourcePhyWidth: %d, sourcePhyHeight: %d",
+        GetAnonyString(srcScreenInfo.devId).c_str(), srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth,
+        srcScreenInfo.sourceWinHeight, GetAnonyString(srcScreenInfo.sourcePhyId).c_str(), srcScreenInfo.sourcePhyFd,
+        srcScreenInfo.sourcePhyWidth, srcScreenInfo.sourcePhyHeight);
+    return DInputContext::GetInstance().UpdateSinkScreenInfo(screenInfoKey, sinkScreenInfo);
+}
+
+int32_t DistributedInputSinkManager::NotifyStopDScreen(const std::string& srcScreenInfoKey)
+{
+    DHLOGI("NotifyStopDScreen start, srcScreenInfoKey: %s", GetAnonyString(srcScreenInfoKey).c_str());
+    if (srcScreenInfoKey.empty()) {
+        DHLOGE("srcScreenInfoKey is empty, srcScreenInfoKey: %s", GetAnonyString(srcScreenInfoKey).c_str());
+        return ERR_DH_INPUT_SERVER_SINK_SCREEN_INFO_IS_EMPTY;
+    }
+    return DInputContext::GetInstance().RemoveSinkScreenInfo(srcScreenInfoKey);
 }
 
 int32_t DistributedInputSinkManager::Dump(int32_t fd, const std::vector<std::u16string>& args)

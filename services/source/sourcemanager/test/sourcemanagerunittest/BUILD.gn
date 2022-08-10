@@ -28,6 +28,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
 
   include_dirs = [
     "${innerkits_path}/include",
+    "${innerkits_path}/ipc/include",
     "${innerkits_path}/src",
     "${ipc_path}/include",
     "${ipc_path}/src",
@@ -50,6 +51,8 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "${utils_path}/include",
     "${low_latency_path}/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
   ]
 
   sources = [
@@ -117,6 +120,8 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
     "//third_party/openssl:libcrypto_static",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
+    "${innerkits_path}:libdinput_sdk",
   ]
 
   external_deps = [

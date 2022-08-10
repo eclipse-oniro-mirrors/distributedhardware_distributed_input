@@ -15,12 +15,19 @@
 
 #include "dinput_utils_tool.h"
 
-#include "anonymous_string.h"
+#include <cstdarg>
+#include <cstdio>
 #include <sys/time.h>
-#include "nlohmann/json.hpp"
 
-#include "dinput_softbus_define.h"
+#include <openssl/sha.h>
+
+#include "anonymous_string.h"
+#include "nlohmann/json.hpp"
 #include "softbus_bus_center.h"
+
+#include "constants_dinput.h"
+#include "dinput_errcode.h"
+#include "dinput_softbus_define.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -47,6 +54,14 @@ DevInfo GetLocalDeviceInfo()
     return devInfo;
 }
 
+std::string GetLocalNetworkId()
+{
+    if (GetLocalDeviceInfo().networkId.empty()) {
+        DHLOGE("local networkId is empty!");
+    }
+    return GetLocalDeviceInfo().networkId;
+}
+
 uint64_t GetCurrentTime()
 {
     struct timeval tv;
@@ -61,18 +76,45 @@ std::string SetAnonyId(const std::string &message)
         DHLOGE("jsonObj parse failed!");
         return "";
     }
+    if (IsString(jsonObj, DINPUT_SOFTBUS_KEY_DEVICE_ID)) {
+        jsonObj[DINPUT_SOFTBUS_KEY_DEVICE_ID] = GetAnonyString(jsonObj[DINPUT_SOFTBUS_KEY_DEVICE_ID]);
+    }
+    if (IsInt32(jsonObj, DINPUT_SOFTBUS_KEY_SESSION_ID)) {
+        jsonObj[DINPUT_SOFTBUS_KEY_SESSION_ID] = GetAnonyInt32(jsonObj[DINPUT_SOFTBUS_KEY_SESSION_ID]);
+    }
+    if (IsString(jsonObj, DESCRIPTOR)) {
+        jsonObj[DESCRIPTOR] = GetAnonyString(jsonObj[DESCRIPTOR]);
+    }
+    return jsonObj.dump();
+}
 
-    nlohmann::json jsonStr = nlohmann::json::parse(message);
-    if (jsonStr.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID)) {
-        jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = GetAnonyString(jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID]);
-    }
-    if (jsonStr.contains(DINPUT_SOFTBUS_KEY_SESSION_ID)) {
-        jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = GetAnonyInt32(jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID]);
-    }
-    if (jsonStr.contains(DESCRIPTOR)) {
-        jsonStr[DESCRIPTOR] = GetAnonyString(jsonStr[DESCRIPTOR]);
-    }
-    return jsonStr.dump();
+bool IsString(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_string();
+    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    return res;
+}
+
+bool IsInt32(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_number_integer() && INT32_MIN <= jsonObj[key] &&
+        jsonObj[key] <= INT32_MAX;
+    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    return res;
+}
+
+bool IsUint32(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT32_MAX;
+    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    return res;
+}
+
+bool IsUint64(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT64_MAX;
+    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    return res;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

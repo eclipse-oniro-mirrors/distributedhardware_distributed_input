@@ -20,6 +20,7 @@
 #include <functional>
 #include <iostream>
 #include <thread>
+#include <unistd.h>
 
 #include <refbase.h>
 
@@ -28,6 +29,9 @@
 
 namespace OHOS {
 namespace DistributedHardware {
+namespace {
+    const uint32_t SLEEP_TIME_US = 100 * 1000;
+}
 void OpenInputSoftbusFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
@@ -36,6 +40,7 @@ void OpenInputSoftbusFuzzTest(const uint8_t* data, size_t size)
 
     std::string remoteDevId(reinterpret_cast<const char*>(data), size);
 
+    usleep(SLEEP_TIME_US);
     DistributedInput::DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(remoteDevId);
     DistributedInput::DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(remoteDevId);
 }

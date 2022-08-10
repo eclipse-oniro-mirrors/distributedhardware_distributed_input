@@ -23,7 +23,6 @@
 
 #include <dirent.h>
 #include <fcntl.h>
-#include <openssl/sha.h>
 #include <securec.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -35,6 +34,7 @@
 #include "constants_dinput.h"
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dh_utils_tool.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -209,7 +209,7 @@ size_t InputHub::CollectEvent(RawEvent* buffer, size_t& capacity, size_t bufferS
 
     std::vector<bool> needFilted(bufferSize, false);
     if (device->classes == INPUT_DEVICE_CLASS_TOUCH_MT) {
-        HandleTouchScreenEvent(readBuffer, count, needFilted);
+        HandleTouchScreenEvent(readBuffer, count, needFilted, device);
     }
 
     RawEvent* event = buffer;
@@ -670,21 +670,6 @@ std::string InputHub::StringPrintf(const char* format, ...) const
     return result;
 }
 
-std::string InputHub::Sha256(const std::string& in) const
-{
-    SHA256_CTX ctx;
-    SHA256_Init(&ctx);
-    SHA256_Update(&ctx, reinterpret_cast<const u_char*>(in.c_str()), in.size());
-    u_char digest[SHA_DIGEST_LENGTH];
-    SHA256_Final(digest, &ctx);
-
-    std::string out;
-    for (size_t i = 0; i < SHA_DIGEST_LENGTH; i++) {
-        out += StringPrintf("%02x", digest[i]);
-    }
-    return out;
-}
-
 void InputHub::GenerateDescriptor(InputDevice& identifier) const
 {
     std::string rawDescriptor;
@@ -964,7 +949,6 @@ void InputHub::RecordEventLog(const RawEvent* event)
         case EV_ABS:
             eventType = "EV_ABS";
             break;
-            break;
         case EV_SYN:
             eventType = "EV_SYN";
             break;
@@ -972,60 +956,59 @@ void InputHub::RecordEventLog(const RawEvent* event)
             eventType = "other type " + std::to_string(event->type);
             break;
     }
-    DHLOGD("1.E2E-Test Sink collect event, EventType: %s, Code: %d, Value: %d, Path: %s, When:%" PRId64 "",
-        eventType.c_str(), event->code, event->value, event->path.c_str(), event->when);
+    DHLOGD("1.E2E-Test Sink collect event, EventType: %s, Code: %d, Value: %d, Path: %s, descriptor: %s,"
+        "When:%" PRId64 "", eventType.c_str(), event->code, event->value, event->path.c_str(),
+        GetAnonyString(event->descriptor).c_str(), event->when);
 }
 
 void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count,
-    std::vector<bool>& needFilted)
+    std::vector<bool>& needFilted, Device* device)
 {
     std::vector<std::pair<size_t, size_t>> absIndexs;
-    uint32_t typePre = 0;
-    uint32_t typeCurr = 0;
-    size_t firstIndex = 0;
-    size_t lastIndex = 0;
+    int32_t firstIndex = -1;
+    int32_t lastIndex = -1;
 
     for (size_t i = 0; i < count; i++) {
         struct input_event& iev = readBuffer[i];
-        typePre = typeCurr;
-        typeCurr = iev.type;
-        if ((typePre != EV_ABS) && (typeCurr == EV_ABS)) {
-            firstIndex = i;
+        if ((iev.type == EV_ABS) && (iev.code == ABS_MT_POSITION_X || iev.code == ABS_X)) {
+            firstIndex = (int32_t)i;
+        } else if (iev.type  == EV_SYN) {
+            lastIndex = (int32_t)i;
         }
-        if (typeCurr == EV_SYN) {
-            lastIndex = i;
-            absIndexs.emplace_back(std::make_pair(firstIndex, lastIndex));
+        if ((firstIndex >= 0) && (lastIndex > 0)) {
+            absIndexs.emplace_back(std::make_pair((size_t)firstIndex, (size_t)lastIndex));
         }
     }
 
-    int32_t absXIndex = -1;
-    int32_t absYIndex = -1;
-    uint32_t absX = 0;
-    uint32_t absY = 0;
+    AbsInfo absInfo = {
+        .absX = 0,
+        .absY = 0,
+        .absXIndex = -1,
+        .absYIndex = -1,
+    };
     for (auto iter : absIndexs) {
-        absXIndex = -1;
-        absYIndex = -1;
+        absInfo.absXIndex = -1;
+        absInfo.absYIndex = -1;
 
         for (size_t j = iter.first; j <= iter.second; j++) {
             struct input_event &iev = readBuffer[j];
-            if (iev.code == ABS_MT_POSITION_X) {
-                absX = (uint32_t)iev.value;
-                absXIndex = (int32_t)j;
+            if (iev.code == ABS_MT_POSITION_X || iev.code == ABS_X) {
+                absInfo.absX = iev.value;
+                absInfo.absXIndex = j;
             }
-            if (iev.code == ABS_MT_POSITION_Y) {
-                absY = (uint32_t)iev.value;
-                absYIndex = (int32_t)j;
+            if (iev.code == ABS_MT_POSITION_Y || iev.code == ABS_Y) {
+                absInfo.absY = iev.value;
+                absInfo.absYIndex = j;
             }
         }
 
-        if ((absXIndex < 0) || (absYIndex < 0)) {
+        if ((absInfo.absXIndex < 0) || (absInfo.absYIndex < 0)) {
             for (size_t j = iter.first; j <= iter.second; j++) {
                 needFilted[j] = true;
             }
             continue;
         }
-
-        if (!CheckTouchPointRegion(readBuffer, absX, absY, absXIndex, absYIndex)) {
+        if (!CheckTouchPointRegion(readBuffer, absInfo, device)) {
             for (size_t j = iter.first; j <= iter.second; j++) {
                 needFilted[j] = true;
             }
@@ -1033,17 +1016,17 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
     }
 }
 
-bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], uint32_t absX, uint32_t absY,
-    int32_t absXIndex, int32_t absYIndex)
+bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo, Device* device)
 {
     auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
 
     for (const auto& [id, sinkInfo] : sinkInfos) {
         auto info = sinkInfo.transformInfo;
-        if ((absX >= info.sinkWinPhyX) && (absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
-            && (absY >= info.sinkWinPhyY)  && (absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
-            readBuffer[absXIndex].value = (absX - info.sinkWinPhyX) * info.coeffWidth;
-            readBuffer[absYIndex].value = (absY - info.sinkWinPhyY) * info.coeffHeight;
+        if ((absInfo.absX >= info.sinkWinPhyX) && (absInfo.absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
+            && (absInfo.absY >= info.sinkWinPhyY)  && (absInfo.absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
+            device->identifier.descriptor = sinkInfo.srcScreenInfo.sourcePhyId;
+            readBuffer[absInfo.absXIndex].value = (absInfo.absX - info.sinkWinPhyX) * info.coeffWidth;
+            readBuffer[absInfo.absYIndex].value = (absInfo.absY - info.sinkWinPhyY) * info.coeffHeight;
             return true;
         }
     }

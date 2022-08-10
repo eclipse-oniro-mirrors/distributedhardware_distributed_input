@@ -70,6 +70,10 @@ public:
 
     DInputServerType IsStartDistributedInput(const uint32_t& inputType);
 
+    int32_t NotifyStartDScreen(const std::string &networkId, const std::string& srcDevId, const uint64_t srcWinId);
+
+    int32_t NotifyStopDScreen(const std::string &networkId, const std::string& srcScreenInfoKey);
+
 public:
     class RegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
     public:
@@ -111,6 +115,7 @@ private:
     bool IsJsonData(std::string strData) const;
     void AddWhiteListInfos(const std::string &deviceId, const std::string &strJson) const;
     void DelWhiteListInfos(const std::string &deviceId) const;
+    sptr<IDistributedSinkInput> GetRemoteDInput(const std::string &networkId) const;
 
 private:
     static std::shared_ptr<DistributedInputClient> instance;

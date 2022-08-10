@@ -15,6 +15,7 @@
 
 #include "dinput_context.h"
 
+#include "anonymous_string.h"
 #include "constants.h"
 
 #include "dinput_errcode.h"
@@ -30,22 +31,25 @@ DInputContext::~DInputContext()
     srcScreenInfoMap_.clear();
 }
 
-std::string DInputContext::GetScreenInfoKey(const std::string &devId, const std::string &sourceWinId)
+std::string DInputContext::GetScreenInfoKey(const std::string &devId, const uint64_t sourceWinId)
 {
-    return devId + RESOURCE_SEPARATOR + sourceWinId;
+    DHLOGI("GetScreenInfoKey screenInfoKey: %s, sourceWinId: %d", GetAnonyString(devId).c_str(), sourceWinId);
+    return devId + RESOURCE_SEPARATOR + std::to_string(sourceWinId);
 }
 
-int32_t DInputContext::RemoveSinkScreenInfo(const std::string &sourceWinId)
+int32_t DInputContext::RemoveSinkScreenInfo(const std::string &screenInfoKey)
 {
+    DHLOGI("RemoveSinkScreenInfo screenInfoKey: %s", GetAnonyString(screenInfoKey).c_str());
     std::lock_guard<std::mutex> lock(sinkMapMutex_);
-    sinkScreenInfoMap_.erase(sourceWinId);
+    sinkScreenInfoMap_.erase(screenInfoKey);
     return DH_SUCCESS;
 }
 
-int32_t DInputContext::UpdateSinkScreenInfo(const std::string &sourceWinId, const SinkScreenInfo &sinkScreenInfo)
+int32_t DInputContext::UpdateSinkScreenInfo(const std::string &screenInfoKey, const SinkScreenInfo &sinkScreenInfo)
 {
+    DHLOGI("UpdateSinkScreenInfo screenInfoKey: %s", GetAnonyString(screenInfoKey).c_str());
     std::lock_guard<std::mutex> lock(sinkMapMutex_);
-    if (sinkScreenInfoMap_.count(sourceWinId) <= 0) {
+    if (sinkScreenInfoMap_.count(screenInfoKey) <= 0) {
         DHLOGE("source window id not exist");
         return ERR_DH_INPUT_CONTEXT_KEY_NOT_EXIST;
     }
@@ -55,20 +59,21 @@ int32_t DInputContext::UpdateSinkScreenInfo(const std::string &sourceWinId, cons
         DHLOGE("calculate transform infomation failed");
     }
 
-    sinkScreenInfoMap_[sourceWinId] = tmp;
+    sinkScreenInfoMap_[screenInfoKey] = tmp;
     return DH_SUCCESS;
 }
 
-SinkScreenInfo DInputContext::GetSinkScreenInfo(const std::string &sourceWinId)
+SinkScreenInfo DInputContext::GetSinkScreenInfo(const std::string &screenInfoKey)
 {
+    DHLOGI("GetSinkScreenInfo screenInfoKey: %s", GetAnonyString(screenInfoKey).c_str());
     std::lock_guard<std::mutex> lock(sinkMapMutex_);
-    if (sinkScreenInfoMap_.count(sourceWinId) <= 0) {
-        DHLOGE("source window id not exist");
+    if (sinkScreenInfoMap_.count(screenInfoKey) <= 0) {
+        DHLOGE("screenInfoKey not exist");
         SinkScreenInfo sinkScreenInfo;
-        sinkScreenInfoMap_[sourceWinId] = sinkScreenInfo;
+        sinkScreenInfoMap_[screenInfoKey] = sinkScreenInfo;
     }
 
-    return sinkScreenInfoMap_[sourceWinId];
+    return sinkScreenInfoMap_[screenInfoKey];
 }
 
 const std::unordered_map<std::string, SinkScreenInfo>& DInputContext::GetAllSinkScreenInfo()
@@ -77,35 +82,38 @@ const std::unordered_map<std::string, SinkScreenInfo>& DInputContext::GetAllSink
     return sinkScreenInfoMap_;
 }
 
-int32_t DInputContext::RemoveSrcScreenInfo(const std::string &sourceWinId)
+int32_t DInputContext::RemoveSrcScreenInfo(const std::string &screenInfoKey)
 {
+    DHLOGI("RemoveSrcScreenInfo screenInfoKey: %s", GetAnonyString(screenInfoKey).c_str());
     std::lock_guard<std::mutex> lock(srcMapMutex_);
-    srcScreenInfoMap_.erase(sourceWinId);
+    srcScreenInfoMap_.erase(screenInfoKey);
     return DH_SUCCESS;
 }
 
-int32_t DInputContext::UpdateSrcScreenInfo(const std::string &sourceWinId, const SrcScreenInfo &srcScreenInfo)
+int32_t DInputContext::UpdateSrcScreenInfo(const std::string &screenInfoKey, const SrcScreenInfo &srcScreenInfo)
 {
     std::lock_guard<std::mutex> lock(srcMapMutex_);
-    if (srcScreenInfoMap_.count(sourceWinId) <= 0) {
+    DHLOGI("UpdateSrcScreenInfo screenInfoKey: %s", GetAnonyString(screenInfoKey).c_str());
+    if (srcScreenInfoMap_.count(screenInfoKey) <= 0) {
         DHLOGE("source window id not exist");
         return ERR_DH_INPUT_CONTEXT_KEY_NOT_EXIST;
     }
 
-    srcScreenInfoMap_[sourceWinId] = srcScreenInfo;
+    srcScreenInfoMap_[screenInfoKey] = srcScreenInfo;
     return DH_SUCCESS;
 }
 
-SrcScreenInfo DInputContext::GetSrcScreenInfo(const std::string &sourceWinId)
+SrcScreenInfo DInputContext::GetSrcScreenInfo(const std::string &screenInfoKey)
 {
+    DHLOGI("GetSrcScreenInfo screenInfoKey: %s", GetAnonyString(screenInfoKey).c_str());
     std::lock_guard<std::mutex> lock(srcMapMutex_);
-    if (srcScreenInfoMap_.count(sourceWinId) <= 0) {
+    if (srcScreenInfoMap_.count(screenInfoKey) <= 0) {
         DHLOGE("source window id not exist");
         SrcScreenInfo srcScreenInfo;
-        srcScreenInfoMap_[sourceWinId] = srcScreenInfo;
+        srcScreenInfoMap_[screenInfoKey] = srcScreenInfo;
     }
 
-    return srcScreenInfoMap_[sourceWinId];
+    return srcScreenInfoMap_[screenInfoKey];
 }
 
 void DInputContext::SetLocalTouchScreenInfo(const LocalTouchScreenInfo &localTouchScreenInfo)
@@ -152,6 +160,15 @@ int32_t DInputContext::CalculateTransformInfo(SinkScreenInfo &sinkScreenInfo)
         transformInfo.coeffWidth, transformInfo.coeffHeight);
     sinkScreenInfo.transformInfo = transformInfo;
     return DH_SUCCESS;
+}
+
+std::shared_ptr<DistributedHardwareFwkKit> DInputContext::GetDHFwkKit()
+{
+    std::lock_guard<std::mutex> lock(dhFwkKitMutex_);
+    if (dhFwkKit_ == nullptr) {
+        dhFwkKit_ = std::make_shared<DistributedHardwareFwkKit>();
+    }
+    return dhFwkKit_;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

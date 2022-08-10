@@ -15,6 +15,7 @@
 
 #include "distributed_input_sink_stub.h"
 
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
 
 #include "constants_dinput.h"
@@ -24,10 +25,20 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 DistributedInputSinkStub::DistributedInputSinkStub()
-{}
+{
+    DHLOGI("DistributedInputSinkStub ctor!");
+    memberFuncMap_[INIT] = &DistributedInputSinkStub::InitInner;
+    memberFuncMap_[RELEASE] = &DistributedInputSinkStub::ReleaseInner;
+    memberFuncMap_[IS_START_REMOTE_INPUT] = &DistributedInputSinkStub::IsStartDistributedInputInner;
+    memberFuncMap_[NOTIFY_START_DSCREEN] = &DistributedInputSinkStub::NotifyStartDScreenInner;
+    memberFuncMap_[NOTIFY_STOP_DSCREEN] = &DistributedInputSinkStub::NotifyStopDScreenInner;
+}
 
 DistributedInputSinkStub::~DistributedInputSinkStub()
-{}
+{
+    DHLOGI("DistributedInputSinkStub dtor!");
+    memberFuncMap_.clear();
+}
 
 int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
@@ -36,40 +47,94 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
         DHLOGE("DistributedInputSinkStub read token valid failed");
         return ERR_DH_INPUT_IPC_READ_TOKEN_VALID_FAIL;
     }
-    switch (code) {
-        case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::INIT): {
-            int32_t ret = Init();
-            if (!reply.WriteInt32(ret)) {
-                DHLOGE("DistributedInputSinkStub write ret failed");
-                return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-            }
-            break;
-        }
-
-        case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::RELEASE): {
-            int32_t ret = Release();
-            if (!reply.WriteInt32(ret)) {
-                DHLOGE("DistributedInputSinkStub write ret failed");
-                return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-            }
-            break;
-        }
-
-        case static_cast<uint32_t>(IDistributedSinkInput::MessageCode::ISSTART_REMOTE_INPUT): {
-            uint32_t inputType = data.ReadUint32();
-            sptr<IStartDInputServerCallback> callback =
-                iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
-            int32_t ret = IsStartDistributedInput(inputType, callback);
-            if (!reply.WriteInt32(ret)) {
-                DHLOGE("DistributedInputSinkStub write ret failed");
-                return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-            }
-            break;
-        }
-        default:
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    auto iter = memberFuncMap_.find(code);
+    if (iter == memberFuncMap_.end()) {
+        DHLOGE("invalid request code is %d.", code);
+        return ERR_DH_INPUT_SA_REQUEST_CODE_INVALID;
     }
-    return DH_SUCCESS;
+    DistributedInputSinkFunc &func = iter->second;
+    return (this->*func)(data, reply, option);
+}
+
+int32_t DistributedInputSinkStub::InitInner(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    DHLOGI("start");
+    int32_t ret = Init();
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("DistributedInputSinkStub write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    return ret;
+}
+
+int32_t DistributedInputSinkStub::ReleaseInner(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    int32_t ret = Release();
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("DistributedInputSinkStub write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    return ret;
+}
+
+int32_t DistributedInputSinkStub::IsStartDistributedInputInner(MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    uint32_t inputType = data.ReadUint32();
+    sptr<IStartDInputServerCallback> callback =
+        iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
+    int32_t ret = IsStartDistributedInput(inputType, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("DistributedInputSinkStub write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    return ret;
+}
+
+int32_t DistributedInputSinkStub::NotifyStartDScreenInner(MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    std::string devId = data.ReadString();
+    uint64_t sourceWinId = data.ReadUint64();
+    uint32_t sourceWinWidth = data.ReadUint32();
+    uint32_t sourceWinHeight = data.ReadUint32();
+    std::string sourcePhyId = data.ReadString();
+    uint32_t sourcePhyFd = data.ReadUint32();
+    uint32_t sourcePhyWidth = data.ReadUint32();
+    uint32_t sourcePhyHeight = data.ReadUint32();
+    DHLOGI("OnRemoteRequest the data: devId: %s, sourceWinId: %d, sourceWinWidth: %d, sourceWinHeight: %d,"
+        "sourcePhyId: %s, sourcePhyFd: %d, sourcePhyWidth: %d, sourcePhyHeight: %d", GetAnonyString(devId).c_str(),
+        sourceWinId, sourceWinWidth, sourceWinHeight, GetAnonyString(sourcePhyId).c_str(), sourcePhyFd, sourcePhyWidth,
+        sourcePhyHeight);
+    SrcScreenInfo srcScreenInfo = {
+        .devId = devId,
+        .sourceWinId = sourceWinId,
+        .sourceWinWidth = sourceWinWidth,
+        .sourceWinHeight = sourceWinHeight,
+        .sourcePhyId = sourcePhyId,
+        .sourcePhyFd = sourcePhyFd,
+        .sourcePhyWidth = sourcePhyWidth,
+        .sourcePhyHeight = sourcePhyHeight,
+    };
+    int32_t ret = NotifyStartDScreen(srcScreenInfo);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("write reply failed");
+        return ERR_DH_INPUT_RPC_REPLY_FAIL;
+    }
+    return ret;
+}
+
+int32_t DistributedInputSinkStub::NotifyStopDScreenInner(MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    std::string srcScreenInfoKey = data.ReadString();
+    DHLOGI("OnRemoteRequest srcScreenInfoKey: %s", GetAnonyString(srcScreenInfoKey).c_str());
+    int ret = NotifyStopDScreen(srcScreenInfoKey);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("write version failed");
+        return ERR_DH_INPUT_RPC_REPLY_FAIL;
+    }
+    return ret;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware
