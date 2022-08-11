@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributed_input/white_list_test"
 
 group("whitelistunittest") {
@@ -32,7 +33,7 @@ ohos_unittest("distributed_input_white_list_test") {
     "${ipc_path}/src",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
     "//foundation/distributedhardware/distributed_input/frameworks/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -65,21 +66,20 @@ ohos_unittest("distributed_input_white_list_test") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/communication/dsoftbus/sdk:softbus_client",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-
 ## UnitTest distributed_input_manager_service_test }}}

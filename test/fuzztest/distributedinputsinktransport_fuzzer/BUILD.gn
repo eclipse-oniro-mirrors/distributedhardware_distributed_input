@@ -14,16 +14,18 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("DistributedInputSinkTransportFuzzTest") {
   module_out_path = "distributed_input/system"
+
   # fuzz_config_file = "//foundation/distributedhardware/distributed_input/test/fuzztest/distributedinputsinktransport_fuzzer"
 
   include_dirs = [
     "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -50,36 +52,34 @@ ohos_fuzztest("DistributedInputSinkTransportFuzzTest") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
-    "${fwk_utils_path}:distributedhardwareutils",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
+    "${fwk_utils_path}:distributedhardwareutils",
     "${low_latency_path}:libdinput_low_latency",
-    ]
+    "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/communication/dsoftbus/sdk:softbus_client",
+  ]
 
   external_deps = [
+    "c_utils:utils",
     "dsoftbus:softbus_client",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
-    ]
+  ]
 
   defines = [
     "HI_LOG_ENABLE",
     "DH_LOG_TAG=\"DistributedInputSinkTransportFuzzTest\"",
     "LOG_DOMAIN=0xD004100",
-    ]
-
+  ]
 }
+
 ###############################################################################
 group("fuzztest") {
   testonly = true
 
-  deps = [
-    ":DistributedInputSinkTransportFuzzTest",
-  ]
+  deps = [ ":DistributedInputSinkTransportFuzzTest" ]
 }
 ###############################################################################

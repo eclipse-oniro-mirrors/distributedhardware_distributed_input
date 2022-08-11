@@ -12,13 +12,14 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_low_latency") {
   include_dirs = [
     "include",
     "${common_path}/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
@@ -29,9 +30,7 @@ ohos_shared_library("libdinput_low_latency") {
     "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/innerkits/ressched_client/include",
   ]
 
-  sources = [
-    "src/dinput_low_latency.cpp",
-  ]
+  sources = [ "src/dinput_low_latency.cpp" ]
 
   defines = [
     "HI_LOG_ENABLE",
@@ -40,18 +39,18 @@ ohos_shared_library("libdinput_low_latency") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "//third_party/openssl:libcrypto_static",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/innerkits/ressched_client:ressched_client",
     "//third_party/jsoncpp:jsoncpp",
+    "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
   ]
 
@@ -60,5 +59,4 @@ ohos_shared_library("libdinput_low_latency") {
   subsystem_name = "distributedhardware"
 
   part_name = "distributed_input"
-
 }

@@ -35,7 +35,7 @@
                 "safwk",
                 "samgr",
                 "dsoftbus",
-                "utils_base",
+                "c_utils",
                 "distributed_hardware_fwk"
             ],
             "third_party":[

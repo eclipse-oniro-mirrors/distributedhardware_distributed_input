@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_utils") {
   include_dirs = [
@@ -27,8 +28,8 @@ ohos_shared_library("libdinput_utils") {
   ]
 
   sources = [
-    "src/dinput_utils_tool.cpp",
     "src/dinput_context.cpp",
+    "src/dinput_utils_tool.cpp",
   ]
 
   defines = [
@@ -37,9 +38,7 @@ ohos_shared_library("libdinput_utils") {
     "LOG_DOMAIN=0xD004100",
   ]
 
-  deps = [
-    "${fwk_utils_path}:distributedhardwareutils",
-  ]
+  deps = [ "${fwk_utils_path}:distributedhardwareutils" ]
 
   external_deps = [
     "dsoftbus:softbus_client",

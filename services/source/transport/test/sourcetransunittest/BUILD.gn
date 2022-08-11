@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributed_input/source_trans"
 
 group("sourcetransunittest") {
@@ -27,10 +28,9 @@ ohos_unittest("distributed_input_sourcetrans_test") {
 
   include_dirs = [
     "//foundation/distributedhardware/distributed_input/services/source/transport/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
-    "//utils/native/base/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
@@ -65,26 +65,25 @@ ohos_unittest("distributed_input_sourcetrans_test") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
+    "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
+    "${low_latency_path}:libdinput_low_latency",
+    "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
-    "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
-    "${low_latency_path}:libdinput_low_latency",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
-    "hitrace_native:hitrace_meter",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-
 ## UnitTest distributed_input_manager_service_test }}}

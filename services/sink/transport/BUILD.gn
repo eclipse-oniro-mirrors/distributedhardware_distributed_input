@@ -12,13 +12,14 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_sink_trans") {
   include_dirs = [
     "include",
     "${common_path}/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
@@ -33,8 +34,8 @@ ohos_shared_library("libdinput_sink_trans") {
   ]
 
   sources = [
+    "src/distributed_input_sink_switch.cpp",
     "src/distributed_input_sink_transport.cpp",
-    "src/distributed_input_sink_switch.cpp"
   ]
 
   defines = [
@@ -44,26 +45,24 @@ ohos_shared_library("libdinput_sink_trans") {
   ]
 
   if (distributed_input_low_latency) {
-    defines += [
-      "DINPUT_LOW_LATENCY",
-    ]
+    defines += [ "DINPUT_LOW_LATENCY" ]
   }
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//utils/native/base:utils",
-    "${fwk_utils_path}:distributedhardwareutils",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
+    "${fwk_utils_path}:distributedhardwareutils",
     "${low_latency_path}:libdinput_low_latency",
+    "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/communication/dsoftbus/sdk:softbus_client",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
   ]
 
@@ -72,5 +71,4 @@ ohos_shared_library("libdinput_sink_trans") {
   subsystem_name = "distributedhardware"
 
   part_name = "distributed_input"
-
 }

@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_sdk") {
   include_dirs = [
@@ -21,7 +22,7 @@ ohos_shared_library("libdinput_sdk") {
     "${ipc_path}/include",
     "${ipc_path}/src",
     "${frameworks_path}/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -34,36 +35,35 @@ ohos_shared_library("libdinput_sdk") {
   sources = [
     "${common_path}/include/white_list_util.cpp",
     "${innerkits_path}/src/distributed_input_kit.cpp",
-    "${ipc_path}/src/distributed_input_client.cpp",
-    "${ipc_path}/src/dinput_sa_manager.cpp",
-    "${ipc_path}/src/distributed_input_source_proxy.cpp",
-    "${ipc_path}/src/distributed_input_source_stub.cpp",
-    "${ipc_path}/src/distributed_input_sink_proxy.cpp",
-    "${ipc_path}/src/distributed_input_sink_stub.cpp",
-    "${ipc_path}/src/register_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/register_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/prepare_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/prepare_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/unprepare_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/start_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/start_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/stop_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/stop_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_stub.cpp",
+    "${ipc_path}/src/dinput_sa_manager.cpp",
+    "${ipc_path}/src/distributed_input_client.cpp",
+    "${ipc_path}/src/distributed_input_sink_proxy.cpp",
+    "${ipc_path}/src/distributed_input_sink_stub.cpp",
+    "${ipc_path}/src/distributed_input_source_proxy.cpp",
+    "${ipc_path}/src/distributed_input_source_stub.cpp",
+    "${ipc_path}/src/prepare_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/prepare_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/register_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/register_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/start_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/start_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
+    "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
+    "${ipc_path}/src/stop_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/stop_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/unprepare_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
   ]
 
   deps = [
-    "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "${utils_path}:libdinput_utils"
+    "${utils_path}:libdinput_utils",
   ]
 
   defines = [
@@ -73,10 +73,11 @@ ohos_shared_library("libdinput_sdk") {
   ]
 
   external_deps = [
-    "ipc:ipc_core",
-    "hiviewdfx_hilog_native:libhilog",
-    "samgr:samgr_proxy",
+    "c_utils:utils",
     "dsoftbus:softbus_client",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

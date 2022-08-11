@@ -12,13 +12,14 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_collector") {
   include_dirs = [
     "include",
     "${common_path}/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
@@ -29,8 +30,8 @@ ohos_shared_library("libdinput_collector") {
   ]
 
   sources = [
-    "src/distributed_input_collector.cpp",
     "${common_path}/include/input_hub.cpp",
+    "src/distributed_input_collector.cpp",
   ]
 
   defines = [
@@ -40,17 +41,17 @@ ohos_shared_library("libdinput_collector") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
   ]
 
@@ -59,5 +60,4 @@ ohos_shared_library("libdinput_collector") {
   subsystem_name = "distributedhardware"
 
   part_name = "distributed_input"
-
 }

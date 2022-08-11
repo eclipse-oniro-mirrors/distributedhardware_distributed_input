@@ -14,19 +14,21 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
   module_out_path = "distributed_input/system"
+
   # fuzz_config_file = "//foundation/distributedhardware/distributed_input/test/fuzztest/distributedinputsourcetransport_fuzzer"
 
   include_dirs = [
     "//foundation/distributedhardware/distributed_input/services/source/transport/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
@@ -54,39 +56,37 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
   ]
 
   deps = [
-    "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
-    "${fwk_utils_path}:distributedhardwareutils",
-    "//foundation/distributedhardware/distributed_input/services/source/transport:libdinput_source_trans",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
+    "${fwk_utils_path}:distributedhardwareutils",
     "${low_latency_path}:libdinput_low_latency",
-    ]
+    "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "//foundation/distributedhardware/distributed_input/services/source/transport:libdinput_source_trans",
+  ]
 
   external_deps = [
+    "c_utils:utils",
     "dsoftbus:softbus_client",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
-    "hitrace_native:hitrace_meter",
-    ]
+  ]
 
   defines = [
     "HI_LOG_ENABLE",
     "DH_LOG_TAG=\"DistributedInputSourceTransportFuzzTest\"",
     "LOG_DOMAIN=0xD004100",
-    ]
-
+  ]
 }
+
 ###############################################################################
 group("fuzztest") {
   testonly = true
 
-  deps = [
-    ":DistributedInputSourceTransportFuzzTest",
-  ]
+  deps = [ ":DistributedInputSourceTransportFuzzTest" ]
 }
 ###############################################################################

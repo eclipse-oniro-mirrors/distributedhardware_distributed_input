@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_sink") {
   include_dirs = [
@@ -22,7 +23,7 @@ ohos_shared_library("libdinput_sink") {
     "${innerkits_path}/src",
     "${ipc_path}/include",
     "${ipc_path}/src",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -39,13 +40,13 @@ ohos_shared_library("libdinput_sink") {
   ]
 
   sources = [
-    "src/distributed_input_sink_manager.cpp",
-    "src/distributed_input_sink_event_handler.cpp",
-    "${ipc_path}/src/distributed_input_sink_stub.cpp",
-    "${common_path}/include/white_list_util.cpp",
     "${common_path}/include/dinput_sa_process_state.cpp",
+    "${common_path}/include/white_list_util.cpp",
+    "${ipc_path}/src/distributed_input_sink_stub.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
+    "src/distributed_input_sink_event_handler.cpp",
+    "src/distributed_input_sink_manager.cpp",
   ]
 
   defines = [
@@ -55,29 +56,27 @@ ohos_shared_library("libdinput_sink") {
   ]
 
   if (distributed_input_low_latency) {
-    defines += [
-      "DINPUT_LOW_LATENCY",
-    ]
+    defines += [ "DINPUT_LOW_LATENCY" ]
   }
 
   deps = [
-    "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
-    "${fwk_utils_path}:distributedhardwareutils",
-    "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",
-    "//foundation/distributedhardware/distributed_input/services/sink/inputcollector:libdinput_collector",
     "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
+    "${fwk_utils_path}:distributedhardwareutils",
     "${low_latency_path}:libdinput_low_latency",
+    "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
+    "//foundation/distributedhardware/distributed_input/services/sink/inputcollector:libdinput_collector",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hisysevent_native:libhisysevent",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
-    "hisysevent_native:libhisysevent",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

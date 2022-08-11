@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributed_input/source_manager"
 
 group("sourcemanagerunittest") {
@@ -32,7 +33,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${ipc_path}/src",
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/include",
     "//foundation/distributedhardware/distributed_input/frameworks/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -52,18 +53,8 @@ ohos_unittest("distributed_input_sourcemanager_test") {
   ]
 
   sources = [
-    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_manager.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_event_handler.cpp",
-    "distributed_input_sourcemanager_test.cpp",
     "${common_path}/include/dinput_sa_process_state.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_inject.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_node_manager.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_device.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_keyboard.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_mouse.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchscreen.cpp",
-    "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
+    "${common_path}/include/input_hub.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",
@@ -86,7 +77,17 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
     "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
     "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
-    "${common_path}/include/input_hub.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_inject.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_node_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_device.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_keyboard.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_mouse.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchscreen.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_event_handler.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
+    "distributed_input_sourcemanager_test.cpp",
   ]
 
   cflags = [
@@ -104,33 +105,30 @@ ohos_unittest("distributed_input_sourcemanager_test") {
   ]
 
   if (distributed_input_low_latency) {
-    defines += [
-      "DINPUT_LOW_LATENCY",
-    ]
+    defines += [ "DINPUT_LOW_LATENCY" ]
   }
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
+    "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
+    "${low_latency_path}:libdinput_low_latency",
+    "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
-    "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
-    "${low_latency_path}:libdinput_low_latency",
     "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
-    "samgr:samgr_proxy",
+    "c_utils:utils",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-
 ## UnitTest distributed_input_manager_service_test }}}

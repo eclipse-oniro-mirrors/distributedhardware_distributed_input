@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
 ohos_shared_library("libdinput_sink_handler") {
   include_dirs = [
@@ -25,7 +26,7 @@ ohos_shared_library("libdinput_sink_handler") {
     "${frameworks_path}/include",
     "${service_common}/include",
     "${common_path}/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
@@ -36,7 +37,7 @@ ohos_shared_library("libdinput_sink_handler") {
 
   sources = [
     "src/distributed_input_sink_handler.cpp",
-    "src/load_d_input_sink_callback.cpp"
+    "src/load_d_input_sink_callback.cpp",
   ]
 
   defines = [
@@ -46,20 +47,20 @@ ohos_shared_library("libdinput_sink_handler") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
+    "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${innerkits_path}:libdinput_sdk",
     "${services_sink_path}/sinkmanager:libdinput_sink",
-    "${dfx_utils_path}:libdinput_dfx_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hisysevent_native:libhisysevent",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
-    "hisysevent_native:libhisysevent",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
@@ -67,5 +68,4 @@ ohos_shared_library("libdinput_sink_handler") {
   subsystem_name = "distributedhardware"
 
   part_name = "distributed_input"
-
 }

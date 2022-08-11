@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributed_input/inner_kits"
 
 group("unittest") {
@@ -33,7 +34,7 @@ ohos_unittest("distributed_input_inner_test") {
     "//foundation/distributedhardware/distributed_input/services/include",
     "//foundation/distributedhardware/distributed_input/services/src",
     "//foundation/distributedhardware/distributed_input/frameworks/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -47,23 +48,23 @@ ohos_unittest("distributed_input_inner_test") {
   sources = [
     "${common_path}/include/white_list_util.cpp",
     "${innerkits_path}/src/distributed_input_kit.cpp",
-    "${ipc_path}/src/register_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/register_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/prepare_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/prepare_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/unprepare_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/start_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/start_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/stop_d_input_call_back_proxy.cpp",
-    "${ipc_path}/src/stop_d_input_call_back_stub.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/distributed_input_source_proxy.cpp",
+    "${ipc_path}/src/prepare_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/prepare_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/register_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/register_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/start_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/start_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/stop_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/stop_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/unprepare_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
     "//foundation/distributedhardware/distributed_input/interfaces/inner_kits/test/unittest/mock/mock_distributed_input_client.cpp",
     "distributed_input_inner_test.cpp",
   ]
@@ -83,21 +84,20 @@ ohos_unittest("distributed_input_inner_test") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
-    "dsoftbus:softbus_client",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-
 ## UnitTest distributed_input_manager_service_test }}}

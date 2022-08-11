@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributed_input/sink_manager"
 
 group("sinkmanagerunittest") {
@@ -33,7 +34,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/include",
     "//foundation/distributedhardware/distributed_input/frameworks/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -50,18 +51,18 @@ ohos_unittest("distributed_input_sinkmanager_test") {
   ]
 
   sources = [
-    "${common_path}/include/white_list_util.cpp",
-    "${common_path}/include/input_hub.cpp",
     "${common_path}/include/dinput_sa_process_state.cpp",
-    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
-    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
-    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
-    "distributed_input_sinkmanager_test.cpp",
-    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_event_handler.cpp",
+    "${common_path}/include/input_hub.cpp",
+    "${common_path}/include/white_list_util.cpp",
     "${ipc_path}/src/distributed_input_sink_stub.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
     "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
     "${services_sink_path}/inputcollector/src/distributed_input_collector.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_event_handler.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
+    "distributed_input_sinkmanager_test.cpp",
   ]
 
   cflags = [
@@ -79,31 +80,28 @@ ohos_unittest("distributed_input_sinkmanager_test") {
   ]
 
   if (distributed_input_low_latency) {
-    defines += [
-      "DINPUT_LOW_LATENCY",
-    ]
+    defines += [ "DINPUT_LOW_LATENCY" ]
   }
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
+    "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
+    "${low_latency_path}:libdinput_low_latency",
+    "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/openssl:libcrypto_static",
-    "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
-    "${low_latency_path}:libdinput_low_latency",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hisysevent_native:libhisysevent",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
-    "hisysevent_native:libhisysevent",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-
 ## UnitTest distributed_input_manager_service_test }}}

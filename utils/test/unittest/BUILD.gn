@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributed_input/utils"
 
 group("unittest") {
@@ -35,9 +36,7 @@ ohos_unittest("distributed_input_utils_test") {
     "${common_path}/include",
   ]
 
-  sources = [
-    "dinput_context_test.cpp",
-  ]
+  sources = [ "dinput_context_test.cpp" ]
 
   cflags = [
     "-Wall",
@@ -65,5 +64,4 @@ ohos_unittest("distributed_input_utils_test") {
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-
 ## UnitTest distributed_input_utils_test }}}

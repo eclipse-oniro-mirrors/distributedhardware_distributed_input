@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/distributedhardware/distributed_input/distributedinput.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 module_out_path = "distributed_input/source_inject"
 
 group("sourceinjectunittest") {
@@ -32,7 +33,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "${ipc_path}/src",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/include",
     "//foundation/distributedhardware/distributed_input/frameworks/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
     "${fwk_common_path}/log/include",
@@ -47,6 +48,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
   ]
 
   sources = [
+    "${common_path}/include/input_hub.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_inject.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_node_manager.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_device.cpp",
@@ -55,7 +57,6 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchscreen.cpp",
     "distributed_input_sourceinject_test.cpp",
-    "${common_path}/include/input_hub.cpp",
   ]
 
   cflags = [
@@ -73,23 +74,22 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
   ]
 
   deps = [
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//utils/native/base:utils",
-    "${fwk_utils_path}:distributedhardwareutils",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "${dfx_utils_path}:libdinput_dfx_utils",
+    "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "hiviewdfx_hilog_native:libhilog",
     "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-
 ## UnitTest distributed_input_manager_service_test }}}
