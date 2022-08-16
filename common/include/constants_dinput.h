@@ -137,7 +137,7 @@ namespace DistributedInput {
 
     constexpr uint32_t DEFAULT_VALUE = 0;
 
-    constexpr int32_t UNINIT_FD_VALUE = -1;
+    constexpr int32_t UN_INIT_FD_VALUE = -1;
 
     enum class EHandlerMsgType {
         DINPUT_SINK_EVENT_HANDLER_MSG = 1,

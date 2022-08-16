@@ -66,8 +66,8 @@ private:
     };
 
     struct AbsInfo {
-        uint32_t absX;
-        uint32_t absY;
+        int32_t absX;
+        int32_t absY;
         int32_t absXIndex;
         int32_t absYIndex;
     };

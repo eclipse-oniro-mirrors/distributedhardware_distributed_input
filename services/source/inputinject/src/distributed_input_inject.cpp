@@ -166,7 +166,7 @@ int32_t DistributedInputInject::GetVirtualTouchScreenFd()
     std::lock_guard<std::mutex> lock(inputNodeManagerMutex_);
     if (inputNodeManager_ == nullptr) {
         DHLOGE("inputNodeManager is nullptr");
-        return UNINIT_FD_VALUE;
+        return UN_INIT_FD_VALUE;
     }
     return inputNodeManager_->GetVirtualTouchScreenFd();
 }

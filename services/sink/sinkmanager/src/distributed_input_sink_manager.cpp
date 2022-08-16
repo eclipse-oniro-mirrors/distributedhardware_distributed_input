@@ -463,8 +463,8 @@ int32_t DistributedInputSinkManager::ProjectWindowListener::UpdateSinkScreenInfo
     sinkScreenInfo.sinkShowWidth = GetScreenWidth();
     sinkScreenInfo.sinkShowHeight = GetScreenHeight();
     LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
-    sinkScreenInfo.sinkPhyWidth = info.absMtPositionXMax + 1;
-    sinkScreenInfo.sinkPhyHeight = info.absMtPositionYMax + 1;
+    sinkScreenInfo.sinkPhyWidth = (uint32_t)(info.absMtPositionXMax + 1);
+    sinkScreenInfo.sinkPhyHeight = (uint32_t)(info.absMtPositionYMax + 1);
     DHLOGI("sinkShowWinId: %d, sinkProjShowWidth: %d, sinkProjShowHeight: %d, sinkWinShowX: %d, sinkWinShowY: %d,"
         "sinkShowWidth: %d, sinkShowHeight: %d, sinkPhyWidth: %d, sinkPhyHeight: %d", sinkScreenInfo.sinkShowWinId,
         sinkScreenInfo.sinkProjShowWidth, sinkScreenInfo.sinkProjShowHeight, sinkScreenInfo.sinkWinShowX,

@@ -36,7 +36,7 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 DistributedInputNodeManager::DistributedInputNodeManager() : isInjectThreadRunning_(false),
-    inputHub_(std::make_unique<InputHub>())
+    inputHub_(std::make_unique<InputHub>()), virtualTouchScreenFd_(UN_INIT_FD_VALUE)
 {
 }
 

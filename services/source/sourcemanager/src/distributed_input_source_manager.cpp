@@ -1295,7 +1295,12 @@ int32_t DistributedInputSourceManager::StartDScreenListener::UpdateSrcScreenInfo
     srcScreenInfo.sourceWinHeight = TmpInfo.sourceWinHeight;
     srcScreenInfo.sourcePhyId = DistributedInputInject::GetInstance().GenerateVirtualTouchScreenDHId(
         srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth, srcScreenInfo.sourceWinHeight);
-    srcScreenInfo.sourcePhyFd = DistributedInputInject::GetInstance().GetVirtualTouchScreenFd();
+    int32_t virtualScreenFd = DistributedInputInject::GetInstance().GetVirtualTouchScreenFd();
+    if (virtualScreenFd < 0) {
+        DHLOGE("virtualScreenFd is invalid");
+        return ERR_DH_INPUT_SERVER_SOURCE_VIRTUAL_SCREEN_NODE_IS_INVALID;
+    }
+    srcScreenInfo.sourcePhyFd = (uint32_t)virtualScreenFd;
     srcScreenInfo.sourcePhyWidth = TmpInfo.sourceWinWidth;
     srcScreenInfo.sourcePhyHeight = TmpInfo.sourceWinHeight;
     DHLOGI("StartDScreenListener UpdateSrcScreenInfo the data: devId: %s, sourceWinId: %d, sourceWinWidth: %d,"
