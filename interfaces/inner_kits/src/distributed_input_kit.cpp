@@ -47,6 +47,11 @@ bool DistributedInputKit::IsNeedFilterOut(const std::string& deviceId, const Bus
     return DistributedInputClient::GetInstance().IsNeedFilterOut(deviceId, event);
 }
 
+bool DistributedInputKit::IsTouchEventNeedFilterOut(const TouchScreenEvent &event)
+{
+    return DistributedInputClient::GetInstance().IsTouchEventNeedFilterOut(event);
+}
+
 DInputServerType DistributedInputKit::IsStartDistributedInput(const uint32_t& inputType)
 {
     return DistributedInputClient::GetInstance().IsStartDistributedInput(inputType);

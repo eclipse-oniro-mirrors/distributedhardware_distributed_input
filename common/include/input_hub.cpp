@@ -970,12 +970,12 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
 
     for (size_t i = 0; i < count; i++) {
         struct input_event& iev = readBuffer[i];
-        if ((iev.type == EV_ABS) && (iev.code == ABS_MT_POSITION_X || iev.code == ABS_X)) {
+        if ((iev.type == EV_ABS) && (iev.code == ABS_X || iev.code == ABS_MT_POSITION_X)) {
             firstIndex = (int32_t)i;
         } else if (iev.type  == EV_SYN) {
             lastIndex = (int32_t)i;
         }
-        if ((firstIndex >= 0) && (lastIndex > 0)) {
+        if ((firstIndex >= 0) && (lastIndex > firstIndex)) {
             absIndexs.emplace_back(std::make_pair((size_t)firstIndex, (size_t)lastIndex));
         }
     }
@@ -992,11 +992,11 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
 
         for (size_t j = iter.first; j <= iter.second; j++) {
             struct input_event &iev = readBuffer[j];
-            if (iev.code == ABS_MT_POSITION_X || iev.code == ABS_X) {
+            if (iev.code == ABS_X || iev.code == ABS_MT_POSITION_X) {
                 absInfo.absX = iev.value;
                 absInfo.absXIndex = (int32_t)j;
             }
-            if (iev.code == ABS_MT_POSITION_Y || iev.code == ABS_Y) {
+            if (iev.code == ABS_Y || iev.code == ABS_MT_POSITION_Y) {
                 absInfo.absY = iev.value;
                 absInfo.absYIndex = (int32_t)j;
             }

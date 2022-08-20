@@ -47,6 +47,8 @@ public:
 
     static bool IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event);
 
+    static bool IsTouchEventNeedFilterOut(const TouchScreenEvent &event);
+
     static DInputServerType IsStartDistributedInput(const uint32_t& inputType);
 };
 } // namespace DistributedInput

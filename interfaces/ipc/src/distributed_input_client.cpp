@@ -22,6 +22,7 @@
 #include "system_ability_definition.h"
 
 #include "constants_dinput.h"
+#include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "dinput_utils_tool.h"
 #include "softbus_bus_center.h"
@@ -294,6 +295,20 @@ bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const 
 {
     DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
     return WhiteListUtil::GetInstance().IsNeedFilterOut(deviceId, event);
+}
+
+bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &event)
+{
+    auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
+
+    for (const auto& [id, sinkInfo] : sinkInfos) {
+        auto info = sinkInfo.transformInfo;
+        if ((event.absX >= info.sinkWinPhyX) && (event.absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
+            && (event.absY >= info.sinkWinPhyY)  && (event.absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
+            return true;
+        }
+    }
+    return false;
 }
 
 DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t& inputType)

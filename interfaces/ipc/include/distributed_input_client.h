@@ -68,6 +68,8 @@ public:
 
     bool IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event);
 
+    bool IsTouchEventNeedFilterOut(const TouchScreenEvent &event);
+
     DInputServerType IsStartDistributedInput(const uint32_t& inputType);
 
     int32_t NotifyStartDScreen(const std::string &networkId, const std::string& srcDevId, const uint64_t srcWinId);

@@ -292,6 +292,37 @@ HWTEST_F(DistributedInputInnerTest, IsNeedFilterOut03, testing::ext::TestSize.Le
     EXPECT_EQ(true, ret);
 }
 
+HWTEST_F(DistributedInputInnerTest, IsTouchEventNeedFilterOut01, testing::ext::TestSize.Level0)
+{
+    std::string sourceWinId = "123";
+    SinkScreenInfo sinkScreenInfo = DInputContext::GetInstance().GetSinkScreenInfo(sourceWinId);
+    const TransformInfo trans{10, 10, 100, 100, 1.0, 1.0};
+    sinkScreenInfo.transformInfo = trans;
+    DInputContext::GetInstance().UpdateSinkScreenInfo(sourceWinId, sinkScreenInfo);
+
+    sourceWinId = "456";
+    sinkScreenInfo = DInputContext::GetInstance().GetSinkScreenInfo(sourceWinId);
+    const TransformInfo trans1{120, 130, 50, 50, 1.0, 1.0};
+    sinkScreenInfo.transformInfo = trans1;
+    DInputContext::GetInstance().UpdateSinkScreenInfo(sourceWinId, sinkScreenInfo);
+
+    TouchScreenEvent event;
+    event.absX = 100;
+    event.absY = 100;
+    bool ret = DistributedInputKit::IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(true, ret);
+
+    event.absX = 140;
+    event.absY = 150;
+    ret = DistributedInputKit::IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(true, ret);
+
+    event.absX = 150;
+    event.absY = 20;
+    ret = DistributedInputKit::IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(false, ret);
+}
+
 HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput1, testing::ext::TestSize.Level0)
 {
     DistributedInputClient::GetInstance().ReleaseSource();

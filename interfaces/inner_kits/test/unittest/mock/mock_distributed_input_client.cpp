@@ -154,6 +154,22 @@ bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const 
     return true;
 }
 
+bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &event)
+{
+    auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
+
+    for (const auto& [id, sinkInfo] : sinkInfos) {
+        auto info = sinkInfo.transformInfo;
+        DHLOGI("event.absX:%d, info.sinkWinPhyX:%d, info.sinkProjPhyWidth:%d\n", event.absX, info.sinkWinPhyX,
+            info.sinkProjPhyWidth);
+        if ((event.absX >= info.sinkWinPhyX) && (event.absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
+            && (event.absY >= info.sinkWinPhyY)  && (event.absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t& inputType)
 {
     return serverType;

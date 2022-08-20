@@ -131,6 +131,21 @@ void IsNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
 
     DistributedInput::DistributedInputKit::IsNeedFilterOut(deviceId, event);
 }
+
+void IsTouchEventNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+
+    uint32_t absX = *(reinterpret_cast<const uint32_t*>(data));
+    uint32_t absY = *(reinterpret_cast<const uint32_t*>(data));
+    DistributedInput::TouchScreenEvent event;
+    event.absX = absX;
+    event.absY = absY;
+
+    DistributedInput::DistributedInputKit::IsTouchEventNeedFilterOut(event);
+}
 } // namespace DistributedHardware
 } // namespace OHOS
 
@@ -141,5 +156,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedHardware::PrepareInputFuzzTest(data, size);
     OHOS::DistributedHardware::StartRemoteInputFuzzTest(data, size);
     OHOS::DistributedHardware::IsNeedFilterOutFuzzTest(data, size);
+    OHOS::DistributedHardware::IsTouchEventNeedFilterOutFuzzTest(data, size);
     return 0;
 }

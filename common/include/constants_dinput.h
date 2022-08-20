@@ -150,6 +150,11 @@ namespace DistributedInput {
         int32_t keyAction;
     };
 
+    struct TouchScreenEvent {
+        uint32_t absX;
+        uint32_t absY;
+    };
+
     /*
      * A raw event as retrieved from the input_event.
      */

@@ -25,6 +25,7 @@
 #include <refbase.h>
 
 #include "constants_dinput.h"
+#include "distributed_input_inject.h"
 #include "distributed_input_source_transport.h"
 
 namespace OHOS {
@@ -73,6 +74,7 @@ void OnBytesReceivedFuzzTest(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    OHOS::DistributedHardware::DistributedInput::DistributedInputInject::GetInstance();
     /* Run your code on data */
     OHOS::DistributedHardware::OpenInputSoftbusFuzzTest(data, size);
     OHOS::DistributedHardware::OnSessionOpenedFuzzTest(data, size);

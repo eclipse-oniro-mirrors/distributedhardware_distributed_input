@@ -53,6 +53,7 @@ static SessionAttribute g_sessionAttr = {
 
 DistributedInputSourceTransport::~DistributedInputSourceTransport()
 {
+    DHLOGI("Dtor DistributedInputSourceTransport");
     Release();
 }
 
