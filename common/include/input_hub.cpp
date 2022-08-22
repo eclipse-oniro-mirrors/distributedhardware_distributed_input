@@ -177,12 +177,15 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
             }
             continue;
         }
+        struct input_event readBuffer[bufferSize];
+        int32_t readSize = read(eventItem.data.fd, readBuffer, sizeof(struct input_event) * capacity);
+        size_t count = ReadInputEvent(readSize, *GetDeviceByFdLocked(eventItem.data.fd));
         Device* device = GetSupportDeviceByFd(eventItem.data.fd);
         if (!device) {
             continue;
         }
         if (eventItem.events & EPOLLIN) {
-            event += CollectEvent(event, capacity, bufferSize, device);
+            event += CollectEvent(event, capacity, device, readBuffer, count);
 
             if (capacity == 0) {
                 pendingEventIndex_ -= 1;
@@ -197,17 +200,10 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
     return event - buffer;
 }
 
-size_t InputHub::CollectEvent(RawEvent* buffer, size_t& capacity, size_t bufferSize, Device* device)
+size_t InputHub::CollectEvent(RawEvent* buffer, size_t& capacity, Device* device, struct input_event readBuffer[],
+    const size_t count)
 {
-    struct input_event readBuffer[bufferSize];
-    if (bufferSize < capacity) {
-        DHLOGE("capacity: %d should not lager than bufferSize: %d\n", capacity, bufferSize);
-        return 0;
-    }
-    int32_t readSize = read(device->fd, readBuffer, sizeof(struct input_event) * capacity);
-    size_t count = ReadInputEvent(readSize, *device);
-
-    std::vector<bool> needFilted(bufferSize, false);
+    std::vector<bool> needFilted(capacity, false);
     if (device->classes == INPUT_DEVICE_CLASS_TOUCH_MT) {
         HandleTouchScreenEvent(readBuffer, count, needFilted, device);
     }

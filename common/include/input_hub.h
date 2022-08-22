@@ -118,7 +118,8 @@ private:
         Device* device);
     int32_t QueryLocalTouchScreenInfo(int fd);
     bool CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo, Device* device);
-    size_t CollectEvent(RawEvent* buffer, size_t& capacity, size_t bufferSize, Device* device);
+    size_t CollectEvent(RawEvent* buffer, size_t& capacity, Device* device, struct input_event readBuffer[],
+        const size_t count);
 
     int epollFd_;
     int iNotifyFd_;
