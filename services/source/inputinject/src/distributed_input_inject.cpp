@@ -51,8 +51,8 @@ DistributedInputInject &DistributedInputInject::GetInstance()
 int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::string& parameters)
 {
-    DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
+    DHLOGI("RegisterDistributedHardware called, deviceId: %s,  dhId: %s,  parameters: %s",
+        GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
     std::lock_guard<std::mutex> lock(inputNodeManagerMutex_);
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");
@@ -62,13 +62,20 @@ int32_t DistributedInputInject::RegisterDistributedHardware(const std::string& d
         DHLOGE("create virtual device error\n");
         return ERR_DH_INPUT_SERVER_SOURCE_INJECT_REGISTER_FAIL;
     }
+
+    std::string srcDevId;
+    inputNodeManager_->GetDeviceInfo(srcDevId);
+    DHLOGI("RegisterDistributedHardware called, device type = source, source networkId = %s, sink networkId = %s",
+           GetAnonyString(srcDevId).c_str(), GetAnonyString(devId).c_str());
+
+    SyncNodeOnlineInfo(srcDevId, devId, dhId, GetNodeDesc(parameters));
     return DH_SUCCESS;
 }
 
 int32_t DistributedInputInject::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId)
 {
-    DHLOGI("%s called, deviceId: %s,  dhId: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
+    DHLOGI("UnregisterDistributedHardware called, deviceId: %s,  dhId: %s",
+        GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
     std::lock_guard<std::mutex> lock(inputNodeManagerMutex_);
     if (inputNodeManager_ == nullptr) {
         DHLOGE("the DistributedInputNodeManager is null\n");
@@ -78,10 +85,48 @@ int32_t DistributedInputInject::UnregisterDistributedHardware(const std::string&
         DHLOGE("delete virtual device error\n");
         return ERR_DH_INPUT_SERVER_SOURCE_INJECT_UNREGISTER_FAIL;
     }
+
+    std::string srcDevId;
+    inputNodeManager_->GetDeviceInfo(srcDevId);
+
+    DHLOGI("UnregisterDistributedHardware called, device = %s, dhId = %s, OnNodeOffLine",
+        GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
+    SyncNodeOfflineInfo(srcDevId, devId, dhId);
+
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputInject::StructTransJson(const InputDevice& pBuf, std::string& strDescriptor)
+int32_t DistributedInputInject::RegisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    std::lock_guard<std::mutex> lock(inputNodeListenersMutex_);
+    this->inputNodeListeners_.insert(listener);
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputInject::UnregisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    std::lock_guard<std::mutex> lock(inputNodeListenersMutex_);
+    this->inputNodeListeners_.erase(listener);
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputInject::GetDhIdsByInputType(const std::string &devId, const uint32_t &inputTypes,
+    std::vector<std::string> &dhIds)
+{
+    std::lock_guard<std::mutex> lock(inputNodeManagerMutex_);
+    if (inputNodeManager_ == nullptr) {
+        DHLOGE("the inputNodeListener is nullptr");
+        return ERR_DH_INPUT_SERVER_SOURCE_INJECT_NODE_MANAGER_IS_NULL;
+    }
+    std::map<int32_t, std::string> datas;
+    inputNodeManager_->GetDevicesInfoByType(devId, inputTypes, datas);
+    for (const auto &data_ : datas) {
+        dhIds.push_back(data_.second);
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputInject::StructTransJson(const InputDevice &pBuf, std::string &strDescriptor)
 {
     DHLOGI("[%s] %d, %d, %d, %d, %s.\n", (pBuf.name).c_str(), pBuf.bus, pBuf.vendor, pBuf.product, pBuf.version,
         GetAnonyString(pBuf.descriptor).c_str());
@@ -102,7 +147,43 @@ int32_t DistributedInputInject::StructTransJson(const InputDevice& pBuf, std::st
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputInject::RegisterDistributedEvent(RawEvent* buffer, size_t bufferSize)
+void DistributedInputInject::InputDeviceEventInject(const std::shared_ptr<RawEvent> &rawEvent)
+{
+    std::lock_guard<std::mutex> lock(inputNodeManagerMutex_);
+    if (inputNodeManager_ == nullptr) {
+        DHLOGE("the inputNodeListener is nullptr");
+        return;
+    }
+    if (rawEvent == nullptr) {
+        DHLOGE("the rawEvent is nullptr");
+        return;
+    }
+    inputNodeManager_->ProcessInjectEvent(rawEvent);
+}
+
+void DistributedInputInject::SyncNodeOnlineInfo(const std::string &srcDevId,
+    const std::string &sinkDevId, const std::string &sinkNodeId, const std::string &sinkNodeDesc)
+{
+    std::lock_guard<std::mutex> lock(inputNodeListenersMutex_);
+    DHLOGI("SyncVirNodeOnlineInfo, srcId: %s, sinkId: %s, dhId: %s", GetAnonyString(srcDevId).c_str(),
+        GetAnonyString(sinkDevId).c_str(), GetAnonyString(sinkNodeId).c_str());
+    for (const auto &listener : inputNodeListeners_) {
+        listener->OnNodeOnLine(srcDevId, sinkDevId, sinkNodeId, sinkNodeDesc);
+    }
+}
+
+void DistributedInputInject::SyncNodeOfflineInfo(const std::string &srcDevId,
+    const std::string &sinkDevId, const std::string &sinkNodeId)
+{
+    std::lock_guard<std::mutex> lock(inputNodeListenersMutex_);
+    DHLOGI("SyncVirNodeOfflineInfo, srcId: %s, sinkId: %s, dhId: %s", GetAnonyString(srcDevId).c_str(),
+        GetAnonyString(sinkDevId).c_str(), GetAnonyString(sinkNodeId).c_str());
+    for (const auto &listener : inputNodeListeners_) {
+        listener->OnNodeOffLine(srcDevId, sinkDevId, sinkNodeId);
+    }
+}
+
+int32_t DistributedInputInject::RegisterDistributedEvent(RawEvent *buffer, size_t bufferSize)
 {
     std::lock_guard<std::mutex> lock(inputNodeManagerMutex_);
     if (inputNodeManager_ == nullptr) {

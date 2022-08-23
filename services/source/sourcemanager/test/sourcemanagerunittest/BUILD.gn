@@ -34,6 +34,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${ipc_path}/src",
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/include",
     "//foundation/distributedhardware/distributed_input/frameworks/include",
+    "//foundation/distributedhardware/distributed_input/inputdevicehandler/include",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -56,6 +57,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
   ]
 
   sources = [
+    "${common_path}/include/dinput_struct_data.cpp",
     "${common_path}/include/input_hub.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
@@ -88,6 +90,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchscreen.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_event_handler.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_sa_cli_mgr.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
     "distributed_input_sourcemanager_test.cpp",
   ]
@@ -121,6 +124,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//third_party/openssl:libcrypto_static",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "${innerkits_path}:libdinput_sdk",
+    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [

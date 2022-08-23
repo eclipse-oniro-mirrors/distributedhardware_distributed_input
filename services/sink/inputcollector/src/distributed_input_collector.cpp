@@ -19,6 +19,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <securec.h>
 #include <unistd.h>
 
 #include <openssl/sha.h>
@@ -95,6 +96,7 @@ void *DistributedInputCollector::CollectEventsThread(void *param)
 void DistributedInputCollector::StartCollectEventsThread()
 {
     while (isCollectingEvents_) {
+        memset_s(&mEventBuffer, sizeof(mEventBuffer), 0, sizeof(mEventBuffer));
         size_t count = inputHub_->StartCollectInputEvents(mEventBuffer, INPUT_EVENT_BUFFER_SIZE);
         if (count > 0) {
             DHLOGI("Count: %zu", count);
@@ -138,7 +140,7 @@ void DistributedInputCollector::StopCollectEventsThread()
     DHLOGW("DistributedInputCollector::StopCollectEventsThread exit!");
 }
 
-void DistributedInputCollector::SetInputTypes(const uint32_t& inputType)
+void DistributedInputCollector::SetSharingTypes(const uint32_t &inputType)
 {
     inputTypes_ = 0;
     if ((inputType & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
@@ -148,7 +150,7 @@ void DistributedInputCollector::SetInputTypes(const uint32_t& inputType)
         inputTypes_ |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
     if ((inputType & static_cast<uint32_t>(DInputDeviceType::TOUCHSCREEN)) != 0) {
-        inputTypes_ |= INPUT_DEVICE_CLASS_TOUCH_MT;
+        inputTypes_ |= INPUT_DEVICE_CLASS_TOUCH_MT | INPUT_DEVICE_CLASS_TOUCH;
     }
 
     inputHub_->SetSupportInputType(inputTypes_);
@@ -157,6 +159,22 @@ void DistributedInputCollector::SetInputTypes(const uint32_t& inputType)
 void DistributedInputCollector::Release()
 {
     StopCollectEventsThread();
+}
+
+void DistributedInputCollector::SetSharingDhIds(bool enabled, std::vector<std::string> dhIds)
+{
+    inputHub_->SetSharingDevices(enabled, dhIds);
+}
+
+void DistributedInputCollector::GetMouseNodePath(
+    std::vector<std::string> dhIds, std::string &mouseNodePath, std::string &dhid)
+{
+    inputHub_->GetShareMousePathByDhId(dhIds, mouseNodePath, dhid);
+}
+
+bool DistributedInputCollector::GetAllDevicesStoped()
+{
+    return inputHub_->GetAllDevicesStoped();
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

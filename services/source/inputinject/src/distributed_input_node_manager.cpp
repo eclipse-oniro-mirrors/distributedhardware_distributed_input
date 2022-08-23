@@ -25,8 +25,11 @@
 #include "distributed_hardware_log.h"
 #include "nlohmann/json.hpp"
 
+#include "softbus_bus_center.h"
+
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_softbus_define.h"
 #include "virtual_keyboard.h"
 #include "virtual_mouse.h"
 #include "virtual_touchpad.h"
@@ -88,12 +91,12 @@ int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::
         device = std::make_unique<VirtualKeyboard>(event);
     } else if (event.classes & INPUT_DEVICE_CLASS_CURSOR) {
         device = std::make_unique<VirtualMouse>(event);
-    } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH) {
-        device = std::make_unique<VirtualTouchpad>(event);
     } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH_MT) {
         inputHub_->ScanInputDevices(DEVICE_PATH);
         LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
         device = std::make_unique<VirtualTouchScreen>(event, info, info.absMtPositionXMax, info.absMtPositionYMax);
+    } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH) {
+        device = std::make_unique<VirtualTouchpad>(event);
     } else {
         DHLOGW("could not find the deviceType\n");
         return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
@@ -132,7 +135,7 @@ int32_t DistributedInputNodeManager::CreateVirtualTouchScreenNode(const std::str
             GetAnonyString(dhId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
     }
-    virtualTouchScreenFd_ = device->GetFd();
+    virtualTouchScreenFd_ = device->GetDeviceFd();
     AddDeviceLocked(dhId, std::move(device));
     DHLOGI("CreateVirtualTouchScreenNode end, dhId: %s", GetAnonyString(dhId).c_str());
     return DH_SUCCESS;
@@ -160,15 +163,15 @@ void DistributedInputNodeManager::AddDeviceLocked(const std::string& dhId, std::
 
 int32_t DistributedInputNodeManager::CloseDeviceLocked(const std::string &dhId)
 {
-    DHLOGI("%s called, dhId=%s", __func__, GetAnonyString(dhId).c_str());
+    DHLOGI("CloseDeviceLocked called, dhId=%s", GetAnonyString(dhId).c_str());
     std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
     std::map<std::string, std::unique_ptr<VirtualDevice>>::iterator iter = virtualDeviceMap_.find(dhId);
     if (iter != virtualDeviceMap_.end()) {
-        DHLOGI("%s called success, dhId=%s", __func__, GetAnonyString(dhId).c_str());
+        DHLOGI("CloseDeviceLocked called success, dhId=%s", GetAnonyString(dhId).c_str());
         virtualDeviceMap_.erase(iter);
         return DH_SUCCESS;
     }
-    DHLOGE("%s called failure, dhId=%s", __func__, GetAnonyString(dhId).c_str());
+    DHLOGE("CloseDeviceLocked called failure, dhId=%s", GetAnonyString(dhId).c_str());
     return ERR_DH_INPUT_SERVER_SOURCE_CLOSE_DEVICE_FAIL;
 }
 
@@ -253,6 +256,60 @@ void DistributedInputNodeManager::ProcessInjectEvent(const std::shared_ptr<RawEv
     }
     if (device != nullptr) {
         device->InjectInputEvent(event);
+    }
+}
+
+int32_t DistributedInputNodeManager::GetDeviceInfo(std::string &deviceId)
+{
+    std::unique_lock<std::mutex> my_lock(operationMutex_);
+    auto localNode = std::make_unique<NodeBasicInfo>();
+    int32_t retCode = GetLocalNodeDeviceInfo(DINPUT_PKG_NAME.c_str(), localNode.get());
+    if (retCode != 0) {
+        DHLOGE("Could not get device id.");
+        return ERR_DH_INPUT_HANDLER_GET_DEVICE_ID_FAIL;
+    }
+
+    deviceId = localNode->networkId;
+    DHLOGI("device id is %s", GetAnonyString(deviceId).c_str());
+    return DH_SUCCESS;
+}
+
+void DistributedInputNodeManager::GetDevicesInfoByType(const std::string &networkId, int32_t inputTypes,
+    std::map<int32_t, std::string> &datas)
+{
+    uint32_t input_types_ = 0;
+
+    if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
+        input_types_ |= INPUT_DEVICE_CLASS_CURSOR;
+    }
+
+    if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::KEYBOARD)) != 0) {
+        input_types_ |= INPUT_DEVICE_CLASS_KEYBOARD;
+    }
+
+    if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
+        input_types_ |= INPUT_DEVICE_CLASS_TOUCH;
+    }
+
+    std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
+    for (const auto &[id, virdevice] : virtualDeviceMap_) {
+        if ((virdevice->GetDeviceType() & input_types_) && (virdevice->GetNetWorkId() == networkId)) {
+            datas.insert(std::pair<int32_t, std::string>(virdevice->GetDeviceFd(), id));
+        }
+    }
+}
+
+void DistributedInputNodeManager::GetDevicesInfoByDhId(
+    std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas)
+{
+    for (auto dhId : dhidsVec) {
+        std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
+        for (const auto &[id, virdevice] : virtualDeviceMap_) {
+            if (id == dhId) {
+                datas.insert(std::pair<int32_t, std::string>(virdevice->GetDeviceFd(), id));
+                break;
+            }
+        }
     }
 }
 } // namespace DistributedInput

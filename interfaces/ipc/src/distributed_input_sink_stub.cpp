@@ -58,7 +58,7 @@ int32_t DistributedInputSinkStub::OnRemoteRequest(uint32_t code, MessageParcel &
 
 int32_t DistributedInputSinkStub::InitInner(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    DHLOGI("start");
+    DHLOGI("DistributedInputSinkStub InitInner start");
     int32_t ret = Init();
     if (!reply.WriteInt32(ret)) {
         DHLOGE("DistributedInputSinkStub write ret failed");

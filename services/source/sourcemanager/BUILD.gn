@@ -41,10 +41,12 @@ ohos_shared_library("libdinput_source") {
     "${low_latency_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "${distributedinput_path}/inputdevicehandler/include",
   ]
 
   sources = [
     "${common_path}/include/white_list_util.cpp",
+    "${common_path}/include/dinput_struct_data.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",
@@ -63,12 +65,21 @@ ohos_shared_library("libdinput_source") {
     "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
     "${ipc_path}/src/stop_d_input_call_back_proxy.cpp",
     "${ipc_path}/src/stop_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/start_stop_d_inputs_call_back_proxy.cpp",
+    "${ipc_path}/src/start_stop_d_inputs_call_back_stub.cpp",
+    "${ipc_path}/src/start_stop_result_call_back_proxy.cpp",
+    "${ipc_path}/src/start_stop_result_call_back_stub.cpp",
+    "${ipc_path}/src/input_node_listener_proxy.cpp",
+    "${ipc_path}/src/input_node_listener_stub.cpp",
+    "${ipc_path}/src/simulation_event_listener_proxy.cpp",
+    "${ipc_path}/src/simulation_event_listener_stub.cpp",
     "${ipc_path}/src/unprepare_d_input_call_back_proxy.cpp",
     "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
     "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
     "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
     "src/distributed_input_source_event_handler.cpp",
     "src/distributed_input_source_manager.cpp",
+    "src/distributed_input_source_sa_cli_mgr.cpp",
   ]
 
   defines = [
@@ -94,13 +105,17 @@ ohos_shared_library("libdinput_source") {
   ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "dsoftbus:softbus_client",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

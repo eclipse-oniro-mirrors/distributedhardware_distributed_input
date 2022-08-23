@@ -54,6 +54,9 @@ public:
     void StartLatencyThread(const std::string& deviceId);
     void StopLatencyThread();
 
+    int32_t StartRemoteInput(const std::string &deviceId, const std::vector<std::string> &dhids);
+    int32_t StopRemoteInput(const std::string &deviceId, const std::vector<std::string> &dhids);
+
     int32_t OnSessionOpened(int32_t sessionId, int32_t result);
     void OnSessionClosed(int32_t sessionId);
     void OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen);
@@ -69,6 +72,9 @@ private:
     void NotifyResponseUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseStopRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyResponseStartRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyResponseStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyResponseKeyState(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyReceivedEventRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void CalculateLatency(int32_t sessionId, const nlohmann::json &recMsg);
 

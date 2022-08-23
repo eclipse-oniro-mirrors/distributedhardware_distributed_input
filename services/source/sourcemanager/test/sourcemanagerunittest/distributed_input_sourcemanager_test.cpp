@@ -105,6 +105,14 @@ void DistributedInputSourceManagerTest::TestStopDInputCallback::OnResult(
     return;
 }
 
+void DistributedInputSourceManagerTest::TestStartStopVectorCallbackStub::OnResultDhids(const std::string &devId,
+                                                                                       const int32_t &status)
+{
+    (void)devId;
+    (void)status;
+    return;
+}
+
 void DistributedInputSourceManagerTest::TestAddWhiteListInfosCb::OnResult(
     const std::string &deviceId, const std::string &strJson)
 {
@@ -117,6 +125,43 @@ void DistributedInputSourceManagerTest::TestDelWhiteListInfosCb::OnResult(
     const std::string& deviceId)
 {
     (void)deviceId;
+    return;
+}
+
+void DistributedInputSourceManagerTest::TestStartStopResultCb::OnStart(const std::string &srcId,
+    const std::string &sinkId, std::vector<std::string> &devData)
+{
+    (void)srcId;
+    (void)sinkId;
+    (void)devData;
+    return;
+}
+
+void DistributedInputSourceManagerTest::TestStartStopResultCb::OnStop(const std::string &srcId,
+    const std::string &sinkId, std::vector<std::string> &devData)
+{
+    (void)srcId;
+    (void)sinkId;
+    (void)devData;
+    return;
+}
+
+void DistributedInputSourceManagerTest::TestInputNodeListenerCb::OnNodeOnLine(const std::string srcDevId,
+    const std::string sinkDevId, const std::string sinkNodeId, const std::string sinkNodeDesc)
+{
+    (void)srcDevId;
+    (void)sinkDevId;
+    (void)sinkNodeId;
+    (void)sinkNodeDesc;
+    return;
+}
+
+void DistributedInputSourceManagerTest::TestInputNodeListenerCb::OnNodeOffLine(const std::string srcDevId,
+    const std::string sinkDevId, const std::string sinkNodeId)
+{
+    (void)srcDevId;
+    (void)sinkDevId;
+    (void)sinkNodeId;
     return;
 }
 
@@ -137,6 +182,12 @@ int32_t DistributedInputSourceManagerTest::StructTransJson(const InputDevice& pB
     stream << tmpJson.dump();
     strDescriptor = stream.str();
     return DH_SUCCESS;
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, Init01, testing::ext::TestSize.Level0)
+{
+    int32_t ret = sourceManager_->Init();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_INIT_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware01, testing::ext::TestSize.Level0)
@@ -211,8 +262,7 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput01, testing::ext::
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
-    sptr<TestAddWhiteListInfosCb> addWhiteListCallback = new TestAddWhiteListInfosCb();
-    int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback, addWhiteListCallback);
+    int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
@@ -220,8 +270,7 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput02, testing::ext::
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestPrepareDInputCallback> callback;
-    sptr<TestAddWhiteListInfosCb> addWhiteListCallback = new TestAddWhiteListInfosCb();
-    int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback, addWhiteListCallback);
+    int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
@@ -229,8 +278,34 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput03, testing::ext::
 {
     std::string devId = "";
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
-    sptr<TestAddWhiteListInfosCb> addWhiteListCallback = new TestAddWhiteListInfosCb();
-    int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback, addWhiteListCallback);
+    int32_t ret = sourceManager_->PrepareRemoteInput(devId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput04, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
+    int32_t ret = sourceManager_->PrepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput05, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestPrepareDInputCallback> callback;
+    int32_t ret = sourceManager_->PrepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput06, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "";
+    std::string sinkId = "";
+    sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
+    int32_t ret = sourceManager_->PrepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
@@ -258,6 +333,68 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput03, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput04, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    int32_t ret =
+        sourceManager_->StartRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput05, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartDInputCallback> callback;
+    int32_t ret =
+        sourceManager_->StartRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput06, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "";
+    std::string sinkId = "";
+    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    int32_t ret =
+        sourceManager_->StartRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput10, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_slkdiek3kddkeojfe");
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput11, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    sptr<TestStartStopVectorCallbackStub> callback;
+    int32_t ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput12, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "";
+    std::string sinkId = "";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_sldkjfldsjf234mdwswo");
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
@@ -282,12 +419,73 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput03, testing::ext::Tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput04, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    int32_t ret =
+        sourceManager_->StopRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput05, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "";
+    std::string sinkId = "";
+    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    int32_t ret =
+        sourceManager_->StopRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput06, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStopDInputCallback> callback;
+    int32_t ret =
+        sourceManager_->StopRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput10, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_slkdiek3kddkeojfe");
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput11, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    sptr<TestStartStopVectorCallbackStub> callback;
+    int32_t ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput12, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "";
+    std::string sinkId = "";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_sldkjfldsjf234mdwswo");
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput01, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
-    sptr<TestDelWhiteListInfosCb> delWhiteListCallback = new TestDelWhiteListInfosCb();
-    int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback, delWhiteListCallback);
+    int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
@@ -295,8 +493,7 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput02, testing::ext
 {
     std::string devId = "";
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
-    sptr<TestDelWhiteListInfosCb> delWhiteListCallback = new TestDelWhiteListInfosCb();
-    int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback, delWhiteListCallback);
+    int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
@@ -304,8 +501,34 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput03, testing::ext
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestUnprepareDInputCallback> callback;
-    sptr<TestDelWhiteListInfosCb> delWhiteListCallback;
-    int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback, delWhiteListCallback);
+    int32_t ret = sourceManager_->UnprepareRemoteInput(devId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput04, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    int32_t ret = sourceManager_->UnprepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput05, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "";
+    std::string sinkId = "";
+    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    int32_t ret = sourceManager_->UnprepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput06, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestUnprepareDInputCallback> callback;
+    int32_t ret = sourceManager_->UnprepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
@@ -335,6 +558,48 @@ HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware03, tes
     int32_t ret = sourceManager_->UnregisterDistributedHardware(devId, dhId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, ret);
 }
-} // namespace DistributedInput
-} // namespace DistributedHardware
-} // namespace OHOS
+
+HWTEST_F(DistributedInputSourceManagerTest, RegisterAddWhiteListCallback01, testing::ext::TestSize.Level0)
+{
+    sptr<TestAddWhiteListInfosCb> callback;
+    int32_t ret = sourceManager_->RegisterAddWhiteListCallback(callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REG_CALLBACK_ERR, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RegisterAddWhiteListCallback02, testing::ext::TestSize.Level0)
+{
+    sptr<TestAddWhiteListInfosCb> callback = new TestAddWhiteListInfosCb();
+    int32_t ret = sourceManager_->RegisterAddWhiteListCallback(callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RegisterDelWhiteListCallback01, testing::ext::TestSize.Level0)
+{
+    sptr<TestDelWhiteListInfosCb> callback;
+    int32_t ret = sourceManager_->RegisterDelWhiteListCallback(callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REG_CALLBACK_ERR, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RegisterDelWhiteListCallback02, testing::ext::TestSize.Level0)
+{
+    sptr<TestDelWhiteListInfosCb> callback = new TestDelWhiteListInfosCb();
+    int32_t ret = sourceManager_->RegisterDelWhiteListCallback(callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RegisterInputNodeListener01, testing::ext::TestSize.Level0)
+{
+    sptr<TestInputNodeListenerCb> callback = new TestInputNodeListenerCb();
+    int32_t ret = sourceManager_->RegisterInputNodeListener(callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UnRegisterInputNodeListener01, testing::ext::TestSize.Level0)
+{
+    sptr<TestInputNodeListenerCb> callback = new TestInputNodeListenerCb();
+    int32_t ret = sourceManager_->UnregisterInputNodeListener(callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+}
+}
+}

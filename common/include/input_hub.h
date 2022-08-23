@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <map>
 #include <unordered_map>
 
 #include <sys/epoll.h>
@@ -40,8 +41,15 @@ public:
     void StopCollectInputHandler();
     size_t DeviceIsExists(InputDeviceEvent* event, size_t capacity);
     std::vector<InputDevice> GetAllInputDevices();
-    void SetSupportInputType(const uint32_t& inputType);
+    void SetSupportInputType(const uint32_t &inputType);
+    void SetSharingDevices(bool enabled, std::vector<std::string> dhIds);
+    void GetDeviceDhIdByFd(int32_t fd, std::string &dhId);
+    void GetDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas);
+    void GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
+    void GetShareMousePathByDhId(std::vector<std::string> dhIds, std::string &path, std::string &dhId);
+    bool GetAllDevicesStoped();
     void ScanInputDevices(const std::string& dirname);
+
 private:
     struct Device  {
         Device* next;
@@ -54,11 +62,11 @@ private:
         uint8_t absBitmask[(ABS_MAX + 1) / 8];
         uint8_t relBitmask[(REL_MAX + 1) / 8];
 
-        Device(int fd, int32_t id, const std::string& path,
-                const InputDevice& identifier);
+        Device(int fd, int32_t id, const std::string& path, const InputDevice& identifier);
         ~Device();
         void Close();
         bool enabled; // initially true
+        bool isShare;
         int32_t Enable();
         int32_t Disable();
         bool HasValidFd() const;
@@ -104,7 +112,9 @@ private:
 
     bool ContainsNonZeroByte(const uint8_t* array, uint32_t startIndex, uint32_t endIndex);
     int64_t ProcessEventTimestamp(const input_event& event);
-    /* this macro is used to tell if "bit" is set in "array"
+
+    /*
+     * this macro is used to tell if "bit" is set in "array"
      * it selects a byte from the array, and does a boolean AND
      * operation with a byte that only has the relevant bit set.
      * eg. to check for the 12th bit, we do (array[1] & 1<<4)

@@ -50,9 +50,14 @@ namespace DistributedInput {
     #define DINPUT_SOFTBUS_KEY_DEVICE_ID "dinput_softbus_key_device_id"
     #define DINPUT_SOFTBUS_KEY_SESSION_ID "dinput_softbus_key_session_id"
     #define DINPUT_SOFTBUS_KEY_INPUT_TYPE "dinput_softbus_key_input_type"
+    #define DINPUT_SOFTBUS_KEY_VECTOR_DHID "dinput_softbus_key_vector_dhid"
     #define DINPUT_SOFTBUS_KEY_RESP_VALUE "dinput_softbus_key_resp_value"
     #define DINPUT_SOFTBUS_KEY_WHITE_LIST "dinput_softbus_key_list_list"
     #define DINPUT_SOFTBUS_KEY_INPUT_DATA "dinput_softbus_key_input_data"
+    #define DINPUT_SOFTBUS_KEY_KEYSTATE_DHID "dinput_softbus_key_keystate_dhid"
+    #define DINPUT_SOFTBUS_KEY_KEYSTATE_TYPE "dinput_softbus_key_keystate_type"
+    #define DINPUT_SOFTBUS_KEY_KEYSTATE_CODE "dinput_softbus_key_keystate_code"
+    #define DINPUT_SOFTBUS_KEY_KEYSTATE_VALUE "dinput_softbus_key_keystate_value"
 
     // json value
     const uint32_t TRANS_SINK_MSG_ONPREPARE    = 1;
@@ -61,11 +66,17 @@ namespace DistributedInput {
     const uint32_t TRANS_SINK_MSG_ONSTOP       = 4;
     const uint32_t TRANS_SINK_MSG_BODY_DATA    = 5;
     const uint32_t TRANS_SINK_MSG_LATENCY      = 6;
+    const uint32_t TRANS_SINK_MSG_DHID_ONSTART = 7;
+    const uint32_t TRANS_SINK_MSG_DHID_ONSTOP  = 8;
+    const uint32_t TRANS_SINK_MSG_KEY_STATE    = 9;
+
     const uint32_t TRANS_SOURCE_MSG_PREPARE    = 11;
     const uint32_t TRANS_SOURCE_MSG_UNPREPARE  = 12;
-    const uint32_t TRANS_SOURCE_MSG_START      = 13;
-    const uint32_t TRANS_SOURCE_MSG_STOP       = 14;
-    const uint32_t TRANS_SOURCE_MSG_LATENCY    = 15;
+    const uint32_t TRANS_SOURCE_MSG_START_TYPE = 13;
+    const uint32_t TRANS_SOURCE_MSG_STOP_TYPE  = 14;
+    const uint32_t TRANS_SOURCE_MSG_START_DHID = 15;
+    const uint32_t TRANS_SOURCE_MSG_STOP_DHID  = 16;
+    const uint32_t TRANS_SOURCE_MSG_LATENCY    = 17;
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

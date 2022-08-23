@@ -26,10 +26,12 @@
 
 #include "idistributed_hardware_source.h"
 #include "idistributed_hardware_sink.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
+const uint32_t DINPUT_CLIENT_CHECK_CALLBACK_REGISTER_MSG = 1;
 class DInputSAManager {
 DECLARE_SINGLE_INSTANCE_BASE(DInputSAManager);
 public:
@@ -40,12 +42,13 @@ public:
     bool GetDInputSinkProxy();
     bool HasDInputSinkProxy();
     bool SetDInputSinkProxy(const sptr<IRemoteObject> &remoteObject);
+    void RegisterEventHandler(std::shared_ptr<AppExecFwk::EventHandler> handler);
 
 public:
-class SystemAbilityListener : public SystemAbilityStatusChangeStub {
-public:
-    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    class SystemAbilityListener : public SystemAbilityStatusChangeStub {
+    public:
+        void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+        void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     };
 
 private:
@@ -59,10 +62,13 @@ public:
     std::atomic<bool> isSubscribeSinkSAChangeListener = false;
     std::mutex sinkMutex_;
     std::mutex sourceMutex_;
+    std::mutex handlerMutex_;
 
     sptr<IDistributedSourceInput> dInputSourceProxy_ = nullptr;
     sptr<IDistributedSinkInput> dInputSinkProxy_ = nullptr;
     sptr<SystemAbilityListener> saListenerCallback = nullptr;
+
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

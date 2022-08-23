@@ -46,6 +46,7 @@ public:
     int32_t RespStartRemoteInput(const int32_t sessionId, std::string &smsg);
     int32_t RespStopRemoteInput(const int32_t sessionId, std::string &smsg);
     int32_t RespLatency(const int32_t sessionId, std::string &smsg);
+    void SendKeyStateNodeMsg(const int32_t sessionId, std::string &smsg);
 
     int32_t OnSessionOpened(int32_t sessionId, int32_t result);
     void OnSessionClosed(int32_t sessionId);
@@ -62,6 +63,8 @@ public:
 
     std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> GetEventHandler();
     void CloseAllSession();
+    int32_t GetSessionIdByNetId(const std::string &srcId);
+    void GetDeviceIdBySessionId(int32_t sessionId, std::string &srcId);
 
 private:
     int32_t SendMessage(int32_t sessionId, std::string &message);
@@ -71,9 +74,11 @@ private:
     void NotifyStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyStopRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyLatency(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyStartRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg);
 
 private:
-    std::string deviceId_;
+    std::map<std::string, int32_t> sessionDevMap_; // source networkId, sessionId
     std::string mySessionName_;
 
     std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> eventHandler_;

@@ -26,7 +26,7 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 IMPLEMENT_SINGLE_INSTANCE(DInputSAManager);
-
+const uint32_t DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME = 50; // million seconds
 void DInputSAManager::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID) {
@@ -45,6 +45,14 @@ void DInputSAManager::SystemAbilityListener::OnAddSystemAbility(int32_t systemAb
 {
     if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID) {
         DInputSAManager::GetInstance().dInputSourceSAOnline.store(true);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().handlerMutex_);
+        if (DInputSAManager::GetInstance().eventHandler_ != nullptr) {
+            DHLOGI("SendEvent DINPUT_CLIENT_CHECK_CALLBACK_REGISTER_MSG");
+            AppExecFwk::InnerEvent::Pointer msgEvent =
+                AppExecFwk::InnerEvent::Get(DINPUT_CLIENT_CHECK_CALLBACK_REGISTER_MSG, systemAbilityId);
+            DInputSAManager::GetInstance().eventHandler_->SendEvent(msgEvent, DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME,
+                                                                    AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        }
     } else if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
         DInputSAManager::GetInstance().dInputSinkSAOnline.store(true);
     }
@@ -85,6 +93,12 @@ void DInputSAManager::Init()
     }
 }
 
+void DInputSAManager::RegisterEventHandler(std::shared_ptr<AppExecFwk::EventHandler> handler)
+{
+    std::lock_guard<std::mutex> lock(handlerMutex_);
+    eventHandler_ = handler;
+}
+
 bool DInputSAManager::GetDInputSourceProxy()
 {
     if (!isSubscribeSrcSAChangeListener.load()) {
@@ -116,12 +130,12 @@ bool DInputSAManager::GetDInputSourceProxy()
         }
         sptr<ISystemAbilityManager> systemAbilityManager =
             SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-
         if (!systemAbilityManager) {
             DHLOGE("get system ability manager failed.");
             return false;
         }
-        DHLOGI("%s try get sa: %d", __func__, DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
+
+        DHLOGI("try get sa: %d", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
         sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(
             DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
         if (!remoteObject) {

@@ -79,13 +79,10 @@ int32_t DistributedInputSourceStub::HandleUnregisterDistributedHardware(MessageP
 int32_t DistributedInputSourceStub::HandlePrepareRemoteInput(MessageParcel &data, MessageParcel &reply)
 {
     std::string deviceId = data.ReadString();
-    sptr<IPrepareDInputCallback> callback =
-        iface_cast<IPrepareDInputCallback>(data.ReadRemoteObject());
-    sptr<IAddWhiteListInfosCallback> addCallback =
-        iface_cast<IAddWhiteListInfosCallback>(data.ReadRemoteObject());
-    int32_t ret = PrepareRemoteInput(deviceId, callback, addCallback);
+    sptr<IPrepareDInputCallback> callback = iface_cast<IPrepareDInputCallback>(data.ReadRemoteObject());
+    int32_t ret = PrepareRemoteInput(deviceId, callback);
     if (!reply.WriteInt32(ret)) {
-        DHLOGE("DistributedInputSourceStub prepareRemoteInput write ret failed");
+        DHLOGE("HandlePrepareRemoteInput write ret failed");
         return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
     return DH_SUCCESS;
@@ -94,14 +91,11 @@ int32_t DistributedInputSourceStub::HandlePrepareRemoteInput(MessageParcel &data
 int32_t DistributedInputSourceStub::HandleUnprepareRemoteInput(MessageParcel &data, MessageParcel &reply)
 {
     std::string deviceId = data.ReadString();
-    sptr<IUnprepareDInputCallback> callback =
-        iface_cast<IUnprepareDInputCallback>(data.ReadRemoteObject());
-    sptr<IDelWhiteListInfosCallback> delCallback =
-        iface_cast<IDelWhiteListInfosCallback>(data.ReadRemoteObject());
-    int32_t ret = UnprepareRemoteInput(deviceId, callback, delCallback);
+    sptr<IUnprepareDInputCallback> callback = iface_cast<IUnprepareDInputCallback>(data.ReadRemoteObject());
+    int32_t ret = UnprepareRemoteInput(deviceId, callback);
     if (!reply.WriteInt32(ret)) {
-        DHLOGE("DistributedInputSourceStub unprepareRemoteInput write ret failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+        DHLOGE("HandleUnprepareRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -114,7 +108,7 @@ int32_t DistributedInputSourceStub::HandleStartRemoteInput(MessageParcel &data, 
     int32_t ret = StartRemoteInput(deviceId, inputTypes, callback);
     if (!reply.WriteInt32(ret)) {
         DHLOGE("DistributedInputSourceStub startRemoteInput write ret failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -127,7 +121,143 @@ int32_t DistributedInputSourceStub::HandleStopRemoteInput(MessageParcel &data, M
     int32_t ret = StopRemoteInput(deviceId, inputTypes, callback);
     if (!reply.WriteInt32(ret)) {
         DHLOGE("DistributedInputSourceStub stopRemoteInput write ret failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleStartRelayTypeRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string srcId = data.ReadString();
+    std::string sinkId = data.ReadString();
+    uint32_t inputTypes = data.ReadUint32();
+    sptr<IStartDInputCallback> callback = iface_cast<IStartDInputCallback>(data.ReadRemoteObject());
+    int32_t ret = StartRemoteInput(srcId, sinkId, inputTypes, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("DistributedInputSourceStub write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleStopRelayTypeRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string srcId = data.ReadString();
+    std::string sinkId = data.ReadString();
+    uint32_t inputTypes = data.ReadUint32();
+    sptr<IStopDInputCallback> callback = iface_cast<IStopDInputCallback>(data.ReadRemoteObject());
+    int32_t ret = StopRemoteInput(srcId, sinkId, inputTypes, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("DistributedInputSourceStub write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandlePrepareRelayRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string srcId = data.ReadString();
+    std::string sinkId = data.ReadString();
+    sptr<IPrepareDInputCallback> callback = iface_cast<IPrepareDInputCallback>(data.ReadRemoteObject());
+    int32_t ret = PrepareRemoteInput(srcId, sinkId, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandlePrepareRelayRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleUnprepareRelayRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string srcId = data.ReadString();
+    std::string sinkId = data.ReadString();
+    sptr<IUnprepareDInputCallback> callback = iface_cast<IUnprepareDInputCallback>(data.ReadRemoteObject());
+    int32_t ret = UnprepareRemoteInput(srcId, sinkId, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleUnprepareRelayRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleStartDhidRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string sinkId = data.ReadString();
+
+    std::vector<std::string> tempVector;
+    uint32_t vecSize = data.ReadUint32();
+    for (uint32_t i = 0; i < vecSize; i++) {
+        std::string dhid = data.ReadString();
+        tempVector.push_back(dhid);
+    }
+
+    sptr<IStartStopDInputsCallback> callback = iface_cast<IStartStopDInputsCallback>(data.ReadRemoteObject());
+    int32_t ret = StartRemoteInput(sinkId, tempVector, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleStartDhidRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleStopDhidRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string sinkId = data.ReadString();
+
+    std::vector<std::string> tempVector;
+    uint32_t vecSize = data.ReadUint32();
+    for (uint32_t i = 0; i < vecSize; i++) {
+        std::string dhid = data.ReadString();
+        tempVector.push_back(dhid);
+    }
+
+    sptr<IStartStopDInputsCallback> callback = iface_cast<IStartStopDInputsCallback>(data.ReadRemoteObject());
+    int32_t ret = StopRemoteInput(sinkId, tempVector, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleStopDhidRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleStartRelayDhidRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string srcId = data.ReadString();
+    std::string sinkId = data.ReadString();
+
+    std::vector<std::string> tempVector;
+    uint32_t vecSize = data.ReadUint32();
+    for (uint32_t i = 0; i < vecSize; i++) {
+        std::string dhid = data.ReadString();
+        tempVector.push_back(dhid);
+    }
+
+    sptr<IStartStopDInputsCallback> callback = iface_cast<IStartStopDInputsCallback>(data.ReadRemoteObject());
+    int32_t ret = StartRemoteInput(srcId, sinkId, tempVector, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleStartRelayDhidRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleStopRelayDhidRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string srcId = data.ReadString();
+    std::string sinkId = data.ReadString();
+
+    std::vector<std::string> tempVector;
+    uint32_t vecSize = data.ReadUint32();
+    for (uint32_t i = 0; i < vecSize; i++) {
+        std::string dhid = data.ReadString();
+        tempVector.push_back(dhid);
+    }
+
+    sptr<IStartStopDInputsCallback> callback = iface_cast<IStartStopDInputsCallback>(data.ReadRemoteObject());
+    int32_t ret = StopRemoteInput(srcId, sinkId, tempVector, callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleStopRelayDhidRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
@@ -139,13 +269,101 @@ int32_t DistributedInputSourceStub::HandleIsStartDistributedInput(MessageParcel 
     int32_t ret = IsStartDistributedInput(inputType, callback);
     if (!reply.WriteInt32(ret)) {
         DHLOGE("DistributedInputSourceStub isStartDistributedInput write ret failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
     }
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputSourceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t DistributedInputSourceStub::HandleSyncNodeInfoRemoteInput(MessageParcel &data, MessageParcel &reply)
+{
+    std::string userDevId = data.ReadString();
+    std::string dhid = data.ReadString();
+    std::string nodeDesc = data.ReadString();
+
+    int32_t ret = SyncNodeInfoRemoteInput(userDevId, dhid, nodeDesc);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleSyncNodeInfoRemoteInput write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleRegisterAddWhiteListCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IAddWhiteListInfosCallback> callback = iface_cast<IAddWhiteListInfosCallback>(data.ReadRemoteObject());
+    int32_t ret = RegisterAddWhiteListCallback(callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleRegisterAddWhiteListCallback write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleRegisterDelWhiteListCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IDelWhiteListInfosCallback> callback = iface_cast<IDelWhiteListInfosCallback>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        DHLOGI("HandleRegisterDelWhiteListCallback callback is null");
+    }
+
+    int32_t ret = RegisterDelWhiteListCallback(callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleRegisterDelWhiteListCallback write ret failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleRegisterInputNodeListener(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<InputNodeListener> callback = iface_cast<InputNodeListener>(data.ReadRemoteObject());
+    int32_t ret = RegisterInputNodeListener(callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleRegisterInputNodeListener write ret failed");
+        return ERR_DH_INPUT_SOURCE_STUB_REGISTER_NODE_LISTENER_FAIL;
+    }
+
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleUnRegisterInputNodeListener(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<InputNodeListener> callback = iface_cast<InputNodeListener>(data.ReadRemoteObject());
+    int32_t ret = RegisterInputNodeListener(callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleUnRegisterInputNodeListener write ret failed");
+        return ERR_DH_INPUT_SOURCE_STUB_UNREGISTER_NODE_LISTENER_FAIL;
+    }
+
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleRegisterSimulationEventListener(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<ISimulationEventListener> callback = iface_cast<ISimulationEventListener>(data.ReadRemoteObject());
+    int32_t ret = RegisterSimulationEventListener(callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleRegisterSimulationEventListener write ret failed, ret = %d", ret);
+        return ERR_DH_INPUT_SOURCE_STUB_REGISTER_SIMULATION_EVENT_LISTENER_FAIL;
+    }
+
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::HandleUnregisterSimulationEventListener(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<ISimulationEventListener> callback = iface_cast<ISimulationEventListener>(data.ReadRemoteObject());
+    int32_t ret = UnregisterSimulationEventListener(callback);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("HandleUnregisterSimulationEventListener write ret failed, ret = %d", ret);
+        return ERR_DH_INPUT_SOURCE_STUB_UNREGISTER_SIMULATION_EVENT_LISTENER_FAIL;
+    }
+
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceStub::OnRemoteRequest(
+    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         DHLOGE("DistributedInputSourceStub read token valid failed");
@@ -175,6 +393,51 @@ int32_t DistributedInputSourceStub::OnRemoteRequest(uint32_t code, MessageParcel
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::STOP_REMOTE_INPUT): {
             return HandleStopRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::START_RELAY_TYPE_REMOTE_INPUT): {
+            return HandleStartRelayTypeRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::STOP_RELAY_TYPE_REMOTE_INPUT): {
+            return HandleStopRelayTypeRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::PREPARE_RELAY_REMOTE_INPUT): {
+            return HandlePrepareRelayRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::UNPREPARE_RELAY_REMOTE_INPUT): {
+            return HandleUnprepareRelayRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::START_DHID_REMOTE_INPUT): {
+            return HandleStartDhidRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::STOP_DHID_REMOTE_INPUT): {
+            return HandleStopDhidRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::START_RELAY_DHID_REMOTE_INPUT): {
+            return HandleStartRelayDhidRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::STOP_RELAY_DHID_REMOTE_INPUT): {
+            return HandleStopRelayDhidRemoteInput(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::REGISTER_ADD_WHITE_LIST_CB_REMOTE_INPUT): {
+            return HandleRegisterAddWhiteListCallback(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::REGISTER_DEL_WHITE_LIST_CB_REMOTE_INPUT): {
+            return HandleRegisterDelWhiteListCallback(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::REGISTER_NODE_LISTENER): {
+            return HandleRegisterInputNodeListener(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::UNREGISTER_NODE_LISTENER): {
+            return HandleUnRegisterInputNodeListener(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::REGISTER_SIMULATION_EVENT_LISTENER): {
+            return HandleRegisterSimulationEventListener(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::UNREGISTER_SIMULATION_EVENT_LISTENER): {
+            return HandleUnregisterSimulationEventListener(data, reply);
+        }
+        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::SYNC_NODE_INFO_REMOTE_INPUT): {
+            return HandleSyncNodeInfoRemoteInput(data, reply);
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::ISSTART_REMOTE_INPUT): {
             return HandleIsStartDistributedInput(data, reply);

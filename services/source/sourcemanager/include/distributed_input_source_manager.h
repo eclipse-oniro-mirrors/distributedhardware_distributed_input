@@ -33,8 +33,10 @@
 #include "constants_dinput.h"
 #include "dinput_source_trans_callback.h"
 #include "distributed_input_node_manager.h"
-#include "distributed_input_source_stub.h"
 #include "distributed_input_source_event_handler.h"
+#include "distributed_input_source_sa_cli_mgr.h"
+#include "distributed_input_source_stub.h"
+#include "idinput_dbg_itf.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -48,15 +50,44 @@ const uint32_t DINPUT_SOURCE_MANAGER_PREPARE_MSG = 3;
 const uint32_t DINPUT_SOURCE_MANAGER_UNPREPARE_MSG = 4;
 const uint32_t DINPUT_SOURCE_MANAGER_START_MSG = 5;
 const uint32_t DINPUT_SOURCE_MANAGER_STOP_MSG = 6;
-const uint32_t DINPUT_SOURCE_MANAGER_RECEIVE_DATA_MSG = 7;
-const uint32_t DINPUT_SOURCE_MANAGER_STARTSERVER_MSG = 8;
+const uint32_t DINPUT_SOURCE_MANAGER_START_DHID_MSG = 7;
+const uint32_t DINPUT_SOURCE_MANAGER_STOP_DHID_MSG = 8;
+const uint32_t DINPUT_SOURCE_MANAGER_RECEIVE_DATA_MSG = 9;
+const uint32_t DINPUT_SOURCE_MANAGER_STARTSERVER_MSG = 10;
+const uint32_t DINPUT_SOURCE_MANAGER_KEY_STATE_MSG = 11;
 const std::string INPUT_SOURCEMANAGER_KEY_DEVID = "deviceId";
 const std::string INPUT_SOURCEMANAGER_KEY_HWID = "hardwareId";
 const std::string INPUT_SOURCEMANAGER_KEY_ITP = "inputTypes";
+const std::string INPUT_SOURCEMANAGER_KEY_DHID = "dhids";
+const std::string INPUT_SOURCEMANAGER_KEY_TYPE = "type";
+const std::string INPUT_SOURCEMANAGER_KEY_CODE = "code";
+const std::string INPUT_SOURCEMANAGER_KEY_VALUE = "value";
+const std::string INPUT_SOURCEMANAGER_KEY_FROM_START_DHID = "fromStartDhid";
 const std::string INPUT_SOURCEMANAGER_KEY_RESULT = "result";
 const std::string INPUT_SOURCEMANAGER_KEY_WHITELIST = "whitelist";
 const uint32_t DINPUT_SOURCE_SWITCH_OFF = 0;
 const uint32_t DINPUT_SOURCE_SWITCH_ON = 1;
+const uint32_t DINPUT_SOURCE_WRITE_EVENT_SIZE = 1;
+
+// Node Info that registerd by remote node
+typedef struct BeRegNodeInfo {
+    // source node network id
+    std::string srcId;
+    // sink node dh id
+    std::string dhId;
+    // node desc on sink node
+    std::string nodeDesc;
+
+    bool operator==(const BeRegNodeInfo &node)
+    {
+        return (srcId == node.srcId) && (dhId == node.dhId) && (nodeDesc == node.nodeDesc);
+    }
+
+    bool operator<(const BeRegNodeInfo &node) const
+    {
+        return (srcId + dhId + nodeDesc).compare(node.srcId + node.dhId + node.nodeDesc) < 0;
+    }
+} BeRegNodeInfo;
 
 class DistributedInputSourceManager : public SystemAbility, public DistributedInputSourceStub {
     DECLARE_SYSTEM_ABILITY(DistributedInputSourceManager)
@@ -64,10 +95,11 @@ class DistributedInputSourceManager : public SystemAbility, public DistributedIn
 typedef struct InputDeviceId {
     std::string devId;
     std::string dhId;
+    std::string nodeDesc;
 
     bool operator==(const InputDeviceId &inputId)
     {
-        return (devId == inputId.devId) && (dhId == inputId.dhId);
+        return (devId == inputId.devId) && (dhId == inputId.dhId) && (nodeDesc == inputId.nodeDesc);
     }
 } InputDeviceId;
 
@@ -89,11 +121,9 @@ public:
     virtual int32_t UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
         sptr<IUnregisterDInputCallback> callback) override;
 
-    virtual int32_t PrepareRemoteInput(const std::string& deviceId,
-        sptr<IPrepareDInputCallback> callback, sptr<IAddWhiteListInfosCallback> addWhiteListCallback)  override;
+    virtual int32_t PrepareRemoteInput(const std::string &deviceId, sptr<IPrepareDInputCallback> callback) override;
 
-    virtual int32_t UnprepareRemoteInput(const std::string& deviceId,
-        sptr<IUnprepareDInputCallback> callback, sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
+    virtual int32_t UnprepareRemoteInput(const std::string &deviceId, sptr<IUnprepareDInputCallback> callback) override;
 
     virtual int32_t StartRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback) override;
@@ -101,8 +131,41 @@ public:
     virtual int32_t StopRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback) override;
 
+    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStartDInputCallback> callback) override;
+
+    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStopDInputCallback> callback) override;
+
+    virtual int32_t PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IPrepareDInputCallback> callback) override;
+
+    virtual int32_t UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IUnprepareDInputCallback> callback) override;
+
+    virtual int32_t StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback) override;
+
+    virtual int32_t StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback) override;
+
+    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
+
+    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
+
     virtual int32_t IsStartDistributedInput(
         const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
+    virtual int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) override;
+    virtual int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
+    virtual int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) override;
+    virtual int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener) override;
+
+    virtual int32_t SyncNodeInfoRemoteInput(const std::string &userDevId, const std::string &dhId,
+        const std::string &nodeDesc) override;
+    virtual int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
+    virtual int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
 
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 
@@ -115,6 +178,10 @@ public:
         void onResponseUnprepareRemoteInput(const std::string deviceId, bool result);
         void onResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result);
         void onResponseStopRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result);
+        void onResponseStartRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result);
+        void onResponseStopRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result);
+        void onResponseKeyState(const std::string deviceId, const std::string &dhid, const uint32_t type,
+            const uint32_t code, const uint32_t value);
         void onReceivedEventRemoteInput(const std::string deviceId, const std::string &event);
         void RecordEventLog(int64_t when, int32_t type, int32_t code, int32_t value, const std::string& path);
 
@@ -136,6 +203,9 @@ public:
         void NotifyUnprepareCallback(const AppExecFwk::InnerEvent::Pointer &event);
         void NotifyStartCallback(const AppExecFwk::InnerEvent::Pointer &event);
         void NotifyStopCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyStartDhidCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyStopDhidCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyKeyStateCallback(const AppExecFwk::InnerEvent::Pointer &event);
         void NotifyStartServerCallback(const AppExecFwk::InnerEvent::Pointer &event);
 
         DistributedInputSourceManager *sourceManagerObj_;
@@ -160,6 +230,19 @@ public:
 
     private:
         int32_t ParseMessage(const std::string& message, std::string& sinkDevId, uint64_t& sourceWinId);
+    };
+
+    class DeviceOfflineListener : public PublisherListenerStub {
+    public:
+        DeviceOfflineListener(DistributedInputSourceManager* srcManagerContext);
+        ~DeviceOfflineListener();
+        void OnMessage(const DHTopic topic, const std::string &message);
+
+    private:
+        void DeleteNodeInfoAndNotify(const std::string& offlineDevId);
+
+    private:
+        DistributedInputSourceManager* sourceManagerContext_;
     };
 
     std::shared_ptr<DInputSourceManagerEventHandler> GetCallbackEventHandler()
@@ -187,6 +270,11 @@ public:
         const std::string& devId, const uint32_t& inputTypes, const int32_t& status
     );
 
+    void RunStartDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status);
+    void RunStopDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status);
+    void RunKeyStateCallback(const std::string &sinkId, const std::string &dhId, const uint32_t type,
+        const uint32_t code, const uint32_t value);
+
     IStartDInputServerCallback* GetStartDInputServerCback();
     DInputServerType GetStartTransFlag();
     void SetStartTransFlag(const DInputServerType flag);
@@ -201,7 +289,6 @@ public:
     uint32_t GetAllInputTypesMap();
 
 private:
-
     struct DInputClientRegistInfo {
         std::string devId;
         std::string dhId;
@@ -217,30 +304,45 @@ private:
     struct DInputClientPrepareInfo {
         std::string devId;
         sptr<IPrepareDInputCallback> preCallback = nullptr;
-        sptr<IAddWhiteListInfosCallback> addWhiteListCallback = nullptr;
 
-        DInputClientPrepareInfo(std::string deviceId, sptr<IPrepareDInputCallback> prepareCallback,
-            sptr<IAddWhiteListInfosCallback> addWhiteListCallback) : devId(deviceId), preCallback(prepareCallback),
-            addWhiteListCallback(addWhiteListCallback) {}
+        DInputClientPrepareInfo(std::string deviceId, sptr<IPrepareDInputCallback> prepareCallback)
+            : devId(deviceId), preCallback(prepareCallback) {}
     };
 
     struct DInputClientUnprepareInfo {
         std::string devId;
         sptr<IUnprepareDInputCallback> unpreCallback = nullptr;
-        sptr<IDelWhiteListInfosCallback>  delWhiteListCallback = nullptr;
     };
 
     struct DInputClientStartInfo {
         std::string devId;
         uint32_t inputTypes;
         sptr<IStartDInputCallback> callback = nullptr;
+        DInputClientStartInfo(std::string deviceId, uint32_t types, sptr<IStartDInputCallback> cb)
+            : devId(deviceId), inputTypes(types), callback(cb) {}
     };
 
     struct DInputClientStopInfo {
         std::string devId;
         uint32_t inputTypes;
         sptr<IStopDInputCallback> callback = nullptr;
+        DInputClientStopInfo(std::string deviceId, uint32_t types, sptr<IStopDInputCallback> cb)
+            : devId(deviceId), inputTypes(types), callback(cb) {}
     };
+    // add new prepare/start function
+    struct DInputClientStartDhidInfo {
+        std::string srcId;
+        std::string sinkId;
+        std::vector<std::string> dhIds;
+        sptr<IStartStopDInputsCallback> callback = nullptr;
+    };
+    struct DInputClientStopDhidInfo {
+        std::string srcId;
+        std::string sinkId;
+        std::vector<std::string> dhIds;
+        sptr<IStartStopDInputsCallback> callback = nullptr;
+    };
+
     ServiceSourceRunningState serviceRunningState_ = ServiceSourceRunningState::STATE_NOT_START;
     DInputServerType isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
     std::shared_ptr<DistributedInputSourceManager::DInputSourceListener> statuslistener_;
@@ -253,6 +355,13 @@ private:
     std::vector<DInputClientStopInfo> stpCallbacks_;
     sptr<IStartDInputServerCallback>  startServerCallback_ = nullptr;
 
+    std::vector<DInputClientStartDhidInfo> staStringCallbacks_;
+    std::vector<DInputClientStopDhidInfo> stpStringCallbacks_;
+
+    sptr<IAddWhiteListInfosCallback> addWhiteListCallback_ = nullptr;
+    sptr<IDelWhiteListInfosCallback> delWhiteListCallback_ = nullptr;
+    std::set<sptr<ISimulationEventListener>> simulationEventCallbacks_;
+
     std::map<std::string, int32_t> DeviceMap_;
     std::map<std::string, uint32_t> InputTypesMap_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
@@ -261,9 +370,38 @@ private:
     std::vector<InputDeviceId> inputDevice_;
     bool InitAuto();
     void handleStartServerCallback(const std::string& devId);
+    std::mutex mutex_;
     std::mutex operationMutex_;
     sptr<StartDScreenListener> startDScreenListener_ = nullptr;
     sptr<StopDScreenListener> stopDScreenListener_ = nullptr;
+    sptr<DeviceOfflineListener> deviceOfflineListener_ = nullptr;
+
+    std::mutex valMutex_;
+    std::mutex syncNodeInfoMutex_;
+    std::map<std::string, std::set<BeRegNodeInfo>> syncNodeInfoMap_;
+    int32_t RelayStartRemoteInputByType(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStartDInputCallback> callback);
+    int32_t RelayStopRemoteInputByType(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStopDInputCallback> callback);
+    int32_t RelayPrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IPrepareDInputCallback> callback);
+    int32_t RelayUnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IUnprepareDInputCallback> callback);
+    int32_t RelayStartRemoteInputByDhid(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback);
+    int32_t RelayStopRemoteInputByDhid(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback);
+    bool IsStringDataSame(const std::vector<std::string> &oldDhIds, std::vector<std::string> newDhIds);
+    void StringSplitToVector(const std::string &str, const char split, std::vector<std::string> &vecStr);
+    void DeleteNodeInfoAndNotify(const std::string& offlineDevId);
+    void SendExistVirNodeInfos(sptr<InputNodeListener> listener);
+    std::set<BeRegNodeInfo> GetSyncNodeInfo(const std::string& devId);
+    void UpdateSyncNodeInfo(const std::string& devId, const std::string& dhId, const std::string &nodeDesc);
+    void DeleteSyncNodeInfo(const std::string& devId);
+
+private:
+    IDInputDBGItf* dinputDbgItfPtr_ = nullptr;
+    void InitDinputDBG();
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

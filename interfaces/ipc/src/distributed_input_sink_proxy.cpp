@@ -19,6 +19,7 @@
 #include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
+#include "dinput_utils_tool.h"
 
 namespace OHOS {
 namespace DistributedHardware {

@@ -60,7 +60,7 @@ int32_t WhiteListUtil::Init()
     std::ifstream inFile(whiteListFilePath, std::ios::in | std::ios::binary);
     if (!inFile.is_open()) {
         // file open error
-        DHLOGE("%s error, file open fail path=%s", __func__, whiteListFilePath);
+        DHLOGE("WhiteListUtil Init error, file open fail path=%s", whiteListFilePath);
         return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
 
@@ -70,8 +70,7 @@ int32_t WhiteListUtil::Init()
 
     std::string line;
     while (getline(inFile, line)) {
-        DHLOGI("%s called success, line=%s", __func__, line.c_str());
-
+        DHLOGI("read whitelist cfg, line=%s", line.c_str());
         vecKeyCode.clear();
         vecCombinationKey.clear();
 
@@ -117,7 +116,7 @@ int32_t WhiteListUtil::Init()
 
 int32_t WhiteListUtil::UnInit(void)
 {
-    DHLOGI("%s called", __func__);
+    DHLOGI("WhiteListUtil UnInit called");
     ClearWhiteList();
     return DH_SUCCESS;
 }
@@ -230,7 +229,7 @@ int32_t WhiteListUtil::ClearWhiteList(void)
 
 int32_t WhiteListUtil::GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST_VEC &vecWhiteList)
 {
-    DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
+    DHLOGI("GetWhiteList start, deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
     TYPE_DEVICE_WHITE_LIST_MAP::const_iterator iter = mapDeviceWhiteList_.find(deviceId);
@@ -271,17 +270,17 @@ std::string WhiteListUtil::GetBusinessEventHash(const BusinessEvent &event)
 
 bool WhiteListUtil::IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event)
 {
-    DHLOGI("start, deviceId=%s", GetAnonyString(deviceId).c_str());
+    DHLOGI("IsNeedFilterOut start, deviceId=%s", GetAnonyString(deviceId).c_str());
 
     std::lock_guard<std::mutex> lock(mutex_);
     if (combKeysHashMap_.empty()) {
-        DHLOGE("%s called, white list is empty!", __func__);
+        DHLOGE("IsNeedFilterOut error, white list is empty!");
         return false;
     }
 
     auto iter = combKeysHashMap_.find(deviceId);
     if (iter == combKeysHashMap_.end()) {
-        DHLOGE("%s called, not find by deviceId!", __func__);
+        DHLOGE("IsNeedFilterOut error, not find by deviceId!");
         return false;
     }
 

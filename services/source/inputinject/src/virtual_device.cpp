@@ -20,18 +20,19 @@
 #include "anonymous_string.h"
 #include "distributed_hardware_log.h"
 
+#include "constants_dinput.h"
 #include "hidumper.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 VirtualDevice::VirtualDevice()
-    : deviceName_(""), netWorkId_(""), busType_(0), vendorId_(0), productId_(0), version_(0)
+    : deviceName_(""), netWorkId_(""), busType_(0), vendorId_(0), productId_(0), version_(0), classes_(0)
 {
 }
 
-VirtualDevice::VirtualDevice(const InputDevice& event) : deviceName_(
-    event.name), busType_(event.bus), vendorId_(event.vendor), productId_(event.product), version_(event.version)
+VirtualDevice::VirtualDevice(const InputDevice& event) : deviceName_(event.name), busType_(event.bus),
+    vendorId_(event.vendor), productId_(event.product), version_(event.version), classes_(event.classes)
 {
 }
 
@@ -48,7 +49,7 @@ bool VirtualDevice::DoIoctl(int32_t fd, int32_t request, const uint32_t value)
 {
     int32_t rc = ioctl(fd, request, value);
     if (rc < 0) {
-        DHLOGE("%s ioctl failed", __func__);
+        DHLOGE("ioctl failed");
         return false;
     }
     return true;
@@ -59,8 +60,7 @@ bool VirtualDevice::CreateKey()
     auto fun = [&](int32_t uiSet, const std::vector<uint32_t>& list) -> bool {
         for (uint32_t evt_type : list) {
             if (!DoIoctl(fd_, uiSet, evt_type)) {
-                DHLOGE(
-                    "%s Error setting event type: %u", __func__, evt_type);
+                DHLOGE("Error setting event type: %u", evt_type);
                 return false;
             }
         }
@@ -82,10 +82,11 @@ bool VirtualDevice::CreateKey()
     return true;
 }
 
-bool VirtualDevice::SetPhys(const std::string deviceName)
+bool VirtualDevice::SetPhys(const std::string deviceName, std::string dhId)
 {
     std::string phys;
-    phys.append(deviceName).append(pid_).append("/").append(pid_).append("|").append(netWorkId_);
+    phys.append(deviceName).append(pid_).append("/").append(pid_).append("|")
+        .append(netWorkId_).append("|").append(dhId);
 
     if (ioctl(fd_, UI_SET_PHYS, phys.c_str()) < 0) {
         return false;
@@ -96,34 +97,33 @@ bool VirtualDevice::SetPhys(const std::string deviceName)
 bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
 {
     fd_ = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
-    DHLOGI("open fd %d", fd_);
     if (fd_ < 0) {
-        DHLOGE("Failed to open uinput %s", __func__);
+        DHLOGE("Failed to open uinput");
         return false;
     }
 
     deviceName_ = VIRTUAL_DEVICE_NAME + deviceName_;
     if (strncpy_s(dev_.name, sizeof(dev_.name), deviceName_.c_str(), deviceName_.size()) != 0) {
         return false;
-    };
+    }
     HiDumper::GetInstance().SaveNodeInfo(devId, deviceName_, dhId);
     dev_.id.bustype = busType_;
     dev_.id.vendor = vendorId_;
     dev_.id.product = productId_;
     dev_.id.version = version_;
 
-    if (!SetPhys(deviceName_)) {
-        DHLOGE("Failed to set PHYS! %s", __func__);
+    if (!SetPhys(deviceName_, dhId)) {
+        DHLOGE("Failed to set PHYS!");
         return false;
     }
 
     if (!CreateKey()) {
-        DHLOGE("Failed to create KeyValue %s", __func__);
+        DHLOGE("Failed to create KeyValue");
         return false;
     }
 
     if (write(fd_, &dev_, sizeof(dev_)) < 0) {
-        DHLOGE("Unable to set input device info: %s", __func__);
+        DHLOGE("Unable to set input device info");
         return false;
     }
 
@@ -131,14 +131,14 @@ bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
         DHLOGE(
             "fd = %d, ioctl(fd_, UI_DEV_CREATE) = %d",
             fd_, ioctl(fd_, UI_DEV_CREATE));
-        DHLOGE("Unable to create input device : %s", __func__);
+        DHLOGE("Unable to create input device");
         return false;
     }
     DHLOGI("create fd %d", fd_);
 
     char sysfs_device_name[16];
     if (ioctl(fd_, UI_GET_SYSNAME(sizeof(sysfs_device_name)), sysfs_device_name) < 0) {
-        DHLOGE("Unable to get input device name: %s", __func__);
+        DHLOGE("Unable to get input device name");
     }
     DHLOGI("get input device name: %s, fd: %d", GetAnonyString(sysfs_device_name).c_str(), fd_);
     return true;
@@ -161,12 +161,12 @@ bool VirtualDevice::InjectInputEvent(const input_event& event)
 void VirtualDevice::SetNetWorkId(const std::string netWorkId)
 {
     DHLOGI("SetNetWorkId %s\n", GetAnonyString(netWorkId).c_str());
-    netWorkId_.append(netWorkId);
+    netWorkId_ = netWorkId;
 }
 
-int32_t VirtualDevice::GetFd()
+std::string VirtualDevice::GetNetWorkId()
 {
-    return fd_;
+    return netWorkId_;
 }
 
 void VirtualDevice::RecordEventLog(const input_event& event)
@@ -188,6 +188,16 @@ void VirtualDevice::RecordEventLog(const input_event& event)
     }
     DHLOGD("4.E2E-Test Source write event into input driver, EventType: %s, Code: %d, Value: %d, Sec: %ld, Sec1: %ld",
         eventType.c_str(), event.code, event.value, event.input_event_sec, event.input_event_usec);
+}
+
+int32_t VirtualDevice::GetDeviceFd()
+{
+    return fd_;
+}
+
+int32_t VirtualDevice::GetDeviceType()
+{
+    return classes_;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

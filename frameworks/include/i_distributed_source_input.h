@@ -17,6 +17,7 @@
 #define I_DISTRIBUTED_SOURCE_INPUT_H
 
 #include <string>
+#include <vector>
 
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -29,8 +30,12 @@
 #include "i_start_d_input_call_back.h"
 #include "i_start_d_input_server_call_back.h"
 #include "i_stop_d_input_call_back.h"
+#include "i_start_stop_d_inputs_call_back.h"
+#include "i_start_stop_result_call_back.h"
 #include "i_unprepare_d_input_call_back.h"
 #include "i_unregister_d_input_call_back.h"
+#include "i_input_node_listener.h"
+#include "i_simulation_event_listener.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -51,13 +56,9 @@ public:
         const std::string& devId, const std::string& dhId,
         sptr<IUnregisterDInputCallback> callback) = 0;
 
-    virtual int32_t PrepareRemoteInput(
-        const std::string& deviceId, sptr<IPrepareDInputCallback> callback,
-        sptr<IAddWhiteListInfosCallback> addWhiteListCallback) = 0;
+    virtual int32_t PrepareRemoteInput(const std::string &deviceId, sptr<IPrepareDInputCallback> callback) = 0;
 
-    virtual int32_t UnprepareRemoteInput(
-        const std::string& deviceId, sptr<IUnprepareDInputCallback> callback,
-        sptr<IDelWhiteListInfosCallback> delWhiteListCallback) = 0;
+    virtual int32_t UnprepareRemoteInput(const std::string &deviceId, sptr<IUnprepareDInputCallback> callback) = 0;
 
     virtual int32_t StartRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback) = 0;
@@ -65,8 +66,42 @@ public:
     virtual int32_t StopRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback) = 0;
 
+    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStartDInputCallback> callback) = 0;
+
+    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStopDInputCallback> callback) = 0;
+
+    virtual int32_t PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IPrepareDInputCallback> callback) = 0;
+
+    virtual int32_t UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IUnprepareDInputCallback> callback) = 0;
+
+    virtual int32_t StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback) = 0;
+
+    virtual int32_t StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback) = 0;
+
+    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) = 0;
+
+    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) = 0;
+
     virtual int32_t IsStartDistributedInput(
         const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) = 0;
+
+    virtual int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) = 0;
+    virtual int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) = 0;
+    virtual int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) = 0;
+    virtual int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener) = 0;
+
+    virtual int32_t SyncNodeInfoRemoteInput(const std::string &userDevId, const std::string &dhid,
+        const std::string &nodeDesc) = 0;
+    virtual int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener) = 0;
+    virtual int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener) = 0;
 
     enum class MessageCode {
         INIT = 0xf001,
@@ -78,6 +113,21 @@ public:
         START_REMOTE_INPUT = 0xf007,
         STOP_REMOTE_INPUT = 0xf008,
         ISSTART_REMOTE_INPUT = 0xf009,
+        PREPARE_RELAY_REMOTE_INPUT = 0xf00a,
+        UNPREPARE_RELAY_REMOTE_INPUT = 0xf00b,
+        START_RELAY_TYPE_REMOTE_INPUT = 0xf00c,
+        STOP_RELAY_TYPE_REMOTE_INPUT = 0xf00d,
+        START_DHID_REMOTE_INPUT = 0xf00e,
+        STOP_DHID_REMOTE_INPUT = 0xf00f,
+        START_RELAY_DHID_REMOTE_INPUT = 0xf010,
+        STOP_RELAY_DHID_REMOTE_INPUT = 0xf011,
+        REGISTER_ADD_WHITE_LIST_CB_REMOTE_INPUT = 0xf013,
+        REGISTER_DEL_WHITE_LIST_CB_REMOTE_INPUT = 0xf014,
+        REGISTER_NODE_LISTENER = 0xf015,
+        UNREGISTER_NODE_LISTENER = 0xf016,
+        REGISTER_SIMULATION_EVENT_LISTENER = 0xf017,
+        UNREGISTER_SIMULATION_EVENT_LISTENER = 0xf018,
+        SYNC_NODE_INFO_REMOTE_INPUT = 0xf019,
     };
 };
 } // namespace DistributedInput

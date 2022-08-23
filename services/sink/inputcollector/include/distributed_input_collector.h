@@ -37,7 +37,10 @@ public:
     static DistributedInputCollector &GetInstance();
     int32_t Init(std::shared_ptr<AppExecFwk::EventHandler> sinkHandler);
     void Release();
-    void SetInputTypes(const uint32_t& inputType);
+    void SetSharingTypes(const uint32_t &inputType);
+    void SetSharingDhIds(bool enabled, std::vector<std::string> dhIds);
+    void GetMouseNodePath(std::vector<std::string> dhIds, std::string &mouseNodePath, std::string &dhid);
+    bool GetAllDevicesStoped();
 
 private:
     DistributedInputCollector();

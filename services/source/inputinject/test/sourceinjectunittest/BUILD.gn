@@ -47,6 +47,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "${utils_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "${distributedinput_path}/inputdevicehandler/include",
   ]
 
   sources = [
@@ -83,6 +84,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/openssl:libcrypto_static",
     "${fwk_interfaces_path}:libdhfwk_sdk",
+    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [

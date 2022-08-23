@@ -40,7 +40,6 @@ public:
         const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
 
     virtual int32_t NotifyStartDScreen(const SrcScreenInfo& srcScreenRemoteCtrlInfo) override;
-
     virtual int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
 
 private:

@@ -25,6 +25,7 @@
 #include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "dinput_utils_tool.h"
+#include "distributed_input_source_proxy.h"
 #include "softbus_bus_center.h"
 #include "white_list_util.h"
 
@@ -32,10 +33,16 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 std::shared_ptr<DistributedInputClient> DistributedInputClient::instance(new DistributedInputClient());
-
-DistributedInputClient::DistributedInputClient()
+DistributedInputClient::DistributedInputClient() : isAddWhiteListCbReg(false), isDelWhiteListCbReg(false),
+                                                   isNodeMonitorCbReg(false), isNodeMonitorCbUnreg(false),
+                                                   isSimulationEventCbReg(false), isSimulationEventCbUnreg(false)
 {
+    DHLOGI("DistributedInputClient init start");
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(true);
+    eventHandler_ = std::make_shared<DistributedInputClient::DInputClientEventHandler>(runner);
+    DInputSAManager::GetInstance().RegisterEventHandler(eventHandler_);
     DInputSAManager::GetInstance().Init();
+    DHLOGI("DistributedInputClient init end.");
 }
 
 DistributedInputClient &DistributedInputClient::GetInstance()
@@ -102,6 +109,104 @@ void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& de
     DistributedInputClient::GetInstance().DelWhiteListInfos(deviceId);
 }
 
+DistributedInputClient::DInputClientEventHandler::DInputClientEventHandler(
+    const std::shared_ptr<AppExecFwk::EventRunner> &runner)
+    : AppExecFwk::EventHandler(runner)
+{
+}
+
+void DistributedInputClient::DInputClientEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    uint32_t eventId = event->GetInnerEventId();
+    DHLOGI("DInputClientEventHandler ProcessEvent start eventId:%d.", eventId);
+    if (eventId == DINPUT_CLIENT_CHECK_CALLBACK_REGISTER_MSG) {
+        DistributedInputClient::GetInstance().CheckRegisterCallback();
+    } else {
+        DHLOGE("DInputClientEventHandler ProcessEvent error, because eventId is unkonwn.");
+    }
+    DHLOGI("DInputClientEventHandler ProcessEvent end");
+}
+
+void DistributedInputClient::CheckRegisterCallback()
+{
+    DHLOGI("CheckRegisterCallback called, awl[%d], dwl[%d], rnm[%d], unm[%d], rmd[%d], umd[%d]",
+           isAddWhiteListCbReg, isDelWhiteListCbReg, isNodeMonitorCbReg, isNodeMonitorCbUnreg, isSimulationEventCbReg,
+           isSimulationEventCbUnreg);
+
+    CheckWhiteListCallback();
+    CheckNodeMonitorCallback();
+    CheckKeyStateCallback();
+}
+
+void DistributedInputClient::CheckWhiteListCallback()
+{
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("CheckWhiteListCallback client get source proxy fail");
+        return;
+    }
+    if (!isAddWhiteListCbReg) {
+        if (addWhiteListCallback_ == nullptr) {
+            addWhiteListCallback_ = new (std::nothrow) AddWhiteListInfosCb();
+        }
+        int32_t ret =
+            DInputSAManager::GetInstance().dInputSourceProxy_->RegisterAddWhiteListCallback(addWhiteListCallback_);
+        if (ret == DH_SUCCESS) {
+            isAddWhiteListCbReg = true;
+        } else {
+            DHLOGE("CheckWhiteListCallback client RegisterAddWhiteListCallback fail");
+        }
+    }
+    if (!isDelWhiteListCbReg) {
+        if (delWhiteListCallback_ == nullptr) {
+            delWhiteListCallback_ = new (std::nothrow) DelWhiteListInfosCb();
+        }
+        int32_t ret =
+            DInputSAManager::GetInstance().dInputSourceProxy_->RegisterDelWhiteListCallback(delWhiteListCallback_);
+        if (ret == DH_SUCCESS) {
+            isDelWhiteListCbReg = true;
+        } else {
+            DHLOGE("CheckWhiteListCallback client RegisterDelWhiteListCallback fail");
+        }
+    }
+}
+
+void DistributedInputClient::CheckNodeMonitorCallback()
+{
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("CheckNodeMonitorCallback client get source proxy fail");
+        return;
+    }
+    if (!isNodeMonitorCbReg && regNodeListener_ != nullptr) {
+        DHLOGI("CheckNodeMonitorCallback need continue register regNodeListener_.");
+        DInputSAManager::GetInstance().dInputSourceProxy_->RegisterInputNodeListener(regNodeListener_);
+        isNodeMonitorCbReg = true;
+    }
+
+    if (!isNodeMonitorCbUnreg && unregNodeListener_ != nullptr) {
+        DHLOGI("CheckNodeMonitorCallback need continue register unregNodeListener_.");
+        DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterInputNodeListener(unregNodeListener_);
+        isNodeMonitorCbUnreg = true;
+    }
+}
+
+void DistributedInputClient::CheckKeyStateCallback()
+{
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("CheckKeyStateCallback client get source proxy fail");
+        return;
+    }
+    if (!isSimulationEventCbReg && regSimulationEventListener_ != nullptr) {
+        DInputSAManager::GetInstance().dInputSourceProxy_->RegisterSimulationEventListener(regSimulationEventListener_);
+        isSimulationEventCbReg = true;
+    }
+
+    if (!isSimulationEventCbUnreg && unregSimulationEventListener_ != nullptr) {
+        DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterSimulationEventListener(
+            unregSimulationEventListener_);
+        isSimulationEventCbUnreg = true;
+    }
+}
+
 int32_t DistributedInputClient::InitSource()
 {
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
@@ -128,9 +233,14 @@ int32_t DistributedInputClient::ReleaseSource()
     inputTypes_ = DInputDeviceType::NONE;
     sinkTypeCallback = nullptr;
     sourceTypeCallback = nullptr;
-    addWhiteListCallback = nullptr;
-    delWhiteListCallback = nullptr;
+    addWhiteListCallback_ = nullptr;
+    delWhiteListCallback_ = nullptr;
+    regNodeListener_ = nullptr;
+    unregNodeListener_ = nullptr;
+    regSimulationEventListener_ = nullptr;
+    unregSimulationEventListener_ = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList();
+
     return DInputSAManager::GetInstance().dInputSourceProxy_->Release();
 }
 
@@ -149,8 +259,8 @@ int32_t DistributedInputClient::ReleaseSink()
 int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::string& parameters, const std::shared_ptr<RegisterCallback>& callback)
 {
-    DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
+    DHLOGI("RegisterDistributedHardware called, deviceId: %s,  dhId: %s,  parameters: %s",
+        GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
 
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("RegisterDistributedHardware client fail");
@@ -183,7 +293,8 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
 int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::shared_ptr<UnregisterCallback>& callback)
 {
-    DHLOGI("%s called, deviceId: %s,  dhId: %s", __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
+    DHLOGI("UnregisterDistributedHardware called, deviceId: %s,  dhId: %s",
+        GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("UnregisterDistributedHardware client fail");
@@ -216,7 +327,7 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
 int32_t DistributedInputClient::PrepareRemoteInput(
     const std::string& deviceId, sptr<IPrepareDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
+    DHLOGI("PrepareRemoteInput called, deviceId: %s", GetAnonyString(deviceId).c_str());
 
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
@@ -227,15 +338,13 @@ int32_t DistributedInputClient::PrepareRemoteInput(
         return ERR_DH_INPUT_CLIENT_PREPARE_FAIL;
     }
 
-    addWhiteListCallback = new(std::nothrow) AddWhiteListInfosCb();
-    return DInputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(deviceId, callback,
-        addWhiteListCallback);
+    return DInputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(deviceId, callback);
 }
 
 int32_t DistributedInputClient::UnprepareRemoteInput(const std::string& deviceId,
     sptr<IUnprepareDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
+    DHLOGI("UnprepareRemoteInput called, deviceId: %s", GetAnonyString(deviceId).c_str());
 
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("PrepareRemoteInput client fail");
@@ -243,19 +352,18 @@ int32_t DistributedInputClient::UnprepareRemoteInput(const std::string& deviceId
     }
 
     if (deviceId.empty() || callback == nullptr) {
+        DHLOGE("UnprepareRemoteInput param error, client fail");
         return ERR_DH_INPUT_CLIENT_UNPREPARE_FAIL;
     }
 
-    delWhiteListCallback = new(std::nothrow) DelWhiteListInfosCb();
-    return DInputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(deviceId, callback,
-        delWhiteListCallback);
+    return DInputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(deviceId, callback);
 }
 
 int32_t DistributedInputClient::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
-
+    DHLOGI("StartRemoteInput called, deviceId: %s, inputTypes: %d",
+        GetAnonyString(deviceId).c_str(), inputTypes);
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("StartRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
@@ -265,17 +373,17 @@ int32_t DistributedInputClient::StartRemoteInput(
         inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
         inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
         !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
+        DHLOGE("StartRemoteInput param error, client fail");
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(deviceId, inputTypes, callback);
 }
 
 int32_t DistributedInputClient::StopRemoteInput(const std::string& deviceId, const uint32_t& inputTypes,
     sptr<IStopDInputCallback> callback)
 {
-    DHLOGI("%s called, deviceId: %s, inputTypes: %d", __func__, GetAnonyString(deviceId).c_str(), inputTypes);
-
+    DHLOGI("StopRemoteInput called, deviceId: %s, inputTypes: %d",
+        GetAnonyString(deviceId).c_str(), inputTypes);
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("StopRemoteInput client fail");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
@@ -285,15 +393,168 @@ int32_t DistributedInputClient::StopRemoteInput(const std::string& deviceId, con
         inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
         inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
         !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
+        DHLOGE("StopRemoteInput param error, client fail");
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
 
     return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(deviceId, inputTypes, callback);
 }
 
+int32_t DistributedInputClient::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStartDInputCallback> callback)
+{
+    DHLOGI("StartRemoteInput relay by type called, srcId: %s, sinkId: %s, inputTypes: %d",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), inputTypes);
+
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("StartRemoteInput relay type client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    if (srcId.empty() || sinkId.empty() || callback == nullptr ||
+        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
+        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
+        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
+        DHLOGE("StartRemoteInput relay type param error, client fail");
+        return ERR_DH_INPUT_CLIENT_START_FAIL;
+    }
+
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(srcId, sinkId, inputTypes, callback);
+}
+
+int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStopDInputCallback> callback)
+{
+    DHLOGI("StopRemoteInput relay by type called, srcId: %s, sinkId: %s, inputTypes: %d",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), inputTypes);
+
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("StopRemoteInput relay type client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    if (srcId.empty() || sinkId.empty() || callback == nullptr ||
+        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
+        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
+        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
+        DHLOGE("StopRemoteInput relay type param error, client fail");
+        return ERR_DH_INPUT_CLIENT_STOP_FAIL;
+    }
+
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(srcId, sinkId, inputTypes, callback);
+}
+
+int32_t DistributedInputClient::PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IPrepareDInputCallback> callback)
+{
+    DHLOGI("PrepareRemoteInput relay called, srcId: %s, sinkId: %s",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("PrepareRemoteInput relay proxy error, client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+    if (srcId.empty() || sinkId.empty() || callback == nullptr) {
+        DHLOGE("PrepareRemoteInput relay param error, client fail");
+        return ERR_DH_INPUT_CLIENT_PREPARE_FAIL;
+    }
+    return DInputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(srcId, sinkId, callback);
+}
+
+int32_t DistributedInputClient::UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IUnprepareDInputCallback> callback)
+{
+    DHLOGI("UnprepareRemoteInput relay called, srcId: %s, sinkId: %s",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("UnprepareRemoteInput relay proxy error, client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    if (srcId.empty() || sinkId.empty() || callback == nullptr) {
+        DHLOGE("UnprepareRemoteInput relay param error, client fail");
+        return ERR_DH_INPUT_CLIENT_UNPREPARE_FAIL;
+    }
+    return DInputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(srcId, sinkId, callback);
+}
+
+int32_t DistributedInputClient::StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+    sptr<IStartStopDInputsCallback> callback)
+{
+    DHLOGI("StartRemoteInput relay by dhid called, sinkId: %s", GetAnonyString(sinkId).c_str());
+
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("StartRemoteInput dhid proxy error, client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    if (sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
+        DHLOGE("StartRemoteInput dhid param error, client fail");
+        return ERR_DH_INPUT_CLIENT_START_FAIL;
+    }
+
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputClient::StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+    sptr<IStartStopDInputsCallback> callback)
+{
+    DHLOGI("StopRemoteInput relay by dhid called, sinkId: %s", GetAnonyString(sinkId).c_str());
+
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("StopRemoteInput dhid proxy error, client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    if (sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
+        DHLOGE("StopRemoteInput dhid param error, client fail");
+        return ERR_DH_INPUT_CLIENT_STOP_FAIL;
+    }
+
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputClient::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    DHLOGI("StartRemoteInput relay by dhid called, srcId: %s, sinkId: %s",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("StartRemoteInput proxy error, client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    if (srcId.empty() || sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
+        DHLOGE("StartRemoteInput param error, client fail");
+        return ERR_DH_INPUT_CLIENT_START_FAIL;
+    }
+
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(srcId, sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    DHLOGI("StopRemoteInput relay by dhid called, srcId: %s, sinkId: %s",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("StopRemoteInput proxy error, client fail");
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    if (srcId.empty() || sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
+        DHLOGE("StopRemoteInput param error, client fail");
+        return ERR_DH_INPUT_CLIENT_STOP_FAIL;
+    }
+
+    return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(srcId, sinkId, dhIds, callback);
+}
+
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
 {
-    DHLOGI("%s called, deviceId: %s", __func__, GetAnonyString(deviceId).c_str());
+    DHLOGI("IsNeedFilterOut called, deviceId: %s", GetAnonyString(deviceId).c_str());
     return WhiteListUtil::GetInstance().IsNeedFilterOut(deviceId, event);
 }
 
@@ -313,7 +574,8 @@ bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &e
 
 DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t& inputType)
 {
-    DHLOGI("%s called, inputType: %d, inputTypes: %d, ", __func__, inputType, static_cast<uint32_t>(inputTypes_));
+    DHLOGI("IsStartDistributedInput called, inputType: %d, current inputTypes: %d",
+        inputType, static_cast<uint32_t>(inputTypes_));
     int32_t retSource = 0;
     int32_t retSink = 0;
 
@@ -341,6 +603,106 @@ DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t&
     } else {
         return DInputServerType::NULL_SERVER_TYPE;
     }
+}
+
+int32_t DistributedInputClient::RegisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    DHLOGI("RegisterInputNodeListener called");
+    if (listener == nullptr) {
+        DHLOGE("RegisterInputNodeListener param error, client fail");
+        return ERR_DH_INPUT_CLIENT_REG_NODE_CB_FAIL;
+    }
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("RegisterInputNodeListener proxy error, client fail");
+        isNodeMonitorCbReg = false;
+        regNodeListener_ = listener;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    int32_t ret = DInputSAManager::GetInstance().dInputSourceProxy_->RegisterInputNodeListener(listener);
+    if (ret == DH_SUCCESS) {
+        isNodeMonitorCbReg = true;
+    } else {
+        isNodeMonitorCbReg = false;
+        regNodeListener_ = listener;
+        DHLOGE("RegisterInputNodeListener Failed, ret = %d", ret);
+    }
+    return ret;
+}
+
+int32_t DistributedInputClient::UnregisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    DHLOGI("UnregisterInputNodeListener called");
+    if (listener == nullptr) {
+        DHLOGE("UnregisterInputNodeListener param error, client fail");
+        return ERR_DH_INPUT_CLIENT_UNREG_NODE_CB_FAIL;
+    }
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("UnregisterInputNodeListener proxy error, client fail");
+        isNodeMonitorCbUnreg = false;
+        unregNodeListener_ = listener;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    int32_t ret = DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterInputNodeListener(listener);
+    if (ret == DH_SUCCESS) {
+        isNodeMonitorCbUnreg = true;
+    } else {
+        isNodeMonitorCbUnreg = false;
+        unregNodeListener_ = listener;
+        DHLOGE("DInputSAManager UnregisterInputNodeListener Failed, ret = %d", ret);
+    }
+    return ret;
+}
+
+int32_t DistributedInputClient::RegisterSimulationEventListener(sptr<ISimulationEventListener> listener)
+{
+    DHLOGI("RegisterSimulationEventListener called Simulation Event Listener Register.");
+    if (listener == nullptr) {
+        DHLOGE("RegisterSimulationEventListener param error");
+        return ERR_DH_INPUT_CLIENT_REG_UNREG_KEY_STATE_FAIL;
+    }
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("RegisterSimulationEventListener proxy error, client fail");
+        isSimulationEventCbReg = false;
+        regSimulationEventListener_ = listener;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    int32_t ret = DInputSAManager::GetInstance().dInputSourceProxy_->RegisterSimulationEventListener(listener);
+    if (ret == DH_SUCCESS) {
+        isSimulationEventCbReg = true;
+    } else {
+        isSimulationEventCbReg = false;
+        regSimulationEventListener_ = listener;
+        DHLOGE("RegisterSimulationEventListener Failed, ret = %d", ret);
+    }
+    return ret;
+}
+
+int32_t DistributedInputClient::UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener)
+{
+    DHLOGI("UnregisterSimulationEventListener called Simulation Event Listener UnRegister.");
+    if (listener == nullptr) {
+        DHLOGE("UnregisterSimulationEventListener param error");
+        return ERR_DH_INPUT_CLIENT_REG_UNREG_KEY_STATE_FAIL;
+    }
+    if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
+        DHLOGE("UnregisterSimulationEventListener proxy error, client fail");
+        isSimulationEventCbUnreg = false;
+        unregSimulationEventListener_ = listener;
+        return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
+    }
+
+    int32_t ret = DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterSimulationEventListener(listener);
+    if (ret == DH_SUCCESS) {
+        isSimulationEventCbUnreg = true;
+    } else {
+        isSimulationEventCbUnreg = false;
+        unregSimulationEventListener_ = listener;
+        DHLOGE("UnregisterSimulationEventListener Failed, ret = %d", ret);
+    }
+    return ret;
 }
 
 bool DistributedInputClient::IsJsonData(std::string strData) const
@@ -419,7 +781,7 @@ int32_t DistributedInputClient::NotifyStopDScreen(const std::string &networkId, 
 
 sptr<IDistributedSinkInput> DistributedInputClient::GetRemoteDInput(const std::string &networkId) const
 {
-    DHLOGI("start, networkId = %s", GetAnonyString(networkId).c_str());
+    DHLOGI("GetRemoteDInput start, networkId = %s", GetAnonyString(networkId).c_str());
     if (networkId.empty()) {
         DHLOGE("networkId is empty");
         return nullptr;

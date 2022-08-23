@@ -33,6 +33,7 @@
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_softbus_define.h"
 #include "softbus_bus_center.h"
 
 namespace OHOS {
@@ -40,8 +41,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 IMPLEMENT_SINGLE_INSTANCE(DistributedInputHandler);
 DistributedInputHandler::DistributedInputHandler()
-    : collectThreadID_(-1), isCollectingEvents_(false),
-    isStartCollectEventThread(false)
+    : collectThreadID_(-1), isCollectingEvents_(false), isStartCollectEventThread(false)
 {
     inputHub_ = std::make_unique<InputHub>();
     this->m_listener = nullptr;
@@ -82,15 +82,33 @@ int32_t DistributedInputHandler::Initialize()
     return DH_SUCCESS;
 }
 
+void DistributedInputHandler::FindDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas)
+{
+    if (inputHub_ != nullptr) {
+        inputHub_->GetDevicesInfoByType(inputTypes, datas);
+    }
+}
+
+void DistributedInputHandler::FindDevicesInfoByDhId(
+    std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas)
+{
+    if (inputHub_ != nullptr) {
+        inputHub_->GetDevicesInfoByDhId(dhidsVec, datas);
+    }
+}
+
 std::vector<DHItem> DistributedInputHandler::Query()
 {
     std::vector<DHItem> retInfos;
-    std::vector<InputDevice> vecInput = inputHub_->GetAllInputDevices();
-    for (auto iter : vecInput) {
-        DHItem item;
-        item.dhId = iter.descriptor;
-        StructTransJson(iter, item.attrs);
-        retInfos.push_back(item);
+
+    if (inputHub_ != nullptr) {
+        std::vector<InputDevice> vecInput = inputHub_->GetAllInputDevices();
+        for (auto iter : vecInput) {
+            DHItem item;
+            item.dhId = iter.descriptor;
+            StructTransJson(iter, item.attrs);
+            retInfos.push_back(item);
+        }
     }
 
     return retInfos;
@@ -142,8 +160,7 @@ bool DistributedInputHandler::InitCollectEventsThread()
     collectThreadID_ = -1;
     int32_t ret = pthread_create(&collectThreadID_, &attr, CollectEventsThread, this);
     if (ret != 0) {
-        DHLOGE(
-            "DistributedInputHandler::InitCollectEventsThread create thread failed:%d \n", ret);
+        DHLOGE("DistributedInputHandler::InitCollectEventsThread create thread failed:%d \n", ret);
         pthread_attr_destroy(&attr);
         collectThreadID_ = -1;
         isCollectingEvents_ = false;
@@ -165,6 +182,10 @@ void *DistributedInputHandler::CollectEventsThread(void *param)
 
 void DistributedInputHandler::StartInputMonitorDeviceThread(const std::string deviceId)
 {
+    if (inputHub_ == nullptr) {
+        DHLOGE("inputHub_ not initialized");
+        return;
+    }
     while (isCollectingEvents_) {
         size_t count = inputHub_->StartCollectInputHandler(mEventBuffer, INPUT_DEVICE_BUFFER_SIZE);
         if (count > 0) {

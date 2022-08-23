@@ -28,10 +28,12 @@
 #include "register_d_input_call_back_stub.h"
 #include "start_d_input_server_call_back_stub.h"
 #include "unregister_d_input_call_back_stub.h"
+#include "start_stop_d_inputs_call_back_stub.h"
 
 #include "dinput_sa_manager.h"
 #include "idistributed_hardware_source.h"
 #include "idistributed_hardware_sink.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -66,15 +68,46 @@ public:
     int32_t StopRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback);
 
-    bool IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event);
+    int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStartDInputCallback> callback);
 
+    int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStopDInputCallback> callback);
+
+    int32_t PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IPrepareDInputCallback> callback);
+    int32_t UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IUnprepareDInputCallback> callback);
+
+    int32_t StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback);
+    int32_t StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback);
+
+    int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback);
+    int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback);
+
+    bool IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event);
     bool IsTouchEventNeedFilterOut(const TouchScreenEvent &event);
 
     DInputServerType IsStartDistributedInput(const uint32_t& inputType);
 
     int32_t NotifyStartDScreen(const std::string &networkId, const std::string& srcDevId, const uint64_t srcWinId);
-
     int32_t NotifyStopDScreen(const std::string &networkId, const std::string& srcScreenInfoKey);
+
+    int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener);
+    int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener);
+
+    int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener);
+    int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener);
+
+    void CheckRegisterCallback();
+    void CheckWhiteListCallback();
+    void CheckNodeMonitorCallback();
+    void CheckKeyStateCallback();
+    void CheckStartStopResultCallback();
 
 public:
     class RegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
@@ -112,6 +145,14 @@ public:
         void OnResult(const std::string &deviceId);
     };
 
+    class DInputClientEventHandler : public AppExecFwk::EventHandler {
+    public:
+        DInputClientEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+        ~DInputClientEventHandler() {}
+
+        void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+    };
+
 private:
     DistributedInputClient();
     bool IsJsonData(std::string strData) const;
@@ -127,8 +168,21 @@ private:
 
     sptr<StartDInputServerCb> sinkTypeCallback = nullptr;
     sptr<StartDInputServerCb> sourceTypeCallback = nullptr;
-    sptr<AddWhiteListInfosCb> addWhiteListCallback = nullptr;
-    sptr<DelWhiteListInfosCb> delWhiteListCallback = nullptr;
+    sptr<AddWhiteListInfosCb> addWhiteListCallback_ = nullptr;
+    sptr<DelWhiteListInfosCb> delWhiteListCallback_ = nullptr;
+    sptr<InputNodeListener> regNodeListener_ = nullptr;
+    sptr<InputNodeListener> unregNodeListener_ = nullptr;
+    sptr<ISimulationEventListener> regSimulationEventListener_ = nullptr;
+    sptr<ISimulationEventListener> unregSimulationEventListener_ = nullptr;
+
+    std::shared_ptr<DistributedInputClient::DInputClientEventHandler> eventHandler_;
+
+    bool isAddWhiteListCbReg;
+    bool isDelWhiteListCbReg;
+    bool isNodeMonitorCbReg;
+    bool isNodeMonitorCbUnreg;
+    bool isSimulationEventCbReg;
+    bool isSimulationEventCbUnreg;
 
     struct DHardWareFwkRegistInfo {
         std::string devId;

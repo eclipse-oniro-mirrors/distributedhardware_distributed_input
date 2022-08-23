@@ -297,7 +297,7 @@ int32_t DistributedInputSourceTransport::StartRemoteInput(
     if (sessionDevMap_.count(deviceId) > 0) {
         int32_t sessionId = sessionDevMap_[deviceId];
         nlohmann::json jsonStr;
-        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START;
+        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_TYPE;
         jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
         jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
         jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
@@ -325,7 +325,7 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(
     if (sessionDevMap_.count(deviceId) > 0) {
         int32_t sessionId = sessionDevMap_[deviceId];
         nlohmann::json jsonStr;
-        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP;
+        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_TYPE;
         jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
         jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
         jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
@@ -408,6 +408,72 @@ void DistributedInputSourceTransport::StopLatencyThread()
         latencyThread_.join();
     }
     DHLOGI("end");
+}
+
+int32_t DistributedInputSourceTransport::StartRemoteInput(const std::string &deviceId,
+    const std::vector<std::string> &dhids)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    if (sessionDevMap_.count(deviceId) == 0) {
+        DHLOGE("StartRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    int32_t sessionId = sessionDevMap_[deviceId];
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_DHID;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
+    std::string strTmp = "";
+    for (auto iter : dhids) {
+        strTmp = strTmp + iter + ".";
+    }
+    if (!strTmp.empty()) {
+        strTmp.erase(strTmp.end() - 1); // delete the last '.' char
+    }
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = strTmp;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s.", GetAnonyString(deviceId).c_str(),
+        GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::StopRemoteInput(const std::string &deviceId,
+    const std::vector<std::string> &dhids)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    if (sessionDevMap_.count(deviceId) == 0) {
+        DHLOGE("StopRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    int32_t sessionId = sessionDevMap_[deviceId];
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_DHID;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
+    std::string strTmp = "";
+    for (auto iter : dhids) {
+        strTmp = strTmp + iter + ".";
+    }
+    if (!strTmp.empty()) {
+        strTmp.erase(strTmp.end() - 1); // delete the last '.' char
+    }
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = strTmp;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s.", GetAnonyString(deviceId).c_str(),
+        GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
 }
 
 std::string DistributedInputSourceTransport::FindDeviceBySession(int32_t sessionId)
@@ -553,6 +619,52 @@ void DistributedInputSourceTransport::NotifyResponseStopRemoteInput(int32_t sess
         deviceId, recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE], recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
 }
 
+void DistributedInputSourceTransport::NotifyResponseStartRemoteInputDhid(int32_t sessionId,
+    const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTART.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTART, data type is error.");
+        return;
+    }
+    std::string deviceId = FindDeviceBySession(sessionId);
+    if (deviceId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTART, deviceId is error.");
+        return;
+    }
+    callback_->onResponseStartRemoteInputDhid(
+        deviceId, recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID], recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
+}
+
+void DistributedInputSourceTransport::NotifyResponseStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTOP.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTOP, data type is error.");
+        return;
+    }
+    std::string deviceId = FindDeviceBySession(sessionId);
+    if (deviceId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTOP, deviceId is error.");
+        return;
+    }
+    callback_->onResponseStopRemoteInputDhid(
+        deviceId, recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID], recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
+}
+
+void DistributedInputSourceTransport::NotifyResponseKeyState(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_KEY_STATE.");
+    std::string deviceId = FindDeviceBySession(sessionId);
+    if (deviceId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_KEY_STATE, deviceId is error.");
+        return;
+    }
+    callback_->onResponseKeyState(deviceId, recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_DHID],
+        recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_TYPE], recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_CODE],
+        recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_VALUE]);
+}
+
 void DistributedInputSourceTransport::NotifyReceivedEventRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_BODY_DATA.");
@@ -622,6 +734,18 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
             CalculateLatency(sessionId, recMsg);
             break;
         }
+        case TRANS_SINK_MSG_DHID_ONSTART: {
+            NotifyResponseStartRemoteInputDhid(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SINK_MSG_DHID_ONSTOP: {
+            NotifyResponseStopRemoteInputDhid(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SINK_MSG_KEY_STATE: {
+            NotifyResponseKeyState(sessionId, recMsg);
+            break;
+        }
         default: {
             DHLOGE("OnBytesReceived cmdType is undefined.");
             break;
@@ -688,7 +812,7 @@ int32_t DistributedInputSourceTransport::GetCurrentSessionId()
 // send message by sessionId (channel opened)
 int32_t DistributedInputSourceTransport::SendMsg(int32_t sessionId, std::string &message)
 {
-    DHLOGI("start SendMsg");
+    DHLOGD("start SendMsg");
     if (message.size() > MSG_MAX_SIZE) {
         DHLOGE("SendMessage error: message.size() > MSG_MAX_SIZE");
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_SENDMESSSAGE;

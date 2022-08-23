@@ -18,7 +18,8 @@
 
 #include <cstring>
 #include <set>
-
+#include <map>
+#include <mutex>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -54,8 +55,18 @@ public:
         void onUnprepareRemoteInput(const int32_t& sessionId);
         void onStartRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes);
         void onStopRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes);
+        void onStartRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids);
+        void onStopRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids);
+
     private:
         DistributedInputSinkManager *sinkManagerObj_;
+        static inline int bit_is_set(const unsigned long *array, int bit)
+        {
+            return !!(array[bit / LONG_BITS] & (1LL << (bit % LONG_BITS)));
+        }
+        void SleepTimeMs();
+        void StringSplitToSet(const std::string &str, const char split, std::set<std::string> &vecStr);
+        void CheckKeyState(const int32_t &sessionId, const std::string &strDhids);
     };
 
     class ProjectWindowListener : public PublisherListenerStub {
@@ -123,9 +134,15 @@ private:
 
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<DistributedInputSinkEventHandler> handler_;
+    std::mutex mutex_;
     bool InitAuto();
     DInputDeviceType inputTypes_;
     sptr<ProjectWindowListener> projectWindowListener_ = nullptr;
+    std::set<std::string> sharingDhIds_;
+    std::map<int32_t, std::set<std::string>> sharingDhIdsMap_;
+    void StoreStartDhids(int32_t sessionId, const std::set<std::string> &dhIds);
+    void DeleteStopDhids(int32_t sessionId, const std::set<std::string> delDhIds, std::vector<std::string> &stopDhIds);
+    bool IsDeleteDhidExist(int32_t sessionId, const std::string &delstr);
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

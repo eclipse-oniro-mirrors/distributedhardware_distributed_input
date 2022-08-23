@@ -42,7 +42,22 @@ private:
     int32_t HandleUnprepareRemoteInput(MessageParcel &data, MessageParcel &reply);
     int32_t HandleStartRemoteInput(MessageParcel &data, MessageParcel &reply);
     int32_t HandleStopRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleStartRelayTypeRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleStopRelayTypeRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandlePrepareRelayRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUnprepareRelayRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleStartDhidRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleStopDhidRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleStartRelayDhidRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleStopRelayDhidRemoteInput(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsStartDistributedInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterAddWhiteListCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterDelWhiteListCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterInputNodeListener(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUnRegisterInputNodeListener(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSyncNodeInfoRemoteInput(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterSimulationEventListener(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUnregisterSimulationEventListener(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(DistributedInputSourceStub);
 };
 } // namespace DistributedInput

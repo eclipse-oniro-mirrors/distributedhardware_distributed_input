@@ -41,6 +41,7 @@ bool IsString(const nlohmann::json& jsonObj, const std::string& key);
 bool IsInt32(const nlohmann::json& jsonObj, const std::string& key);
 bool IsUint32(const nlohmann::json& jsonObj, const std::string& key);
 bool IsUint64(const nlohmann::json& jsonObj, const std::string& key);
+std::string GetNodeDesc(std::string parameters);
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

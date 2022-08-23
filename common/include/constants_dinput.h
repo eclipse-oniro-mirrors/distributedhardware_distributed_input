@@ -31,7 +31,13 @@ namespace DistributedInput {
 #define INPUT_KEY_PATH "path"
 
 #define VIRTUAL_DEVICE_NAME "Hos Distributed Virtual Device "
+#define LONG_BITS (sizeof(long) * 8)
+#define NLONGS(x) (((x) + LONG_BITS - 1) / LONG_BITS)
 
+    const char INPUT_STRING_SPLIT_POINT = '.';
+    const uint32_t KEY_DOWN_STATE = 1;
+    const uint32_t READ_SLEEP_TIME_MS = 50;
+    const uint32_t READ_RETRY_MAX = 5;
     /*
      * Device Type definitions
      */

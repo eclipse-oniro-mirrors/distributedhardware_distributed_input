@@ -19,32 +19,44 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 int32_t DistributedInputKit::PrepareRemoteInput(
-    const std::string& deviceId, sptr<IPrepareDInputCallback> callback)
+    const std::string& sinkId, sptr<IPrepareDInputCallback> callback)
 {
-    return DistributedInputClient::GetInstance().PrepareRemoteInput(deviceId, callback);
+    return DistributedInputClient::GetInstance().PrepareRemoteInput(sinkId, callback);
 }
 
 int32_t DistributedInputKit::UnprepareRemoteInput(
-    const std::string& deviceId, sptr<IUnprepareDInputCallback> callback)
+    const std::string& sinkId, sptr<IUnprepareDInputCallback> callback)
 {
-    return DistributedInputClient::GetInstance().UnprepareRemoteInput(deviceId, callback);
+    return DistributedInputClient::GetInstance().UnprepareRemoteInput(sinkId, callback);
 }
 
 int32_t DistributedInputKit::StartRemoteInput(
-    const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
+    const std::string& sinkId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
-    return DistributedInputClient::GetInstance().StartRemoteInput(deviceId, inputTypes, callback);
+    return DistributedInputClient::GetInstance().StartRemoteInput(sinkId, inputTypes, callback);
 }
 
 int32_t DistributedInputKit::StopRemoteInput(
-    const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
+    const std::string& sinkId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
 {
-    return DistributedInputClient::GetInstance().StopRemoteInput(deviceId, inputTypes, callback);
+    return DistributedInputClient::GetInstance().StopRemoteInput(sinkId, inputTypes, callback);
 }
 
-bool DistributedInputKit::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
+int32_t DistributedInputKit::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStartDInputCallback> callback)
 {
-    return DistributedInputClient::GetInstance().IsNeedFilterOut(deviceId, event);
+    return DistributedInputClient::GetInstance().StartRemoteInput(srcId, sinkId, inputTypes, callback);
+}
+
+int32_t DistributedInputKit::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStopDInputCallback> callback)
+{
+    return DistributedInputClient::GetInstance().StopRemoteInput(srcId, sinkId, inputTypes, callback);
+}
+
+bool DistributedInputKit::IsNeedFilterOut(const std::string& sinkId, const BusinessEvent& event)
+{
+    return DistributedInputClient::GetInstance().IsNeedFilterOut(sinkId, event);
 }
 
 bool DistributedInputKit::IsTouchEventNeedFilterOut(const TouchScreenEvent &event)
@@ -55,6 +67,62 @@ bool DistributedInputKit::IsTouchEventNeedFilterOut(const TouchScreenEvent &even
 DInputServerType DistributedInputKit::IsStartDistributedInput(const uint32_t& inputType)
 {
     return DistributedInputClient::GetInstance().IsStartDistributedInput(inputType);
+}
+
+int32_t DistributedInputKit::PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IPrepareDInputCallback> callback)
+{
+    return DistributedInputClient::GetInstance().PrepareRemoteInput(srcId, sinkId, callback);
+}
+
+int32_t DistributedInputKit::UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IUnprepareDInputCallback> callback)
+{
+    return DistributedInputClient::GetInstance().UnprepareRemoteInput(srcId, sinkId, callback);
+}
+
+int32_t DistributedInputKit::StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+    sptr<IStartStopDInputsCallback> callback)
+{
+    return DistributedInputClient::GetInstance().StartRemoteInput(sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputKit::StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+    sptr<IStartStopDInputsCallback> callback)
+{
+    return DistributedInputClient::GetInstance().StopRemoteInput(sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputKit::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    return DistributedInputClient::GetInstance().StartRemoteInput(srcId, sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputKit::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    return DistributedInputClient::GetInstance().StopRemoteInput(srcId, sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputKit::RegisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    return DistributedInputClient::GetInstance().RegisterInputNodeListener(listener);
+}
+
+int32_t DistributedInputKit::UnregisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    return DistributedInputClient::GetInstance().UnregisterInputNodeListener(listener);
+}
+
+int32_t DistributedInputKit::RegisterSimulationEventListener(sptr<ISimulationEventListener> listener)
+{
+    return DistributedInputClient::GetInstance().RegisterSimulationEventListener(listener);
+}
+
+int32_t DistributedInputKit::UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener)
+{
+    return DistributedInputClient::GetInstance().UnregisterSimulationEventListener(listener);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

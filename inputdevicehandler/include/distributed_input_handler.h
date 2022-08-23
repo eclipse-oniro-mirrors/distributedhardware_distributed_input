@@ -30,19 +30,25 @@
 #include "constants_dinput.h"
 #include "input_hub.h"
 
+#ifndef API_EXPORT
+#define API_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 class DistributedInputHandler : public IHardwareHandler {
 DECLARE_SINGLE_INSTANCE_BASE(DistributedInputHandler);
 public:
-    virtual int32_t Initialize() override;
-    virtual std::vector<DHItem> Query() override;
-    virtual std::map<std::string, std::string> QueryExtraInfo() override;
-    virtual bool IsSupportPlugin() override;
-    virtual void RegisterPluginListener(std::shared_ptr<PluginListener> listener) override;
-    virtual void UnRegisterPluginListener() override;
+    API_EXPORT virtual int32_t Initialize() override;
+    API_EXPORT virtual std::vector<DHItem> Query() override;
+    API_EXPORT virtual std::map<std::string, std::string> QueryExtraInfo() override;
+    API_EXPORT virtual bool IsSupportPlugin() override;
+    API_EXPORT virtual void RegisterPluginListener(std::shared_ptr<PluginListener> listener) override;
+    API_EXPORT virtual void UnRegisterPluginListener() override;
 
+    API_EXPORT void FindDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas);
+    API_EXPORT void FindDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
 private:
     DistributedInputHandler();
     ~DistributedInputHandler();
@@ -69,7 +75,7 @@ private:
 #ifdef __cplusplus
 extern "C" {
 #endif
-__attribute__((visibility("default"))) IHardwareHandler* GetHardwareHandler();
+API_EXPORT IHardwareHandler* GetHardwareHandler();
 #ifdef __cplusplus
 }
 #endif

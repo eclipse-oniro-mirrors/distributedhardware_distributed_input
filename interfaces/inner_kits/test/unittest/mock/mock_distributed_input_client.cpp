@@ -149,6 +149,18 @@ int32_t DistributedInputClient::StopRemoteInput(
     return DH_SUCCESS;
 }
 
+int32_t DistributedInputClient::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStartDInputCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStopDInputCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
 {
     return true;

@@ -25,6 +25,7 @@ ohos_shared_library("libdinput_handler") {
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
+    "${service_common}/include",
     "${frameworks_path}/include",
     "${utils_path}/include",
     "//third_party/json/include",

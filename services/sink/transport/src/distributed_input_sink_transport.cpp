@@ -26,6 +26,7 @@
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 #include "dinput_low_latency.h"
+#include "dinput_softbus_define.h"
 #include "dinput_utils_tool.h"
 #include "hidumper.h"
 #include "session.h"
@@ -34,17 +35,17 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-DistributedInputSinkTransport::DistributedInputSinkTransport()
+DistributedInputSinkTransport::DistributedInputSinkTransport() : sessionDevMap_({}), mySessionName_("")
 {
     std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(true);
     eventHandler_ = std::make_shared<DistributedInputSinkTransport::DInputSinkEventHandler>(runner);
-    mySessionName_ = "";
     DHLOGI("DistributedInputSinkTransport eventHandler_");
 }
 
 DistributedInputSinkTransport::~DistributedInputSinkTransport()
 {
     DHLOGI("~DistributedInputSinkTransport");
+    sessionDevMap_.clear();
     (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
 }
 
@@ -209,8 +210,7 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
     }
 }
 
-int32_t DistributedInputSinkTransport::RespStopRemoteInput(
-    const int32_t sessionId, std::string &smsg)
+int32_t DistributedInputSinkTransport::RespStopRemoteInput(const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
         DHLOGI("RespStopRemoteInput sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
@@ -243,9 +243,22 @@ int32_t DistributedInputSinkTransport::RespLatency(const int32_t sessionId, std:
     return DH_SUCCESS;
 }
 
+void DistributedInputSinkTransport::SendKeyStateNodeMsg(const int32_t sessionId, std::string &smsg)
+{
+    if (sessionId <= 0) {
+        DHLOGE("SendKeyStateNodeMsg error, sessionId <= 0.");
+        return;
+    }
+    DHLOGI("SendKeyStateNodeMsg sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    int32_t ret = SendMessage(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("SendKeyStateNodeMsg error, SendMessage fail.");
+    }
+}
+
 int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::string &message)
 {
-    DHLOGI("start SendMessage");
+    DHLOGD("start SendMessage");
     if (message.size() > MSG_MAX_SIZE) {
         DHLOGE("SendMessage error: message.size() > MSG_MAX_SIZE");
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
@@ -265,6 +278,27 @@ int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::strin
     int32_t ret = SendBytes(sessionId, buf, outLen);
     free(buf);
     return ret;
+}
+
+int32_t DistributedInputSinkTransport::GetSessionIdByNetId(const std::string &srcId)
+{
+    std::map<std::string, int32_t>::iterator it = sessionDevMap_.find(srcId);
+    if (it != sessionDevMap_.end()) {
+        return it->second;
+    }
+    DHLOGE("get session id failed, srcId = %s", GetAnonyString(srcId).c_str());
+    return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_GET_SESSIONID_FAIL;
+}
+
+void DistributedInputSinkTransport::GetDeviceIdBySessionId(int32_t sessionId, std::string &srcId)
+{
+    for (auto iter = sessionDevMap_.begin(); iter != sessionDevMap_.end(); iter++) {
+        if (sessionId == iter->second) {
+            srcId = iter->first;
+            return;
+        }
+    }
+    srcId = "";
 }
 
 int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_t result)
@@ -287,17 +321,19 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetMySessionName(sessionId, mySessionName, sizeof(mySessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGE("get my session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
     // get other device session name
     ret = GetPeerSessionName(sessionId, peerSessionName, sizeof(peerSessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my peer session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGE("get my peer session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
     }
 
     ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGE("get my peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+    } else {
+        sessionDevMap_[peerDevId] = sessionId;
     }
     DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s",
         mySessionName, peerSessionName, GetAnonyString(peerDevId).c_str());
@@ -318,6 +354,12 @@ void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
     int ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
         DHLOGI("get my peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+    }
+    for (auto iter = sessionDevMap_.begin(); iter != sessionDevMap_.end(); iter++) {
+        if (iter->second == sessionId) {
+            sessionDevMap_.erase(iter);
+            break;
+        }
     }
     DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
     HiDumper::GetInstance().SetSessionStatus(std::string(peerDevId), SessionStatus::CLOSED);
@@ -381,12 +423,12 @@ void DistributedInputSinkTransport::NotifyUnprepareRemoteInput(int32_t sessionId
 void DistributedInputSinkTransport::NotifyStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
 {
     if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START, data type error.");
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START_TYPE, data type error.");
         return;
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
-    DHLOGI("OnBytesRecei,ved cmdType is TRANS_SOURCE_MSG_START deviceId:%s inputTypes:%d .",
+    DHLOGI("OnBytesRecei,ved cmdType is TRANS_SOURCE_MSG_START_TYPE deviceId:%s inputTypes:%d .",
         GetAnonyString(deviceId).c_str(), inputTypes);
     callback_->onStartRemoteInput(sessionId, inputTypes);
 }
@@ -394,12 +436,12 @@ void DistributedInputSinkTransport::NotifyStartRemoteInput(int32_t sessionId, co
 void DistributedInputSinkTransport::NotifyStopRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
 {
     if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP, data type is error.");
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP_TYPE, data type is error.");
         return;
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
-    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP deviceId:%s.", GetAnonyString(deviceId).c_str());
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_TYPE deviceId:%s.", GetAnonyString(deviceId).c_str());
     callback_->onStopRemoteInput(sessionId, inputTypes);
 }
 
@@ -420,6 +462,44 @@ void DistributedInputSinkTransport::NotifyLatency(int32_t sessionId, const nlohm
     jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
     std::string smsg = jsonStr.dump();
     RespLatency(sessionId, smsg);
+}
+
+void DistributedInputSinkTransport::NotifyStartRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START_DHID, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START_DHID, data type error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    std::string strTmp = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_START_DHID deviceId:%s .",
+           GetAnonyString(deviceId).c_str());
+    callback_->onStartRemoteInputDhid(sessionId, strTmp);
+}
+
+void DistributedInputSinkTransport::NotifyStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP_DHID, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP_DHID, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    std::string strTmp = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_DHID deviceId:%s.",
+           GetAnonyString(deviceId).c_str());
+    callback_->onStopRemoteInputDhid(sessionId, strTmp);
 }
 
 void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const std::string& message)
@@ -455,16 +535,24 @@ void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const s
             NotifyUnprepareRemoteInput(sessionId, recMsg);
             break;
         }
-        case TRANS_SOURCE_MSG_START: {
+        case TRANS_SOURCE_MSG_START_TYPE: {
             NotifyStartRemoteInput(sessionId, recMsg);
             break;
         }
-        case TRANS_SOURCE_MSG_STOP: {
+        case TRANS_SOURCE_MSG_STOP_TYPE: {
             NotifyStopRemoteInput(sessionId, recMsg);
             break;
         }
         case TRANS_SOURCE_MSG_LATENCY: {
             NotifyLatency(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_START_DHID: {
+            NotifyStartRemoteInputDhid(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_STOP_DHID: {
+            NotifyStopRemoteInputDhid(sessionId, recMsg);
             break;
         }
         default:

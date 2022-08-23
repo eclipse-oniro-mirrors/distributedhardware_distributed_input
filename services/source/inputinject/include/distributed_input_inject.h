@@ -17,10 +17,14 @@
 #define DISTRIBUTED_INPUT_INJECT_H
 
 #include <mutex>
+#include <set>
 #include <string>
 
 #include "constants_dinput.h"
+#include "distributed_input_handler.h"
 #include "distributed_input_node_manager.h"
+#include "dinput_struct_data.h"
+#include "i_input_node_listener.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -43,12 +47,24 @@ public:
     int32_t RemoveVirtualTouchScreenNode(const std::string& dhId);
     int32_t GetVirtualTouchScreenFd();
 
+    int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener);
+    int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener);
+
+    int32_t GetDhIdsByInputType(const std::string &devId, const uint32_t &inputTypes, std::vector<std::string> &dhIds);
+
+    void InputDeviceEventInject(const std::shared_ptr<RawEvent> &rawEvent);
+    void SyncNodeOnlineInfo(const std::string &srcDevId, const std::string &sinkDevId, const std::string &sinkNodeId,
+        const std::string &sinkNodeDesc);
+    void SyncNodeOfflineInfo(const std::string &srcDevId, const std::string &sinkDevId, const std::string &sinkNodeId);
+
 private:
     DistributedInputInject();
     ~DistributedInputInject();
 
     std::unique_ptr<DistributedInputNodeManager> inputNodeManager_;
     std::mutex inputNodeManagerMutex_;
+    std::set<sptr<InputNodeListener>> inputNodeListeners_;
+    std::mutex inputNodeListenersMutex_;
 
     // The event queue.
     static const int EVENT_BUFFER_SIZE = 16;

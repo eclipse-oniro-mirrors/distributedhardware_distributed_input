@@ -85,6 +85,21 @@ public:
     };
 };
 
+class TestIStartStopDInputsCallback : public OHOS::DistributedHardware
+                                           ::DistributedInput::IStartStopDInputsCallback {
+public:
+    virtual void OnResultDhids(const std::string &devId, const int32_t &status) override
+    {
+        (void)devId;
+        (void)status;
+    };
+
+    virtual sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+
 void PrepareInputFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
@@ -105,13 +120,16 @@ void StartRemoteInputFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    std::string dhId(reinterpret_cast<const char*>(data), size);
+    std::string srcId = "123";
+    std::string sinkId = "456";
     uint32_t inputTypes = *(reinterpret_cast<const uint32_t*>(data));
-
-    OHOS::sptr<TestStartDInputCallback> startCb = new(std::nothrow) TestStartDInputCallback();
-    OHOS::sptr<TestStopDInputCallback> stopCb = new(std::nothrow) TestStopDInputCallback();
-    DistributedInput::DistributedInputKit::StartRemoteInput(dhId, inputTypes, startCb);
-    DistributedInput::DistributedInputKit::StopRemoteInput(dhId, inputTypes, stopCb);
+    std::vector<std::string> dhIds= {};
+    OHOS::sptr<TestStartDInputCallback> startCb = new (std::nothrow) TestStartDInputCallback();
+    OHOS::sptr<TestStopDInputCallback> stopCb = new (std::nothrow) TestStopDInputCallback();
+    DistributedInput::DistributedInputKit::StartRemoteInput(srcId, sinkId, inputTypes, startCb);
+    DistributedInput::DistributedInputKit::StopRemoteInput(srcId, sinkId, inputTypes, stopCb);
+    OHOS::sptr<TestIStartStopDInputsCallback> callback = new (std::nothrow) TestIStartStopDInputsCallback();
+    DistributedInput::DistributedInputKit::StartRemoteInput(sinkId, dhIds, callback);
 }
 
 void IsNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
@@ -130,6 +148,23 @@ void IsNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
     event.keyAction = keyAction;
 
     DistributedInput::DistributedInputKit::IsNeedFilterOut(deviceId, event);
+}
+void StopRemoteInputFuzzTest(const uint8_t* data, size_t  size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+
+    std::string srcId = "123";
+    std::string sinkId = "456";
+    uint32_t inputTypes = *(reinterpret_cast<const uint32_t*>(data));
+    std::vector<std::string> dhIds = {};
+    OHOS::sptr<TestStartDInputCallback> startCb = new (std::nothrow) TestStartDInputCallback();
+    OHOS::sptr<TestStopDInputCallback> stopCb = new (std::nothrow) TestStopDInputCallback();
+    DistributedInput::DistributedInputKit::StopRemoteInput(sinkId, inputTypes, stopCb);
+    DistributedInput::DistributedInputKit::StopRemoteInput(srcId, sinkId, inputTypes, stopCb);
+    OHOS::sptr<TestIStartStopDInputsCallback> callback = new (std::nothrow) TestIStartStopDInputsCallback();
+    DistributedInput::DistributedInputKit::StopRemoteInput(sinkId, dhIds, callback);
 }
 
 void IsTouchEventNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
@@ -156,6 +191,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedHardware::PrepareInputFuzzTest(data, size);
     OHOS::DistributedHardware::StartRemoteInputFuzzTest(data, size);
     OHOS::DistributedHardware::IsNeedFilterOutFuzzTest(data, size);
+    OHOS::DistributedHardware::StopRemoteInputFuzzTest(data, size);
     OHOS::DistributedHardware::IsTouchEventNeedFilterOutFuzzTest(data, size);
     return 0;
 }

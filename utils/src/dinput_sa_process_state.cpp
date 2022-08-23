@@ -49,7 +49,7 @@ void SetSinkProcessExit()
 #ifdef DINPUT_LOW_LATENCY
     DInputLowLatency::GetInstance().DisableSinkLowLatency();
 #endif
-    exit(0);
+    _Exit(0);
 }
 
 void SetSourceProcessExit()
@@ -66,7 +66,7 @@ void SetSourceProcessExit()
 #ifdef DINPUT_LOW_LATENCY
     DInputLowLatency::GetInstance().DisableSourceLowLatency();
 #endif
-    exit(0);
+    _Exit(0);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

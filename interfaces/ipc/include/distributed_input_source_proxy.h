@@ -42,11 +42,9 @@ public:
     virtual int32_t UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
         sptr<IUnregisterDInputCallback> callback) override;
 
-    virtual int32_t PrepareRemoteInput(const std::string& deviceId,
-        sptr<IPrepareDInputCallback> callback, sptr<IAddWhiteListInfosCallback> addWhiteListCallback) override;
+    virtual int32_t PrepareRemoteInput(const std::string &deviceId, sptr<IPrepareDInputCallback> callback) override;
 
-    virtual int32_t UnprepareRemoteInput(const std::string& deviceId,
-        sptr<IUnprepareDInputCallback> callback, sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
+    virtual int32_t UnprepareRemoteInput(const std::string &deviceId, sptr<IUnprepareDInputCallback> callback) override;
 
     virtual int32_t StartRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback) override;
@@ -54,8 +52,42 @@ public:
     virtual int32_t StopRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback) override;
 
+    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStartDInputCallback> callback) override;
+
+    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+        sptr<IStopDInputCallback> callback) override;
+
+    virtual int32_t PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IPrepareDInputCallback> callback) override;
+
+    virtual int32_t UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+        sptr<IUnprepareDInputCallback> callback) override;
+
+    virtual int32_t StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback) override;
+
+    virtual int32_t StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+        sptr<IStartStopDInputsCallback> callback) override;
+
+    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
+
+    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
+
     virtual int32_t IsStartDistributedInput(
         const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
+
+    virtual int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) override;
+    virtual int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
+    virtual int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) override;
+    virtual int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener) override;
+
+    virtual int32_t SyncNodeInfoRemoteInput(const std::string &userDevId, const std::string &dhid,
+        const std::string &nodeDesc) override;
+    virtual int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
+    virtual int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
 
 private:
     bool SendRequest(const IDistributedSourceInput::MessageCode code, MessageParcel &data, MessageParcel &reply);

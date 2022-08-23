@@ -38,11 +38,14 @@ public:
     virtual ~VirtualDevice();
     bool DoIoctl(int32_t fd, int32_t request, const uint32_t value);
     bool CreateKey();
-    bool SetPhys(const std::string deviceName);
-    bool SetUp(const std::string& devId, const std::string& dhId);
-    bool InjectInputEvent(const input_event& event);
+    bool SetPhys(const std::string deviceName, std::string dhId);
+    bool SetUp(const std::string &devId, const std::string &dhId);
+    bool InjectInputEvent(const input_event &event);
     void SetNetWorkId(const std::string netWorkId);
-    int32_t GetFd();
+    std::string GetNetWorkId();
+
+    int32_t GetDeviceFd();
+    int32_t GetDeviceType();
 
 protected:
     VirtualDevice();
@@ -59,6 +62,7 @@ protected:
     const uint16_t vendorId_;
     const uint16_t productId_;
     const uint16_t version_;
+    const uint16_t classes_;
     struct uinput_user_dev dev_ {};
     struct uinput_abs_setup absTemp_ = {};
     std::vector<uinput_abs_setup> absInit_;

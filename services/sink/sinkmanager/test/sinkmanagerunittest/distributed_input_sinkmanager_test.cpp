@@ -19,6 +19,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -41,6 +42,12 @@ void DistributedInputSinkManagerTest::SetUpTestCase()
 
 void DistributedInputSinkManagerTest::TearDownTestCase()
 {
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, Init01, testing::ext::TestSize.Level0)
+{
+    int32_t ret = sinkManager_->Init();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_MANAGER_INIT_FAIL, ret);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

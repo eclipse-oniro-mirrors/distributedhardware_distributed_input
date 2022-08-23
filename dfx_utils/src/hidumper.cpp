@@ -19,6 +19,7 @@
 #include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
+#include "dinput_softbus_define.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -28,7 +29,6 @@ namespace {
     const std::string ARGS_HELP = "-h";
     const std::string ARGS_NODE_INFO = "-nodeinfo";
     const std::string ARGS_SESSION_INFO = "-sessioninfo";
-    const std::string DINPUT_PKG_NAME = "ohos.dhardware.dinput";
 
     const std::map<std::string, HiDumperFlag> ARGS_MAP = {
         {ARGS_HELP, HiDumperFlag::GET_HELP},
@@ -129,7 +129,7 @@ void HiDumper::DeleteNodeInfo(const std::string& deviceId, const std::string& dh
     }
 }
 
-int32_t HiDumper::GetSessionInfo(std::string &result)
+int32_t HiDumper::GetSessionInfo(std::string& result)
 {
     DHLOGI("GetSessionInfo Dump.");
     std::lock_guard<std::mutex> lock(sessionMutex_);

@@ -33,6 +33,9 @@
 #include "stop_d_input_call_back_stub.h"
 #include "unprepare_d_input_call_back_stub.h"
 #include "unregister_d_input_call_back_stub.h"
+#include "start_stop_d_inputs_call_back_stub.h"
+#include "start_stop_result_call_back_stub.h"
+#include "input_node_listener_stub.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -76,6 +79,14 @@ public:
         void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status);
     };
 
+    class TestStartStopVectorCallbackStub
+        : public OHOS::DistributedHardware::DistributedInput::StartStopDInputsCallbackStub {
+    public:
+        TestStartStopVectorCallbackStub() = default;
+        virtual ~TestStartStopVectorCallbackStub() = default;
+        void OnResultDhids(const std::string &devId, const int32_t &status);
+    };
+
     class TestRegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
     public:
         TestRegisterDInputCb() = default;
@@ -102,6 +113,25 @@ public:
         TestDelWhiteListInfosCb() = default;
         virtual ~TestDelWhiteListInfosCb() = default;
         void OnResult(const std::string &deviceId);
+    };
+
+    class TestStartStopResultCb : public OHOS::DistributedHardware::DistributedInput::StartStopResultCallbackStub {
+    public:
+        TestStartStopResultCb() = default;
+        virtual ~TestStartStopResultCb() = default;
+        void OnStart(const std::string &srcId, const std::string &sinkId, std::vector<std::string> &devData);
+        void OnStop(const std::string &srcId, const std::string &sinkId, std::vector<std::string> &devData);
+    };
+
+    class TestInputNodeListenerCb : public OHOS::DistributedHardware::DistributedInput::InputNodeListenerStub {
+    public:
+        TestInputNodeListenerCb() = default;
+        virtual ~TestInputNodeListenerCb() = default;
+        void OnNodeOnLine(const std::string srcDevId, const std::string sinkDevId,
+            const std::string sinkNodeId, const std::string sinkNodeDesc);
+
+        void OnNodeOffLine(const std::string srcDevId, const std::string sinkDevId,
+            const std::string sinkNodeId);
     };
 
 private:

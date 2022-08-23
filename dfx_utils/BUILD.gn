@@ -27,6 +27,7 @@ ohos_shared_library("libdinput_dfx_utils") {
     "${fwk_utils_path}/include",
     "${frameworks_path}/include",
     "${dfx_utils_path}/include",
+    "${service_common}/include",
   ]
 
   sources = [

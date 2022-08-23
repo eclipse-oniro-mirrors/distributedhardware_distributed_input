@@ -19,17 +19,20 @@ ohos_shared_library("libdinput_inject") {
   include_dirs = [
     "include",
     "${common_path}/include",
+    "${frameworks_path}/include",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
+    "${service_common}/include",
     "//third_party/json/include",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "${distributedinput_path}/inputdevicehandler/include",
   ]
 
   sources = [
@@ -41,6 +44,7 @@ ohos_shared_library("libdinput_inject") {
     "src/virtual_mouse.cpp",
     "src/virtual_touchpad.cpp",
     "src/virtual_touchscreen.cpp",
+    "${common_path}/include/dinput_struct_data.cpp",
   ]
 
   defines = [
@@ -56,6 +60,7 @@ ohos_shared_library("libdinput_inject") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/openssl:libcrypto_static",
     "${fwk_interfaces_path}:libdhfwk_sdk",
+    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [
@@ -64,6 +69,8 @@ ohos_shared_library("libdinput_inject") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

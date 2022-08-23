@@ -16,14 +16,18 @@
 #include "distributed_input_source_manager.h"
 
 #include <cinttypes>
+#include <dlfcn.h>
+#include <fstream>
 
 #include "anonymous_string.h"
 #include "distributed_hardware_log.h"
+#include "dinput_softbus_define.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
 #include "system_ability_definition.h"
 #include "string_ex.h"
+#include "softbus_bus_center.h"
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
@@ -33,12 +37,22 @@
 #include "distributed_hardware_fwk_kit.h"
 #include "distributed_input_client.h"
 #include "distributed_input_inject.h"
+#include "distributed_input_source_proxy.h"
 #include "distributed_input_source_transport.h"
 #include "dinput_utils_tool.h"
 #include "hisysevent_util.h"
 #include "hidumper.h"
 #include "ipublisher_listener.h"
+#include "idinput_dbg_itf.h"
 #include "white_list_util.h"
+
+#ifdef __LP64__
+const std::string LIB_LOAD_PATH = "/system/lib64/libdinput_dbg_itf.z.so";
+#else
+const std::string LIB_LOAD_PATH = "/system/lib/libdinput_dbg_itf.z.so";
+#endif
+
+using GetDInputDBGItfFunc = OHOS::DistributedHardware::DistributedInput::IDInputDBGItf* (*)();
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -217,6 +231,106 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteIn
     sourceManagerObj_->GetCallbackEventHandler()->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
+void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteInputDhid(
+    const std::string deviceId, const std::string &dhids, bool result)
+{
+    DHLOGI("onResponseStartRemoteInputDhid called, deviceId: %s, result: %d.",
+        GetAnonyString(deviceId).c_str(), result);
+
+    if (sourceManagerObj_ == nullptr) {
+        DHLOGE("onResponseStartRemoteInputDhid sourceManagerObj_ is null.");
+        return;
+    }
+    if (sourceManagerObj_->GetCallbackEventHandler() == nullptr) {
+        DHLOGE("onResponseStartRemoteInputDhid GetCallbackEventHandler is null.");
+        sourceManagerObj_->RunStartDhidCallback(deviceId, dhids,
+                                                ERR_DH_INPUT_SERVER_SOURCE_MANAGERGET_CALLBACK_HANDLER_FAIL);
+        return;
+    }
+    if (result) {
+        sourceManagerObj_->SetDeviceMapValue(deviceId, DINPUT_SOURCE_SWITCH_ON);
+    }
+
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    if (jsonArrayMsg == nullptr) {
+        DHLOGE("onResponseStartRemoteInputDhid jsonArrayMsg is null.");
+        return;
+    }
+
+    nlohmann::json tmpJson;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_DHID] = dhids;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = result;
+    jsonArrayMsg->push_back(tmpJson);
+    AppExecFwk::InnerEvent::Pointer msgEvent =
+        AppExecFwk::InnerEvent::Get(DINPUT_SOURCE_MANAGER_START_DHID_MSG, jsonArrayMsg, 0);
+    sourceManagerObj_->GetCallbackEventHandler()->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteInputDhid(
+    const std::string deviceId, const std::string &dhids, bool result)
+{
+    DHLOGI("onResponseStopRemoteInputDhid called, deviceId: %s, result: %d.",
+        GetAnonyString(deviceId).c_str(), result);
+
+    if (sourceManagerObj_ == nullptr) {
+        DHLOGE("onResponseStopRemoteInputDhid sourceManagerObj_ is null.");
+        return;
+    }
+    if (sourceManagerObj_->GetCallbackEventHandler() == nullptr) {
+        DHLOGE("onResponseStopRemoteInputDhid GetCallbackEventHandler is null.");
+        sourceManagerObj_->RunStopDhidCallback(deviceId, dhids,
+                                               ERR_DH_INPUT_SERVER_SOURCE_MANAGERGET_CALLBACK_HANDLER_FAIL);
+        return;
+    }
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    if (jsonArrayMsg == nullptr) {
+        DHLOGE("onResponseStartRemoteInputDhid jsonArrayMsg is null.");
+        return;
+    }
+
+    nlohmann::json tmpJson;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_DHID] = dhids;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = result;
+    jsonArrayMsg->push_back(tmpJson);
+    AppExecFwk::InnerEvent::Pointer msgEvent =
+        AppExecFwk::InnerEvent::Get(DINPUT_SOURCE_MANAGER_STOP_DHID_MSG, jsonArrayMsg, 0);
+    sourceManagerObj_->GetCallbackEventHandler()->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void DistributedInputSourceManager::DInputSourceListener::onResponseKeyState(const std::string deviceId,
+    const std::string &dhid, const uint32_t type, const uint32_t code, const uint32_t value)
+{
+    DHLOGI("onResponseMouseDown called, deviceId: %s, dhid: %s.", GetAnonyString(deviceId).c_str(),
+        GetAnonyString(dhid).c_str());
+    if (sourceManagerObj_ == nullptr) {
+        DHLOGE("onResponseMouseDown sourceManagerObj_ is null.");
+        return;
+    }
+    if (sourceManagerObj_->GetCallbackEventHandler() == nullptr) {
+        DHLOGE("onResponseMouseDown GetCallbackEventHandler is null.");
+        sourceManagerObj_->RunKeyStateCallback(deviceId, dhid, type, code, value);
+        return;
+    }
+    std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
+    if (jsonArrayMsg == nullptr) {
+        DHLOGE("onResponseMouseDown jsonArrayMsg is null.");
+        return;
+    }
+
+    nlohmann::json tmpJson;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_DHID] = dhid;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_TYPE] = type;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_CODE] = code;
+    tmpJson[INPUT_SOURCEMANAGER_KEY_VALUE] = value;
+    jsonArrayMsg->push_back(tmpJson);
+    AppExecFwk::InnerEvent::Pointer msgEvent =
+        AppExecFwk::InnerEvent::Get(DINPUT_SOURCE_MANAGER_KEY_STATE_MSG, jsonArrayMsg, 0);
+    sourceManagerObj_->GetCallbackEventHandler()->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteInput(
     const std::string deviceId, const std::string &event)
 {
@@ -255,7 +369,9 @@ void DistributedInputSourceManager::OnStart()
     }
     serviceRunningState_ = ServiceSourceRunningState::STATE_RUNNING;
     runner_->Run();
-    /* Publish service maybe failed, so we need call this function at the last,
+
+    /*
+	 * Publish service maybe failed, so we need call this function at the last,
      * so it can't affect the TDD test program.
      */
     bool ret = Publish(this);
@@ -430,6 +546,57 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStopC
         result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD);
 }
 
+void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStartDhidCallback(
+    const AppExecFwk::InnerEvent::Pointer &event)
+{
+    DHLOGI("ProcessEvent NotifyStartDhidCallback()");
+    std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
+    nlohmann::json::iterator it = dataMsg->begin();
+    nlohmann::json innerMsg = *(it);
+    std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
+    std::string dhidStr = innerMsg[INPUT_SOURCEMANAGER_KEY_DHID];
+    bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
+
+    if (sourceManagerObj_ != nullptr) {
+        sourceManagerObj_->RunStartDhidCallback(deviceId, dhidStr,
+            result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_MSG_IS_BAD);
+    }
+}
+
+void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStopDhidCallback(
+    const AppExecFwk::InnerEvent::Pointer &event)
+{
+    DHLOGI("ProcessEvent NotifyStopDhidCallback()");
+    std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
+    nlohmann::json::iterator it = dataMsg->begin();
+    nlohmann::json innerMsg = *(it);
+    std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
+    std::string dhidStr = innerMsg[INPUT_SOURCEMANAGER_KEY_DHID];
+    bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
+
+    if (sourceManagerObj_ != nullptr) {
+        sourceManagerObj_->RunStopDhidCallback(deviceId, dhidStr,
+            result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD);
+    }
+}
+
+void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyKeyStateCallback(
+    const AppExecFwk::InnerEvent::Pointer &event)
+{
+    DHLOGI("ProcessEvent NotifyKeyStateCallback()");
+    std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
+    nlohmann::json::iterator it = dataMsg->begin();
+    nlohmann::json innerMsg = *(it);
+    std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
+    std::string dhid = innerMsg[INPUT_SOURCEMANAGER_KEY_DHID];
+    uint32_t keyType = innerMsg[INPUT_SOURCEMANAGER_KEY_TYPE];
+    uint32_t keyCode = innerMsg[INPUT_SOURCEMANAGER_KEY_CODE];
+    uint32_t keyValue = innerMsg[INPUT_SOURCEMANAGER_KEY_VALUE];
+    if (sourceManagerObj_ != nullptr) {
+        sourceManagerObj_->RunKeyStateCallback(deviceId, dhid, keyType, keyCode, keyValue);
+    }
+}
+
 void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStartServerCallback(
     const AppExecFwk::InnerEvent::Pointer &event)
 {
@@ -476,6 +643,18 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::ProcessEven
             NotifyStopCallback(event);
             break;
         }
+        case DINPUT_SOURCE_MANAGER_START_DHID_MSG: {
+            NotifyStartDhidCallback(event);
+            break;
+        }
+        case DINPUT_SOURCE_MANAGER_STOP_DHID_MSG: {
+            NotifyStopDhidCallback(event);
+            break;
+        }
+        case DINPUT_SOURCE_MANAGER_KEY_STATE_MSG: {
+            NotifyKeyStateCallback(event);
+            break;
+        }
         case DINPUT_SOURCE_MANAGER_STARTSERVER_MSG: {
             NotifyStartServerCallback(event);
             break;
@@ -515,9 +694,44 @@ int32_t DistributedInputSourceManager::Init()
     }
     startDScreenListener_ = new StartDScreenListener;
     stopDScreenListener_ = new StopDScreenListener;
+    deviceOfflineListener_ = new DeviceOfflineListener(this);
     dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_START_DSCREEN, startDScreenListener_);
     dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_STOP_DSCREEN, stopDScreenListener_);
+    dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_DEV_OFFLINE, deviceOfflineListener_);
+
+    DHLOGI("Try InitDinputDBG");
+    InitDinputDBG();
     return DH_SUCCESS;
+}
+
+void DistributedInputSourceManager::InitDinputDBG()
+{
+    char path[PATH_MAX + 1] = {0x00};
+    if (LIB_LOAD_PATH.length() > PATH_MAX || realpath(LIB_LOAD_PATH.c_str(), path) == nullptr) {
+        DHLOGE("File canonicalization failed");
+        return;
+    }
+
+    void *pHandler = dlopen(path, RTLD_LAZY | RTLD_NODELETE);
+    if (pHandler == nullptr) {
+        DHLOGE("%s handler load failed, failed reason : %s", path, dlerror());
+        return;
+    }
+
+    GetDInputDBGItfFunc getDinputDBGItfFunc = (GetDInputDBGItfFunc)dlsym(pHandler, GET_DBG_ITF_FUNC.c_str());
+    if (getDinputDBGItfFunc == nullptr) {
+        DHLOGE("get getDinputDBGItfFunc is null, failed reason : %s", dlerror());
+        return;
+    }
+
+    dinputDbgItfPtr_ = getDinputDBGItfFunc();
+    if (dinputDbgItfPtr_ == nullptr) {
+        DHLOGE("Get DInput DBG iterface error");
+        return;
+    }
+
+    DHLOGE("Init DInput DBG interface");
+    dinputDbgItfPtr_->Init();
 }
 
 int32_t DistributedInputSourceManager::Release()
@@ -531,7 +745,7 @@ int32_t DistributedInputSourceManager::Release()
         DHLOGI("Release() devId[%s] dhId[%s]", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
         int32_t ret = DistributedInputInject::GetInstance().UnregisterDistributedHardware(devId, dhId);
         if (ret != DH_SUCCESS) {
-            DHLOGW("%s called, remove node fail.",  __func__);
+            DHLOGW("DistributedInputSourceManager Release called, remove node fail.");
         }
     }
 
@@ -561,10 +775,17 @@ int32_t DistributedInputSourceManager::Release()
 
     serviceRunningState_ = ServiceSourceRunningState::STATE_NOT_START;
     std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
-    if (dhFwkKit != nullptr && startDScreenListener_ != nullptr && stopDScreenListener_ != nullptr) {
-        DHLOGI("UnPublish StartDScreenListener and StopDScreenListener");
+    if (dhFwkKit != nullptr && startDScreenListener_ != nullptr) {
+        DHLOGI("UnPublish StartDScreenListener");
         dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_START_DSCREEN, startDScreenListener_);
+    }
+    if (dhFwkKit != nullptr && stopDScreenListener_ != nullptr) {
+        DHLOGI("UnPublish StopDScreenListener");
         dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_STOP_DSCREEN, stopDScreenListener_);
+    }
+    if (dhFwkKit != nullptr && deviceOfflineListener_ != nullptr) {
+        DHLOGI("UnPublish DeviceOfflineListener");
+        dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_DEV_OFFLINE, deviceOfflineListener_);
     }
     DHLOGI("exit dinput source sa.");
     SetSourceProcessExit();
@@ -575,12 +796,10 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     const std::string& parameters, sptr<IRegisterDInputCallback> callback)
 {
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_REGISTER, devId, dhId, "dinput register call.");
-    DHLOGI("%s called, deviceId: %s,  dhId: %s,  parameters: %s",
-        __func__, GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
+    DHLOGI("RegisterDistributedHardware called, deviceId: %s,  dhId: %s,  parameters: %s",
+        GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
     if (callback == nullptr) {
-        DHLOGE(
-            "%s called, deviceId: %s callback is null.",
-            __func__, GetAnonyString(devId).c_str());
+        DHLOGE("RegisterDistributedHardware called, deviceId: %s callback is null.", GetAnonyString(devId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_REGISTER_FAIL, devId, dhId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL,
             "dinput register distributed hardware failed callback is nullptr.");
@@ -595,7 +814,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     info.callback = callback;
     regCallbacks_.push_back(info);
 
-    InputDeviceId inputDeviceId {devId, dhId};
+    InputDeviceId inputDeviceId {devId, dhId, GetNodeDesc(parameters)};
     DHLOGI("RegisterDistributedHardware deviceId: %s, dhId: %s",
         GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
@@ -612,7 +831,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_REGISTER_FAIL, devId, dhId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL,
             "dinput register distributed hardware failed in create input node.");
-        DHLOGE("%s called, create node fail.",  __func__);
+        DHLOGE("RegisterDistributedHardware called, create node fail.");
 
         for (auto iter = regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
             if (iter->devId == devId && iter->dhId == dhId) {
@@ -631,6 +850,15 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
 
     // 4.notify source distributedfwk register hardware success
     callback->OnResult(devId, dhId, DH_SUCCESS);
+
+    // 5. notify remote side that this side is registerd remote dhid
+    sptr<IDistributedSourceInput> cli = DInputSourceSACliMgr::GetInstance().GetRemoteCli(devId);
+    if (cli == nullptr) {
+        DHLOGE("Get Remote DInput Source Proxy return null");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL;
+    }
+
+    cli->SyncNodeInfoRemoteInput(GetLocalNetworkId(), dhId, GetNodeDesc(parameters));
     return DH_SUCCESS;
 }
 
@@ -674,7 +902,7 @@ int32_t DistributedInputSourceManager::RemoveInputNode(const std::string& devId,
 {
     int32_t ret = DistributedInputInject::GetInstance().UnregisterDistributedHardware(devId, dhId);
     if (ret != DH_SUCCESS) {
-        DHLOGE("%s called, remove node fail.",  __func__);
+        DHLOGE("RemoveInputNode called, remove node fail.");
         for (std::vector<DInputClientUnregistInfo>::iterator iter =
             unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
             if (iter->devId == devId && iter->dhId == dhId) {
@@ -771,8 +999,8 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& deviceId,
-    sptr<IPrepareDInputCallback> callback, sptr<IAddWhiteListInfosCallback> addWhiteListCallback)
+int32_t DistributedInputSourceManager::PrepareRemoteInput(
+    const std::string &deviceId, sptr<IPrepareDInputCallback> callback)
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_PREPARE, deviceId, "dinput prepare call");
@@ -803,7 +1031,7 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& dev
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
-    DInputClientPrepareInfo info(deviceId, callback, addWhiteListCallback);
+    DInputClientPrepareInfo info(deviceId, callback);
     preCallbacks_.push_back(info);
 
     ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(deviceId);
@@ -825,8 +1053,8 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string& dev
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& deviceId,
-    sptr<IUnprepareDInputCallback> callback, sptr<IDelWhiteListInfosCallback> delWhiteListCallback)
+int32_t DistributedInputSourceManager::UnprepareRemoteInput(
+    const std::string &deviceId, sptr<IUnprepareDInputCallback> callback)
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId, "dinput unprepare call");
@@ -853,7 +1081,6 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string& d
     DInputClientUnprepareInfo info;
     info.devId = deviceId;
     info.unpreCallback = callback;
-    info.delWhiteListCallback = delWhiteListCallback;
     unpreCallbacks_.push_back(info);
 
     int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(deviceId);
@@ -900,10 +1127,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
         }
     }
 
-    DInputClientStartInfo info;
-    info.devId = deviceId;
-    info.inputTypes = inputTypes;
-    info.callback = callback;
+    DInputClientStartInfo info(deviceId, inputTypes, callback);
     staCallbacks_.push_back(info);
 
     DeviceMap_[deviceId] = DINPUT_SOURCE_SWITCH_OFF; // when sink device start success,set DINPUT_SOURCE_SWITCH_ON
@@ -952,10 +1176,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
         }
     }
 
-    DInputClientStopInfo info;
-    info.devId = deviceId;
-    info.inputTypes = inputTypes;
-    info.callback = callback;
+    DInputClientStopInfo info(deviceId, inputTypes, callback);
     stpCallbacks_.push_back(info);
 
     int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(deviceId, inputTypes);
@@ -978,6 +1199,498 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
     return DH_SUCCESS;
 }
 
+int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStartDInputCallback> callback)
+{
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
+    DHLOGI("StartRemoteInput called, srcId: %s, sinkId: %s, inputTypes: %d", GetAnonyString(srcId).c_str(),
+        GetAnonyString(sinkId).c_str(), inputTypes);
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("StartRemoteInput called, Could not get local device id.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in get local networkId error");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+    DHLOGI("StartRemoteInput called, device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+    if (srcId != localNetworkId) {
+        DHLOGI("StartRemoteInput called, relay start to srcId: %s", GetAnonyString(srcId).c_str());
+        return RelayStartRemoteInputByType(srcId, sinkId, inputTypes, callback);
+    }
+
+    for (auto iter : staCallbacks_) {
+        if (iter.devId == sinkId && iter.inputTypes == inputTypes) {
+            DHLOGE("StartRemoteInput called, srcId: %s, sinkId: %s repeat call.",
+                GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in already started");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+        }
+    }
+
+    DInputClientStartInfo info(sinkId, inputTypes, callback);
+    staCallbacks_.push_back(info);
+
+    DeviceMap_[sinkId] = DINPUT_SOURCE_SWITCH_OFF; // when sink device start success,set DINPUT_SOURCE_SWITCH_ON
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(sinkId, inputTypes);
+    if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+        DHLOGE("StartRemoteInput called, start fail.");
+        for (std::vector<DInputClientStartInfo>::iterator it = staCallbacks_.begin(); it != staCallbacks_.end(); it++) {
+            if (it->devId == sinkId && it->inputTypes == inputTypes) {
+                staCallbacks_.erase(it);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStopDInputCallback> callback)
+{
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
+    DHLOGI("StopRemoteInput called, srcId: %s, sinkId: %s, inputTypes: %d", GetAnonyString(srcId).c_str(),
+        GetAnonyString(sinkId).c_str(), inputTypes);
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("StopRemoteInput called, Could not get local device id.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in get networkId");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+    DHLOGI("StopRemoteInput called, device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+    if (srcId != localNetworkId) {
+        DHLOGI("StopRemoteInput called, relay start to srcId: %s", GetAnonyString(srcId).c_str());
+        return RelayStopRemoteInputByType(srcId, sinkId, inputTypes, callback);
+    }
+
+    for (auto iter : stpCallbacks_) {
+        if (iter.devId == sinkId && iter.inputTypes == inputTypes) {
+            DHLOGE("StopRemoteInput called, srcId: %s, sinkId: %s repeat call.",
+                GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in already stoped");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+        }
+    }
+    DInputClientStopInfo info(sinkId, inputTypes, callback);
+    stpCallbacks_.push_back(info);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(sinkId, inputTypes);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StopRemoteInput called, stop fail.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+        for (std::vector<DInputClientStopInfo>::iterator it = stpCallbacks_.begin(); it != stpCallbacks_.end(); it++) {
+            if (it->devId == sinkId && it->inputTypes == inputTypes) {
+                stpCallbacks_.erase(it);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::RelayStartRemoteInputByType(const std::string &srcId, const std::string &sinkId,
+    const uint32_t &inputTypes, sptr<IStartDInputCallback> callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!samgr) {
+        DHLOGE("get sa fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+
+    DHLOGE("try get sa: %d from %s", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, GetAnonyString(srcId).c_str());
+    sptr<IRemoteObject> remoteObject = samgr->GetSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, srcId);
+    if (!remoteObject) {
+        DHLOGE("Could not get remoteObject.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+
+    sptr<DistributedInputSourceProxy> dInputSourceProxy(new DistributedInputSourceProxy(remoteObject));
+    if (!dInputSourceProxy) {
+        DHLOGE("new proxy Object fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+
+    return dInputSourceProxy->StartRemoteInput(srcId, sinkId, inputTypes, callback);
+}
+
+int32_t DistributedInputSourceManager::RelayStopRemoteInputByType(
+    const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes, sptr<IStopDInputCallback> callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!samgr) {
+        DHLOGE("get sa fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+
+    DHLOGE("try get sa: %d from %s", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, GetAnonyString(srcId).c_str());
+    sptr<IRemoteObject> remoteObject = samgr->GetSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, srcId);
+    if (!remoteObject) {
+        DHLOGE("Could not get remoteObject.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+
+    sptr<DistributedInputSourceProxy> dInputSourceProxy(new DistributedInputSourceProxy(remoteObject));
+    if (!dInputSourceProxy) {
+        DHLOGE("new proxy Object fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+
+    return dInputSourceProxy->StopRemoteInput(srcId, sinkId, inputTypes, callback);
+}
+
+int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IPrepareDInputCallback> callback)
+{
+    if (srcId.empty() || sinkId.empty()) {
+        DHLOGE("srcId: %d or sinkId: %d is empty.", srcId.empty(), sinkId.empty());
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+    if (callback == nullptr) {
+        DHLOGE("srcId: %s, sinkId: %s callback is null.",
+            GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+    DHLOGI("srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+    if (srcId != localNetworkId) {
+        DHLOGE("relay prepare to srcId: %s", GetAnonyString(srcId).c_str());
+        return RelayPrepareRemoteInput(srcId, sinkId, callback);
+    }
+    // current device is source device
+    for (auto iter : preCallbacks_) {
+        if (iter.devId == sinkId) {
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+        }
+    }
+    int32_t ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(sinkId);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Open softbus session fail ret=%d.", ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+    DInputClientPrepareInfo info(sinkId, callback);
+    preCallbacks_.push_back(info);
+
+    ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(sinkId);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Can not send message by softbus, prepare fail.");
+        for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
+            if (iter->devId == sinkId) {
+                preCallbacks_.erase(iter);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IUnprepareDInputCallback> callback)
+{
+    if (srcId.empty() || sinkId.empty()) {
+        DHLOGE("srcId: %d or sinkId: %d is empty.", srcId.empty(), sinkId.empty());
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+    }
+    if (callback == nullptr) {
+        DHLOGE("srcId: %s, sinkId: %s callback is null.",
+            GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+    }
+    DHLOGI("srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(),
+        GetAnonyString(sinkId).c_str());
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+    }
+    DHLOGI("device local localNetworkId is %s", GetAnonyString(localNetworkId).c_str());
+    if (srcId != localNetworkId) {
+        DHLOGE("relay unprepare to srcId: %s", GetAnonyString(srcId).c_str());
+        return RelayUnprepareRemoteInput(srcId, sinkId, callback);
+    }
+
+    // current device is source device
+    for (auto iter : unpreCallbacks_) {
+        if (iter.devId == sinkId) {
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+        }
+    }
+
+    DInputClientUnprepareInfo info;
+    info.devId = sinkId;
+    info.unpreCallback = callback;
+    unpreCallbacks_.push_back(info);
+
+    int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(sinkId);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Can not send message by softbus, unprepare fail.");
+        for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
+            if (iter->devId == sinkId) {
+                unpreCallbacks_.erase(iter);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+bool DistributedInputSourceManager::IsStringDataSame(const std::vector<std::string> &oldDhIds,
+    std::vector<std::string> newDhIds)
+{
+    if (oldDhIds.size() != newDhIds.size()) {
+        DHLOGI("Size is not same, return false.");
+        return false;
+    }
+    bool isSame = true;
+    for (auto oDhid : oldDhIds) {
+        std::vector<std::string>::iterator it = find(newDhIds.begin(), newDhIds.end(), oDhid);
+        if (it == newDhIds.end()) {
+            isSame = false;
+            break;
+        }
+    }
+    DHLOGI("IsSame: %d.", isSame);
+    return isSame;
+}
+
+int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
+    DHLOGI("sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in get networkId");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+
+    // current device is source device
+    for (auto iter : staStringCallbacks_) {
+        if (iter.sinkId == sinkId && IsStringDataSame(iter.dhIds, dhIds)) {
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in already started");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+            DHLOGE("sinkId: %s, repeat call.", GetAnonyString(sinkId).c_str());
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+        }
+    }
+
+    DInputClientStartDhidInfo info;
+    info.srcId = localNetworkId;
+    info.sinkId = sinkId;
+    info.dhIds = dhIds;
+    info.callback = callback;
+    staStringCallbacks_.push_back(info);
+
+    DeviceMap_[sinkId] = DINPUT_SOURCE_SWITCH_OFF; // when sink device start success,set DINPUT_SOURCE_SWITCH_ON
+
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(sinkId, dhIds);
+    if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+        DHLOGE("StartRemoteInput start fail.");
+        for (std::vector<DInputClientStartDhidInfo>::iterator iter = staStringCallbacks_.begin();
+            iter != staStringCallbacks_.end(); iter++) {
+            if (iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
+                staStringCallbacks_.erase(iter);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+    sptr<IStartStopDInputsCallback> callback)
+{
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
+    DHLOGI("sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in get networkId");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+    for (auto iter : stpStringCallbacks_) {
+        if (iter.sinkId == sinkId && IsStringDataSame(iter.dhIds, dhIds)) {
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in already stop");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+            DHLOGE("sinkId: %s, repeat call.", GetAnonyString(sinkId).c_str());
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+        }
+    }
+
+    DInputClientStopDhidInfo info;
+    info.srcId = localNetworkId;
+    info.sinkId = sinkId;
+    info.dhIds = dhIds;
+    info.callback = callback;
+    stpStringCallbacks_.push_back(info);
+
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(sinkId, dhIds);
+    if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+        DHLOGE("StopRemoteInput stop fail.");
+        for (std::vector<DInputClientStopDhidInfo>::iterator iter = stpStringCallbacks_.begin();
+            iter != stpStringCallbacks_.end(); iter++) {
+            if (iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
+                stpStringCallbacks_.erase(iter);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
+    DHLOGI("srcId: %s, sinkId: %s, dhids size: %d",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in get networkId");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+    if (srcId != localNetworkId) {
+        DHLOGI("relay start to srcId: %s", GetAnonyString(srcId).c_str());
+        return RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    }
+
+    // current device is source device
+    for (auto iter : staStringCallbacks_) {
+        if (iter.srcId == srcId && iter.sinkId == sinkId && IsStringDataSame(iter.dhIds, dhIds)) {
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in already start");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+            DHLOGE("sinkId: %s, repeat call.", GetAnonyString(sinkId).c_str());
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+        }
+    }
+
+    DInputClientStartDhidInfo info{srcId, sinkId, dhIds, callback};
+    staStringCallbacks_.push_back(info);
+
+    DeviceMap_[sinkId] = DINPUT_SOURCE_SWITCH_OFF; // when sink device start success,set DINPUT_SOURCE_SWITCH_ON
+
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(sinkId, dhIds);
+    if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
+        DHLOGE("StartRemoteInput start fail.");
+        for (std::vector<DInputClientStartDhidInfo>::iterator iter = staStringCallbacks_.begin();
+            iter != staStringCallbacks_.end(); iter++) {
+            if (iter->srcId == srcId && iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
+                staStringCallbacks_.erase(iter);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
+    DHLOGI("srcId: %s, sinkId: %s, vector.string.size: %d",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in get networkId");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+    if (srcId != localNetworkId) {
+        DHLOGI("relay stop to srcId: %s", GetAnonyString(srcId).c_str());
+        return RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    }
+
+    for (auto iter : stpStringCallbacks_) {
+        if (iter.srcId == srcId && iter.sinkId == sinkId && IsStringDataSame(iter.dhIds, dhIds)) {
+            HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+                ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in already stop");
+            FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+            DHLOGE("sinkId: %s, repeat call.", GetAnonyString(sinkId).c_str());
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+        }
+    }
+
+    DInputClientStopDhidInfo info;
+    info.srcId = srcId;
+    info.sinkId = sinkId;
+    info.dhIds = dhIds;
+    info.callback = callback;
+    stpStringCallbacks_.push_back(info);
+
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(sinkId, dhIds);
+    if (ret != DH_SUCCESS) {
+        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+        DHLOGE("StopRemoteInput stop fail.");
+        for (std::vector<DInputClientStopDhidInfo>::iterator iter = stpStringCallbacks_.begin();
+            iter != stpStringCallbacks_.end(); iter++) {
+            if (iter->srcId == srcId && iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
+                stpStringCallbacks_.erase(iter);
+                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+            }
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+    return DH_SUCCESS;
+}
+
 int32_t DistributedInputSourceManager::IsStartDistributedInput(
     const uint32_t& inputType, sptr<IStartDInputServerCallback> callback)
 {
@@ -994,6 +1707,198 @@ int32_t DistributedInputSourceManager::IsStartDistributedInput(
     } else {
         return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
     }
+}
+
+int32_t DistributedInputSourceManager::RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> callback)
+{
+    DHLOGI("RegisterAddWhiteListCallback called.");
+    if (callback == nullptr) {
+        DHLOGE("RegisterAddWhiteListCallback callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REG_CALLBACK_ERR;
+    }
+    std::lock_guard<std::mutex> lock(valMutex_);
+    addWhiteListCallback_ = callback;
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> callback)
+{
+    DHLOGI("RegisterDelWhiteListCallback called.");
+    if (callback == nullptr) {
+        DHLOGE("RegisterDelWhiteListCallback callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REG_CALLBACK_ERR;
+    }
+    std::lock_guard<std::mutex> lock(valMutex_);
+    delWhiteListCallback_ = callback;
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::RegisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    DHLOGI("RegisterInputNodeListener, addr: %p", &listener);
+    DistributedInputInject::GetInstance().RegisterInputNodeListener(listener);
+    SendExistVirNodeInfos(listener);
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::UnregisterInputNodeListener(sptr<InputNodeListener> listener)
+{
+    DHLOGI("UnregisterInputNodeListener, addr: %p", &listener);
+    DistributedInputInject::GetInstance().UnregisterInputNodeListener(listener);
+    return DH_SUCCESS;
+}
+
+void DistributedInputSourceManager::SendExistVirNodeInfos(sptr<InputNodeListener> listener)
+{
+    DHLOGI("SendExistVirNodeInfos call");
+    std::lock_guard<std::mutex> lock(operationMutex_);
+    DevInfo localDevInfo = GetLocalDeviceInfo();
+    for (const auto &node : inputDevice_) {
+        DHLOGI("Send Exist Vir Node: srcId: %s, sinkId: %s, dhId: %s", GetAnonyString(localDevInfo.networkId).c_str(),
+            GetAnonyString(node.devId).c_str(), GetAnonyString(node.dhId).c_str());
+        listener->OnNodeOnLine(localDevInfo.networkId, node.devId, node.dhId, node.nodeDesc);
+    }
+}
+
+int32_t DistributedInputSourceManager::RegisterSimulationEventListener(sptr<ISimulationEventListener> listener)
+{
+    DHLOGI("RegisterSimulationEventListener called.");
+    if (listener == nullptr) {
+        DHLOGE("RegisterSimulationEventListener callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_SIMULATION_EVENT_CALLBACK_ERR;
+    }
+    std::lock_guard<std::mutex> lock(valMutex_);
+    this->simulationEventCallbacks_.insert(listener);
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener)
+{
+    DHLOGI("UnregisterSimulationEventListener called.");
+    if (listener == nullptr) {
+        DHLOGE("UnregisterSimulationEventListener callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_SIMULATION_EVENT_CALLBACK_ERR;
+    }
+    std::lock_guard<std::mutex> lock(valMutex_);
+    this->simulationEventCallbacks_.erase(listener);
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::SyncNodeInfoRemoteInput(const std::string &userDevId, const std::string &dhId,
+    const std::string &nodeDesc)
+{
+    // store info
+    UpdateSyncNodeInfo(userDevId, dhId, nodeDesc);
+    // notify multimodal
+    DistributedInputInject::GetInstance().SyncNodeOnlineInfo(userDevId, GetLocalNetworkId(), dhId, nodeDesc);
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::RelayPrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IPrepareDInputCallback> callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!samgr) {
+        DHLOGE("get sa fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+
+    DHLOGI("try get sa: %d from device:%s.", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID,
+        GetAnonyString(srcId).c_str());
+    sptr<IRemoteObject> remoteObject = samgr->GetSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, srcId);
+    if (!remoteObject) {
+        DHLOGE("get remoteObject error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+
+    sptr<DistributedInputSourceProxy> dInputSourceProxy(new DistributedInputSourceProxy(remoteObject));
+    if (!dInputSourceProxy) {
+        DHLOGE("dInputSourceProxy error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
+    }
+
+    return dInputSourceProxy->PrepareRemoteInput(sinkId, callback);
+}
+
+int32_t DistributedInputSourceManager::RelayUnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    sptr<IUnprepareDInputCallback> callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!samgr) {
+        DHLOGE("get sa fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+    }
+
+    DHLOGI("try get sa: %d", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
+    sptr<IRemoteObject> remoteObject = samgr->GetSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, srcId);
+    if (!remoteObject) {
+        DHLOGE("get remoteObject error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+    }
+
+    sptr<DistributedInputSourceProxy> dInputSourceProxy(new DistributedInputSourceProxy(remoteObject));
+    if (!dInputSourceProxy) {
+        DHLOGE("dInputSourceProxy error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
+    }
+
+    return dInputSourceProxy->UnprepareRemoteInput(sinkId, callback);
+}
+
+int32_t DistributedInputSourceManager::RelayStartRemoteInputByDhid(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!samgr) {
+        DHLOGE("get sa fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+
+    DHLOGI("try get sa: %d from %s", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID,
+        GetAnonyString(srcId).c_str());
+    sptr<IRemoteObject> remoteObject = samgr->GetSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, srcId);
+    if (!remoteObject) {
+        DHLOGE("remoteObject error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+
+    sptr<DistributedInputSourceProxy> dInputSourceProxy(new DistributedInputSourceProxy(remoteObject));
+    if (!dInputSourceProxy) {
+        DHLOGE("dInputSourceProxy error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
+
+    return dInputSourceProxy->StartRemoteInput(srcId, sinkId, dhIds, callback);
+}
+
+int32_t DistributedInputSourceManager::RelayStopRemoteInputByDhid(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!samgr) {
+        DHLOGE("get sa fail.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+
+    DHLOGI("try get sa: %d from %s", DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID,
+        GetAnonyString(srcId).c_str());
+    sptr<IRemoteObject> remoteObject = samgr->GetSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, srcId);
+    if (!remoteObject) {
+        DHLOGE("get remoteObject error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+
+    sptr<DistributedInputSourceProxy> dInputSourceProxy(new DistributedInputSourceProxy(remoteObject));
+    if (!dInputSourceProxy) {
+        DHLOGE("dInputSourceProxy error.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
+
+    return dInputSourceProxy->StopRemoteInput(srcId, sinkId, dhIds, callback);
 }
 
 void DistributedInputSourceManager::RunRegisterCallback(
@@ -1039,8 +1944,12 @@ void DistributedInputSourceManager::RunPrepareCallback(
         if (iter->devId == devId) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_PREPARE_MSG");
             iter->preCallback->OnResult(devId, status);
-            iter->addWhiteListCallback->OnResult(devId, object);
             preCallbacks_.erase(iter);
+            if (addWhiteListCallback_ == nullptr) {
+                DHLOGE("ProcessEvent DINPUT_SOURCE_MANAGER_PREPARE_MSG addWhiteListCallback is null.");
+                return;
+            }
+            addWhiteListCallback_->OnResult(devId, object);
             return;
         }
     }
@@ -1048,8 +1957,7 @@ void DistributedInputSourceManager::RunPrepareCallback(
     DHLOGE("ProcessEvent parepareCallback is null.");
 }
 
-void DistributedInputSourceManager::RunUnprepareCallback(
-    const std::string& devId, const int32_t& status)
+void DistributedInputSourceManager::RunUnprepareCallback(const std::string &devId, const int32_t &status)
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
     for (std::vector<DInputClientUnprepareInfo>::iterator iter =
@@ -1057,8 +1965,12 @@ void DistributedInputSourceManager::RunUnprepareCallback(
         if (iter->devId == devId) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_UNPREPARE_MSG");
             iter->unpreCallback->OnResult(devId, status);
-            iter->delWhiteListCallback->OnResult(devId);
             unpreCallbacks_.erase(iter);
+            if (delWhiteListCallback_ == nullptr) {
+                DHLOGE("ProcessEvent DINPUT_SOURCE_MANAGER_UNPREPARE_MSG delWhiteListCallback is null.");
+                return;
+            }
+            delWhiteListCallback_->OnResult(devId);
             return;
         }
     }
@@ -1070,34 +1982,113 @@ void DistributedInputSourceManager::RunStartCallback(
     const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
-    for (std::vector<DInputClientStartInfo>::iterator iter =
-        staCallbacks_.begin(); iter != staCallbacks_.end(); iter++) {
+    for (std::vector<DInputClientStartInfo>::iterator iter = staCallbacks_.begin();
+        iter != staCallbacks_.end(); iter++) {
         if (iter->devId == devId && iter->inputTypes == inputTypes) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_START_MSG");
             iter->callback->OnResult(devId, inputTypes, status);
             staCallbacks_.erase(iter);
-            return;
+            break;
         }
     }
-
-    DHLOGE("ProcessEvent startCallback is null.");
 }
 
 void DistributedInputSourceManager::RunStopCallback(
     const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
-    for (std::vector<DInputClientStopInfo>::iterator iter =
-        stpCallbacks_.begin(); iter != stpCallbacks_.end(); iter++) {
+    for (std::vector<DInputClientStopInfo>::iterator iter = stpCallbacks_.begin();
+        iter != stpCallbacks_.end(); iter++) {
         if (iter->devId == devId && iter->inputTypes == inputTypes) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_STOP_MSG");
             iter->callback->OnResult(devId, inputTypes, status);
             stpCallbacks_.erase(iter);
-            return;
+            break;
         }
     }
+}
 
-    DHLOGE("ProcessEvent stopCallback is null.");
+void DistributedInputSourceManager::RunStartDhidCallback(const std::string &sinkId, const std::string &dhIds,
+    const int32_t &status)
+{
+    std::vector<std::string> dhidsVec;
+    StringSplitToVector(dhIds, INPUT_STRING_SPLIT_POINT, dhidsVec);
+    DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_START_DHID_MSG dhIds:%s, vec-size:%d", dhIds.c_str(), dhidsVec.size());
+    std::string localNetWorkId = GetLocalNetworkId();
+    if (localNetWorkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return;
+    }
+
+    for (std::vector<DInputClientStartDhidInfo>::iterator iter = staStringCallbacks_.begin();
+        iter != staStringCallbacks_.end(); iter++) {
+        if (iter->sinkId != sinkId || !IsStringDataSame(iter->dhIds, dhidsVec)) {
+            continue;
+        }
+        iter->callback->OnResultDhids(sinkId, status);
+        staStringCallbacks_.erase(iter);
+        break;
+    }
+}
+
+void DistributedInputSourceManager::RunStopDhidCallback(const std::string &sinkId, const std::string &dhIds,
+    const int32_t &status)
+{
+    std::vector<std::string> dhidsVec;
+    StringSplitToVector(dhIds, INPUT_STRING_SPLIT_POINT, dhidsVec);
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return;
+    }
+
+    for (std::vector<DInputClientStopDhidInfo>::iterator iter = stpStringCallbacks_.begin();
+        iter != stpStringCallbacks_.end(); iter++) {
+        if (iter->sinkId != sinkId || !IsStringDataSame(iter->dhIds, dhidsVec)) {
+            continue;
+        }
+        iter->callback->OnResultDhids(sinkId, status);
+        stpStringCallbacks_.erase(iter);
+        break;
+    }
+}
+
+void DistributedInputSourceManager::RunKeyStateCallback(const std::string &sinkId, const std::string &dhId,
+    const uint32_t type, const uint32_t code, const uint32_t value)
+{
+    // 1.notify multiinput
+    std::lock_guard<std::mutex> lock(valMutex_);
+    for (const auto &cb : simulationEventCallbacks_) {
+        cb->OnSimulationEvent(type, code, value);
+    }
+
+    DHLOGI("ProcessEvent notify multimodal OnSimulationEvent success.");
+    // 2.if return success, write to virtulnode
+    RawEvent mEventBuffer;
+    mEventBuffer.type = type;
+    mEventBuffer.code = code;
+    mEventBuffer.value = value;
+    mEventBuffer.descriptor = dhId;
+    DistributedInputInject::GetInstance().RegisterDistributedEvent(&mEventBuffer, DINPUT_SOURCE_WRITE_EVENT_SIZE);
+    return;
+}
+
+void DistributedInputSourceManager::StringSplitToVector(const std::string &str, const char split,
+    std::vector<std::string> &vecStr)
+{
+    if (str.empty()) {
+        DHLOGE("StringSplitToVector param str is error.");
+        return;
+    }
+    std::string strTmp = str + split;
+    size_t pos = strTmp.find(split);
+    while (pos != strTmp.npos) {
+        std::string matchTmp = strTmp.substr(0, pos);
+        vecStr.push_back(matchTmp);
+
+        strTmp = strTmp.substr(pos + 1, strTmp.size());
+        pos = strTmp.find(split);
+    }
 }
 
 IStartDInputServerCallback* DistributedInputSourceManager::GetStartDInputServerCback()
@@ -1153,7 +2144,6 @@ void DistributedInputSourceManager::SetDeviceMapValue(const std::string deviceId
     DeviceMap_[deviceId] = value;
 }
 
-
 uint32_t DistributedInputSourceManager::GetInputTypesMap(const std::string deviceId)
 {
     std::map<std::string, uint32_t>::iterator key = InputTypesMap_.find(deviceId);
@@ -1183,6 +2173,34 @@ void DistributedInputSourceManager::SetInputTypesMap(const std::string deviceId,
         }
     }
     InputTypesMap_[deviceId] = value;
+}
+
+std::set<BeRegNodeInfo> DistributedInputSourceManager::GetSyncNodeInfo(const std::string& devId)
+{
+    std::lock_guard<std::mutex> lock(syncNodeInfoMutex_);
+    if (syncNodeInfoMap_.find(devId) == syncNodeInfoMap_.end()) {
+        DHLOGI("syncNodeInfoMap find not the key: %s", GetAnonyString(devId).c_str());
+        return {};
+    }
+    return syncNodeInfoMap_[devId];
+}
+
+void DistributedInputSourceManager::UpdateSyncNodeInfo(const std::string& userDevId, const std::string& dhId,
+    const std::string &nodeDesc)
+{
+    std::lock_guard<std::mutex> lock(syncNodeInfoMutex_);
+    if (syncNodeInfoMap_.find(userDevId) == syncNodeInfoMap_.end()) {
+        DHLOGI("syncNodeInfoMap has not the key: %s, So create this entry", GetAnonyString(userDevId).c_str());
+        std::set<BeRegNodeInfo> syncNodeInfo;
+        syncNodeInfoMap_[userDevId] = syncNodeInfo;
+    }
+    syncNodeInfoMap_[userDevId].insert({userDevId, dhId, nodeDesc});
+}
+
+void DistributedInputSourceManager::DeleteSyncNodeInfo(const std::string& devId)
+{
+    std::lock_guard<std::mutex> lock(syncNodeInfoMutex_);
+    syncNodeInfoMap_.erase(devId);
 }
 
 void DistributedInputSourceManager::DInputSourceListener::RecordEventLog(int64_t when, int32_t type, int32_t code,
@@ -1220,6 +2238,10 @@ DistributedInputSourceManager::StartDScreenListener::~StartDScreenListener()
 void DistributedInputSourceManager::StartDScreenListener::OnMessage(const DHTopic topic, const std::string& message)
 {
     DHLOGI("StartDScreenListener OnMessage!");
+    if (topic != DHTopic::TOPIC_START_DSCREEN) {
+        DHLOGE("this topic is wrong, %d", static_cast<uint32_t>(topic));
+        return;
+    }
     std::string sinkDevId = "";
     SrcScreenInfo srcScreenInfo = {};
     int32_t parseRes = ParseMessage(message, sinkDevId, srcScreenInfo);
@@ -1326,6 +2348,10 @@ DistributedInputSourceManager::StopDScreenListener::~StopDScreenListener()
 void DistributedInputSourceManager::StopDScreenListener::OnMessage(const DHTopic topic, const std::string& message)
 {
     DHLOGI("StopDScreenListener OnMessage!");
+    if (topic != DHTopic::TOPIC_STOP_DSCREEN) {
+        DHLOGE("this topic is wrong, %d", static_cast<uint32_t>(topic));
+        return;
+    }
     std::string sinkDevId = "";
     uint64_t sourceWinId = 0;
     int32_t parseRes = ParseMessage(message, sinkDevId, sourceWinId);
@@ -1378,6 +2404,51 @@ int32_t DistributedInputSourceManager::StopDScreenListener::ParseMessage(const s
     }
     sourceWinId = jsonObj[SOURCE_WINDOW_ID].get<uint64_t>();
     return DH_SUCCESS;
+}
+
+DistributedInputSourceManager::DeviceOfflineListener::DeviceOfflineListener(
+    DistributedInputSourceManager* srcManagerContext)
+{
+    DHLOGI("DeviceOfflineListener ctor!");
+    sourceManagerContext_ = srcManagerContext;
+}
+
+DistributedInputSourceManager::DeviceOfflineListener::~DeviceOfflineListener()
+{
+    DHLOGI("DeviceOfflineListener dtor!");
+}
+
+void DistributedInputSourceManager::DeviceOfflineListener::OnMessage(const DHTopic topic, const std::string &message)
+{
+    DHLOGI("DeviceOfflineListener OnMessage!");
+    if (topic != DHTopic::TOPIC_DEV_OFFLINE) {
+        DHLOGE("this topic is wrong, %d", static_cast<uint32_t>(topic));
+        return;
+    }
+    if (message.empty()) {
+        DHLOGE("this message is empty");
+        return;
+    }
+    DeleteNodeInfoAndNotify(message);
+}
+
+void DistributedInputSourceManager::DeviceOfflineListener::DeleteNodeInfoAndNotify(const std::string& offlineDevId)
+{
+    DHLOGI("DeviceOfflineListener DeleteNodeInfoAndNotify!");
+    if (sourceManagerContext_ == nullptr) {
+        DHLOGE("sourceManagerContext is nullptr!");
+        return;
+    }
+    std::set<BeRegNodeInfo> nodeSet = sourceManagerContext_->GetSyncNodeInfo(offlineDevId);
+    std::string localNetWorkId = GetLocalNetworkId();
+    for (const auto &node : nodeSet) {
+        DHLOGI("DeleteNodeInfoAndNotify device: %s, dhId: %s", GetAnonyString(offlineDevId).c_str(),
+            GetAnonyString(node.dhId).c_str());
+        // Notify multimodal
+        DistributedInputInject::GetInstance().SyncNodeOfflineInfo(offlineDevId, localNetWorkId, node.dhId);
+    }
+    // Delete info
+    sourceManagerContext_->DeleteSyncNodeInfo(offlineDevId);
 }
 
 int32_t DistributedInputSourceManager::Dump(int32_t fd, const std::vector<std::u16string>& args)

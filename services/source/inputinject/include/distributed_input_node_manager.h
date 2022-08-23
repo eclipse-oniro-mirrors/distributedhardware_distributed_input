@@ -49,12 +49,16 @@ public:
     int32_t RemoveVirtualTouchScreenNode(const std::string& dhId);
     int32_t GetVirtualTouchScreenFd();
 
+    int32_t GetDeviceInfo(std::string &deviceId);
+    void GetDevicesInfoByType(const std::string &networkId, int32_t inputTypes, std::map<int32_t, std::string> &datas);
+    void GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
+    void ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent);
+
 private:
     void AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device);
     int32_t CreateHandle(InputDevice event, const std::string& devId, const std::string& dhId);
     void stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf);
     void InjectEvent();
-    void ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent);
 
     /* the key is dhId, and the value is virtualDevice */
     std::map<std::string, std::unique_ptr<VirtualDevice>> virtualDeviceMap_;

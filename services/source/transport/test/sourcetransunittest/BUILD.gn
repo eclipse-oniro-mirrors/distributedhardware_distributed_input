@@ -43,6 +43,8 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "${low_latency_path}/include",
+    "${frameworks_path}/include",
+    "${distributedinput_path}/inputdevicehandler/include",
   ]
 
   sources = [
@@ -73,6 +75,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [

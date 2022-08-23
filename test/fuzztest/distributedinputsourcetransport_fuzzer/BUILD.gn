@@ -41,6 +41,8 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "${utils_path}/include",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "${low_latency_path}/include",
+    "${frameworks_path}/include",
+    "${distributedinput_path}/inputdevicehandler/include",
   ]
 
   cflags = [
@@ -64,6 +66,7 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "//foundation/distributedhardware/distributed_input/services/source/transport:libdinput_source_trans",
+    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [

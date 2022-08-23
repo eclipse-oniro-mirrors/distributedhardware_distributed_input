@@ -34,6 +34,8 @@ ohos_shared_library("libdinput_source_trans") {
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "${low_latency_path}/include",
+    "${frameworks_path}/include",
+    "${distributedinput_path}/inputdevicehandler/include",
   ]
 
   sources = [ "src/distributed_input_source_transport.cpp" ]
@@ -57,6 +59,7 @@ ohos_shared_library("libdinput_source_trans") {
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [
