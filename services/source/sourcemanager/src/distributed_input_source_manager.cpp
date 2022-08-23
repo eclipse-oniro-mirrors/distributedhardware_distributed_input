@@ -1290,6 +1290,8 @@ int32_t DistributedInputSourceManager::StartDScreenListener::UpdateSrcScreenInfo
     std::string srcScreenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcDevId, TmpInfo.sourceWinId);
     SrcScreenInfo srcScreenInfo = DInputContext::GetInstance().GetSrcScreenInfo(srcScreenInfoKey);
     srcScreenInfo.devId = srcDevId;
+    srcScreenInfo.sessionId = DistributedInputSourceTransport::GetInstance().GetCurrentSessionId();
+    srcScreenInfo.uuid = GetUUIDBySoftBus(srcDevId);
     srcScreenInfo.sourceWinId = TmpInfo.sourceWinId;
     srcScreenInfo.sourceWinWidth = TmpInfo.sourceWinWidth;
     srcScreenInfo.sourceWinHeight = TmpInfo.sourceWinHeight;

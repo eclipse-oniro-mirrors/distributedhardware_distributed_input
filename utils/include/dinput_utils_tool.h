@@ -33,6 +33,7 @@ struct DevInfo {
 
 DevInfo GetLocalDeviceInfo();
 std::string GetLocalNetworkId();
+std::string GetUUIDBySoftBus(const std::string &networkId);
 uint64_t GetCurrentTime();
 std::string SetAnonyId(const std::string &message);
 /* IsString, IsUint32 and IsUint64 are used to valid json key */

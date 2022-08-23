@@ -95,6 +95,8 @@ int32_t DistributedInputSinkStub::NotifyStartDScreenInner(MessageParcel &data, M
     MessageOption &option)
 {
     std::string devId = data.ReadString();
+    int32_t sessionId = data.ReadInt32();
+    std::string uuid = data.ReadString();
     uint64_t sourceWinId = data.ReadUint64();
     uint32_t sourceWinWidth = data.ReadUint32();
     uint32_t sourceWinHeight = data.ReadUint32();
@@ -108,6 +110,8 @@ int32_t DistributedInputSinkStub::NotifyStartDScreenInner(MessageParcel &data, M
         sourcePhyHeight);
     SrcScreenInfo srcScreenInfo = {
         .devId = devId,
+        .sessionId = sessionId,
+        .uuid = uuid,
         .sourceWinId = sourceWinId,
         .sourceWinWidth = sourceWinWidth,
         .sourceWinHeight = sourceWinHeight,

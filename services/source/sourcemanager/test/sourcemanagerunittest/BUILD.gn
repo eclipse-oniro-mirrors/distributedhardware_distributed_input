@@ -56,7 +56,6 @@ ohos_unittest("distributed_input_sourcemanager_test") {
   ]
 
   sources = [
-    "${common_path}/include/dinput_sa_process_state.cpp",
     "${common_path}/include/input_hub.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",

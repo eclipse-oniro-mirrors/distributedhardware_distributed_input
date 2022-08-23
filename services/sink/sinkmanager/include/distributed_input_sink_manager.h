@@ -113,6 +113,9 @@ public:
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 
 private:
+    void CleanExceptionalInfo(const SrcScreenInfo& srcScreenInfo);
+
+private:
     ServiceSinkRunningState serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DInputServerType isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
     std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener_;

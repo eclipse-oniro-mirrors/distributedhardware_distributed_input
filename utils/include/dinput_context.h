@@ -69,6 +69,8 @@ struct LocalTouchScreenInfo {
 
 struct SrcScreenInfo {
     std::string devId = "";             // source device id
+    std::string uuid = "";              // source device uuid
+    int32_t sessionId = 0;              // source device session id
     uint64_t sourceWinId = 0;           // source projection window id
     uint32_t sourceWinWidth = 0;        // source projection window width
     uint32_t sourceWinHeight = 0;       // source projection window height

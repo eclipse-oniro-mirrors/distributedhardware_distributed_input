@@ -31,8 +31,8 @@ enum DInputSAState : uint32_t {
     DINPUT_SA_EXIT_STATE_STOP = 1
 };
 
-DInputSAState g_sinkSAState = DINPUT_SA_EXIT_STATE_START;
-DInputSAState g_sourceSAState = DINPUT_SA_EXIT_STATE_START;
+volatile DInputSAState g_sinkSAState = DINPUT_SA_EXIT_STATE_START;
+volatile DInputSAState g_sourceSAState = DINPUT_SA_EXIT_STATE_START;
 std::mutex g_saProcessState;
 
 void SetSinkProcessExit()

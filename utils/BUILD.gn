@@ -28,11 +28,14 @@ ohos_shared_library("libdinput_utils") {
     "//third_party/json/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "${low_latency_path}/include",
+    "${dfx_utils_path}/include",
   ]
 
   sources = [
     "src/dinput_context.cpp",
     "src/dinput_utils_tool.cpp",
+    "src/dinput_sa_process_state.cpp",
   ]
 
   defines = [
@@ -42,6 +45,8 @@ ohos_shared_library("libdinput_utils") {
   ]
 
   deps = [
+    "${dfx_utils_path}:libdinput_dfx_utils",
+    "${low_latency_path}:libdinput_low_latency",
     "${fwk_utils_path}:distributedhardwareutils",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "//third_party/openssl:libcrypto_static",
@@ -51,6 +56,7 @@ ohos_shared_library("libdinput_utils") {
     "dsoftbus:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "hisysevent_native:libhisysevent",
   ]
 
   subsystem_name = "distributedhardware"

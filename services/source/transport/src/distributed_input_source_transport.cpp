@@ -189,6 +189,7 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
 
     DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%s",
         GetAnonyString(remoteDevId).c_str(), GetAnonyInt32(sessionId).c_str());
+    sessionId_ = sessionId;
 
 #ifdef DINPUT_LOW_LATENCY
     DInputLowLatency::GetInstance().EnableSourceLowLatency();
@@ -677,6 +678,11 @@ void DistributedInputSourceTransport::OnBytesReceived(int32_t sessionId, const v
     free(buf);
     DHLOGI("OnBytesReceived completed");
     return;
+}
+
+int32_t DistributedInputSourceTransport::GetCurrentSessionId()
+{
+    return sessionId_;
 }
 
 // send message by sessionId (channel opened)

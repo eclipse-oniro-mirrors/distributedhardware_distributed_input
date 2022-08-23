@@ -61,6 +61,17 @@ std::string GetLocalNetworkId()
     return GetLocalDeviceInfo().networkId;
 }
 
+std::string GetUUIDBySoftBus(const std::string &networkId)
+{
+    if (networkId.empty()) {
+        return "";
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    auto ret = GetNodeKeyInfo(DINPUT_PKG_NAME.c_str(), networkId.c_str(), NodeDeviceInfoKey::NODE_KEY_UUID,
+        reinterpret_cast<uint8_t *>(uuid), UUID_BUF_LEN);
+    return (ret == DH_SUCCESS) ? std::string(uuid) : "";
+}
+
 uint64_t GetCurrentTime()
 {
     constexpr int32_t usOneSecond = 1000 * 1000;

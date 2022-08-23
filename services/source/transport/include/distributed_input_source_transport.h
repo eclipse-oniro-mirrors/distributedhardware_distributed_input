@@ -57,6 +57,7 @@ public:
     int32_t OnSessionOpened(int32_t sessionId, int32_t result);
     void OnSessionClosed(int32_t sessionId);
     void OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen);
+    int32_t GetCurrentSessionId();
 
 private:
     std::string FindDeviceBySession(int32_t sessionId);
@@ -87,6 +88,7 @@ private:
     std::atomic<bool> isLatencyThreadRunning_ = false;
     std::thread latencyThread_;
     std::string eachLatencyDetails_ = "";
+    int32_t sessionId_ = 0;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

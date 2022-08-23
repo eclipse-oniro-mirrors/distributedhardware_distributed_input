@@ -106,7 +106,8 @@ int32_t DistributedInputSinkProxy::NotifyStartDScreen(const SrcScreenInfo &remot
         GetAnonyString(remoteCtrlInfo.devId).c_str(), remoteCtrlInfo.sourceWinId, remoteCtrlInfo.sourceWinWidth,
         remoteCtrlInfo.sourceWinHeight, GetAnonyString(remoteCtrlInfo.sourcePhyId).c_str(),
         remoteCtrlInfo.sourcePhyFd, remoteCtrlInfo.sourcePhyWidth, remoteCtrlInfo.sourcePhyHeight);
-    if (!data.WriteString(remoteCtrlInfo.devId) || !data.WriteUint64(remoteCtrlInfo.sourceWinId) ||
+    if (!data.WriteString(remoteCtrlInfo.devId) || !data.WriteInt32(remoteCtrlInfo.sessionId) ||
+        !data.WriteString(remoteCtrlInfo.uuid) || !data.WriteUint64(remoteCtrlInfo.sourceWinId) ||
         !data.WriteUint32(remoteCtrlInfo.sourceWinWidth) || !data.WriteUint32(remoteCtrlInfo.sourceWinHeight) ||
         !data.WriteString(remoteCtrlInfo.sourcePhyId) || !data.WriteUint32(remoteCtrlInfo.sourcePhyFd) ||
         !data.WriteUint32(remoteCtrlInfo.sourcePhyWidth) || !data.WriteUint32(remoteCtrlInfo.sourcePhyHeight)) {

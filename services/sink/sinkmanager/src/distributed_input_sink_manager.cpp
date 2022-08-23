@@ -496,6 +496,9 @@ uint32_t DistributedInputSinkManager::ProjectWindowListener::GetScreenHeight()
 int32_t DistributedInputSinkManager::NotifyStartDScreen(const SrcScreenInfo& srcScreenInfo)
 {
     DHLOGI("NotifyStartDScreen start!");
+
+    CleanExceptionalInfo(srcScreenInfo);
+
     std::string screenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcScreenInfo.devId,
         srcScreenInfo.sourceWinId);
     SinkScreenInfo sinkScreenInfo = DInputContext::GetInstance().GetSinkScreenInfo(screenInfoKey);
@@ -506,6 +509,22 @@ int32_t DistributedInputSinkManager::NotifyStartDScreen(const SrcScreenInfo& src
         srcScreenInfo.sourceWinHeight, GetAnonyString(srcScreenInfo.sourcePhyId).c_str(), srcScreenInfo.sourcePhyFd,
         srcScreenInfo.sourcePhyWidth, srcScreenInfo.sourcePhyHeight);
     return DInputContext::GetInstance().UpdateSinkScreenInfo(screenInfoKey, sinkScreenInfo);
+}
+
+void DistributedInputSinkManager::CleanExceptionalInfo(const SrcScreenInfo& srcScreenInfo)
+{
+    DHLOGI("CleanExceptionalInfo start!");
+    std::string uuid = srcScreenInfo.uuid;
+    int32_t sessionId = srcScreenInfo.sessionId;
+    auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
+
+    for (const auto& [id, sinkInfo] : sinkInfos) {
+        auto srcInfo = sinkInfo.srcScreenInfo;
+        if ((std::strcmp(srcInfo.uuid.c_str(), uuid.c_str()) == 0) && (srcInfo.sessionId != sessionId)) {
+            DInputContext::GetInstance().RemoveSinkScreenInfo(id);
+            DHLOGI("CleanExceptionalInfo screenInfoKey: %s, sessionId: %d", id.c_str(), sessionId);
+        }
+    }
 }
 
 int32_t DistributedInputSinkManager::NotifyStopDScreen(const std::string& srcScreenInfoKey)

@@ -55,7 +55,6 @@ ohos_unittest("distributed_input_sinkmanager_test") {
   ]
 
   sources = [
-    "${common_path}/include/dinput_sa_process_state.cpp",
     "${common_path}/include/input_hub.cpp",
     "${common_path}/include/white_list_util.cpp",
     "${ipc_path}/src/distributed_input_sink_stub.cpp",
