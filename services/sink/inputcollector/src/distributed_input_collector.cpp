@@ -172,9 +172,9 @@ void DistributedInputCollector::GetMouseNodePath(
     inputHub_->GetShareMousePathByDhId(dhIds, mouseNodePath, dhid);
 }
 
-bool DistributedInputCollector::GetAllDevicesStoped()
+bool DistributedInputCollector::IsAllDevicesStoped()
 {
-    return inputHub_->GetAllDevicesStoped();
+    return inputHub_->IsAllDevicesStoped();
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

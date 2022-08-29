@@ -40,7 +40,8 @@ public:
     void SetSharingTypes(const uint32_t &inputType);
     void SetSharingDhIds(bool enabled, std::vector<std::string> dhIds);
     void GetMouseNodePath(std::vector<std::string> dhIds, std::string &mouseNodePath, std::string &dhid);
-    bool GetAllDevicesStoped();
+    // false for sharing device exist, true for all devices stop sharing
+    bool IsAllDevicesStoped();
 
 private:
     DistributedInputCollector();

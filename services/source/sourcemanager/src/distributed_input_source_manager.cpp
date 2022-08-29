@@ -39,7 +39,6 @@
 #include "distributed_input_inject.h"
 #include "distributed_input_source_proxy.h"
 #include "distributed_input_source_transport.h"
-#include "dinput_utils_tool.h"
 #include "hisysevent_util.h"
 #include "hidumper.h"
 #include "ipublisher_listener.h"

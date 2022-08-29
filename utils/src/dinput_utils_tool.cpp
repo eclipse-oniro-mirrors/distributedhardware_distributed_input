@@ -137,7 +137,7 @@ std::string GetNodeDesc(std::string parameters)
         nodeName = parObj.at("name").get<std::string>();
         classes = parObj.at("classes").get<int32_t>();
     }
-    return "{ NodeName: " + nodeName + ", classes: " + std::to_string(classes) + " }";
+    return "{ nodeName: " + nodeName + ", classes: " + std::to_string(classes) + " }";
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

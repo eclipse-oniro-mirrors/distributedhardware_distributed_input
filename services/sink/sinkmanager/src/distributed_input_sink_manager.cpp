@@ -171,8 +171,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
 void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
-    DHLOGI("onStopRemoteInput called, sessionId: %s, inputTypes: %d",
-        GetAnonyInt32(sessionId).c_str(), inputTypes);
+    DHLOGI("onStopRemoteInput called, sessionId: %s, inputTypes: %d, curInputTypes: %d",
+        GetAnonyInt32(sessionId).c_str(), inputTypes, sinkManagerObj_->GetInputTypes());
 
     sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
         (sinkManagerObj_->GetInputTypes() & inputTypes));
@@ -185,7 +185,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
     std::string smsg = jsonStr.dump();
     DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
 
-    bool isAllClosed = DistributedInputCollector::GetInstance().GetAllDevicesStoped();
+    bool isAllClosed = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
     if (isAllClosed) {
         DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
         if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() ==
@@ -250,8 +250,11 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(cons
     StringSplitToSet(strDhids, INPUT_STRING_SPLIT_POINT, setStr);
     sinkManagerObj_->DeleteStopDhids(sessionId, setStr, stopStr);
     DistributedInputCollector::GetInstance().SetSharingDhIds(false, stopStr);
-    DHLOGE("onStopRemoteInputDhid called, sessionId: %d is closed.", sessionId);
-    DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
+
+    if (DistributedInputCollector::GetInstance().IsAllDevicesStoped()) {
+        DHLOGE("onStopRemoteInputDhid called, all dhid stop sharing, sessionId: %d is closed.", sessionId);
+        DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
+    }
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_DHID_ONSTOP;
@@ -260,7 +263,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(cons
     std::string smsg = jsonStr.dump();
     DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
 
-    bool isAllClosed = DistributedInputCollector::GetInstance().GetAllDevicesStoped();
+    bool isAllClosed = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
     if (isAllClosed) {
         DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
         sinkManagerObj_->SetInputTypes(static_cast<uint32_t>(DInputDeviceType::NONE));

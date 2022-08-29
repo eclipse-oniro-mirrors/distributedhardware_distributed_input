@@ -47,7 +47,7 @@ public:
     void GetDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas);
     void GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
     void GetShareMousePathByDhId(std::vector<std::string> dhIds, std::string &path, std::string &dhId);
-    bool GetAllDevicesStoped();
+    bool IsAllDevicesStoped();
     void ScanInputDevices(const std::string& dirname);
 
 private:

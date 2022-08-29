@@ -1032,7 +1032,7 @@ void InputHub::GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<
     }
 }
 
-bool InputHub::GetAllDevicesStoped()
+bool InputHub::IsAllDevicesStoped()
 {
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto &[id, device] : devices_) {
