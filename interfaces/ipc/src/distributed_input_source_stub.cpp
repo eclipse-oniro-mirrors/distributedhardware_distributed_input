@@ -262,18 +262,6 @@ int32_t DistributedInputSourceStub::HandleStopRelayDhidRemoteInput(MessageParcel
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputSourceStub::HandleIsStartDistributedInput(MessageParcel &data, MessageParcel &reply)
-{
-    uint32_t inputType = data.ReadUint32();
-    sptr<IStartDInputServerCallback> callback = iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
-    int32_t ret = IsStartDistributedInput(inputType, callback);
-    if (!reply.WriteInt32(ret)) {
-        DHLOGE("DistributedInputSourceStub isStartDistributedInput write ret failed");
-        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
-    }
-    return DH_SUCCESS;
-}
-
 int32_t DistributedInputSourceStub::HandleSyncNodeInfoRemoteInput(MessageParcel &data, MessageParcel &reply)
 {
     std::string userDevId = data.ReadString();
@@ -438,9 +426,6 @@ int32_t DistributedInputSourceStub::OnRemoteRequest(
         }
         case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::SYNC_NODE_INFO_REMOTE_INPUT): {
             return HandleSyncNodeInfoRemoteInput(data, reply);
-        }
-        case static_cast<uint32_t>(IDistributedSourceInput::MessageCode::ISSTART_REMOTE_INPUT): {
-            return HandleIsStartDistributedInput(data, reply);
         }
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

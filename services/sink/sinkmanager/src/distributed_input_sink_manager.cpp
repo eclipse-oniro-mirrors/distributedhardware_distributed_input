@@ -156,15 +156,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     // add the input type
     if (startRes == DH_SUCCESS) {
         sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() | inputTypes);
-        DistributedInputCollector::GetInstance().SetSharingTypes(sinkManagerObj_->GetInputTypes());
-    }
-
-    IStartDInputServerCallback *startServerCB = sinkManagerObj_->GetStartDInputServerCback();
-    if (startServerCB == nullptr) {
-        DHLOGE("onStartRemoteInput called, startServerCB is null.");
-    } else {
-        startServerCB->OnResult(
-            static_cast<int32_t>(sinkManagerObj_->GetStartTransFlag()), sinkManagerObj_->GetInputTypes());
+        DistributedInputCollector::GetInstance().SetSharingTypes(true, sinkManagerObj_->GetInputTypes());
     }
 }
 
@@ -176,7 +168,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
 
     sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
         (sinkManagerObj_->GetInputTypes() & inputTypes));
-    DistributedInputCollector::GetInstance().SetSharingTypes(sinkManagerObj_->GetInputTypes());
+    DistributedInputCollector::GetInstance().SetSharingTypes(false, inputTypes);
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONSTOP;
@@ -193,14 +185,6 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
             DHLOGI("all session is stop.");
             sinkManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
         }
-    }
-
-    IStartDInputServerCallback *startServerCB = sinkManagerObj_->GetStartDInputServerCback();
-    if (startServerCB == nullptr) {
-        DHLOGE("startServerCB is null.");
-    } else {
-        startServerCB->OnResult(
-            static_cast<int32_t>(sinkManagerObj_->GetStartTransFlag()), sinkManagerObj_->GetInputTypes());
     }
 }
 
@@ -518,13 +502,6 @@ int32_t DistributedInputSinkManager::Release()
 
     // 3.notify callback servertype
     SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
-    IStartDInputServerCallback *startServerCB = GetStartDInputServerCback();
-    if (startServerCB == nullptr) {
-        DHLOGE("Release() called, startServerCB is null.");
-    } else {
-        startServerCB->OnResult(0, 0);
-    }
-
     // 4.Release input collect resource
     DistributedInputCollector::GetInstance().Release();
 
@@ -538,28 +515,6 @@ int32_t DistributedInputSinkManager::Release()
     SetSinkProcessExit();
 
     return DH_SUCCESS;
-}
-
-int32_t DistributedInputSinkManager::IsStartDistributedInput(
-    const uint32_t& inputType, sptr<IStartDInputServerCallback> callback)
-{
-    if (callback != nullptr) {
-        startServerCallback_ = callback;
-        if (GetStartTransFlag() != DInputServerType::NULL_SERVER_TYPE) {
-            startServerCallback_->OnResult(static_cast<int32_t>(GetStartTransFlag()), GetInputTypes());
-        }
-    }
-
-    if (inputType & GetInputTypes()) {
-        return static_cast<int32_t>(isStartTrans_);
-    } else {
-        return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
-    }
-}
-
-IStartDInputServerCallback* DistributedInputSinkManager::GetStartDInputServerCback()
-{
-    return startServerCallback_;
 }
 
 DInputServerType DistributedInputSinkManager::GetStartTransFlag()
@@ -752,6 +707,13 @@ int32_t DistributedInputSinkManager::NotifyStopDScreen(const std::string& srcScr
         return ERR_DH_INPUT_SERVER_SINK_SCREEN_INFO_IS_EMPTY;
     }
     return DInputContext::GetInstance().RemoveSinkScreenInfo(srcScreenInfoKey);
+}
+
+int32_t DistributedInputSinkManager::RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener)
+{
+    DHLOGI("RegisterSharingDhIdListener");
+    DistributedInputCollector::GetInstance().RegisterSharingDhIdListener(sharingDhIdListener);
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSinkManager::Dump(int32_t fd, const std::vector<std::u16string>& args)

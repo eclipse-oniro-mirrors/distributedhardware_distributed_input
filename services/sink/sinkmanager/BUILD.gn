@@ -46,8 +46,6 @@ ohos_shared_library("libdinput_sink") {
   sources = [
     "${common_path}/include/white_list_util.cpp",
     "${ipc_path}/src/distributed_input_sink_stub.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
     "src/distributed_input_sink_event_handler.cpp",
     "src/distributed_input_sink_manager.cpp",
   ]

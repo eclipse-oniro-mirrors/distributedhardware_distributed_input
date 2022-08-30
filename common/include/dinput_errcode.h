@@ -164,6 +164,8 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_NOTIFY_STOP_DSCREEN_FAIL = -67051;
     constexpr int32_t ERR_DH_INPUT_RPC_REPLY_FAIL = -67052;
     constexpr int32_t ERR_DH_INPUT_SA_REQUEST_CODE_INVALID = -67053;
+    constexpr int32_t ERR_DH_INPUT_SINK_PROXY_REGISTER_SHARING_DHID_LISTENER_FAIL = -67054;
+    constexpr int32_t ERR_DH_INPUT_SINK_STUB_REGISTER_SHARING_DHID_LISTENER_FAIL = -67055;
 
     // Hidump Helper error code
     constexpr int32_t ERR_DH_INPUT_HIDUMP_INVALID_ARGS = -68000;

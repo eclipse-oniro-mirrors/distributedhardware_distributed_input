@@ -50,7 +50,6 @@ private:
     int32_t HandleStopDhidRemoteInput(MessageParcel &data, MessageParcel &reply);
     int32_t HandleStartRelayDhidRemoteInput(MessageParcel &data, MessageParcel &reply);
     int32_t HandleStopRelayDhidRemoteInput(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleIsStartDistributedInput(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterAddWhiteListCallback(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterDelWhiteListCallback(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterInputNodeListener(MessageParcel &data, MessageParcel &reply);

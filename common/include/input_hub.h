@@ -31,6 +31,11 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
+struct AffectDhIds {
+    std::vector<std::string> sharingDhIds;
+    std::vector<std::string> noSharingDhIds;
+};
+
 class InputHub {
 public:
     InputHub();
@@ -41,8 +46,10 @@ public:
     void StopCollectInputHandler();
     size_t DeviceIsExists(InputDeviceEvent* event, size_t capacity);
     std::vector<InputDevice> GetAllInputDevices();
-    void SetSupportInputType(const uint32_t &inputType);
-    void SetSharingDevices(bool enabled, std::vector<std::string> dhIds);
+    // return efftive dhids
+    AffectDhIds SetSupportInputType(bool enabled, const uint32_t &inputType);
+    // return efftive dhids
+    AffectDhIds SetSharingDevices(bool enabled, std::vector<std::string> dhIds);
     void GetDeviceDhIdByFd(int32_t fd, std::string &dhId);
     void GetDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas);
     void GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
@@ -130,6 +137,10 @@ private:
     bool CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo, Device* device);
     size_t CollectEvent(RawEvent* buffer, size_t& capacity, Device* device, struct input_event readBuffer[],
         const size_t count);
+    /*
+     * isEnable: true for sharing dhid, false for no sharing dhid
+     */
+    void SaveAffectDhId(bool isEnable, const std::string &dhId, AffectDhIds &affDhIds);
 
     int epollFd_;
     int iNotifyFd_;

@@ -21,19 +21,21 @@
 #include <mutex>
 #include <string>
 
+#include "event_handler.h"
+
 #include "add_white_list_infos_call_back_stub.h"
 #include "del_white_list_infos_call_back_stub.h"
 #include "i_distributed_source_input.h"
 #include "i_distributed_sink_input.h"
+#include "i_sharing_dhid_listener.h"
 #include "register_d_input_call_back_stub.h"
-#include "start_d_input_server_call_back_stub.h"
 #include "unregister_d_input_call_back_stub.h"
+#include "sharing_dhid_listener_stub.h"
 #include "start_stop_d_inputs_call_back_stub.h"
 
 #include "dinput_sa_manager.h"
 #include "idistributed_hardware_source.h"
 #include "idistributed_hardware_sink.h"
-#include "event_handler.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -92,7 +94,7 @@ public:
     bool IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event);
     bool IsTouchEventNeedFilterOut(const TouchScreenEvent &event);
 
-    DInputServerType IsStartDistributedInput(const uint32_t& inputType);
+    bool IsStartDistributedInput(const std::string& dhId);
 
     int32_t NotifyStartDScreen(const std::string &networkId, const std::string& srcDevId, const uint64_t srcWinId);
     int32_t NotifyStopDScreen(const std::string &networkId, const std::string& srcScreenInfoKey);
@@ -103,11 +105,14 @@ public:
     int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener);
     int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener);
 
-    void CheckRegisterCallback();
+    void CheckSourceRegisterCallback();
     void CheckWhiteListCallback();
     void CheckNodeMonitorCallback();
     void CheckKeyStateCallback();
     void CheckStartStopResultCallback();
+
+    void CheckSinkRegisterCallback();
+    void CheckSharingDhIdsCallback();
 
 public:
     class RegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
@@ -124,13 +129,6 @@ public:
         void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status);
     };
 
-    class StartDInputServerCb : public OHOS::DistributedHardware::DistributedInput::StartDInputServerCallbackStub {
-    public:
-        StartDInputServerCb() = default;
-        virtual ~StartDInputServerCb() = default;
-        void OnResult(const int32_t& status, const uint32_t& inputTypes);
-    };
-
     class AddWhiteListInfosCb : public OHOS::DistributedHardware::DistributedInput::AddWhiteListInfosCallbackStub {
     public:
         AddWhiteListInfosCb() = default;
@@ -143,6 +141,14 @@ public:
         DelWhiteListInfosCb() = default;
         virtual ~DelWhiteListInfosCb() = default;
         void OnResult(const std::string &deviceId);
+    };
+
+    class SharingDhIdListenerCb : public OHOS::DistributedHardware::DistributedInput::SharingDhIdListenerStub {
+    public:
+        SharingDhIdListenerCb() = default;
+        virtual ~SharingDhIdListenerCb() = default;
+        int32_t OnSharing(std::string dhId);
+        int32_t OnNoSharing(std::string dhId);
     };
 
     class DInputClientEventHandler : public AppExecFwk::EventHandler {
@@ -166,23 +172,21 @@ private:
     DInputServerType serverType = DInputServerType::NULL_SERVER_TYPE;
     DInputDeviceType inputTypes_ = DInputDeviceType::NONE;
 
-    sptr<StartDInputServerCb> sinkTypeCallback = nullptr;
-    sptr<StartDInputServerCb> sourceTypeCallback = nullptr;
     sptr<AddWhiteListInfosCb> addWhiteListCallback_ = nullptr;
     sptr<DelWhiteListInfosCb> delWhiteListCallback_ = nullptr;
     sptr<InputNodeListener> regNodeListener_ = nullptr;
     sptr<InputNodeListener> unregNodeListener_ = nullptr;
     sptr<ISimulationEventListener> regSimulationEventListener_ = nullptr;
     sptr<ISimulationEventListener> unregSimulationEventListener_ = nullptr;
+    sptr<ISharingDhIdListener> sharingDhIdListener_ = nullptr;
 
     std::shared_ptr<DistributedInputClient::DInputClientEventHandler> eventHandler_;
 
-    bool isAddWhiteListCbReg;
-    bool isDelWhiteListCbReg;
-    bool isNodeMonitorCbReg;
-    bool isNodeMonitorCbUnreg;
-    bool isSimulationEventCbReg;
-    bool isSimulationEventCbUnreg;
+    std::atomic<bool> isAddWhiteListCbReg;
+    std::atomic<bool> isDelWhiteListCbReg;
+    std::atomic<bool> isNodeMonitorCbReg;
+    std::atomic<bool> isSimulationEventCbReg;
+    std::atomic<bool> isSharingDhIdsReg;
 
     struct DHardWareFwkRegistInfo {
         std::string devId;
@@ -199,6 +203,10 @@ private:
     std::vector<DHardWareFwkRegistInfo> dHardWareFwkRstInfos;
     std::vector<DHardWareFwkUnRegistInfo> dHardWareFwkUnRstInfos;
     std::mutex operationMutex_;
+
+    std::mutex sharingDhIdsMtx_;
+    // sharing local dhids
+    std::set<std::string> sharingDhIds_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

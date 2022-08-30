@@ -58,8 +58,6 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "${common_path}/include/input_hub.cpp",
     "${common_path}/include/white_list_util.cpp",
     "${ipc_path}/src/distributed_input_sink_stub.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
     "${services_sink_path}/inputcollector/src/distributed_input_collector.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_event_handler.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",

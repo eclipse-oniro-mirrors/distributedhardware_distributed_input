@@ -23,7 +23,8 @@
 
 #include "constants_dinput.h"
 #include "dinput_context.h"
-#include "i_start_d_input_server_call_back.h"
+#include "i_distributed_sink_input.h"
+#include "i_sharing_dhid_listener.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -33,15 +34,12 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.IDistributedSinkInput");
 
     /*
-     * Init, Release and IsStartDistributedInput are IPC interface,
+     * Init and Release are IPC interface,
      * which are used for interacting by dhareware and dinput
      */
     virtual int32_t Init() = 0;
 
     virtual int32_t Release() = 0;
-
-    virtual int32_t IsStartDistributedInput(
-        const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) = 0;
 
     /*
      * NotifyStartDScreen and NotifyStopDScreen are RPC interface,
@@ -51,12 +49,14 @@ public:
 
     virtual int32_t NotifyStopDScreen(const std::string &srcScreenInfoKey) = 0;
 
+    virtual int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener) = 0;
+
     enum {
         INIT = 0xf011U,
         RELEASE = 0xf012U,
-        IS_START_REMOTE_INPUT = 0xf013U,
-        NOTIFY_START_DSCREEN = 0xf014U,
-        NOTIFY_STOP_DSCREEN = 0xf015U,
+        NOTIFY_START_DSCREEN = 0xf013U,
+        NOTIFY_STOP_DSCREEN = 0xf014U,
+        REGISTER_SHARING_DHID_LISTENER = 0xf015U,
     };
 };
 } // namespace DistributedInput

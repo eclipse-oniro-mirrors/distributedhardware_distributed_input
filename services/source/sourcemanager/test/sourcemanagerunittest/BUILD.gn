@@ -73,8 +73,6 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${ipc_path}/src/register_d_input_call_back_stub.cpp",
     "${ipc_path}/src/start_d_input_call_back_proxy.cpp",
     "${ipc_path}/src/start_d_input_call_back_stub.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_proxy.cpp",
-    "${ipc_path}/src/start_d_input_server_call_back_stub.cpp",
     "${ipc_path}/src/stop_d_input_call_back_proxy.cpp",
     "${ipc_path}/src/stop_d_input_call_back_stub.cpp",
     "${ipc_path}/src/unprepare_d_input_call_back_proxy.cpp",

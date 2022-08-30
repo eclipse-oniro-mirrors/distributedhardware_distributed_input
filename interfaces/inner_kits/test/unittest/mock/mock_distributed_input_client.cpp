@@ -65,20 +65,6 @@ void DistributedInputClient::UnregisterDInputCb::OnResult(
     }
 }
 
-void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status, const uint32_t& inputTypes)
-{
-    if (DInputServerType::SOURCE_SERVER_TYPE == static_cast<DInputServerType>(status)) {
-        DistributedInputClient::GetInstance().serverType = DInputServerType::SOURCE_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
-    } else if (DInputServerType::SINK_SERVER_TYPE == static_cast<DInputServerType>(status)) {
-        DistributedInputClient::GetInstance().serverType = DInputServerType::SINK_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
-    } else {
-        DistributedInputClient::GetInstance().serverType = DInputServerType::NULL_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes_ = DInputDeviceType::NONE;
-    }
-}
-
 void DistributedInputClient::AddWhiteListInfosCb::OnResult(const std::string &deviceId, const std::string &strJson)
 {
     nlohmann::json inputData = nlohmann::json::parse(strJson);
@@ -180,11 +166,6 @@ bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &e
         }
     }
     return false;
-}
-
-DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t& inputType)
-{
-    return serverType;
 }
 
 bool DistributedInputClient::IsJsonData(std::string strData) const

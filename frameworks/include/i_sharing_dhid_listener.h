@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef START_D_INPUT_SERVER_CALL_BACK_STUB_H
-#define START_D_INPUT_SERVER_CALL_BACK_STUB_H
-
-#include "i_start_d_input_server_call_back.h"
+#ifndef I_SHARING_DHID_LISTENER_H
+#define I_SHARING_DHID_LISTENER_H
 
 #include <string>
 
-#include "iremote_stub.h"
+#include <iremote_broker.h>
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class StartDInputServerCallbackStub : public IRemoteStub<IStartDInputServerCallback> {
+class ISharingDhIdListener : public IRemoteBroker {
 public:
-    StartDInputServerCallbackStub();
-    virtual ~StartDInputServerCallbackStub() override;
+    virtual int32_t OnSharing(std::string dhId) = 0;
+    virtual int32_t OnNoSharing(std::string dhId) = 0;
 
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    enum class Message {
+        SHARING,
+        NO_SHARING
+    };
 
-private:
-    DISALLOW_COPY_AND_MOVE(StartDInputServerCallbackStub);
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.DistributedHardware.DistributedInput.ISharingDhIdListener");
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif // START_D_INPUT_SERVER_CALL_BACK_STUB_H
+#endif // I_SHARING_DHID_LISTENER_H

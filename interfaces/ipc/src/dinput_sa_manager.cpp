@@ -26,17 +26,43 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 IMPLEMENT_SINGLE_INSTANCE(DInputSAManager);
-const uint32_t DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME = 50; // million seconds
+const uint32_t DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME = 100; // million seconds
 void DInputSAManager::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID) {
         DInputSAManager::GetInstance().dInputSourceSAOnline.store(false);
-        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
-        DInputSAManager::GetInstance().dInputSourceProxy_ = nullptr;
-    } else if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
+        {
+            std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sourceMutex_);
+            DInputSAManager::GetInstance().dInputSourceProxy_ = nullptr;
+        }
+        {
+            std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().handlerMutex_);
+            if (DInputSAManager::GetInstance().eventHandler_ != nullptr) {
+                DHLOGI("SendEvent DINPUT_CLIENT_CLEAR_SOURCE_CALLBACK_REGISTER_MSG");
+                AppExecFwk::InnerEvent::Pointer msgEvent =
+                    AppExecFwk::InnerEvent::Get(DINPUT_CLIENT_CLEAR_SOURCE_CALLBACK_REGISTER_MSG, systemAbilityId);
+                DInputSAManager::GetInstance().eventHandler_->SendEvent(msgEvent, DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME,
+                    AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            }
+        }
+    }
+
+    if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
         DInputSAManager::GetInstance().dInputSinkSAOnline.store(false);
-        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
-        DInputSAManager::GetInstance().dInputSinkProxy_ = nullptr;
+        {
+            std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().sinkMutex_);
+            DInputSAManager::GetInstance().dInputSinkProxy_ = nullptr;
+        }
+        {
+            std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().handlerMutex_);
+            if (DInputSAManager::GetInstance().eventHandler_ != nullptr) {
+                DHLOGI("SendEvent DINPUT_CLIENT_CLEAR_SINK_CALLBACK_REGISTER_MSG");
+                AppExecFwk::InnerEvent::Pointer msgEvent =
+                    AppExecFwk::InnerEvent::Get(DINPUT_CLIENT_CLEAR_SINK_CALLBACK_REGISTER_MSG, systemAbilityId);
+                DInputSAManager::GetInstance().eventHandler_->SendEvent(msgEvent, DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME,
+                    AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            }
+        }
     }
     DHLOGI("sa %d is removed.", systemAbilityId);
 }
@@ -47,14 +73,24 @@ void DInputSAManager::SystemAbilityListener::OnAddSystemAbility(int32_t systemAb
         DInputSAManager::GetInstance().dInputSourceSAOnline.store(true);
         std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().handlerMutex_);
         if (DInputSAManager::GetInstance().eventHandler_ != nullptr) {
-            DHLOGI("SendEvent DINPUT_CLIENT_CHECK_CALLBACK_REGISTER_MSG");
+            DHLOGI("SendEvent DINPUT_CLIENT_CHECK_SOURCE_CALLBACK_REGISTER_MSG");
             AppExecFwk::InnerEvent::Pointer msgEvent =
-                AppExecFwk::InnerEvent::Get(DINPUT_CLIENT_CHECK_CALLBACK_REGISTER_MSG, systemAbilityId);
+                AppExecFwk::InnerEvent::Get(DINPUT_CLIENT_CHECK_SOURCE_CALLBACK_REGISTER_MSG, systemAbilityId);
             DInputSAManager::GetInstance().eventHandler_->SendEvent(msgEvent, DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME,
                                                                     AppExecFwk::EventQueue::Priority::IMMEDIATE);
         }
-    } else if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
+    }
+
+    if (systemAbilityId == DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID) {
         DInputSAManager::GetInstance().dInputSinkSAOnline.store(true);
+        std::lock_guard<std::mutex> lock(DInputSAManager::GetInstance().handlerMutex_);
+        if (DInputSAManager::GetInstance().eventHandler_ != nullptr) {
+            DHLOGI("SendEvent DINPUT_CLIENT_CHECK_SINK_CALLBACK_REGISTER_MSG");
+            AppExecFwk::InnerEvent::Pointer msgEvent =
+                AppExecFwk::InnerEvent::Get(DINPUT_CLIENT_CHECK_SINK_CALLBACK_REGISTER_MSG, systemAbilityId);
+            DInputSAManager::GetInstance().eventHandler_->SendEvent(msgEvent, DINPUT_CLIENT_HANDLER_MSG_DELAY_TIME,
+                                                                    AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        }
     }
     DHLOGI("sa %d is added.", systemAbilityId);
 }

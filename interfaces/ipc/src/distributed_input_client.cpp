@@ -34,8 +34,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 std::shared_ptr<DistributedInputClient> DistributedInputClient::instance(new DistributedInputClient());
 DistributedInputClient::DistributedInputClient() : isAddWhiteListCbReg(false), isDelWhiteListCbReg(false),
-                                                   isNodeMonitorCbReg(false), isNodeMonitorCbUnreg(false),
-                                                   isSimulationEventCbReg(false), isSimulationEventCbUnreg(false)
+    isNodeMonitorCbReg(false), isSimulationEventCbReg(false), isSharingDhIdsReg(false)
 {
     DHLOGI("DistributedInputClient init start");
     std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(true);
@@ -82,21 +81,6 @@ void DistributedInputClient::UnregisterDInputCb::OnResult(
     }
 }
 
-void DistributedInputClient::StartDInputServerCb::OnResult(const int32_t& status, const uint32_t& inputTypes)
-{
-    DHLOGI("StartDInputServerCb status: %d, inputTypes: %d, addr: %p", status, inputTypes, this);
-    if (DInputServerType::SOURCE_SERVER_TYPE == static_cast<DInputServerType>(status)) {
-        DistributedInputClient::GetInstance().serverType = DInputServerType::SOURCE_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
-    } else if (DInputServerType::SINK_SERVER_TYPE == static_cast<DInputServerType>(status)) {
-        DistributedInputClient::GetInstance().serverType = DInputServerType::SINK_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
-    } else {
-        DistributedInputClient::GetInstance().serverType = DInputServerType::NULL_SERVER_TYPE;
-        DistributedInputClient::GetInstance().inputTypes_ = DInputDeviceType::NONE;
-    }
-}
-
 void DistributedInputClient::AddWhiteListInfosCb::OnResult(const std::string &deviceId, const std::string &strJson)
 {
     if (!strJson.empty()) {
@@ -109,6 +93,22 @@ void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& de
     DistributedInputClient::GetInstance().DelWhiteListInfos(deviceId);
 }
 
+int32_t DistributedInputClient::SharingDhIdListenerCb::OnSharing(std::string dhId)
+{
+    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().sharingDhIdsMtx_);
+    DHLOGI("Add Sharing Local dhId: %s", GetAnonyString(dhId).c_str());
+    DistributedInputClient::GetInstance().sharingDhIds_.insert(dhId);
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputClient::SharingDhIdListenerCb::OnNoSharing(std::string dhId)
+{
+    std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().sharingDhIdsMtx_);
+    DHLOGI("Remove No Sharing Local dhId: %s", GetAnonyString(dhId).c_str());
+    DistributedInputClient::GetInstance().sharingDhIds_.erase(dhId);
+    return DH_SUCCESS;
+}
+
 DistributedInputClient::DInputClientEventHandler::DInputClientEventHandler(
     const std::shared_ptr<AppExecFwk::EventRunner> &runner)
     : AppExecFwk::EventHandler(runner)
@@ -119,23 +119,68 @@ void DistributedInputClient::DInputClientEventHandler::ProcessEvent(const AppExe
 {
     uint32_t eventId = event->GetInnerEventId();
     DHLOGI("DInputClientEventHandler ProcessEvent start eventId:%d.", eventId);
-    if (eventId == DINPUT_CLIENT_CHECK_CALLBACK_REGISTER_MSG) {
-        DistributedInputClient::GetInstance().CheckRegisterCallback();
-    } else {
-        DHLOGE("DInputClientEventHandler ProcessEvent error, because eventId is unkonwn.");
+    if (eventId == DINPUT_CLIENT_CHECK_SOURCE_CALLBACK_REGISTER_MSG) {
+        DistributedInputClient::GetInstance().CheckSourceRegisterCallback();
+        return;
     }
-    DHLOGI("DInputClientEventHandler ProcessEvent end");
+
+    if (eventId == DINPUT_CLIENT_CHECK_SINK_CALLBACK_REGISTER_MSG) {
+        DistributedInputClient::GetInstance().CheckSinkRegisterCallback();
+        return;
+    }
+
+    if (eventId == DINPUT_CLIENT_CLEAR_SOURCE_CALLBACK_REGISTER_MSG) {
+        DHLOGI("Source SA exit, clear callback flag");
+        DistributedInputClient::GetInstance().isAddWhiteListCbReg = false;
+        DistributedInputClient::GetInstance().isDelWhiteListCbReg = false;
+        DistributedInputClient::GetInstance().isNodeMonitorCbReg = false;
+        DistributedInputClient::GetInstance().isSimulationEventCbReg = false;
+        return;
+    }
+
+    if (eventId == DINPUT_CLIENT_CLEAR_SINK_CALLBACK_REGISTER_MSG) {
+        DHLOGI("Sink SA exit, clear callback flag");
+        DistributedInputClient::GetInstance().isSharingDhIdsReg = false;
+        return;
+    }
 }
 
-void DistributedInputClient::CheckRegisterCallback()
+void DistributedInputClient::CheckSourceRegisterCallback()
 {
-    DHLOGI("CheckRegisterCallback called, awl[%d], dwl[%d], rnm[%d], unm[%d], rmd[%d], umd[%d]",
-           isAddWhiteListCbReg, isDelWhiteListCbReg, isNodeMonitorCbReg, isNodeMonitorCbUnreg, isSimulationEventCbReg,
-           isSimulationEventCbUnreg);
+    DHLOGI("CheckSourceRegisterCallback called, isAddWhiteListCbReg[%d], isDelWhiteListCbReg[%d],"
+        "isNodeMonitorCbReg[%d], isSimulationEventCbReg[%d]",
+        isAddWhiteListCbReg.load(), isDelWhiteListCbReg.load(), isNodeMonitorCbReg.load(),
+        isSimulationEventCbReg.load());
 
     CheckWhiteListCallback();
     CheckNodeMonitorCallback();
     CheckKeyStateCallback();
+}
+
+void DistributedInputClient::CheckSinkRegisterCallback()
+{
+    DHLOGI("CheckSinkRegisterCallback called, isSharingDhIdsReg[%d]", isSharingDhIdsReg.load());
+    CheckSharingDhIdsCallback();
+}
+
+void DistributedInputClient::CheckSharingDhIdsCallback()
+{
+    if (!DInputSAManager::GetInstance().GetDInputSinkProxy()) {
+        DHLOGE("CheckWhiteListCallback client get source proxy fail");
+        return;
+    }
+    if (!isSharingDhIdsReg) {
+        if (sharingDhIdListener_ == nullptr) {
+            sharingDhIdListener_ = new (std::nothrow) SharingDhIdListenerCb();
+        }
+        int32_t ret =
+            DInputSAManager::GetInstance().dInputSinkProxy_->RegisterSharingDhIdListener(sharingDhIdListener_);
+        if (ret == DH_SUCCESS) {
+            isSharingDhIdsReg = true;
+        } else {
+            DHLOGE("CheckSharingDhIdsCallback client RegisterSharingDhIdListener fail");
+        }
+    }
 }
 
 void DistributedInputClient::CheckWhiteListCallback()
@@ -181,12 +226,6 @@ void DistributedInputClient::CheckNodeMonitorCallback()
         DInputSAManager::GetInstance().dInputSourceProxy_->RegisterInputNodeListener(regNodeListener_);
         isNodeMonitorCbReg = true;
     }
-
-    if (!isNodeMonitorCbUnreg && unregNodeListener_ != nullptr) {
-        DHLOGI("CheckNodeMonitorCallback need continue register unregNodeListener_.");
-        DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterInputNodeListener(unregNodeListener_);
-        isNodeMonitorCbUnreg = true;
-    }
 }
 
 void DistributedInputClient::CheckKeyStateCallback()
@@ -198,12 +237,6 @@ void DistributedInputClient::CheckKeyStateCallback()
     if (!isSimulationEventCbReg && regSimulationEventListener_ != nullptr) {
         DInputSAManager::GetInstance().dInputSourceProxy_->RegisterSimulationEventListener(regSimulationEventListener_);
         isSimulationEventCbReg = true;
-    }
-
-    if (!isSimulationEventCbUnreg && unregSimulationEventListener_ != nullptr) {
-        DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterSimulationEventListener(
-            unregSimulationEventListener_);
-        isSimulationEventCbUnreg = true;
     }
 }
 
@@ -231,8 +264,6 @@ int32_t DistributedInputClient::ReleaseSource()
 
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
-    sinkTypeCallback = nullptr;
-    sourceTypeCallback = nullptr;
     addWhiteListCallback_ = nullptr;
     delWhiteListCallback_ = nullptr;
     regNodeListener_ = nullptr;
@@ -251,7 +282,6 @@ int32_t DistributedInputClient::ReleaseSink()
     }
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
-    sinkTypeCallback = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList();
     return DInputSAManager::GetInstance().dInputSinkProxy_->Release();
 }
@@ -572,37 +602,10 @@ bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &e
     return false;
 }
 
-DInputServerType DistributedInputClient::IsStartDistributedInput(const uint32_t& inputType)
+bool DistributedInputClient::IsStartDistributedInput(const std::string& dhId)
 {
-    DHLOGI("IsStartDistributedInput called, inputType: %d, current inputTypes: %d",
-        inputType, static_cast<uint32_t>(inputTypes_));
-    int32_t retSource = 0;
-    int32_t retSink = 0;
-
-    if (sourceTypeCallback == nullptr && DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGI("Init sourceTypeCallback");
-        sourceTypeCallback = new(std::nothrow) StartDInputServerCb();
-        retSource = DInputSAManager::GetInstance().dInputSourceProxy_->IsStartDistributedInput(inputType,
-            sourceTypeCallback);
-    }
-
-    if (sinkTypeCallback == nullptr && DInputSAManager::GetInstance().GetDInputSinkProxy()) {
-        DHLOGI("Init sinkTypeCallback");
-        sinkTypeCallback = new(std::nothrow) StartDInputServerCb();
-        retSink = DInputSAManager::GetInstance().dInputSinkProxy_->IsStartDistributedInput(inputType, sinkTypeCallback);
-    }
-
-    if (static_cast<DInputServerType>(retSource) != DInputServerType::NULL_SERVER_TYPE) {
-        serverType = DInputServerType::SOURCE_SERVER_TYPE;
-    } else if (static_cast<DInputServerType>(retSink) != DInputServerType::NULL_SERVER_TYPE) {
-        serverType = DInputServerType::SINK_SERVER_TYPE;
-    }
-
-    if (inputType & static_cast<uint32_t>(inputTypes_)) {
-        return serverType;
-    } else {
-        return DInputServerType::NULL_SERVER_TYPE;
-    }
+    std::lock_guard<std::mutex> lock(sharingDhIdsMtx_);
+    return sharingDhIds_.find(dhId) != sharingDhIds_.end();
 }
 
 int32_t DistributedInputClient::RegisterInputNodeListener(sptr<InputNodeListener> listener)
@@ -639,17 +642,11 @@ int32_t DistributedInputClient::UnregisterInputNodeListener(sptr<InputNodeListen
     }
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("UnregisterInputNodeListener proxy error, client fail");
-        isNodeMonitorCbUnreg = false;
-        unregNodeListener_ = listener;
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     int32_t ret = DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterInputNodeListener(listener);
-    if (ret == DH_SUCCESS) {
-        isNodeMonitorCbUnreg = true;
-    } else {
-        isNodeMonitorCbUnreg = false;
-        unregNodeListener_ = listener;
+    if (ret != DH_SUCCESS) {
         DHLOGE("DInputSAManager UnregisterInputNodeListener Failed, ret = %d", ret);
     }
     return ret;
@@ -689,17 +686,11 @@ int32_t DistributedInputClient::UnregisterSimulationEventListener(sptr<ISimulati
     }
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
         DHLOGE("UnregisterSimulationEventListener proxy error, client fail");
-        isSimulationEventCbUnreg = false;
-        unregSimulationEventListener_ = listener;
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
 
     int32_t ret = DInputSAManager::GetInstance().dInputSourceProxy_->UnregisterSimulationEventListener(listener);
-    if (ret == DH_SUCCESS) {
-        isSimulationEventCbUnreg = true;
-    } else {
-        isSimulationEventCbUnreg = false;
-        unregSimulationEventListener_ = listener;
+    if (ret != DH_SUCCESS) {
         DHLOGE("UnregisterSimulationEventListener Failed, ret = %d", ret);
     }
     return ret;

@@ -76,9 +76,6 @@ public:
     virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
         const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
 
-    virtual int32_t IsStartDistributedInput(
-        const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
-
     virtual int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) override;
     virtual int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
     virtual int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) override;

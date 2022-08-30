@@ -140,10 +140,11 @@ void DistributedInputCollector::StopCollectEventsThread()
     DHLOGW("DistributedInputCollector::StopCollectEventsThread exit!");
 }
 
-void DistributedInputCollector::SetSharingTypes(const uint32_t &inputType)
+void DistributedInputCollector::SetSharingTypes(bool enabled, const uint32_t &inputType)
 {
     inputTypes_ = 0;
-    if ((inputType & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
+    if ((inputType & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0 ||
+        (inputType & static_cast<uint32_t>(DInputDeviceType::TOUCHPAD)) != 0) {
         inputTypes_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
     if ((inputType & static_cast<uint32_t>(DInputDeviceType::KEYBOARD)) != 0) {
@@ -153,7 +154,27 @@ void DistributedInputCollector::SetSharingTypes(const uint32_t &inputType)
         inputTypes_ |= INPUT_DEVICE_CLASS_TOUCH_MT | INPUT_DEVICE_CLASS_TOUCH;
     }
 
-    inputHub_->SetSupportInputType(inputTypes_);
+    AffectDhIds dhIds = inputHub_->SetSupportInputType(enabled, inputTypes_);
+    ReportDhIdSharingState(dhIds);
+}
+
+void DistributedInputCollector::ReportDhIdSharingState(const AffectDhIds &dhIds)
+{
+    std::lock_guard<std::mutex> lock(sharingDhIdListenerMtx_);
+    if (sharingDhIdListener_ == nullptr) {
+        DHLOGI("sharingDhIdListener_ is null, can not report sharing dhid");
+        return;
+    }
+
+    for (auto const &id : dhIds.sharingDhIds) {
+        DHLOGI("Sharing DhId: %s", id.c_str());
+        sharingDhIdListener_->OnSharing(id);
+    }
+
+    for (auto const &id : dhIds.noSharingDhIds) {
+        DHLOGI("No Sharing DhId: %s", id.c_str());
+        sharingDhIdListener_->OnNoSharing(id);
+    }
 }
 
 void DistributedInputCollector::Release()
@@ -163,7 +184,8 @@ void DistributedInputCollector::Release()
 
 void DistributedInputCollector::SetSharingDhIds(bool enabled, std::vector<std::string> dhIds)
 {
-    inputHub_->SetSharingDevices(enabled, dhIds);
+    AffectDhIds affdhIds = inputHub_->SetSharingDevices(enabled, dhIds);
+    ReportDhIdSharingState(affdhIds);
 }
 
 void DistributedInputCollector::GetMouseNodePath(
@@ -175,6 +197,14 @@ void DistributedInputCollector::GetMouseNodePath(
 bool DistributedInputCollector::IsAllDevicesStoped()
 {
     return inputHub_->IsAllDevicesStoped();
+}
+
+int32_t DistributedInputCollector::RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener)
+{
+    DHLOGI("RegisterSharingDhIdListener");
+    std::lock_guard<std::mutex> lock(sharingDhIdListenerMtx_);
+    sharingDhIdListener_ = sharingDhIdListener;
+    return DH_SUCCESS;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

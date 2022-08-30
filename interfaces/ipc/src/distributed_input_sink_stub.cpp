@@ -20,6 +20,7 @@
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "i_sharing_dhid_listener.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -29,9 +30,9 @@ DistributedInputSinkStub::DistributedInputSinkStub()
     DHLOGI("DistributedInputSinkStub ctor!");
     memberFuncMap_[INIT] = &DistributedInputSinkStub::InitInner;
     memberFuncMap_[RELEASE] = &DistributedInputSinkStub::ReleaseInner;
-    memberFuncMap_[IS_START_REMOTE_INPUT] = &DistributedInputSinkStub::IsStartDistributedInputInner;
     memberFuncMap_[NOTIFY_START_DSCREEN] = &DistributedInputSinkStub::NotifyStartDScreenInner;
     memberFuncMap_[NOTIFY_STOP_DSCREEN] = &DistributedInputSinkStub::NotifyStopDScreenInner;
+    memberFuncMap_[REGISTER_SHARING_DHID_LISTENER] = &DistributedInputSinkStub::RegisterSharingDhIdListenerInner;
 }
 
 DistributedInputSinkStub::~DistributedInputSinkStub()
@@ -70,20 +71,6 @@ int32_t DistributedInputSinkStub::InitInner(MessageParcel &data, MessageParcel &
 int32_t DistributedInputSinkStub::ReleaseInner(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     int32_t ret = Release();
-    if (!reply.WriteInt32(ret)) {
-        DHLOGE("DistributedInputSinkStub write ret failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-    }
-    return ret;
-}
-
-int32_t DistributedInputSinkStub::IsStartDistributedInputInner(MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
-{
-    uint32_t inputType = data.ReadUint32();
-    sptr<IStartDInputServerCallback> callback =
-        iface_cast<IStartDInputServerCallback>(data.ReadRemoteObject());
-    int32_t ret = IsStartDistributedInput(inputType, callback);
     if (!reply.WriteInt32(ret)) {
         DHLOGE("DistributedInputSinkStub write ret failed");
         return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
@@ -139,6 +126,19 @@ int32_t DistributedInputSinkStub::NotifyStopDScreenInner(MessageParcel &data, Me
         return ERR_DH_INPUT_RPC_REPLY_FAIL;
     }
     return ret;
+}
+
+int32_t DistributedInputSinkStub::RegisterSharingDhIdListenerInner(MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    sptr<ISharingDhIdListener> listener = iface_cast<ISharingDhIdListener>(data.ReadRemoteObject());
+    int32_t ret = RegisterSharingDhIdListener(listener);
+    if (!reply.WriteInt32(ret)) {
+        DHLOGE("RegisterSharingDhIdListenerInner write ret failed, ret = %d", ret);
+        return ERR_DH_INPUT_SINK_STUB_REGISTER_SHARING_DHID_LISTENER_FAIL;
+    }
+
+    return DH_SUCCESS;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

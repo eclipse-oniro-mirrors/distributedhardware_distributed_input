@@ -97,11 +97,6 @@ public:
 
     virtual int32_t Release() override;
 
-    virtual int32_t IsStartDistributedInput(
-        const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
-
-    IStartDInputServerCallback* GetStartDInputServerCback();
-
     DInputServerType GetStartTransFlag();
 
     void SetStartTransFlag(const DInputServerType flag);
@@ -121,6 +116,8 @@ public:
 
     int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
 
+    int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener) override;
+
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 
 private:
@@ -130,7 +127,6 @@ private:
     ServiceSinkRunningState serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DInputServerType isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
     std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener_;
-    sptr<IStartDInputServerCallback> startServerCallback_ = nullptr;
 
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<DistributedInputSinkEventHandler> handler_;

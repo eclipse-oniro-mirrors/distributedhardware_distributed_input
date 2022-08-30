@@ -28,7 +28,6 @@
 #include "i_prepare_d_input_call_back.h"
 #include "i_register_d_input_call_back.h"
 #include "i_start_d_input_call_back.h"
-#include "i_start_d_input_server_call_back.h"
 #include "i_stop_d_input_call_back.h"
 #include "i_start_stop_d_inputs_call_back.h"
 #include "i_start_stop_result_call_back.h"
@@ -90,9 +89,6 @@ public:
     virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
         const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) = 0;
 
-    virtual int32_t IsStartDistributedInput(
-        const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) = 0;
-
     virtual int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) = 0;
     virtual int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) = 0;
     virtual int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) = 0;
@@ -112,7 +108,6 @@ public:
         UNPREPARE_REMOTE_INPUT = 0xf006,
         START_REMOTE_INPUT = 0xf007,
         STOP_REMOTE_INPUT = 0xf008,
-        ISSTART_REMOTE_INPUT = 0xf009,
         PREPARE_RELAY_REMOTE_INPUT = 0xf00a,
         UNPREPARE_RELAY_REMOTE_INPUT = 0xf00b,
         START_RELAY_TYPE_REMOTE_INPUT = 0xf00c,

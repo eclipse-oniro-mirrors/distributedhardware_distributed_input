@@ -37,11 +37,11 @@ public:
 
     int32_t ReleaseInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
-    int32_t IsStartDistributedInputInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-
     int32_t NotifyStartDScreenInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     int32_t NotifyStopDScreenInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
+    int32_t RegisterSharingDhIdListenerInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
 private:
     DISALLOW_COPY_AND_MOVE(DistributedInputSinkStub);

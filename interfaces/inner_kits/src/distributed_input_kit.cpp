@@ -66,7 +66,12 @@ bool DistributedInputKit::IsTouchEventNeedFilterOut(const TouchScreenEvent &even
 
 DInputServerType DistributedInputKit::IsStartDistributedInput(const uint32_t& inputType)
 {
-    return DistributedInputClient::GetInstance().IsStartDistributedInput(inputType);
+    return DInputServerType::NULL_SERVER_TYPE;
+}
+
+bool DistributedInputKit::IsStartDistributedInput(const std::string& dhId)
+{
+    return DistributedInputClient::GetInstance().IsStartDistributedInput(dhId);
 }
 
 int32_t DistributedInputKit::PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,

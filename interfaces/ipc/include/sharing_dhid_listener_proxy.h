@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef START_D_INPUT_SERVER_CALL_BACK_PROXY_H
-#define START_D_INPUT_SERVER_CALL_BACK_PROXY_H
+#ifndef SHARING_DHID_LISTENER_PROXY_H
+#define SHARING_DHID_LISTENER_PROXY_H
 
-#include "i_start_d_input_server_call_back.h"
+#include "i_sharing_dhid_listener.h"
 
 #include <string>
 
@@ -25,19 +25,20 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class StartDInputServerCallbackProxy : public IRemoteProxy<IStartDInputServerCallback> {
+class SharingDhIdListenerProxy : public IRemoteProxy<ISharingDhIdListener> {
 public:
-    explicit StartDInputServerCallbackProxy(const sptr<IRemoteObject> &object);
+    explicit SharingDhIdListenerProxy(const sptr<IRemoteObject> &object);
 
-    virtual ~StartDInputServerCallbackProxy() override;
+    virtual ~SharingDhIdListenerProxy() override;
 
-    virtual void OnResult(const int32_t& status, const uint32_t& inputTypes) override;
+    virtual int32_t OnSharing(std::string dhId) override;
+    virtual int32_t OnNoSharing(std::string dhId) override;
 
 private:
-    static inline BrokerDelegator<StartDInputServerCallbackProxy> delegator_;
+    static inline BrokerDelegator<SharingDhIdListenerProxy> delegator_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif // START_D_INPUT_CALL_BACK_PROXY_H
+#endif // SHARING_DHID_LISTENER_PROXY_H

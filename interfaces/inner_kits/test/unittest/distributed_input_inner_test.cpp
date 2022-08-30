@@ -402,30 +402,6 @@ HWTEST_F(DistributedInputInnerTest, IsTouchEventNeedFilterOut01, testing::ext::T
     ret = DistributedInputKit::IsTouchEventNeedFilterOut(event);
     EXPECT_EQ(false, ret);
 }
-
-HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput1, testing::ext::TestSize.Level0)
-{
-    DistributedInputClient::GetInstance().ReleaseSource();
-    DistributedInputClient::GetInstance().InitSink();
-    DInputServerType ret = DistributedInputKit::IsStartDistributedInput(static_cast<uint32_t>(DInputDeviceType::ALL));
-
-    if (ret == DInputServerType::NULL_SERVER_TYPE) {
-        EXPECT_EQ(DH_SUCCESS, 0);
-    } else {
-        EXPECT_EQ(DH_SUCCESS, -1);
-    }
-}
-
-HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput2, testing::ext::TestSize.Level0)
-{
-    DInputServerType ret = DistributedInputKit::IsStartDistributedInput(static_cast<uint32_t>(DInputDeviceType::ALL));
-
-    if (ret == DInputServerType::NULL_SERVER_TYPE) {
-        EXPECT_EQ(DH_SUCCESS, 0);
-    } else {
-        EXPECT_EQ(DH_SUCCESS, -1);
-    }
-}
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

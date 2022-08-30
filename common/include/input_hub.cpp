@@ -938,18 +938,30 @@ bool InputHub::IsSupportInputTypes(uint32_t classes)
     return classes & inputTypes_;
 }
 
-void InputHub::SetSupportInputType(const uint32_t &inputTypes)
+void InputHub::SaveAffectDhId(bool isEnable, const std::string &dhId, AffectDhIds &affDhIds)
 {
+    if (isEnable) {
+        affDhIds.sharingDhIds.push_back(dhId);
+    } else {
+        affDhIds.noSharingDhIds.push_back(dhId);
+    }
+}
+
+AffectDhIds InputHub::SetSupportInputType(bool enabled, const uint32_t &inputTypes)
+{
+    AffectDhIds affDhIds;
     inputTypes_ = inputTypes;
     DHLOGI("SetSupportInputType: inputTypes=0x%x,", inputTypes_.load());
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto &[id, device] : devices_) {
         if (device->classes & inputTypes_) {
-            device->isShare = true;
-        } else {
-            device->isShare = false;
+            device->isShare = enabled;
+            DHLOGW("ByType dhid:%s, isshare:%d", device->identifier.descriptor.c_str(), enabled);
+            SaveAffectDhId(enabled, device->identifier.descriptor, affDhIds);
         }
     }
+
+    return affDhIds;
 }
 
 void InputHub::GetDeviceDhIdByFd(int32_t fd, std::string &dhId)
@@ -964,18 +976,22 @@ void InputHub::GetDeviceDhIdByFd(int32_t fd, std::string &dhId)
     dhId.clear();
 }
 
-void InputHub::SetSharingDevices(bool enabled, std::vector<std::string> dhIds)
+AffectDhIds InputHub::SetSharingDevices(bool enabled, std::vector<std::string> dhIds)
 {
+    AffectDhIds affDhIds;
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (auto dhId : dhIds) {
         for (const auto &[id, device] : devices_) {
             if (device->identifier.descriptor == dhId) {
                 device->isShare = enabled;
-                DHLOGW("dhid:%s, isshare:%d,", device->identifier.descriptor.c_str(), enabled);
+                DHLOGW("dhid:%s, isshare:%d", device->identifier.descriptor.c_str(), enabled);
+                SaveAffectDhId(enabled, device->identifier.descriptor, affDhIds);
                 break;
             }
         }
     }
+
+    return affDhIds;
 }
 
 void InputHub::GetShareMousePathByDhId(std::vector<std::string> dhIds, std::string &path, std::string &dhId)

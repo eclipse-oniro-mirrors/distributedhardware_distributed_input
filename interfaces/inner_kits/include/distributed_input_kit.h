@@ -70,6 +70,12 @@ public:
     static bool IsTouchEventNeedFilterOut(const TouchScreenEvent &event);
 
     static DInputServerType IsStartDistributedInput(const uint32_t& inputType);
+    /*
+     * check is dhId sharing to other devices
+     * true: dhId sharing to other device
+     * false: dhId NOT sharing to other device
+     */
+    static bool IsStartDistributedInput(const std::string& dhId);
 
     static int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener);
     static int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener);

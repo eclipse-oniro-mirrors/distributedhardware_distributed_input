@@ -525,31 +525,6 @@ int32_t DistributedInputSourceProxy::StopRemoteInput(const std::string &srcId, c
     return result;
 }
 
-int32_t DistributedInputSourceProxy::IsStartDistributedInput(
-    const uint32_t& inputType, sptr<IStartDInputServerCallback> callback)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        DHLOGE("DistributedInputSourceProxy write token valid failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-    }
-    if (!data.WriteUint32(inputType)) {
-        DHLOGE("DistributedInputSourceProxy write inputType failed");
-        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
-    }
-    if (!data.WriteRemoteObject(callback->AsObject())) {
-        DHLOGE("DistributedInputSourceProxy write callback failed");
-        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
-    }
-    MessageParcel reply;
-    int32_t result = ERR_DH_INPUT_SOURCE_PROXY_IS_START_INPUT_FAIL;
-    bool ret = SendRequest(IDistributedSourceInput::MessageCode::ISSTART_REMOTE_INPUT, data, reply);
-    if (ret) {
-        result = reply.ReadInt32();
-    }
-    return result;
-}
-
 int32_t DistributedInputSourceProxy::RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback)
 {
     if (addWhiteListCallback == nullptr) {

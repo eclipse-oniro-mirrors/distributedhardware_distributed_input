@@ -67,33 +67,6 @@ int32_t DistributedInputSinkProxy::Release()
     return result;
 }
 
-int32_t DistributedInputSinkProxy::IsStartDistributedInput(
-    const uint32_t& inputType, sptr<IStartDInputServerCallback> callback)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        DHLOGE("DistributedInputSinkProxy write token valid failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-    }
-    if (!data.WriteUint32(inputType)) {
-        DHLOGE("DistributedInputSinkProxy write inputType failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-    }
-    if (!data.WriteRemoteObject(callback->AsObject())) {
-        DHLOGE("DistributedInputSinkProxy write callback failed");
-        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
-    }
-    MessageParcel reply;
-    int32_t result = ERR_DH_INPUT_SINK_PROXY_IS_START_INPUT_FAIL;
-    bool ret = SendRequest(IS_START_REMOTE_INPUT, data, reply);
-    if (!ret) {
-        DHLOGE("SendRequest fail!");
-        return ERR_DH_INPUT_SINK_PROXY_IS_START_INPUT_FAIL;
-    }
-    result = reply.ReadInt32();
-    return result;
-}
-
 int32_t DistributedInputSinkProxy::NotifyStartDScreen(const SrcScreenInfo &remoteCtrlInfo)
 {
     MessageParcel data;
@@ -144,6 +117,27 @@ int32_t DistributedInputSinkProxy::NotifyStopDScreen(const std::string &srcScree
         return ERR_DH_INPUT_NOTIFY_STOP_DSCREEN_FAIL;
     }
     result = reply.ReadInt32();
+    return result;
+}
+
+int32_t DistributedInputSinkProxy::RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("RegisterSharingDhIdListener write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    if (!data.WriteRemoteObject(sharingDhIdListener->AsObject())) {
+        DHLOGE("RegisterSharingDhIdListener write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t result = ERR_DH_INPUT_SINK_PROXY_REGISTER_SHARING_DHID_LISTENER_FAIL;
+    bool ret = SendRequest(REGISTER_SHARING_DHID_LISTENER, data, reply);
+    if (ret) {
+        result = reply.ReadInt32();
+    }
     return result;
 }
 

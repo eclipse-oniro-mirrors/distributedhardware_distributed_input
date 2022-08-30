@@ -155,8 +155,6 @@ public:
     virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
         const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
 
-    virtual int32_t IsStartDistributedInput(
-        const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
     virtual int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) override;
     virtual int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
     virtual int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) override;
@@ -275,7 +273,6 @@ public:
     void RunKeyStateCallback(const std::string &sinkId, const std::string &dhId, const uint32_t type,
         const uint32_t code, const uint32_t value);
 
-    IStartDInputServerCallback* GetStartDInputServerCback();
     DInputServerType GetStartTransFlag();
     void SetStartTransFlag(const DInputServerType flag);
     std::vector<InputDeviceId> GetInputDeviceId();
@@ -353,7 +350,6 @@ private:
     std::vector<DInputClientUnprepareInfo> unpreCallbacks_;
     std::vector<DInputClientStartInfo> staCallbacks_;
     std::vector<DInputClientStopInfo> stpCallbacks_;
-    sptr<IStartDInputServerCallback>  startServerCallback_ = nullptr;
 
     std::vector<DInputClientStartDhidInfo> staStringCallbacks_;
     std::vector<DInputClientStopDhidInfo> stpStringCallbacks_;

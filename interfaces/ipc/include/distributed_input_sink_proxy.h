@@ -22,6 +22,8 @@
 
 #include "iremote_proxy.h"
 
+#include "i_sharing_dhid_listener.h"
+
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
@@ -36,11 +38,10 @@ public:
 
     virtual int32_t Release() override;
 
-    virtual int32_t IsStartDistributedInput(
-        const uint32_t& inputType, sptr<IStartDInputServerCallback> callback) override;
-
     virtual int32_t NotifyStartDScreen(const SrcScreenInfo& srcScreenRemoteCtrlInfo) override;
     virtual int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
+
+    virtual int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener) override;
 
 private:
     bool SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply);

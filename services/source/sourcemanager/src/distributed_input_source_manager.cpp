@@ -495,13 +495,6 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
     }
     sourceManagerObj_->SetStartTransFlag((result && (sourceManagerObj_->GetInputTypesMap(deviceId) > 0)) ?
         DInputServerType::SOURCE_SERVER_TYPE : DInputServerType::NULL_SERVER_TYPE);
-    if (sourceManagerObj_->GetStartDInputServerCback() != nullptr) {
-        sourceManagerObj_->GetStartDInputServerCback()->OnResult(
-            static_cast<int32_t>(sourceManagerObj_->GetStartTransFlag()),
-            sourceManagerObj_->GetAllInputTypesMap());
-    } else {
-        DHLOGE("ProcessEvent GetStartDInputServerCback() or is null.");
-    }
     sourceManagerObj_->RunStartCallback(deviceId, inputTypes,
         result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_MSG_IS_BAD);
 }
@@ -533,13 +526,6 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStopC
     if (isAllDevSwitchOff) {
         DHLOGI("All Dev Switch Off");
         sourceManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
-    }
-    if (sourceManagerObj_->GetStartDInputServerCback() != nullptr) {
-        sourceManagerObj_->GetStartDInputServerCback()->OnResult(
-            static_cast<int32_t>(sourceManagerObj_->GetStartTransFlag()),
-            sourceManagerObj_->GetAllInputTypesMap());
-    } else {
-        DHLOGE("ProcessEvent GetStartDInputServerCback() is null.");
     }
     sourceManagerObj_->RunStopCallback(deviceId, inputTypes,
         result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD);
@@ -605,13 +591,6 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
     int32_t serType = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
     DInputServerType startTransFlag = DInputServerType(serType);
     sourceManagerObj_->SetStartTransFlag(startTransFlag);
-
-    if (sourceManagerObj_->GetStartDInputServerCback() != nullptr) {
-        sourceManagerObj_->GetStartDInputServerCback()->OnResult(
-            serType, static_cast<uint32_t>(DInputDeviceType::NONE));
-    } else {
-        DHLOGE("ProcessEvent GetStartDInputServerCback() is null.");
-    }
 }
 
 void DistributedInputSourceManager::DInputSourceManagerEventHandler::ProcessEvent(
@@ -1690,24 +1669,6 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputSourceManager::IsStartDistributedInput(
-    const uint32_t& inputType, sptr<IStartDInputServerCallback> callback)
-{
-    if (callback != nullptr) {
-        startServerCallback_ = callback;
-        if (GetStartTransFlag() != DInputServerType::NULL_SERVER_TYPE) {
-            startServerCallback_->OnResult(static_cast<int32_t>(GetStartTransFlag()), GetAllInputTypesMap());
-        }
-    }
-
-    DHLOGI("param inputType: %d, allInputTypes: %d", inputType, GetAllInputTypesMap());
-    if (inputType & GetAllInputTypesMap()) {
-        return static_cast<int32_t>(isStartTrans_);
-    } else {
-        return static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
-    }
-}
-
 int32_t DistributedInputSourceManager::RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> callback)
 {
     DHLOGI("RegisterAddWhiteListCallback called.");
@@ -2088,11 +2049,6 @@ void DistributedInputSourceManager::StringSplitToVector(const std::string &str, 
         strTmp = strTmp.substr(pos + 1, strTmp.size());
         pos = strTmp.find(split);
     }
-}
-
-IStartDInputServerCallback* DistributedInputSourceManager::GetStartDInputServerCback()
-{
-    return startServerCallback_;
 }
 
 DInputServerType DistributedInputSourceManager::GetStartTransFlag()

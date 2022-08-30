@@ -43,7 +43,7 @@ int32_t SimulationEventListenerStub::OnRemoteRequest(
             int32_t eventValue = data.ReadInt32();
             int32_t ret = OnSimulationEvent(eventType, eventCode, eventValue);
             if (!reply.WriteInt32(ret)) {
-                DHLOGE("DistributedInputSourceStub write ret failed");
+                DHLOGE("SimulationEventListenerStub write ret failed");
                 return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
             }
             break;
