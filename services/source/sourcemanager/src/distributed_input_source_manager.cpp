@@ -929,16 +929,19 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
 
     std::lock_guard<std::mutex> lock(operationMutex_);
 
-    DInputClientUnregistInfo info;
-    info.devId = devId;
-    info.dhId = dhId;
-    info.callback = callback;
+    DInputClientUnregistInfo info {devId, dhId, callback};
     unregCallbacks_.push_back(info);
 
     InputDeviceId inputDeviceId {devId, dhId};
     DHLOGI("Unregister deviceId: %s, dhId: %s", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
-    std::vector<InputDeviceId>::iterator it = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
+    std::vector<InputDeviceId>::iterator it = inputDevice_.begin();
+    for (; it != inputDevice_.end(); ++it) {
+        if (devId == inputDeviceId.devId && dhId == inputDeviceId.dhId) {
+            break;
+        }
+    }
+
     if (it == inputDevice_.end()) {
         DHLOGE("%s called, deviceId: %s is not exist.", __func__, GetAnonyString(devId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
