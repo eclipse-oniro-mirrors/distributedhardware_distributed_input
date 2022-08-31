@@ -42,6 +42,7 @@ namespace DistributedInput {
 namespace {
 const uint32_t SLEEP_TIME_US = 100 * 1000;
 const uint32_t ERROR_MSG_MAX_LEN = 256;
+constexpr int32_t MAX_RETRY_COUNT = 10;
 }
 
 InputHub::InputHub() : epollFd_(0), iNotifyFd_(0), inputWd_(0), needToScanDevices_(true), nextDeviceId_(1),
@@ -460,8 +461,21 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
         DHLOGE("path check fail, error path: %s", devicePath.c_str());
         return ERR_DH_INPUT_HUB_OPEN_DEVICEPATH_FAIL;
     }
+    struct stat s;
+    if ((stat(canonicalDevicePath, &s) == 0) && (s.st_mode & S_IFDIR)) {
+        DHLOGI("path: %s is a dir.", devicePath.c_str());
+        return DH_SUCCESS;
+    }
+
     int fd = open(canonicalDevicePath, O_RDWR | O_CLOEXEC | O_NONBLOCK);
-    if (fd < 0) {
+    int32_t count = 0;
+    while ((fd < 0) && (count < MAX_RETRY_COUNT)) {
+        ++count;
+        usleep(SLEEP_TIME_US);
+        fd = open(canonicalDevicePath, O_RDWR | O_CLOEXEC | O_NONBLOCK);
+        DHLOGE("could not open %s, %s; retry %d\n", devicePath.c_str(), ConvertErrNo().c_str(), count);
+    }
+    if (count >= MAX_RETRY_COUNT) {
         DHLOGE("could not open %s, %s\n", devicePath.c_str(), ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_OPEN_DEVICEPATH_FAIL;
     }
@@ -475,17 +489,7 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     // Allocate device. (The device object takes ownership of the fd at this point.)
     int32_t deviceId = nextDeviceId_++;
     std::unique_ptr<Device> device = std::make_unique<Device>(fd, deviceId, devicePath, identifier);
-
-    DHLOGI("add device %d: %s\n", deviceId, devicePath.c_str());
-    DHLOGI("  bus:        %04x\n"
-           "  vendor      %04x\n"
-           "  product     %04x\n"
-           "  version     %04x\n",
-        identifier.bus, identifier.vendor, identifier.product, identifier.version);
-    DHLOGI("  name:       \"%s\"\n", identifier.name.c_str());
-    DHLOGI("  location:   \"%s\"\n", identifier.location.c_str());
-    DHLOGI("  unique id:  \"%s\"\n", identifier.uniqueId.c_str());
-    DHLOGI("  descriptor: \"%s\"\n", GetAnonyString(identifier.descriptor).c_str());
+    RecordDeviceLog(deviceId, devicePath, identifier);
 
     if (MakeDevice(fd, std::move(device)) < 0) {
         return ERR_DH_INPUT_HUB_MAKE_DEVICE_FAIL;
@@ -1057,6 +1061,20 @@ bool InputHub::IsAllDevicesStoped()
         }
     }
     return true;
+}
+
+void InputHub::RecordDeviceLog(const int32_t deviceId, const std::string& devicePath, const InputDevice& identifier)
+{
+    DHLOGI("add device %d: %s\n", deviceId, devicePath.c_str());
+    DHLOGI("  bus:        %04x\n"
+           "  vendor      %04x\n"
+           "  product     %04x\n"
+           "  version     %04x\n",
+        identifier.bus, identifier.vendor, identifier.product, identifier.version);
+    DHLOGI("  name:       \"%s\"\n", identifier.name.c_str());
+    DHLOGI("  location:   \"%s\"\n", identifier.location.c_str());
+    DHLOGI("  unique id:  \"%s\"\n", identifier.uniqueId.c_str());
+    DHLOGI("  descriptor: \"%s\"\n", GetAnonyString(identifier.descriptor).c_str());
 }
 
 void InputHub::RecordEventLog(const RawEvent* event)

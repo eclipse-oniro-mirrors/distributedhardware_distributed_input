@@ -131,6 +131,7 @@ private:
     uint32_t SizeofBitArray(uint32_t bit);
     bool IsSupportInputTypes(uint32_t classes);
     void RecordEventLog(const RawEvent* event);
+    void RecordDeviceLog(const int32_t deviceId, const std::string& devicePath, const InputDevice& identifier);
     void HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count, std::vector<bool>& needFilted,
         Device* device);
     int32_t QueryLocalTouchScreenInfo(int fd);
