@@ -24,6 +24,7 @@
 #include "constants_dinput.h"
 #include "dinput_context.h"
 #include "i_distributed_sink_input.h"
+#include "i_get_sink_screen_infos_call_back.h"
 #include "i_sharing_dhid_listener.h"
 
 namespace OHOS {
@@ -41,6 +42,8 @@ public:
 
     virtual int32_t Release() = 0;
 
+    virtual int32_t RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback) = 0;
+
     /*
      * NotifyStartDScreen and NotifyStopDScreen are RPC interface,
      * which are used for interacting by dinput source and dinput sink
@@ -57,6 +60,7 @@ public:
         NOTIFY_START_DSCREEN = 0xf013U,
         NOTIFY_STOP_DSCREEN = 0xf014U,
         REGISTER_SHARING_DHID_LISTENER = 0xf015U,
+        GET_SINK_SCREEN_INFOS = 0xf016U,
     };
 };
 } // namespace DistributedInput

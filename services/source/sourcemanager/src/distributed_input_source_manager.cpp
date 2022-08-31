@@ -1681,7 +1681,7 @@ int32_t DistributedInputSourceManager::RegisterAddWhiteListCallback(sptr<IAddWhi
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REG_CALLBACK_ERR;
     }
     std::lock_guard<std::mutex> lock(valMutex_);
-    addWhiteListCallback_ = callback;
+    addWhiteListCallbacks_.insert(callback);
     return DH_SUCCESS;
 }
 
@@ -1693,7 +1693,7 @@ int32_t DistributedInputSourceManager::RegisterDelWhiteListCallback(sptr<IDelWhi
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REG_CALLBACK_ERR;
     }
     std::lock_guard<std::mutex> lock(valMutex_);
-    delWhiteListCallback_ = callback;
+    delWhiteListCallbacks_.insert(callback);
     return DH_SUCCESS;
 }
 
@@ -1909,11 +1909,14 @@ void DistributedInputSourceManager::RunPrepareCallback(
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_PREPARE_MSG");
             iter->preCallback->OnResult(devId, status);
             preCallbacks_.erase(iter);
-            if (addWhiteListCallback_ == nullptr) {
+            std::lock_guard<std::mutex> lock(valMutex_);
+            if (addWhiteListCallbacks_.size() == 0) {
                 DHLOGE("ProcessEvent DINPUT_SOURCE_MANAGER_PREPARE_MSG addWhiteListCallback is null.");
                 return;
             }
-            addWhiteListCallback_->OnResult(devId, object);
+            for (const auto& iter : addWhiteListCallbacks_) {
+                iter->OnResult(devId, object);
+            }
             return;
         }
     }
@@ -1930,11 +1933,14 @@ void DistributedInputSourceManager::RunUnprepareCallback(const std::string &devI
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_UNPREPARE_MSG");
             iter->unpreCallback->OnResult(devId, status);
             unpreCallbacks_.erase(iter);
-            if (delWhiteListCallback_ == nullptr) {
+            std::lock_guard<std::mutex> lock(valMutex_);
+            if (delWhiteListCallbacks_.size() == 0) {
                 DHLOGE("ProcessEvent DINPUT_SOURCE_MANAGER_UNPREPARE_MSG delWhiteListCallback is null.");
                 return;
             }
-            delWhiteListCallback_->OnResult(devId);
+            for (const auto& iter : delWhiteListCallbacks_) {
+                iter->OnResult(devId);
+            }
             return;
         }
     }

@@ -25,6 +25,7 @@
 
 #include "add_white_list_infos_call_back_stub.h"
 #include "del_white_list_infos_call_back_stub.h"
+#include "get_sink_screen_infos_call_back_stub.h"
 #include "i_distributed_source_input.h"
 #include "i_distributed_sink_input.h"
 #include "i_sharing_dhid_listener.h"
@@ -113,6 +114,7 @@ public:
 
     void CheckSinkRegisterCallback();
     void CheckSharingDhIdsCallback();
+    void CheckSinkScreenInfoCallback();
 
 public:
     class RegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
@@ -151,6 +153,13 @@ public:
         int32_t OnNoSharing(std::string dhId);
     };
 
+    class GetSinkScreenInfosCb : public OHOS::DistributedHardware::DistributedInput::GetSinkScreenInfosCallbackStub {
+    public:
+        GetSinkScreenInfosCb() = default;
+        virtual ~GetSinkScreenInfosCb() = default;
+        void OnResult(const std::string &strJson);
+    };
+
     class DInputClientEventHandler : public AppExecFwk::EventHandler {
     public:
         DInputClientEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
@@ -164,6 +173,7 @@ private:
     bool IsJsonData(std::string strData) const;
     void AddWhiteListInfos(const std::string &deviceId, const std::string &strJson) const;
     void DelWhiteListInfos(const std::string &deviceId) const;
+    void UpdateSinkScreenInfos(const std::string &strJson);
     sptr<IDistributedSinkInput> GetRemoteDInput(const std::string &networkId) const;
 
 private:
@@ -172,13 +182,14 @@ private:
     DInputServerType serverType = DInputServerType::NULL_SERVER_TYPE;
     DInputDeviceType inputTypes_ = DInputDeviceType::NONE;
 
-    sptr<AddWhiteListInfosCb> addWhiteListCallback_ = nullptr;
-    sptr<DelWhiteListInfosCb> delWhiteListCallback_ = nullptr;
+    std::set<sptr<AddWhiteListInfosCb>> addWhiteListCallbacks_;
+    std::set<sptr<DelWhiteListInfosCb>> delWhiteListCallbacks_;
     sptr<InputNodeListener> regNodeListener_ = nullptr;
     sptr<InputNodeListener> unregNodeListener_ = nullptr;
     sptr<ISimulationEventListener> regSimulationEventListener_ = nullptr;
     sptr<ISimulationEventListener> unregSimulationEventListener_ = nullptr;
-    sptr<ISharingDhIdListener> sharingDhIdListener_ = nullptr;
+    std::set<sptr<ISharingDhIdListener>> sharingDhIdListeners_;
+    std::set<sptr<GetSinkScreenInfosCb>> getSinkScreenInfosCallbacks_;
 
     std::shared_ptr<DistributedInputClient::DInputClientEventHandler> eventHandler_;
 
@@ -187,6 +198,7 @@ private:
     std::atomic<bool> isNodeMonitorCbReg;
     std::atomic<bool> isSimulationEventCbReg;
     std::atomic<bool> isSharingDhIdsReg;
+    std::atomic<bool> isGetSinkScreenInfosCbReg;
 
     struct DHardWareFwkRegistInfo {
         std::string devId;
@@ -202,6 +214,7 @@ private:
 
     std::vector<DHardWareFwkRegistInfo> dHardWareFwkRstInfos;
     std::vector<DHardWareFwkUnRegistInfo> dHardWareFwkUnRstInfos;
+    std::vector<TransformInfo> screenTransInfos;
     std::mutex operationMutex_;
 
     std::mutex sharingDhIdsMtx_;

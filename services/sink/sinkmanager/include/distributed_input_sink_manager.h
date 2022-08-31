@@ -72,7 +72,7 @@ public:
 
     class ProjectWindowListener : public PublisherListenerStub {
     public:
-        ProjectWindowListener();
+        ProjectWindowListener(DistributedInputSinkManager *manager);
         ~ProjectWindowListener();
         void OnMessage(const DHTopic topic, const std::string& message) override;
 
@@ -87,6 +87,7 @@ public:
     private:
         sptr<Rosen::Screen> screen_;
         std::mutex handleScreenMutex_;
+        DistributedInputSinkManager *sinkManagerObj_;
     };
 
     class DScreenSinkSvrRecipient : public IRemoteObject::DeathRecipient {
@@ -108,6 +109,10 @@ public:
     virtual int32_t Init() override;
 
     virtual int32_t Release() override;
+
+    virtual int32_t RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback) override;
+
+    uint32_t GetSinkScreenInfosCbackSize();
 
     DInputServerType GetStartTransFlag();
 
@@ -134,11 +139,13 @@ public:
 
 private:
     void CleanExceptionalInfo(const SrcScreenInfo& srcScreenInfo);
+    void CallBackScreenInfoChange();
 
 private:
     ServiceSinkRunningState serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
     DInputServerType isStartTrans_ = DInputServerType::NULL_SERVER_TYPE;
     std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener_;
+    std::set<sptr<IGetSinkScreenInfosCallback>> getSinkScreenInfosCallbacks_;
 
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<DistributedInputSinkEventHandler> handler_;

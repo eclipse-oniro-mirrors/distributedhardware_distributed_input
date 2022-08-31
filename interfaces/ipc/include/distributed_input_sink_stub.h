@@ -37,6 +37,8 @@ public:
 
     int32_t ReleaseInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
+    int32_t RegisterGetSinkScreenInfosInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
     int32_t NotifyStartDScreenInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     int32_t NotifyStopDScreenInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);

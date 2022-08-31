@@ -369,8 +369,8 @@ private:
     std::vector<DInputClientStartDhidInfo> staStringCallbacks_;
     std::vector<DInputClientStopDhidInfo> stpStringCallbacks_;
 
-    sptr<IAddWhiteListInfosCallback> addWhiteListCallback_ = nullptr;
-    sptr<IDelWhiteListInfosCallback> delWhiteListCallback_ = nullptr;
+    std::set<sptr<IAddWhiteListInfosCallback>> addWhiteListCallbacks_;
+    std::set<sptr<IDelWhiteListInfosCallback>> delWhiteListCallbacks_;
     std::set<sptr<ISimulationEventListener>> simulationEventCallbacks_;
 
     std::map<std::string, int32_t> DeviceMap_;

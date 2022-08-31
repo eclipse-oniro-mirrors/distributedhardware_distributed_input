@@ -93,6 +93,13 @@ void DistributedInputClient::DelWhiteListInfosCb::OnResult(const std::string& de
     DistributedInputClient::GetInstance().DelWhiteListInfos(deviceId);
 }
 
+void DistributedInputClient::GetSinkScreenInfosCb::OnResult(const std::string &strJson)
+{
+    if (!strJson.empty()) {
+        DistributedInputClient::GetInstance().UpdateSinkScreenInfos(strJson);
+    }
+}
+
 int32_t DistributedInputClient::SharingDhIdListenerCb::OnSharing(std::string dhId)
 {
     std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().sharingDhIdsMtx_);
@@ -161,6 +168,7 @@ void DistributedInputClient::CheckSinkRegisterCallback()
 {
     DHLOGI("CheckSinkRegisterCallback called, isSharingDhIdsReg[%d]", isSharingDhIdsReg.load());
     CheckSharingDhIdsCallback();
+    CheckSinkScreenInfoCallback();
 }
 
 void DistributedInputClient::CheckSharingDhIdsCallback()
@@ -170,13 +178,13 @@ void DistributedInputClient::CheckSharingDhIdsCallback()
         return;
     }
     if (!isSharingDhIdsReg) {
-        if (sharingDhIdListener_ == nullptr) {
-            sharingDhIdListener_ = new (std::nothrow) SharingDhIdListenerCb();
-        }
+        sptr<ISharingDhIdListener> listener = new (std::nothrow) SharingDhIdListenerCb();
         int32_t ret =
-            DInputSAManager::GetInstance().dInputSinkProxy_->RegisterSharingDhIdListener(sharingDhIdListener_);
+            DInputSAManager::GetInstance().dInputSinkProxy_->RegisterSharingDhIdListener(listener);
         if (ret == DH_SUCCESS) {
             isSharingDhIdsReg = true;
+            std::lock_guard<std::mutex> lock(operationMutex_);
+            sharingDhIdListeners_.insert(listener);
         } else {
             DHLOGE("CheckSharingDhIdsCallback client RegisterSharingDhIdListener fail");
         }
@@ -190,25 +198,25 @@ void DistributedInputClient::CheckWhiteListCallback()
         return;
     }
     if (!isAddWhiteListCbReg) {
-        if (addWhiteListCallback_ == nullptr) {
-            addWhiteListCallback_ = new (std::nothrow) AddWhiteListInfosCb();
-        }
+        sptr<AddWhiteListInfosCb> addCallback = new (std::nothrow) AddWhiteListInfosCb();
         int32_t ret =
-            DInputSAManager::GetInstance().dInputSourceProxy_->RegisterAddWhiteListCallback(addWhiteListCallback_);
+            DInputSAManager::GetInstance().dInputSourceProxy_->RegisterAddWhiteListCallback(addCallback);
         if (ret == DH_SUCCESS) {
             isAddWhiteListCbReg = true;
+            std::lock_guard<std::mutex> lock(operationMutex_);
+            addWhiteListCallbacks_.insert(addCallback);
         } else {
             DHLOGE("CheckWhiteListCallback client RegisterAddWhiteListCallback fail");
         }
     }
     if (!isDelWhiteListCbReg) {
-        if (delWhiteListCallback_ == nullptr) {
-            delWhiteListCallback_ = new (std::nothrow) DelWhiteListInfosCb();
-        }
+        sptr<DelWhiteListInfosCb> delCallback= new (std::nothrow) DelWhiteListInfosCb();
         int32_t ret =
-            DInputSAManager::GetInstance().dInputSourceProxy_->RegisterDelWhiteListCallback(delWhiteListCallback_);
+            DInputSAManager::GetInstance().dInputSourceProxy_->RegisterDelWhiteListCallback(delCallback);
         if (ret == DH_SUCCESS) {
             isDelWhiteListCbReg = true;
+            std::lock_guard<std::mutex> lock(operationMutex_);
+            delWhiteListCallbacks_.insert(delCallback);
         } else {
             DHLOGE("CheckWhiteListCallback client RegisterDelWhiteListCallback fail");
         }
@@ -240,6 +248,26 @@ void DistributedInputClient::CheckKeyStateCallback()
     }
 }
 
+void DistributedInputClient::CheckSinkScreenInfoCallback()
+{
+    if (!DInputSAManager::GetInstance().GetDInputSinkProxy()) {
+        DHLOGE("get sink proxy fail");
+        return;
+    }
+    if (!isGetSinkScreenInfosCbReg) {
+        sptr<GetSinkScreenInfosCb> callback = new (std::nothrow) GetSinkScreenInfosCb();
+        int32_t ret =
+            DInputSAManager::GetInstance().dInputSinkProxy_->RegisterGetSinkScreenInfosCallback(callback);
+        if (ret == DH_SUCCESS) {
+            isGetSinkScreenInfosCbReg = true;
+            std::lock_guard<std::mutex> lock(operationMutex_);
+            getSinkScreenInfosCallbacks_.insert(callback);
+        } else {
+            DHLOGE("RegisterAddWhiteListCallback fail");
+        }
+    }
+}
+
 int32_t DistributedInputClient::InitSource()
 {
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
@@ -264,14 +292,22 @@ int32_t DistributedInputClient::ReleaseSource()
 
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
-    addWhiteListCallback_ = nullptr;
-    delWhiteListCallback_ = nullptr;
     regNodeListener_ = nullptr;
     unregNodeListener_ = nullptr;
     regSimulationEventListener_ = nullptr;
     unregSimulationEventListener_ = nullptr;
     WhiteListUtil::GetInstance().ClearWhiteList();
-
+    {
+        std::lock_guard<std::mutex> lock(operationMutex_);
+        for (auto iter : addWhiteListCallbacks_) {
+            iter = nullptr;
+        }
+        addWhiteListCallbacks_.clear();
+        for (auto iter : delWhiteListCallbacks_) {
+            iter = nullptr;
+        }
+        delWhiteListCallbacks_.clear();
+    }
     return DInputSAManager::GetInstance().dInputSourceProxy_->Release();
 }
 
@@ -282,6 +318,17 @@ int32_t DistributedInputClient::ReleaseSink()
     }
     serverType = DInputServerType::NULL_SERVER_TYPE;
     inputTypes_ = DInputDeviceType::NONE;
+    {
+        std::lock_guard<std::mutex> lock(operationMutex_);
+        for (auto iter : getSinkScreenInfosCallbacks_) {
+            iter = nullptr;
+        }
+        getSinkScreenInfosCallbacks_.clear();
+        for (auto iter : sharingDhIdListeners_) {
+            iter = nullptr;
+        }
+        sharingDhIdListeners_.clear();
+    }
     WhiteListUtil::GetInstance().ClearWhiteList();
     return DInputSAManager::GetInstance().dInputSinkProxy_->Release();
 }
@@ -590,10 +637,9 @@ bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const 
 
 bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &event)
 {
-    auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
-
-    for (const auto& [id, sinkInfo] : sinkInfos) {
-        auto info = sinkInfo.transformInfo;
+    std::lock_guard<std::mutex> lock(operationMutex_);
+    for (const auto& info : screenTransInfos) {
+        DHLOGI("sinkProjPhyWidth: %d sinkProjPhyHeight: %d", info.sinkProjPhyWidth, info.sinkProjPhyHeight);
         if ((event.absX >= info.sinkWinPhyX) && (event.absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
             && (event.absY >= info.sinkWinPhyY)  && (event.absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
             return true;
@@ -730,6 +776,26 @@ void DistributedInputClient::AddWhiteListInfos(const std::string &deviceId, cons
 void DistributedInputClient::DelWhiteListInfos(const std::string &deviceId) const
 {
     WhiteListUtil::GetInstance().ClearWhiteList(deviceId);
+}
+
+void DistributedInputClient::UpdateSinkScreenInfos(const std::string &strJson)
+{
+    std::lock_guard<std::mutex> lock(operationMutex_);
+    screenTransInfos.clear();
+    nlohmann::json inputData = nlohmann::json::parse(strJson);
+    size_t jsonSize = inputData.size();
+    DHLOGI("OnResult json str: %s, json size:%d.\n",
+        GetAnonyString(strJson).c_str(), jsonSize);
+    std::vector<std::vector<uint32_t>> transInfos = inputData;
+    for (auto info : transInfos) {
+        if (info.size() != SINK_SCREEN_INFO_SIZE) {
+            DHLOGE("get sinkScreenInfo failed, info size is %d", info.size());
+            continue;
+        }
+        TransformInfo tmp{info[0], info[1], info[2], info[3]};
+        screenTransInfos.emplace_back(tmp);
+        DHLOGI("screenTransInfos size %d", screenTransInfos.size());
+    }
 }
 
 int32_t DistributedInputClient::NotifyStartDScreen(const std::string &sinkDevId, const std::string& srcDevId,

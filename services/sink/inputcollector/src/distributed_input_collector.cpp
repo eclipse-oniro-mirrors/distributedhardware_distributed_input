@@ -161,19 +161,23 @@ void DistributedInputCollector::SetSharingTypes(bool enabled, const uint32_t &in
 void DistributedInputCollector::ReportDhIdSharingState(const AffectDhIds &dhIds)
 {
     std::lock_guard<std::mutex> lock(sharingDhIdListenerMtx_);
-    if (sharingDhIdListener_ == nullptr) {
-        DHLOGI("sharingDhIdListener_ is null, can not report sharing dhid");
+    if (sharingDhIdListeners_.size() == 0) {
+        DHLOGI("sharingDhIdListeners_ is null, can not report sharing dhid");
         return;
     }
 
     for (auto const &id : dhIds.sharingDhIds) {
         DHLOGI("Sharing DhId: %s", id.c_str());
-        sharingDhIdListener_->OnSharing(id);
+        for (auto iter : sharingDhIdListeners_) {
+            iter->OnSharing(id);
+        }
     }
 
     for (auto const &id : dhIds.noSharingDhIds) {
         DHLOGI("No Sharing DhId: %s", id.c_str());
-        sharingDhIdListener_->OnNoSharing(id);
+        for (auto iter : sharingDhIdListeners_) {
+            iter->OnNoSharing(id);
+        }
     }
 }
 
@@ -203,7 +207,7 @@ int32_t DistributedInputCollector::RegisterSharingDhIdListener(sptr<ISharingDhId
 {
     DHLOGI("RegisterSharingDhIdListener");
     std::lock_guard<std::mutex> lock(sharingDhIdListenerMtx_);
-    sharingDhIdListener_ = sharingDhIdListener;
+    sharingDhIdListeners_.insert(sharingDhIdListener);
     return DH_SUCCESS;
 }
 } // namespace DistributedInput

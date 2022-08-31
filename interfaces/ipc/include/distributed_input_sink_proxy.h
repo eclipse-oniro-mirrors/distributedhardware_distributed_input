@@ -38,6 +38,8 @@ public:
 
     virtual int32_t Release() override;
 
+    virtual int32_t RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback) override;
+
     virtual int32_t NotifyStartDScreen(const SrcScreenInfo& srcScreenRemoteCtrlInfo) override;
     virtual int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
 

@@ -479,7 +479,7 @@ int32_t DistributedInputSinkManager::Init()
         DHLOGE("dhFwkKit obtain fail!");
         return ERR_DH_INPUT_SERVER_SINK_MANAGER_INIT_FAIL;
     }
-    projectWindowListener_ = new ProjectWindowListener;
+    projectWindowListener_ = new ProjectWindowListener(this);
     dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_SINK_PROJECT_WINDOW_INFO, projectWindowListener_);
     return DH_SUCCESS;
 }
@@ -516,6 +516,21 @@ int32_t DistributedInputSinkManager::Release()
     return DH_SUCCESS;
 }
 
+int32_t DistributedInputSinkManager::RegisterGetSinkScreenInfosCallback(
+    sptr<IGetSinkScreenInfosCallback> callback)
+{
+    if (callback != nullptr) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        getSinkScreenInfosCallbacks_.insert(callback);
+    }
+    return DH_SUCCESS;
+}
+
+uint32_t DistributedInputSinkManager::GetSinkScreenInfosCbackSize()
+{
+    return getSinkScreenInfosCallbacks_.size();
+}
+
 DInputServerType DistributedInputSinkManager::GetStartTransFlag()
 {
     return isStartTrans_;
@@ -536,10 +551,11 @@ void DistributedInputSinkManager::SetInputTypes(const uint32_t& inputTypes)
     inputTypes_ = static_cast<DInputDeviceType>(inputTypes);
 }
 
-DistributedInputSinkManager::ProjectWindowListener::ProjectWindowListener()
+DistributedInputSinkManager::ProjectWindowListener::ProjectWindowListener(DistributedInputSinkManager *manager)
 {
     DHLOGI("ProjectWindowListener ctor!");
     std::lock_guard<std::mutex> lock(handleScreenMutex_);
+    sinkManagerObj_ = manager;
     if (screen_ == nullptr) {
         std::vector<sptr<Rosen::Screen>> screens = Rosen::ScreenManager::GetInstance().GetAllScreens();
         screen_ = screens[SCREEN_ID_DEFAULT];
@@ -550,6 +566,7 @@ DistributedInputSinkManager::ProjectWindowListener::~ProjectWindowListener()
 {
     DHLOGI("ProjectWindowListener dtor!");
     std::lock_guard<std::mutex> lock(handleScreenMutex_);
+    sinkManagerObj_ = nullptr;
     screen_ = nullptr;
 }
 
@@ -647,7 +664,12 @@ int32_t DistributedInputSinkManager::ProjectWindowListener::UpdateSinkScreenInfo
         sinkScreenInfo.sinkProjShowWidth, sinkScreenInfo.sinkProjShowHeight, sinkScreenInfo.sinkWinShowX,
         sinkScreenInfo.sinkWinShowY, sinkScreenInfo.sinkShowWidth, sinkScreenInfo.sinkShowHeight,
         sinkScreenInfo.sinkPhyWidth, sinkScreenInfo.sinkPhyHeight);
-    return DInputContext::GetInstance().UpdateSinkScreenInfo(srcScreenInfoKey, sinkScreenInfo);
+    int32_t ret = DInputContext::GetInstance().UpdateSinkScreenInfo(srcScreenInfoKey, sinkScreenInfo);
+    std::lock_guard<std::mutex> lock(sinkManagerObj_->mutex_);
+    if ((ret == DH_SUCCESS) && (sinkManagerObj_->GetSinkScreenInfosCbackSize() > 0)) {
+        sinkManagerObj_->CallBackScreenInfoChange();
+    }
+    return ret;
 }
 
 uint32_t DistributedInputSinkManager::ProjectWindowListener::GetScreenWidth()
@@ -711,7 +733,33 @@ int32_t DistributedInputSinkManager::NotifyStartDScreen(const SrcScreenInfo& src
         GetAnonyString(srcScreenInfo.devId).c_str(), srcScreenInfo.sourceWinId, srcScreenInfo.sourceWinWidth,
         srcScreenInfo.sourceWinHeight, GetAnonyString(srcScreenInfo.sourcePhyId).c_str(), srcScreenInfo.sourcePhyFd,
         srcScreenInfo.sourcePhyWidth, srcScreenInfo.sourcePhyHeight);
-    return DInputContext::GetInstance().UpdateSinkScreenInfo(screenInfoKey, sinkScreenInfo);
+    int32_t ret = DInputContext::GetInstance().UpdateSinkScreenInfo(screenInfoKey, sinkScreenInfo);
+    std::lock_guard<std::mutex> lock(mutex_);
+    if ((ret == DH_SUCCESS) && (getSinkScreenInfosCallbacks_.size() > 0)) {
+        CallBackScreenInfoChange();
+    }
+    return ret;
+}
+
+void DistributedInputSinkManager::CallBackScreenInfoChange()
+{
+    std::vector<std::vector<uint32_t>> transInfos;
+    auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
+    std::vector<uint32_t> info;
+    for (const auto& [id, sinkInfo] : sinkInfos) {
+        info.clear();
+        info.emplace_back(sinkInfo.transformInfo.sinkWinPhyX);
+        info.emplace_back(sinkInfo.transformInfo.sinkWinPhyY);
+        info.emplace_back(sinkInfo.transformInfo.sinkProjPhyWidth);
+        info.emplace_back(sinkInfo.transformInfo.sinkProjPhyHeight);
+        transInfos.emplace_back(info);
+    }
+    nlohmann::json screenMsg(transInfos);
+    std::string str = screenMsg.dump();
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto& iter : getSinkScreenInfosCallbacks_) {
+        iter->OnResult(str);
+    }
 }
 
 void DistributedInputSinkManager::CleanExceptionalInfo(const SrcScreenInfo& srcScreenInfo)

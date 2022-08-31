@@ -20,6 +20,7 @@
 
 #include "dinput_errcode.h"
 #include "dinput_utils_tool.h"
+#include "i_get_sink_screen_infos_call_back.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -64,6 +65,30 @@ int32_t DistributedInputSinkProxy::Release()
         return ERR_DH_INPUT_SINK_PROXY_RELEASE_FAIL;
     }
     result = reply.ReadInt32();
+    return result;
+}
+
+int32_t DistributedInputSinkProxy::RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback)
+{
+    if (callback == nullptr) {
+        DHLOGE("getSinkScreenInfosCallback is null.");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        DHLOGE("write token valid failed");
+        return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject())) {
+        DHLOGE("write callback failed");
+        return ERR_DH_INPUT_IPC_WRITE_VALID_FAIL;
+    }
+    MessageParcel reply;
+    int32_t result = ERR_DH_INPUT_SINK_PROXY_REGISTER_GETSINKSCREENINFOS_FAIL;
+    bool ret = SendRequest(GET_SINK_SCREEN_INFOS, data, reply);
+    if (ret) {
+        result = reply.ReadInt32();
+    }
     return result;
 }
 

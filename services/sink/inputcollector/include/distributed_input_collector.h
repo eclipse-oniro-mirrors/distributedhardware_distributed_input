@@ -19,6 +19,7 @@
 #include <atomic>
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 
 #include <sys/epoll.h>
@@ -65,7 +66,7 @@ private:
     uint32_t inputTypes_;
 
     std::mutex sharingDhIdListenerMtx_;
-    sptr<ISharingDhIdListener> sharingDhIdListener_ = nullptr;
+    std::set<sptr<ISharingDhIdListener>> sharingDhIdListeners_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

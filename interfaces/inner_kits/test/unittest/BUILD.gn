@@ -55,6 +55,8 @@ ohos_unittest("distributed_input_inner_test") {
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_stub.cpp",
+    "${ipc_path}/src/get_sink_screen_infos_call_back_proxy.cpp",
+    "${ipc_path}/src/get_sink_screen_infos_call_back_stub.cpp",
     "${ipc_path}/src/distributed_input_source_proxy.cpp",
     "${ipc_path}/src/input_node_listener_proxy.cpp",
     "${ipc_path}/src/input_node_listener_stub.cpp",
