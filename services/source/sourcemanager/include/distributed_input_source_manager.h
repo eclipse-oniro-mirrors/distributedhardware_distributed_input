@@ -23,14 +23,15 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#include "dinput_context.h"
 #include "event_handler.h"
 #include "ipublisher_listener.h"
 #include "publisher_listener_stub.h"
 #include "singleton.h"
 #include "system_ability.h"
+#include "system_ability_status_change_stub.h"
 
 #include "constants_dinput.h"
+#include "dinput_context.h"
 #include "dinput_source_trans_callback.h"
 #include "distributed_input_node_manager.h"
 #include "distributed_input_source_event_handler.h"
@@ -233,14 +234,28 @@ public:
     class DeviceOfflineListener : public PublisherListenerStub {
     public:
         DeviceOfflineListener(DistributedInputSourceManager* srcManagerContext);
+
         ~DeviceOfflineListener();
-        void OnMessage(const DHTopic topic, const std::string &message);
+
+        void OnMessage(const DHTopic topic, const std::string& message);
 
     private:
         void DeleteNodeInfoAndNotify(const std::string& offlineDevId);
 
     private:
         DistributedInputSourceManager* sourceManagerContext_;
+    };
+
+    class DScreenSourceSvrRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        DScreenSourceSvrRecipient(const std::string& srcDevId, const std::string& sinkDevId, const uint64_t srcWinId);
+        ~DScreenSourceSvrRecipient();
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+
+    private:
+        std::string srcDevId_;
+        std::string sinkDevId_;
+        uint64_t srcWinId_;
     };
 
     std::shared_ptr<DInputSourceManagerEventHandler> GetCallbackEventHandler()

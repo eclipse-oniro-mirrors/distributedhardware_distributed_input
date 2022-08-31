@@ -38,6 +38,8 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_CONTEXT_KEY_NOT_EXIST = -60012;
     constexpr int32_t ERR_DH_INPUT_CONTEXT_CALCULATE_FAIL = -60013;
     constexpr int32_t ERR_DH_INPUT_JSON_PARSE_FAIL = -60014;
+    constexpr int32_t ERR_DH_INPUT_REGISTER_DEATH_FAIL = -60015;
+    constexpr int32_t ERR_DH_INPUT_UNREGISTER_DEATH_FAIL = -60016;
 
     // whilte list error code
     constexpr int32_t ERR_DH_INPUT_WHILTELIST_INIT_FAIL = -61001;

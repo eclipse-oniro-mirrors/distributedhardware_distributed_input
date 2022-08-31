@@ -30,6 +30,7 @@ ohos_shared_library("libdinput_utils") {
     "${fwk_interfaces_path}/include/ipc",
     "${low_latency_path}/include",
     "${dfx_utils_path}/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 
   sources = [
@@ -57,6 +58,8 @@ ohos_shared_library("libdinput_utils") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "hisysevent_native:libhisysevent",
+    "samgr:samgr_proxy",
+    "c_utils:utils",
   ]
 
   subsystem_name = "distributedhardware"

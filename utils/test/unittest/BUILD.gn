@@ -36,6 +36,7 @@ ohos_unittest("distributed_input_utils_test") {
     "${common_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "//commonlibrary/c_utils/base/include",
   ]
 
   sources = [ "dinput_context_test.cpp" ]
@@ -64,6 +65,8 @@ ohos_unittest("distributed_input_utils_test") {
     "dsoftbus:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
+    "c_utils:utils",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

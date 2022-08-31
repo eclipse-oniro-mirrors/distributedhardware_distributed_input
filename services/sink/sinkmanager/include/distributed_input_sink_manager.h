@@ -29,6 +29,7 @@
 #include "screen.h"
 #include "singleton.h"
 #include "system_ability.h"
+#include "system_ability_status_change_stub.h"
 
 #include "constants_dinput.h"
 #include "dinput_sink_trans_callback.h"
@@ -86,6 +87,17 @@ public:
     private:
         sptr<Rosen::Screen> screen_;
         std::mutex handleScreenMutex_;
+    };
+
+    class DScreenSinkSvrRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        DScreenSinkSvrRecipient(const std::string& srcDevId, const uint64_t srcWinId);
+        ~DScreenSinkSvrRecipient();
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+
+    private:
+        std::string srcDevId_;
+        uint64_t srcWinId_;
     };
 
 public:

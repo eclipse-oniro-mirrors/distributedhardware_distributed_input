@@ -170,6 +170,42 @@ std::shared_ptr<DistributedHardwareFwkKit> DInputContext::GetDHFwkKit()
     }
     return dhFwkKit_;
 }
+
+sptr<IRemoteObject> DInputContext::GetRemoteObject(const int32_t saId)
+{
+    DHLOGI("GetDScreenSrcSA start");
+    {
+        std::lock_guard<std::mutex> lock(remoteObjectsMutex_);
+        if (remoteObjects_.find(saId) != remoteObjects_.end()) {
+            DHLOGI("dScreenSrcSA get from cache!");
+            return remoteObjects_[saId];
+        }
+    }
+
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        DHLOGE("GetSystemAbilityManager fail!");
+        return nullptr;
+    }
+    auto remoteObject = samgr->GetSystemAbility(saId);
+    if (remoteObject == nullptr) {
+        DHLOGE("GetSystemAbility remoteObject is nullptr");
+        return nullptr;
+    }
+    return remoteObject;
+}
+
+void DInputContext::AddRemoteObject(const int32_t saId, const sptr<IRemoteObject>& remoteObject)
+{
+    std::lock_guard<std::mutex> lock(remoteObjectsMutex_);
+    remoteObjects_[saId] = remoteObject;
+}
+
+void DInputContext::RemoveRemoteObject(const int32_t saId)
+{
+    std::lock_guard<std::mutex> lock(remoteObjectsMutex_);
+    remoteObjects_.erase(saId);
+}
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

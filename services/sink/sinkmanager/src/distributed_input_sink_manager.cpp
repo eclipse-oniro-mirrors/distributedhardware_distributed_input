@@ -24,7 +24,6 @@
 #include "dinput_softbus_define.h"
 #include "distributed_hardware_fwk_kit.h"
 #include "distributed_hardware_log.h"
-
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
@@ -574,6 +573,12 @@ void DistributedInputSinkManager::ProjectWindowListener::OnMessage(const DHTopic
         DHLOGE("Save sink screen info failed!");
         return;
     }
+    sptr<IRemoteObject> dScreenSinkSA = DInputContext::GetInstance().GetRemoteObject(
+        DISTRIBUTED_HARDWARE_SCREEN_SINK_SA_ID);
+    sptr<DScreenSinkSvrRecipient> dScreenSinkDeathRecipient = new(std::nothrow) DScreenSinkSvrRecipient(srcDeviceId,
+        srcWinId);
+    dScreenSinkSA->AddDeathRecipient(dScreenSinkDeathRecipient);
+    DInputContext::GetInstance().AddRemoteObject(DISTRIBUTED_HARDWARE_SCREEN_SINK_SA_ID, dScreenSinkSA);
 }
 
 int32_t DistributedInputSinkManager::ProjectWindowListener::ParseMessage(const std::string& message,
@@ -663,6 +668,32 @@ uint32_t DistributedInputSinkManager::ProjectWindowListener::GetScreenHeight()
         return DEFAULT_VALUE;
     }
     return screen_->GetHeight();
+}
+
+DistributedInputSinkManager::DScreenSinkSvrRecipient::DScreenSinkSvrRecipient(const std::string& srcDevId,
+    const uint64_t srcWinId)
+{
+    DHLOGI("DScreenStatusListener ctor!");
+    this->srcDevId_ = srcDevId;
+    this->srcWinId_ = srcWinId;
+}
+
+DistributedInputSinkManager::DScreenSinkSvrRecipient::~DScreenSinkSvrRecipient()
+{
+    DHLOGI("DScreenStatusListener dtor!");
+}
+
+void DistributedInputSinkManager::DScreenSinkSvrRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    DHLOGI("DScreenSinkSvrRecipient OnRemoteDied");
+    sptr<IRemoteObject> remoteObject = remote.promote();
+    if (!remoteObject) {
+        DHLOGE("OnRemoteDied remote promoted failed");
+        return;
+    }
+    std::string srcScreenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcDevId_, srcWinId_);
+    DInputContext::GetInstance().RemoveSinkScreenInfo(srcScreenInfoKey);
+    DInputContext::GetInstance().RemoveRemoteObject(DISTRIBUTED_HARDWARE_SCREEN_SINK_SA_ID);
 }
 
 int32_t DistributedInputSinkManager::NotifyStartDScreen(const SrcScreenInfo& srcScreenInfo)

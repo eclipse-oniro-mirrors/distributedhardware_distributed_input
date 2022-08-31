@@ -29,19 +29,20 @@
 #include "string_ex.h"
 #include "softbus_bus_center.h"
 
+#include "distributed_hardware_fwk_kit.h"
+#include "ipublisher_listener.h"
+
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 #include "dinput_hitrace.h"
 #include "dinput_sa_process_state.h"
 #include "dinput_utils_tool.h"
-#include "distributed_hardware_fwk_kit.h"
 #include "distributed_input_client.h"
 #include "distributed_input_inject.h"
 #include "distributed_input_source_proxy.h"
 #include "distributed_input_source_transport.h"
 #include "hisysevent_util.h"
 #include "hidumper.h"
-#include "ipublisher_listener.h"
 #include "idinput_dbg_itf.h"
 #include "white_list_util.h"
 
@@ -670,9 +671,9 @@ int32_t DistributedInputSourceManager::Init()
         DHLOGE("dhFwkKit obtain fail!");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_INIT_FAIL;
     }
-    startDScreenListener_ = new StartDScreenListener;
-    stopDScreenListener_ = new StopDScreenListener;
-    deviceOfflineListener_ = new DeviceOfflineListener(this);
+    startDScreenListener_ = new(std::nothrow) StartDScreenListener;
+    stopDScreenListener_ = new(std::nothrow) StopDScreenListener;
+    deviceOfflineListener_ = new(std::nothrow) DeviceOfflineListener(this);
     dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_START_DSCREEN, startDScreenListener_);
     dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_STOP_DSCREEN, stopDScreenListener_);
     dhFwkKit->RegisterPublisherListener(DHTopic::TOPIC_DEV_OFFLINE, deviceOfflineListener_);
@@ -833,7 +834,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     sptr<IDistributedSourceInput> cli = DInputSourceSACliMgr::GetInstance().GetRemoteCli(devId);
     if (cli == nullptr) {
         DHLOGE("Get Remote DInput Source Proxy return null");
-        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL;
+        return DH_SUCCESS;
     }
 
     cli->SyncNodeInfoRemoteInput(GetLocalNetworkId(), dhId, GetNodeDesc(parameters));
@@ -2231,6 +2232,13 @@ void DistributedInputSourceManager::StartDScreenListener::OnMessage(const DHTopi
         DHLOGE("Rpc invoke failed!");
         return;
     }
+
+    sptr<IRemoteObject> dScreenSrcSA =
+        DInputContext::GetInstance().GetRemoteObject(DISTRIBUTED_HARDWARE_SCREEN_SOURCE_SA_ID);
+    sptr<DScreenSourceSvrRecipient> dScreenSrcDeathRecipient = new(std::nothrow) DScreenSourceSvrRecipient(srcDevId,
+        sinkDevId, srcScreenInfo.sourceWinId);
+    dScreenSrcSA->AddDeathRecipient(dScreenSrcDeathRecipient);
+    DInputContext::GetInstance().AddRemoteObject(DISTRIBUTED_HARDWARE_SCREEN_SOURCE_SA_ID, dScreenSrcSA);
 }
 
 int32_t DistributedInputSourceManager::StartDScreenListener::ParseMessage(const std::string& message,
@@ -2399,7 +2407,7 @@ void DistributedInputSourceManager::DeviceOfflineListener::DeleteNodeInfoAndNoti
     }
     std::set<BeRegNodeInfo> nodeSet = sourceManagerContext_->GetSyncNodeInfo(offlineDevId);
     std::string localNetWorkId = GetLocalNetworkId();
-    for (const auto &node : nodeSet) {
+    for (const auto& node : nodeSet) {
         DHLOGI("DeleteNodeInfoAndNotify device: %s, dhId: %s", GetAnonyString(offlineDevId).c_str(),
             GetAnonyString(node.dhId).c_str());
         // Notify multimodal
@@ -2407,6 +2415,52 @@ void DistributedInputSourceManager::DeviceOfflineListener::DeleteNodeInfoAndNoti
     }
     // Delete info
     sourceManagerContext_->DeleteSyncNodeInfo(offlineDevId);
+}
+
+DistributedInputSourceManager::DScreenSourceSvrRecipient::DScreenSourceSvrRecipient(const std::string& srcDevId,
+    const std::string& sinkDevId, const uint64_t srcWinId)
+{
+    DHLOGI("DScreenStatusListener ctor!");
+    this->srcDevId_ = srcDevId;
+    this->sinkDevId_ = sinkDevId;
+    this->srcWinId_ = srcWinId;
+}
+
+DistributedInputSourceManager::DScreenSourceSvrRecipient::~DScreenSourceSvrRecipient()
+{
+    DHLOGI("DScreenStatusListener dtor!");
+}
+
+void DistributedInputSourceManager::DScreenSourceSvrRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    DHLOGI("DScreenStatusListener OnRemoveSystemAbility");
+    sptr<IRemoteObject> remoteObject = remote.promote();
+    if (!remoteObject) {
+        DHLOGE("OnRemoteDied remote promoted failed");
+        return;
+    }
+    std::string screenInfoKey = DInputContext::GetInstance().GetScreenInfoKey(srcDevId_, srcWinId_);
+    SrcScreenInfo srcScreenInfo = DInputContext::GetInstance().GetSrcScreenInfo(screenInfoKey);
+
+    int32_t removeNodeRes = DistributedInputInject::GetInstance().RemoveVirtualTouchScreenNode(
+        srcScreenInfo.sourcePhyId);
+    if (removeNodeRes != DH_SUCCESS) {
+        DHLOGE("Remove virtual touch screen node failed!");
+        return;
+    }
+
+    int32_t removeCacheRes = DInputContext::GetInstance().RemoveSrcScreenInfo(screenInfoKey);
+    if (removeCacheRes != DH_SUCCESS) {
+        DHLOGE("Remove src cache failed!");
+        return;
+    }
+
+    int32_t rpcRes = DistributedInputClient::GetInstance().NotifyStopDScreen(sinkDevId_, screenInfoKey);
+    if (rpcRes != DH_SUCCESS) {
+        DHLOGE("Rpc invoke failed!");
+        return;
+    }
+    DInputContext::GetInstance().RemoveRemoteObject(DISTRIBUTED_HARDWARE_SCREEN_SOURCE_SA_ID);
 }
 
 int32_t DistributedInputSourceManager::Dump(int32_t fd, const std::vector<std::u16string>& args)

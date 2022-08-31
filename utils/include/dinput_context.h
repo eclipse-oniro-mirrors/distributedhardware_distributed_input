@@ -23,10 +23,15 @@
 #include <string>
 #include <unordered_map>
 
+#include <refbase.h>
+
 #include "single_instance.h"
 
 #include "distributed_hardware_fwk_kit.h"
 #include "distributed_hardware_log.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 
 #include "input_hub.h"
 
@@ -119,6 +124,9 @@ public:
     void SetLocalTouchScreenInfo(const LocalTouchScreenInfo &localTouchScreenInfo);
     LocalTouchScreenInfo GetLocalTouchScreenInfo();
     std::shared_ptr<DistributedHardwareFwkKit> GetDHFwkKit();
+    sptr<IRemoteObject> GetRemoteObject(const int32_t saId);
+    void AddRemoteObject(const int32_t saId, const sptr<IRemoteObject>& remoteObject);
+    void RemoveRemoteObject(const int32_t saId);
 
 private:
     int32_t CalculateTransformInfo(SinkScreenInfo &sinkScreenInfo);
@@ -138,6 +146,8 @@ private:
     std::mutex localTouchScreenInfoMutex_;
     std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit_;
     std::mutex dhFwkKitMutex_;
+    std::unordered_map<int32_t, sptr<IRemoteObject>> remoteObjects_;
+    std::mutex remoteObjectsMutex_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
