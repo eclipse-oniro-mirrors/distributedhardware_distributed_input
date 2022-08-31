@@ -19,6 +19,7 @@
 #include "nlohmann/json.hpp"
 
 #include "constants_dinput.h"
+#include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "white_list_util.h"
 

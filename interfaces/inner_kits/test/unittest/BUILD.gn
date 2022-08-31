@@ -45,6 +45,7 @@ ohos_unittest("distributed_input_inner_test") {
     "${utils_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "${frameworks_path}/include",
   ]
 
   sources = [

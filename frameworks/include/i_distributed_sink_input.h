@@ -22,7 +22,7 @@
 #include "iremote_object.h"
 
 #include "constants_dinput.h"
-#include "dinput_context.h"
+#include "i_dinput_context.h"
 #include "i_distributed_sink_input.h"
 #include "i_get_sink_screen_infos_call_back.h"
 #include "i_sharing_dhid_listener.h"

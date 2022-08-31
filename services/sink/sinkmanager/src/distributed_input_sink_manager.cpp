@@ -35,6 +35,7 @@
 #include "distributed_input_sink_switch.h"
 #include "distributed_input_sink_transport.h"
 
+#include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "dinput_sa_process_state.h"
 #include "dinput_utils_tool.h"

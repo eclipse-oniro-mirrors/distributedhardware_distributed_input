@@ -19,6 +19,7 @@
 #include <atomic>
 #include <iostream>
 #include <mutex>
+#include <set>
 #include <string>
 
 #include "event_handler.h"

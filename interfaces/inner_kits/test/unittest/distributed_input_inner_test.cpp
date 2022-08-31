@@ -16,6 +16,7 @@
 #include "distributed_input_inner_test.h"
 
 #include "system_ability_definition.h"
+#include "dinput_context.h"
 #include "dinput_errcode.h"
 
 using namespace testing::ext;
