@@ -520,6 +520,7 @@ int32_t DistributedInputSinkManager::Release()
 int32_t DistributedInputSinkManager::RegisterGetSinkScreenInfosCallback(
     sptr<IGetSinkScreenInfosCallback> callback)
 {
+    DHLOGI("start");
     if (callback != nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);
         getSinkScreenInfosCallbacks_.insert(callback);
@@ -744,6 +745,7 @@ int32_t DistributedInputSinkManager::NotifyStartDScreen(const SrcScreenInfo& src
 
 void DistributedInputSinkManager::CallBackScreenInfoChange()
 {
+    DHLOGI("start!");
     std::vector<std::vector<uint32_t>> transInfos;
     auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
     std::vector<uint32_t> info;
@@ -757,7 +759,6 @@ void DistributedInputSinkManager::CallBackScreenInfoChange()
     }
     nlohmann::json screenMsg(transInfos);
     std::string str = screenMsg.dump();
-    std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& iter : getSinkScreenInfosCallbacks_) {
         iter->OnResult(str);
     }
