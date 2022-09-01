@@ -1016,7 +1016,7 @@ void InputHub::GetShareMousePathByDhId(std::vector<std::string> dhIds, std::stri
     }
 }
 
-void InputHub::GetDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas)
+void InputHub::GetDevicesInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string> &datas)
 {
     uint32_t input_types_ = 0;
 

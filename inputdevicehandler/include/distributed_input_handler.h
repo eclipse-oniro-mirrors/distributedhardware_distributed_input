@@ -47,7 +47,7 @@ public:
     API_EXPORT virtual void RegisterPluginListener(std::shared_ptr<PluginListener> listener) override;
     API_EXPORT virtual void UnRegisterPluginListener() override;
 
-    API_EXPORT void FindDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas);
+    API_EXPORT void FindDevicesInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string> &datas);
     API_EXPORT void FindDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
 private:
     DistributedInputHandler();

@@ -51,7 +51,7 @@ public:
     // return efftive dhids
     AffectDhIds SetSharingDevices(bool enabled, std::vector<std::string> dhIds);
     void GetDeviceDhIdByFd(int32_t fd, std::string &dhId);
-    void GetDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas);
+    void GetDevicesInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string> &datas);
     void GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
     void GetShareMousePathByDhId(std::vector<std::string> dhIds, std::string &path, std::string &dhId);
     bool IsAllDevicesStoped();

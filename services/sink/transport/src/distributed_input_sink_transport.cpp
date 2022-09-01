@@ -243,14 +243,22 @@ int32_t DistributedInputSinkTransport::RespLatency(const int32_t sessionId, std:
     return DH_SUCCESS;
 }
 
-void DistributedInputSinkTransport::SendKeyStateNodeMsg(const int32_t sessionId, std::string &smsg)
+void DistributedInputSinkTransport::SendKeyStateNodeMsg(const int32_t sessionId, const std::string& dhId,
+    const uint32_t btnCode)
 {
     if (sessionId <= 0) {
         DHLOGE("SendKeyStateNodeMsg error, sessionId <= 0.");
         return;
     }
-    DHLOGI("SendKeyStateNodeMsg sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
-    int32_t ret = SendMessage(sessionId, smsg);
+    DHLOGI("SendKeyStateNodeMsg sessionId: %d, btnCode: %d.", sessionId, btnCode);
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_KEY_STATE;
+    jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_DHID] = dhId;
+    jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_TYPE] = EV_KEY;
+    jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_CODE] = btnCode;
+    jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_VALUE] = KEY_DOWN_STATE;
+    std::string msg = jsonStr.dump();
+    int32_t ret = SendMessage(sessionId, msg);
     if (ret != DH_SUCCESS) {
         DHLOGE("SendKeyStateNodeMsg error, SendMessage fail.");
     }

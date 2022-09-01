@@ -47,6 +47,7 @@ public:
     bool IsAllDevicesStoped();
     int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener);
     void ReportDhIdSharingState(const AffectDhIds &dhIds);
+    void GetDeviceInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string>& deviceInfo);
 
 private:
     DistributedInputCollector();

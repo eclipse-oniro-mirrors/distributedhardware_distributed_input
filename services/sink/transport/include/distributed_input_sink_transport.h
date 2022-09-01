@@ -46,7 +46,7 @@ public:
     int32_t RespStartRemoteInput(const int32_t sessionId, std::string &smsg);
     int32_t RespStopRemoteInput(const int32_t sessionId, std::string &smsg);
     int32_t RespLatency(const int32_t sessionId, std::string &smsg);
-    void SendKeyStateNodeMsg(const int32_t sessionId, std::string &smsg);
+    void SendKeyStateNodeMsg(const int32_t sessionId, const std::string& dhId, const uint32_t btnCode);
 
     int32_t OnSessionOpened(int32_t sessionId, int32_t result);
     void OnSessionClosed(int32_t sessionId);

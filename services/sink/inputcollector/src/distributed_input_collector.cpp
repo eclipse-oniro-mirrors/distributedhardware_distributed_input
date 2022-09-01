@@ -97,6 +97,10 @@ void DistributedInputCollector::StartCollectEventsThread()
 {
     while (isCollectingEvents_) {
         memset_s(&mEventBuffer, sizeof(mEventBuffer), 0, sizeof(mEventBuffer));
+        if (inputHub_ == nullptr) {
+            DHLOGI("inputHub is nullptr!");
+            return;
+        }
         size_t count = inputHub_->StartCollectInputEvents(mEventBuffer, INPUT_EVENT_BUFFER_SIZE);
         if (count > 0) {
             DHLOGI("Count: %zu", count);
@@ -131,6 +135,10 @@ void DistributedInputCollector::StopCollectEventsThread()
 {
     isCollectingEvents_ = false;
     isStartGetDeviceHandlerThread = false;
+    if (inputHub_ == nullptr) {
+        DHLOGI("inputHub is nullptr!");
+        return;
+    }
     inputHub_->StopCollectInputEvents();
     if (collectThreadID_ != (pthread_t)(-1)) {
         DHLOGI("DistributedInputCollector::Wait collect thread exit");
@@ -193,11 +201,19 @@ AffectDhIds DistributedInputCollector::SetSharingDhIds(bool enabled, std::vector
 void DistributedInputCollector::GetMouseNodePath(
     std::vector<std::string> dhIds, std::string &mouseNodePath, std::string &dhid)
 {
+    if (inputHub_ == nullptr) {
+        DHLOGI("inputHub is nullptr!");
+        return;
+    }
     inputHub_->GetShareMousePathByDhId(dhIds, mouseNodePath, dhid);
 }
 
 bool DistributedInputCollector::IsAllDevicesStoped()
 {
+    if (inputHub_ == nullptr) {
+        DHLOGI("inputHub is nullptr!");
+        return false;
+    }
     return inputHub_->IsAllDevicesStoped();
 }
 
@@ -207,6 +223,16 @@ int32_t DistributedInputCollector::RegisterSharingDhIdListener(sptr<ISharingDhId
     std::lock_guard<std::mutex> lock(sharingDhIdListenerMtx_);
     sharingDhIdListeners_.insert(sharingDhIdListener);
     return DH_SUCCESS;
+}
+
+void DistributedInputCollector::GetDeviceInfoByType(const uint32_t inputTypes, std::map<int32_t,
+    std::string>& deviceInfo)
+{
+    if (inputHub_ == nullptr) {
+        DHLOGI("inputHub is nullptr!");
+        return;
+    }
+    inputHub_->GetDevicesInfoByType(inputTypes, deviceInfo);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

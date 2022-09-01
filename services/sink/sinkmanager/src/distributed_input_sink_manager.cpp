@@ -161,6 +161,18 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
         sinkManagerObj_->StoreStartDhids(sessionId, affDhIds.sharingDhIds);
         DistributedInputCollector::GetInstance().ReportDhIdSharingState(affDhIds);
     }
+
+    bool isMouse = (sinkManagerObj_->GetInputTypes() & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0;
+    if (isMouse) {
+        std::map<int32_t, std::string> deviceInfos;
+        DistributedInputCollector::GetInstance().GetDeviceInfoByType(static_cast<uint32_t>(DInputDeviceType::MOUSE),
+            deviceInfos);
+        for (auto deviceInfo : deviceInfos) {
+            DHLOGI("deviceInfo dhId, %s", GetAnonyString(deviceInfo.second).c_str());
+            std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, sessionId,
+                deviceInfo.second).detach();
+        }
+    }
 }
 
 void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
@@ -221,7 +233,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInputDhid(con
         DHLOGW("onStartRemoteInputDhid called, this is the only session.");
     }
 
-    CheckKeyState(sessionId, strDhids);
+    std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, sessionId, strDhids).detach();
     // add the dhids
     if (startRes == DH_SUCCESS) {
         std::vector<std::string> vecStr;
@@ -309,11 +321,12 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
         DHLOGE("open mouse Node Path error:", errno);
         return;
     }
-    DHLOGI("mouse Node Path fd: %d", fd);
 
     uint32_t count = 0;
     int rc = 0;
-    int keyVal = 0;
+    int leftKeyVal = 0;
+    int rightKeyVal = 0;
+    int midKeyVal = 0;
     unsigned long keystate[NLONGS(KEY_CNT)] = { 0 };
     while (true) {
         if (count > READ_RETRY_MAX) {
@@ -323,25 +336,23 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
         rc = ioctl(fd, EVIOCGKEY(sizeof(keystate)), keystate);
         if (rc < 0) {
             DHLOGE("read all key state failed, rc: ", rc);
+            count += 1;
             SleepTimeMs();
             continue;
         }
-
-        keyVal = bit_is_set(keystate, BTN_LEFT);
-        if (keyVal != 0) {
-            DHLOGI("mouse left button is down.");
-            nlohmann::json jsonStr;
-            jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_KEY_STATE;
-            jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_DHID] = dhid;
-            jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_TYPE] = EV_KEY;
-            jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_CODE] = BTN_LEFT;
-            jsonStr[DINPUT_SOFTBUS_KEY_KEYSTATE_VALUE] = KEY_DOWN_STATE;
-            std::string smsg = jsonStr.dump();
-            DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, smsg);
-            break;
+        leftKeyVal = bit_is_set(keystate, BTN_LEFT);
+        if (leftKeyVal != 0) {
+            DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhid, BTN_LEFT);
         }
-        SleepTimeMs();
-        count += 1;
+        rightKeyVal = bit_is_set(keystate, BTN_RIGHT);
+        if (rightKeyVal != 0) {
+            DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhid, BTN_RIGHT);
+        }
+        midKeyVal = bit_is_set(keystate, BTN_MIDDLE);
+        if (midKeyVal != 0) {
+            DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhid, BTN_MIDDLE);
+        }
+        break;
     }
     if (fd > 0) {
         close(fd);

@@ -82,7 +82,7 @@ int32_t DistributedInputHandler::Initialize()
     return DH_SUCCESS;
 }
 
-void DistributedInputHandler::FindDevicesInfoByType(int32_t inputTypes, std::map<int32_t, std::string> &datas)
+void DistributedInputHandler::FindDevicesInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string> &datas)
 {
     if (inputHub_ != nullptr) {
         inputHub_->GetDevicesInfoByType(inputTypes, datas);
