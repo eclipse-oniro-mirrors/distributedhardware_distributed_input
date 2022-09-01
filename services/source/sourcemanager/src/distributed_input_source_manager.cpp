@@ -938,7 +938,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
 
     std::vector<InputDeviceId>::iterator it = inputDevice_.begin();
     for (; it != inputDevice_.end(); ++it) {
-        if (devId == inputDeviceId.devId && dhId == inputDeviceId.dhId) {
+        if (it->devId == inputDeviceId.devId && it->dhId == inputDeviceId.dhId) {
             break;
         }
     }
