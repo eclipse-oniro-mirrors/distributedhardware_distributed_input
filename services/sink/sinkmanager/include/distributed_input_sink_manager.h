@@ -22,6 +22,7 @@
 #include <mutex>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
 #include "event_handler.h"
 #include "ipublisher_listener.h"
@@ -66,7 +67,7 @@ public:
             return !!(array[bit / LONG_BITS] & (1LL << (bit % LONG_BITS)));
         }
         void SleepTimeMs();
-        void StringSplitToSet(const std::string &str, const char split, std::set<std::string> &vecStr);
+        void StringSplit(const std::string &str, const char split, std::vector<std::string> &vecStr);
         void CheckKeyState(const int32_t &sessionId, const std::string &strDhids);
     };
 
@@ -155,9 +156,16 @@ private:
     sptr<ProjectWindowListener> projectWindowListener_ = nullptr;
     std::set<std::string> sharingDhIds_;
     std::map<int32_t, std::set<std::string>> sharingDhIdsMap_;
-    void StoreStartDhids(int32_t sessionId, const std::set<std::string> &dhIds);
-    void DeleteStopDhids(int32_t sessionId, const std::set<std::string> delDhIds, std::vector<std::string> &stopDhIds);
-    bool IsDeleteDhidExist(int32_t sessionId, const std::string &delstr);
+    void StoreStartDhids(int32_t sessionId, const std::vector<std::string> &dhIds);
+
+    /*
+     * Stop dhids on cmd,
+     * stoDhIds: dhIds on cmd
+     * stopIndeedDhIds: dhId that no session (retmote node) need, stop capture event.
+     */
+    void DeleteStopDhids(int32_t sessionId, const std::vector<std::string> stopDhIds,
+        std::vector<std::string> &stopIndeedDhIds);
+    bool IsStopDhidOnCmdStillNeed(int32_t sessionId, const std::string &stopDhId);
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

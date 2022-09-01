@@ -140,7 +140,7 @@ void DistributedInputCollector::StopCollectEventsThread()
     DHLOGW("DistributedInputCollector::StopCollectEventsThread exit!");
 }
 
-void DistributedInputCollector::SetSharingTypes(bool enabled, const uint32_t &inputType)
+AffectDhIds DistributedInputCollector::SetSharingTypes(bool enabled, const uint32_t &inputType)
 {
     inputTypes_ = 0;
     if ((inputType & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0 ||
@@ -154,8 +154,7 @@ void DistributedInputCollector::SetSharingTypes(bool enabled, const uint32_t &in
         inputTypes_ |= INPUT_DEVICE_CLASS_TOUCH_MT | INPUT_DEVICE_CLASS_TOUCH;
     }
 
-    AffectDhIds dhIds = inputHub_->SetSupportInputType(enabled, inputTypes_);
-    ReportDhIdSharingState(dhIds);
+    return inputHub_->SetSupportInputType(enabled, inputTypes_);
 }
 
 void DistributedInputCollector::ReportDhIdSharingState(const AffectDhIds &dhIds)
@@ -186,10 +185,9 @@ void DistributedInputCollector::Release()
     StopCollectEventsThread();
 }
 
-void DistributedInputCollector::SetSharingDhIds(bool enabled, std::vector<std::string> dhIds)
+AffectDhIds DistributedInputCollector::SetSharingDhIds(bool enabled, std::vector<std::string> dhIds)
 {
-    AffectDhIds affdhIds = inputHub_->SetSharingDevices(enabled, dhIds);
-    ReportDhIdSharingState(affdhIds);
+    return inputHub_->SetSharingDevices(enabled, dhIds);
 }
 
 void DistributedInputCollector::GetMouseNodePath(

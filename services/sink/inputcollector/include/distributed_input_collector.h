@@ -40,12 +40,13 @@ public:
     static DistributedInputCollector &GetInstance();
     int32_t Init(std::shared_ptr<AppExecFwk::EventHandler> sinkHandler);
     void Release();
-    void SetSharingTypes(bool enabled, const uint32_t &inputType);
-    void SetSharingDhIds(bool enabled, std::vector<std::string> dhIds);
+    AffectDhIds SetSharingTypes(bool enabled, const uint32_t &inputType);
+    AffectDhIds SetSharingDhIds(bool enabled, std::vector<std::string> dhIds);
     void GetMouseNodePath(std::vector<std::string> dhIds, std::string &mouseNodePath, std::string &dhid);
     // false for sharing device exist, true for all devices stop sharing
     bool IsAllDevicesStoped();
     int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener);
+    void ReportDhIdSharingState(const AffectDhIds &dhIds);
 
 private:
     DistributedInputCollector();
@@ -55,7 +56,6 @@ private:
     static void *CollectEventsThread(void *param);
     void StartCollectEventsThread();
     void StopCollectEventsThread();
-    void ReportDhIdSharingState(const AffectDhIds &dhIds);
 
     RawEvent mEventBuffer[INPUT_EVENT_BUFFER_SIZE];
     pthread_t collectThreadID_;

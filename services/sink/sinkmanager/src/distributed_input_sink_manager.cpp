@@ -77,8 +77,8 @@ DistributedInputSinkManager::DInputSinkListener::~DInputSinkListener()
 void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     const int32_t& sessionId, const std::string &deviceId)
 {
-    DHLOGI("onPrepareRemoteInput called, sessionId: %s, devId: %s",
-        GetAnonyInt32(sessionId).c_str(), GetAnonyString(deviceId).c_str());
+    DHLOGI("onPrepareRemoteInput called, sessionId: %d, devId: %s",
+        sessionId, GetAnonyString(deviceId).c_str());
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONPREPARE;
@@ -122,7 +122,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
 
 void DistributedInputSinkManager::DInputSinkListener::onUnprepareRemoteInput(const int32_t& sessionId)
 {
-    DHLOGI("onUnprepareRemoteInput called, sessionId: %s", GetAnonyInt32(sessionId).c_str());
+    DHLOGI("onUnprepareRemoteInput called, sessionId: %d", sessionId);
     onStopRemoteInput(sessionId, static_cast<uint32_t>(DInputDeviceType::ALL));
     DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
 
@@ -137,8 +137,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
-    DHLOGI("onStartRemoteInput called, curSessionId:%s, new sessionId: %s",
-        GetAnonyInt32(curSessionId).c_str(), GetAnonyInt32(sessionId).c_str());
+    DHLOGI("onStartRemoteInput called, cursessionId: %d, new sessionId: %d",
+        curSessionId, sessionId);
     // set new session
     int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
 
@@ -156,19 +156,27 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     // add the input type
     if (startRes == DH_SUCCESS) {
         sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() | inputTypes);
-        DistributedInputCollector::GetInstance().SetSharingTypes(true, sinkManagerObj_->GetInputTypes());
+        AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingTypes(true,
+            sinkManagerObj_->GetInputTypes());
+        sinkManagerObj_->StoreStartDhids(sessionId, affDhIds.sharingDhIds);
+        DistributedInputCollector::GetInstance().ReportDhIdSharingState(affDhIds);
     }
 }
 
 void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
-    DHLOGI("onStopRemoteInput called, sessionId: %s, inputTypes: %d, curInputTypes: %d",
-        GetAnonyInt32(sessionId).c_str(), inputTypes, sinkManagerObj_->GetInputTypes());
+    DHLOGI("onStopRemoteInput called, sessionId: %d, inputTypes: %d, curInputTypes: %d",
+        sessionId, inputTypes, sinkManagerObj_->GetInputTypes());
 
     sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
         (sinkManagerObj_->GetInputTypes() & inputTypes));
-    DistributedInputCollector::GetInstance().SetSharingTypes(false, inputTypes);
+    AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingTypes(false, inputTypes);
+    std::vector<std::string> stopIndeedDhIds;
+    sinkManagerObj_->DeleteStopDhids(sessionId, affDhIds.noSharingDhIds, stopIndeedDhIds);
+    AffectDhIds stopIndeedOnes;
+    stopIndeedOnes.noSharingDhIds = stopIndeedDhIds;
+    DistributedInputCollector::GetInstance().ReportDhIdSharingState(stopIndeedOnes);
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONSTOP;
@@ -192,8 +200,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInputDhid(con
     const std::string &strDhids)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
-    DHLOGE("onStartRemoteInputDhid called, curSessionId:%s, new sessionId: %s",
-        GetAnonyInt32(curSessionId).c_str(), GetAnonyInt32(sessionId).c_str());
+    DHLOGE("onStartRemoteInputDhid called, cursessionId: %d, new sessionId: %d",
+        curSessionId, sessionId);
     // set new session
     int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
     bool result = (startRes == DH_SUCCESS) ? true : false;
@@ -216,24 +224,26 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInputDhid(con
     CheckKeyState(sessionId, strDhids);
     // add the dhids
     if (startRes == DH_SUCCESS) {
-        std::set<std::string> setStr;
-        StringSplitToSet(strDhids, INPUT_STRING_SPLIT_POINT, setStr);
-        sinkManagerObj_->StoreStartDhids(sessionId, setStr);
         std::vector<std::string> vecStr;
-        vecStr.assign(setStr.begin(), setStr.end());
-        DistributedInputCollector::GetInstance().SetSharingDhIds(true, vecStr);
+        StringSplit(strDhids, INPUT_STRING_SPLIT_POINT, vecStr);
+        AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingDhIds(true, vecStr);
+        sinkManagerObj_->StoreStartDhids(sessionId, affDhIds.sharingDhIds);
+        DistributedInputCollector::GetInstance().ReportDhIdSharingState(affDhIds);
     }
 }
 
 void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(const int32_t &sessionId,
     const std::string &strDhids)
 {
-    DHLOGI("onStopRemoteInputDhid called, sessionId: %s", GetAnonyInt32(sessionId).c_str());
-    std::vector<std::string> stopStr;
-    std::set<std::string> setStr;
-    StringSplitToSet(strDhids, INPUT_STRING_SPLIT_POINT, setStr);
-    sinkManagerObj_->DeleteStopDhids(sessionId, setStr, stopStr);
-    DistributedInputCollector::GetInstance().SetSharingDhIds(false, stopStr);
+    DHLOGI("onStopRemoteInputDhid called, sessionId: %d", sessionId);
+    std::vector<std::string> stopIndeedDhIds;
+    std::vector<std::string> stopOnCmdDhIds;
+    StringSplit(strDhids, INPUT_STRING_SPLIT_POINT, stopOnCmdDhIds);
+    sinkManagerObj_->DeleteStopDhids(sessionId, stopOnCmdDhIds, stopIndeedDhIds);
+    AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingDhIds(false, stopIndeedDhIds);
+    AffectDhIds stopIndeedOnes;
+    stopIndeedOnes.noSharingDhIds = stopIndeedDhIds;
+    DistributedInputCollector::GetInstance().ReportDhIdSharingState(stopIndeedOnes);
 
     if (DistributedInputCollector::GetInstance().IsAllDevicesStoped()) {
         DHLOGE("onStopRemoteInputDhid called, all dhid stop sharing, sessionId: %d is closed.", sessionId);
@@ -259,8 +269,8 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(cons
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::StringSplitToSet(const std::string &str, const char split,
-    std::set<std::string> &vecStr)
+void DistributedInputSinkManager::DInputSinkListener::StringSplit(const std::string &str, const char split,
+    std::vector<std::string> &vecStr)
 {
     if (str.empty()) {
         DHLOGE("param str is error.");
@@ -270,7 +280,7 @@ void DistributedInputSinkManager::DInputSinkListener::StringSplitToSet(const std
     size_t pos = strTmp.find(split);
     while (pos != strTmp.npos) {
         std::string matchTmp = strTmp.substr(0, pos);
-        vecStr.insert(matchTmp);
+        vecStr.push_back(matchTmp);
         strTmp = strTmp.substr(pos + 1, strTmp.size());
         pos = strTmp.find(split);
     }
@@ -284,12 +294,10 @@ void DistributedInputSinkManager::DInputSinkListener::SleepTimeMs()
 void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_t &sessionId,
     const std::string &strDhids)
 {
-    std::set<std::string> setStr;
-    StringSplitToSet(strDhids, INPUT_STRING_SPLIT_POINT, setStr);
+    std::vector<std::string> vecStr;
+    StringSplit(strDhids, INPUT_STRING_SPLIT_POINT, vecStr);
     std::string mouseNodePath;
     std::string dhid;
-    std::vector<std::string> vecStr;
-    vecStr.assign(setStr.begin(), setStr.end());
     DistributedInputCollector::GetInstance().GetMouseNodePath(vecStr, mouseNodePath, dhid);
     if (mouseNodePath.empty()) {
         DHLOGE("mouse Node Path is empty.");
@@ -340,36 +348,37 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
     }
 }
 
-bool DistributedInputSinkManager::IsDeleteDhidExist(int32_t sessionId, const std::string &delstr)
+bool DistributedInputSinkManager::IsStopDhidOnCmdStillNeed(int32_t sessionId, const std::string &stopDhId)
 {
     for (auto sessionDhid : sharingDhIdsMap_) {
         if (sessionDhid.first == sessionId) {
-            DHLOGW("IsDeleteDhidExist sessionId=%d is self, ignore.", sessionId);
+            DHLOGW("IsStopDhidOnCmdStillNeed sessionId=%d is self, ignore.", sessionId);
             continue;
         }
         for (auto dhid : sessionDhid.second) {
-            if (delstr == dhid) {
-                DHLOGI("IsDeleteDhidExist delstr=%s is find.", delstr.c_str());
+            if (stopDhId == dhid) {
+                DHLOGI("IsStopDhidOnCmdStillNeed stopDhId=%s is find in session: %d", stopDhId.c_str(),
+                    sessionDhid.first);
                 return true;
             }
         }
     }
-    DHLOGW("IsDeleteDhidExist delstr=%s is not find.", delstr.c_str());
+    DHLOGW("IsStopDhidOnCmdStillNeed stopDhId=%s is not find.", stopDhId.c_str());
     return false;
 }
 
-void DistributedInputSinkManager::DeleteStopDhids(int32_t sessionId, const std::set<std::string> delDhIds,
-    std::vector<std::string> &stopDhIds)
+void DistributedInputSinkManager::DeleteStopDhids(int32_t sessionId, const std::vector<std::string> stopDhIds,
+    std::vector<std::string> &stopIndeedDhIds)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (sharingDhIdsMap_.count(sessionId) <= 0) {
-        DHLOGE("DeleteStopDhids sessionId:%d is not exist.", sessionId);
+        DHLOGE("DeleteStopDhids sessionId: %d is not exist.", sessionId);
         return;
     }
     DHLOGI("DeleteStopDhids sessionId=%d before has dhid.size=%d, delDhIds.size=%d.", sessionId,
-        sharingDhIdsMap_[sessionId].size(), delDhIds.size());
-    for (auto delstr : delDhIds) {
-        sharingDhIdsMap_[sessionId].erase(delstr);
+        sharingDhIdsMap_[sessionId].size(), stopDhIds.size());
+    for (auto stopDhId : stopDhIds) {
+        sharingDhIdsMap_[sessionId].erase(stopDhId);
     }
     if (sharingDhIdsMap_[sessionId].size() == 0) {
         sharingDhIdsMap_.erase(sessionId);
@@ -379,16 +388,16 @@ void DistributedInputSinkManager::DeleteStopDhids(int32_t sessionId, const std::
     }
     // find which dhid can be stop
     bool isFind = false;
-    for (auto tmp : delDhIds) {
-        isFind = IsDeleteDhidExist(sessionId, tmp);
+    for (auto tmp : stopDhIds) {
+        isFind = IsStopDhidOnCmdStillNeed(sessionId, tmp);
         if (!isFind) {
-            stopDhIds.push_back(tmp);
+            stopIndeedDhIds.push_back(tmp);
             sharingDhIds_.erase(tmp);
         }
     }
 }
 
-void DistributedInputSinkManager::StoreStartDhids(int32_t sessionId, const std::set<std::string> &dhIds)
+void DistributedInputSinkManager::StoreStartDhids(int32_t sessionId, const std::vector<std::string> &dhIds)
 {
     std::set<std::string> tmpDhids;
     std::lock_guard<std::mutex> lock(mutex_);

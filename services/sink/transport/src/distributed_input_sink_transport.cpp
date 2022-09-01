@@ -74,7 +74,7 @@ static void MessageReceived(int32_t sessionId, const void *data, uint32_t dataLe
     (void)sessionId;
     (void)data;
     (void)dataLen;
-    DHLOGI("sessionId:%s, dataLen:%d", GetAnonyInt32(sessionId).c_str(), dataLen);
+    DHLOGI("sessionId: %d, dataLen:%d", sessionId, dataLen);
 }
 
 static void StreamReceived(int32_t sessionId, const StreamData *data, const StreamData *ext,
@@ -84,7 +84,7 @@ static void StreamReceived(int32_t sessionId, const StreamData *data, const Stre
     (void)data;
     (void)ext;
     (void)param;
-    DHLOGI("sessionId:%s", GetAnonyInt32(sessionId).c_str());
+    DHLOGI("sessionId: %d", sessionId);
 }
 DistributedInputSinkTransport &DistributedInputSinkTransport::GetInstance()
 {
@@ -163,7 +163,7 @@ int32_t DistributedInputSinkTransport::RespPrepareRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespPrepareRemoteInput session:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+        DHLOGI("RespPrepareRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespPrepareRemoteInput error, SendMessage fail.");
@@ -180,7 +180,7 @@ int32_t DistributedInputSinkTransport::RespUnprepareRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespUnprepareRemoteInput sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+        DHLOGI("RespUnprepareRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespUnprepareRemoteInput error, SendMessage fail.");
@@ -197,7 +197,7 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespStartRemoteInput sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+        DHLOGI("RespStartRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespStartRemoteInput error, SendMessage fail.");
@@ -213,7 +213,7 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
 int32_t DistributedInputSinkTransport::RespStopRemoteInput(const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespStopRemoteInput sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+        DHLOGI("RespStopRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespStopRemoteInput error, SendMessage fail.");
@@ -239,7 +239,7 @@ int32_t DistributedInputSinkTransport::RespLatency(const int32_t sessionId, std:
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL;
     }
 
-    DHLOGI("RespLatency sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    DHLOGI("RespLatency sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
     return DH_SUCCESS;
 }
 
@@ -249,7 +249,7 @@ void DistributedInputSinkTransport::SendKeyStateNodeMsg(const int32_t sessionId,
         DHLOGE("SendKeyStateNodeMsg error, sessionId <= 0.");
         return;
     }
-    DHLOGI("SendKeyStateNodeMsg sessionId:%s, smsg:%s.", GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    DHLOGI("SendKeyStateNodeMsg sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
     int32_t ret = SendMessage(sessionId, smsg);
     if (ret != DH_SUCCESS) {
         DHLOGE("SendKeyStateNodeMsg error, SendMessage fail.");
@@ -304,7 +304,7 @@ void DistributedInputSinkTransport::GetDeviceIdBySessionId(int32_t sessionId, st
 int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_t result)
 {
     if (result != DH_SUCCESS) {
-        DHLOGE("session open failed, sessionId %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGE("session open failed, sessionId: %d", sessionId);
         return DH_SUCCESS;
     }
 
@@ -314,24 +314,24 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
 
     // return 1 is client
     int32_t sessionSide = GetSessionSide(sessionId);
-    DHLOGI("session open succeed, sessionId %s, sessionSide %d", GetAnonyInt32(sessionId).c_str(), sessionSide);
+    DHLOGI("session open succeed, sessionId: %d, sessionSide %d", sessionId, sessionSide);
 
     char mySessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerSessionName[SESSION_NAME_SIZE_MAX] = "";
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetMySessionName(sessionId, mySessionName, sizeof(mySessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGE("get my session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGE("get my session name failed, session id is %d", sessionId);
     }
     // get other device session name
     ret = GetPeerSessionName(sessionId, peerSessionName, sizeof(peerSessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGE("get my peer session name failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGE("get my peer session name failed, session id is %d", sessionId);
     }
 
     ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
-        DHLOGE("get my peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGE("get my peer device id failed, session id is %d", sessionId);
     } else {
         sessionDevMap_[peerDevId] = sessionId;
     }
@@ -344,7 +344,7 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
 
 void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
 {
-    DHLOGI("OnSessionClosed, sessionId:%s", GetAnonyInt32(sessionId).c_str());
+    DHLOGI("OnSessionClosed, sessionId: %d", sessionId);
 
 #ifdef DINPUT_LOW_LATENCY
     DInputLowLatency::GetInstance().DisableSinkLowLatency();
@@ -353,7 +353,7 @@ void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my peer device id failed, session id is %s", GetAnonyInt32(sessionId).c_str());
+        DHLOGI("get my peer device id failed, session id is %d", sessionId);
     }
     for (auto iter = sessionDevMap_.begin(); iter != sessionDevMap_.end(); iter++) {
         if (iter->second == sessionId) {
@@ -368,7 +368,7 @@ void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
 
 void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
-    DHLOGI("OnBytesReceived, sessionId:%s, dataLen:%d", GetAnonyInt32(sessionId).c_str(), dataLen);
+    DHLOGI("OnBytesReceived, sessionId: %d, dataLen:%d", sessionId, dataLen);
     if (sessionId < 0 || data == nullptr || dataLen <= 0) {
         DHLOGE("OnBytesReceived param check failed");
         return;
