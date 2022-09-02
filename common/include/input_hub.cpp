@@ -23,6 +23,7 @@
 
 #include <dirent.h>
 #include <fcntl.h>
+#include <regex>
 #include <securec.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -696,17 +697,12 @@ void InputHub::GenerateDescriptor(InputDevice& identifier) const
         rawDescriptor += "location:";
         rawDescriptor += identifier.location;
     }
-
-    if (identifier.vendor == 0 && identifier.product == 0) {
-        // If we don't know the vendor and product id, then the device is probably
-        // built-in so we need to rely on other information to uniquely identify
-        // the input device.  Usually we try to avoid relying on the device name
-        // but for built-in input device, they are unlikely to ever change.
-        if (!identifier.name.empty()) {
-            rawDescriptor += "name:";
-            rawDescriptor += identifier.name;
-        }
+    if (!identifier.name.empty()) {
+        rawDescriptor += "name:";
+        std::string name = identifier.name;
+        rawDescriptor += regex_replace(name, std::regex(" "), "");
     }
+
     identifier.descriptor = DH_ID_PREFIX + Sha256(rawDescriptor);
     DHLOGI("Created descriptor: raw=%s, cooked=%s", rawDescriptor.c_str(),
         GetAnonyString(identifier.descriptor).c_str());
