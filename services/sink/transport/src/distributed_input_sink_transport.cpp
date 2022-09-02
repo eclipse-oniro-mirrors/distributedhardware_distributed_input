@@ -163,7 +163,7 @@ int32_t DistributedInputSinkTransport::RespPrepareRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespPrepareRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespPrepareRemoteInput sessionId: %d, smsg:%s.", sessionId, SetAnonyId(smsg).c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespPrepareRemoteInput error, SendMessage fail.");
@@ -180,7 +180,7 @@ int32_t DistributedInputSinkTransport::RespUnprepareRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespUnprepareRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespUnprepareRemoteInput sessionId: %d, smsg:%s.", sessionId, SetAnonyId(smsg).c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespUnprepareRemoteInput error, SendMessage fail.");
@@ -197,7 +197,7 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
     const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespStartRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespStartRemoteInput sessionId: %d, smsg:%s.", sessionId, SetAnonyId(smsg).c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespStartRemoteInput error, SendMessage fail.");
@@ -213,7 +213,7 @@ int32_t DistributedInputSinkTransport::RespStartRemoteInput(
 int32_t DistributedInputSinkTransport::RespStopRemoteInput(const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
-        DHLOGI("RespStopRemoteInput sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
+        DHLOGI("RespStopRemoteInput sessionId: %d, smsg:%s.", sessionId, SetAnonyId(smsg).c_str());
         int32_t ret = SendMessage(sessionId, smsg);
         if (ret != DH_SUCCESS) {
             DHLOGE("RespStopRemoteInput error, SendMessage fail.");
@@ -239,7 +239,7 @@ int32_t DistributedInputSinkTransport::RespLatency(const int32_t sessionId, std:
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL;
     }
 
-    DHLOGI("RespLatency sessionId: %d, smsg:%s.", sessionId, smsg.c_str());
+    DHLOGI("RespLatency sessionId: %d, smsg:%s.", sessionId, SetAnonyId(smsg).c_str());
     return DH_SUCCESS;
 }
 

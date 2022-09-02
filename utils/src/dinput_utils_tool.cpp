@@ -90,9 +90,6 @@ std::string SetAnonyId(const std::string &message)
     if (IsString(jsonObj, DINPUT_SOFTBUS_KEY_DEVICE_ID)) {
         jsonObj[DINPUT_SOFTBUS_KEY_DEVICE_ID] = GetAnonyString(jsonObj[DINPUT_SOFTBUS_KEY_DEVICE_ID]);
     }
-    if (IsInt32(jsonObj, DINPUT_SOFTBUS_KEY_SESSION_ID)) {
-        jsonObj[DINPUT_SOFTBUS_KEY_SESSION_ID] = GetAnonyInt32(jsonObj[DINPUT_SOFTBUS_KEY_SESSION_ID]);
-    }
     if (IsString(jsonObj, DESCRIPTOR)) {
         jsonObj[DESCRIPTOR] = GetAnonyString(jsonObj[DESCRIPTOR]);
     }

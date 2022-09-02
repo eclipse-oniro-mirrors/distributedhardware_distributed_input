@@ -435,11 +435,11 @@ int32_t DistributedInputSourceTransport::StartRemoteInput(const std::string &dev
     int32_t ret = SendMsg(sessionId, smsg);
     if (ret != DH_SUCCESS) {
         DHLOGE("StartRemoteInput deviceId:%s, sessionId: %d, smsg:%s, SendMsg error, ret:%d.",
-            GetAnonyString(deviceId).c_str(), sessionId, smsg.c_str(), ret);
+            GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str(), ret);
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
     }
     DHLOGI("StartRemoteInput deviceId:%s, sessionId: %d, smsg:%s.", GetAnonyString(deviceId).c_str(),
-        sessionId, smsg.c_str());
+        sessionId, SetAnonyId(smsg).c_str());
     return DH_SUCCESS;
 }
 
@@ -468,11 +468,11 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(const std::string &devi
     int32_t ret = SendMsg(sessionId, smsg);
     if (ret != DH_SUCCESS) {
         DHLOGE("StopRemoteInput deviceId:%s, sessionId: %d, smsg:%s, SendMsg error, ret:%d.",
-            GetAnonyString(deviceId).c_str(), sessionId, smsg.c_str(), ret);
+            GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str(), ret);
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
     }
     DHLOGI("StopRemoteInput deviceId:%s, sessionId: %d, smsg:%s.", GetAnonyString(deviceId).c_str(),
-        sessionId, smsg.c_str());
+        sessionId, SetAnonyId(smsg).c_str());
     return DH_SUCCESS;
 }
 

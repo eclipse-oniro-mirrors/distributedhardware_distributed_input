@@ -88,7 +88,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseRegisterDist
     const std::string deviceId, const std::string dhId, bool result)
 {
     DHLOGI("onResponseRegisterDistributedHardware called, deviceId: %s, "
-        "result: %s.", GetAnonyString(deviceId).c_str(), result);
+        "result: %s.", GetAnonyString(deviceId).c_str(), result ? "success" : "failed");
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseRegisterDistributedHardware sourceManagerObj_ is null.");
         return;
@@ -115,8 +115,8 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseRegisterDist
 void DistributedInputSourceManager::DInputSourceListener::onResponsePrepareRemoteInput(const std::string deviceId,
     bool result, const std::string &object)
 {
-    DHLOGI("onResponsePrepareRemoteInput called, deviceId: %s, result: %d.",
-        GetAnonyString(deviceId).c_str(), result);
+    DHLOGI("onResponsePrepareRemoteInput called, deviceId: %s, result: %s.",
+        GetAnonyString(deviceId).c_str(), result ? "success" : "failed");
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponsePrepareRemoteInput sourceManagerObj_ is null.");
@@ -144,7 +144,7 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseUnprepareRem
     const std::string deviceId, bool result)
 {
     DHLOGI("onResponseUnprepareRemoteInput called, deviceId: %s, "
-        "result: %d.", GetAnonyString(deviceId).c_str(), result);
+        "result: %s.", GetAnonyString(deviceId).c_str(), result ? "success" : "failed");
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseUnprepareRemoteInput sourceManagerObj_ is null.");
@@ -170,8 +170,8 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseUnprepareRem
 void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteInput(
     const std::string deviceId, const uint32_t inputTypes, bool result)
 {
-    DHLOGI("onResponseStartRemoteInput called, deviceId: %s, inputTypes: %d, result: %d.",
-        GetAnonyString(deviceId).c_str(), inputTypes, result);
+    DHLOGI("onResponseStartRemoteInput called, deviceId: %s, inputTypes: %d, result: %s.",
+        GetAnonyString(deviceId).c_str(), inputTypes, result ? "success" : "failed");
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseStartRemoteInput sourceManagerObj_ is null.");
@@ -206,8 +206,8 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteI
 void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteInput(
     const std::string deviceId, const uint32_t inputTypes, bool result)
 {
-    DHLOGI("onResponseStopRemoteInput called, deviceId: %s, inputTypes: %d, result: %d.",
-        GetAnonyString(deviceId).c_str(), inputTypes, result);
+    DHLOGI("onResponseStopRemoteInput called, deviceId: %s, inputTypes: %d, result: %s.",
+        GetAnonyString(deviceId).c_str(), inputTypes, result ? "true" : "failed");
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseStopRemoteInput sourceManagerObj_ is null.");
@@ -234,8 +234,8 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteIn
 void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteInputDhid(
     const std::string deviceId, const std::string &dhids, bool result)
 {
-    DHLOGI("onResponseStartRemoteInputDhid called, deviceId: %s, result: %d.",
-        GetAnonyString(deviceId).c_str(), result);
+    DHLOGI("onResponseStartRemoteInputDhid called, deviceId: %s, result: %s.",
+        GetAnonyString(deviceId).c_str(), result ? "success" : "failed");
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseStartRemoteInputDhid sourceManagerObj_ is null.");
@@ -270,8 +270,8 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteI
 void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteInputDhid(
     const std::string deviceId, const std::string &dhids, bool result)
 {
-    DHLOGI("onResponseStopRemoteInputDhid called, deviceId: %s, result: %d.",
-        GetAnonyString(deviceId).c_str(), result);
+    DHLOGI("onResponseStopRemoteInputDhid called, deviceId: %s, result: %s.",
+        GetAnonyString(deviceId).c_str(), result ? "success" : "failed");
 
     if (sourceManagerObj_ == nullptr) {
         DHLOGE("onResponseStopRemoteInputDhid sourceManagerObj_ is null.");
