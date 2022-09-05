@@ -46,11 +46,11 @@ int32_t SimulationEventListenerProxy::OnSimulationEvent(uint32_t type, uint32_t 
         DHLOGE("SimulationEventListenerProxy write token valid failed");
         return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
-    if (!data.WriteInt32(type)) {
+    if (!data.WriteUint32(type)) {
         DHLOGE("SimulationEventListenerProxy write type failed");
         return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }
-    if (!data.WriteInt32(code)) {
+    if (!data.WriteUint32(code)) {
         DHLOGE("SimulationEventListenerProxy write code failed");
         return ERR_DH_INPUT_IPC_WRITE_TOKEN_VALID_FAIL;
     }

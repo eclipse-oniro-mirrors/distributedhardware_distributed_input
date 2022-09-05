@@ -1174,7 +1174,7 @@ bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], const AbsI
 
 InputHub::Device::Device(int fd, int32_t id, const std::string& path,
     const InputDevice& identifier) : next(nullptr), fd(fd), id(id), path(path), identifier(identifier),
-    classes(0), enabled(true), isVirtual(fd < 0) {
+    classes(0), enabled(false), isShare(false), isVirtual(fd < 0) {
     memset_s(keyBitmask, sizeof(keyBitmask), 0, sizeof(keyBitmask));
     memset_s(absBitmask, sizeof(absBitmask), 0, sizeof(absBitmask));
     memset_s(relBitmask, sizeof(relBitmask), 0, sizeof(relBitmask));

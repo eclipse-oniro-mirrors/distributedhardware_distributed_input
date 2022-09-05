@@ -50,7 +50,7 @@ public:
     int32_t GetVirtualTouchScreenFd();
 
     int32_t GetDeviceInfo(std::string &deviceId);
-    void GetDevicesInfoByType(const std::string &networkId, int32_t inputTypes, std::map<int32_t, std::string> &datas);
+    void GetDevicesInfoByType(const std::string &networkId, uint32_t inputTypes, std::map<int32_t, std::string> &datas);
     void GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
     void ProcessInjectEvent(const std::shared_ptr<RawEvent> &rawEvent);
 

@@ -311,12 +311,15 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
     std::string mouseNodePath;
     std::string dhid;
     DistributedInputCollector::GetInstance().GetMouseNodePath(vecStr, mouseNodePath, dhid);
-    if (mouseNodePath.empty()) {
-        DHLOGE("mouse Node Path is empty.");
+
+    char canonicalPath[PATH_MAX + 1] = {0x00};
+    if (mouseNodePath.length() == 0 || mouseNodePath.length() > PATH_MAX ||
+        realpath(mouseNodePath.c_str(), canonicalPath) == nullptr) {
+        DHLOGE("mouse Nodepath check fail, error path: %s", mouseNodePath.c_str());
         return;
     }
 
-    int fd = open(mouseNodePath.c_str(), O_RDONLY | O_NONBLOCK);
+    int fd = open(canonicalPath, O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
         DHLOGE("open mouse Node Path error:", errno);
         return;

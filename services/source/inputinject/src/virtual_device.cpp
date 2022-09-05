@@ -195,7 +195,7 @@ int32_t VirtualDevice::GetDeviceFd()
     return fd_;
 }
 
-int32_t VirtualDevice::GetDeviceType()
+uint16_t VirtualDevice::GetDeviceType()
 {
     return classes_;
 }

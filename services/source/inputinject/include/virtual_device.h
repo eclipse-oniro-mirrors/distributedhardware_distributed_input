@@ -45,7 +45,7 @@ public:
     std::string GetNetWorkId();
 
     int32_t GetDeviceFd();
-    int32_t GetDeviceType();
+    uint16_t GetDeviceType();
 
 protected:
     VirtualDevice();

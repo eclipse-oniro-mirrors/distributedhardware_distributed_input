@@ -274,7 +274,7 @@ int32_t DistributedInputNodeManager::GetDeviceInfo(std::string &deviceId)
     return DH_SUCCESS;
 }
 
-void DistributedInputNodeManager::GetDevicesInfoByType(const std::string &networkId, int32_t inputTypes,
+void DistributedInputNodeManager::GetDevicesInfoByType(const std::string &networkId, uint32_t inputTypes,
     std::map<int32_t, std::string> &datas)
 {
     uint32_t input_types_ = 0;

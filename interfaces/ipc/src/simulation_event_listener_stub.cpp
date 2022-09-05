@@ -38,8 +38,8 @@ int32_t SimulationEventListenerStub::OnRemoteRequest(
     ISimulationEventListener::Message msgCode = static_cast<ISimulationEventListener::Message>(code);
     switch (msgCode) {
         case ISimulationEventListener::Message::RESULT_ON: {
-            uint32_t eventType = data.ReadInt32();
-            uint32_t eventCode = data.ReadInt32();
+            uint32_t eventType = data.ReadUint32();
+            uint32_t eventCode = data.ReadUint32();
             int32_t eventValue = data.ReadInt32();
             int32_t ret = OnSimulationEvent(eventType, eventCode, eventValue);
             if (!reply.WriteInt32(ret)) {
