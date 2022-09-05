@@ -132,10 +132,9 @@ private:
     bool IsSupportInputTypes(uint32_t classes);
     void RecordEventLog(const RawEvent* event);
     void RecordDeviceLog(const int32_t deviceId, const std::string& devicePath, const InputDevice& identifier);
-    void HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count, std::vector<bool>& needFilted,
-        Device* device);
+    void HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count, std::vector<bool>& needFilted);
     int32_t QueryLocalTouchScreenInfo(int fd);
-    bool CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo, Device* device);
+    bool CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo);
     size_t CollectEvent(RawEvent* buffer, size_t& capacity, Device* device, struct input_event readBuffer[],
         const size_t count);
     /*
@@ -154,6 +153,7 @@ private:
 
     std::atomic<bool> needToScanDevices_;
     std::string deviceId_;
+    std::string touchDescriptor;
     std::atomic<int32_t> nextDeviceId_;
 
     // The array of pending epoll events and the index of the next event to be handled.

@@ -209,8 +209,10 @@ size_t InputHub::CollectEvent(RawEvent* buffer, size_t& capacity, Device* device
     const size_t count)
 {
     std::vector<bool> needFilted(capacity, false);
+    bool isTouchEvent = false;
     if ((device->classes & INPUT_DEVICE_CLASS_TOUCH_MT) || (device->classes & INPUT_DEVICE_CLASS_TOUCH)) {
-        HandleTouchScreenEvent(readBuffer, count, needFilted, device);
+        isTouchEvent = true;
+        HandleTouchScreenEvent(readBuffer, count, needFilted);
     }
 
     RawEvent* event = buffer;
@@ -224,7 +226,7 @@ size_t InputHub::CollectEvent(RawEvent* buffer, size_t& capacity, Device* device
         event->code = iev.code;
         event->value = iev.value;
         event->path = device->path;
-        event->descriptor = device->identifier.descriptor;
+        event->descriptor = isTouchEvent ? touchDescriptor : device->identifier.descriptor;
         RecordEventLog(event);
         event += 1;
         capacity -= 1;
@@ -1099,7 +1101,7 @@ void InputHub::RecordEventLog(const RawEvent* event)
 }
 
 void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count,
-    std::vector<bool>& needFilted, Device* device)
+    std::vector<bool>& needFilted)
 {
     std::vector<std::pair<size_t, size_t>> absIndexs;
     int32_t firstIndex = -1;
@@ -1145,7 +1147,7 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
             }
             continue;
         }
-        if (!CheckTouchPointRegion(readBuffer, absInfo, device)) {
+        if (!CheckTouchPointRegion(readBuffer, absInfo)) {
             for (size_t j = iter.first; j <= iter.second; j++) {
                 needFilted[j] = true;
             }
@@ -1153,7 +1155,7 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
     }
 }
 
-bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo, Device* device)
+bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], const AbsInfo& absInfo)
 {
     auto sinkInfos = DInputContext::GetInstance().GetAllSinkScreenInfo();
 
@@ -1161,7 +1163,7 @@ bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], const AbsI
         auto info = sinkInfo.transformInfo;
         if ((absInfo.absX >= info.sinkWinPhyX) && (absInfo.absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
             && (absInfo.absY >= info.sinkWinPhyY)  && (absInfo.absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
-            device->identifier.descriptor = sinkInfo.srcScreenInfo.sourcePhyId;
+            touchDescriptor = sinkInfo.srcScreenInfo.sourcePhyId;
             readBuffer[absInfo.absXIndex].value = (absInfo.absX - info.sinkWinPhyX) * info.coeffWidth;
             readBuffer[absInfo.absYIndex].value = (absInfo.absY - info.sinkWinPhyY) * info.coeffHeight;
             return true;
