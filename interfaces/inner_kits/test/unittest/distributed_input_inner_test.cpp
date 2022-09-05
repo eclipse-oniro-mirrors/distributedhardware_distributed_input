@@ -373,6 +373,12 @@ HWTEST_F(DistributedInputInnerTest, IsNeedFilterOut03, testing::ext::TestSize.Le
     EXPECT_EQ(true, ret);
 }
 
+/**
+ * @tc.name: IsTouchEventNeedFilterOut01
+ * @tc.desc: verify the function of filtering events on the touchscreen.
+ * @tc.type: FUNC
+ * @tc.require: SR000GNECO
+ */
 HWTEST_F(DistributedInputInnerTest, IsTouchEventNeedFilterOut01, testing::ext::TestSize.Level0)
 {
     std::string sourceWinId = "123";

@@ -282,6 +282,12 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput03, testing::ext::
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
+/**
+ * @tc.name: PrepareRemoteInput04
+ * @tc.desc: verify the function of distributing data from any device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput04, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -291,6 +297,12 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput04, testing::ext::
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
+/**
+ * @tc.name: PrepareRemoteInput05
+ * @tc.desc: verify the function of distributing data from any device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput05, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -300,6 +312,12 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput05, testing::ext::
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
+/**
+ * @tc.name: PrepareRemoteInput06
+ * @tc.desc: verify the function of distributing data from any device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput06, testing::ext::TestSize.Level0)
 {
     std::string srcId = "";
@@ -333,6 +351,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput03, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+/**
+ * @tc.name: StartRemoteInput06
+ * @tc.desc: verify the function of starting distributed input on InputDeviceType.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput04, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -343,6 +367,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput04, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+/**
+ * @tc.name: StartRemoteInput06
+ * @tc.desc: verify the function of starting distributed input on InputDeviceType.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput05, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -353,6 +383,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput05, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+/**
+ * @tc.name: StartRemoteInput06
+ * @tc.desc: verify the low-latency transmission capability of distributed input.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J78
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput06, testing::ext::TestSize.Level0)
 {
     std::string srcId = "";
@@ -363,6 +399,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput06, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+/**
+ * @tc.name: StartRemoteInput10
+ * @tc.desc: verify the function of transferring mouse button status.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J76
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput10, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -374,6 +416,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput10, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+/**
+ * @tc.name: StartRemoteInput10
+ * @tc.desc: verify the function of transferring mouse button status.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J76
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput11, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -384,6 +432,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput11, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+/**
+ * @tc.name: StartRemoteInput12
+ * @tc.desc: verify the low-latency transmission capability of distributed input
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J78
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput12, testing::ext::TestSize.Level0)
 {
     std::string srcId = "";
@@ -419,6 +473,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput03, testing::ext::Tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+/**
+ * @tc.name: StopRemoteInput04
+ * @tc.desc: verify the function of stoping distributed input on InputDeviceType.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput04, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91ev";
@@ -429,6 +489,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput04, testing::ext::Tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+/**
+ * @tc.name: StopRemoteInput05
+ * @tc.desc: verify the function of stoping distributed input on InputDeviceType.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput05, testing::ext::TestSize.Level0)
 {
     std::string srcId = "";
@@ -439,6 +505,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput05, testing::ext::Tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+/**
+ * @tc.name: StopRemoteInput06
+ * @tc.desc: verify the function of stoping distributed input on InputDeviceType.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput06, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91ev";
@@ -449,6 +521,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput06, testing::ext::Tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+/**
+ * @tc.name: StopRemoteInput10
+ * @tc.desc: verify the function of stoping distributed input with dhid.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J74
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput10, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -460,6 +538,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput10, testing::ext::Tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+/**
+ * @tc.name: StopRemoteInput11
+ * @tc.desc: verify the function of stoping distributed input with dhid.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J74
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput11, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -470,6 +554,12 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput11, testing::ext::Tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+/**
+ * @tc.name: StopRemoteInput12
+ * @tc.desc: verify the function of stoping distributed input with dhid.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J74
+ */
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput12, testing::ext::TestSize.Level0)
 {
     std::string srcId = "";
@@ -505,6 +595,12 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput03, testing::ext
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
+/**
+ * @tc.name: UnprepareRemoteInput04
+ * @tc.desc: verify the function of distributing data from any device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput04, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -514,6 +610,12 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput04, testing::ext
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
+/**
+ * @tc.name: UnprepareRemoteInput05
+ * @tc.desc: verify the function of distributing data from any device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput05, testing::ext::TestSize.Level0)
 {
     std::string srcId = "";
@@ -523,6 +625,12 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput05, testing::ext
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
+/**
+ * @tc.name: UnprepareRemoteInput06
+ * @tc.desc: verify the function of distributing data from any device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J75
+ */
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput06, testing::ext::TestSize.Level0)
 {
     std::string srcId = "umkyu1b165e1be98151891erbe8r91eb";
@@ -532,6 +640,12 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput06, testing::ext
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
+/**
+ * @tc.name: UnprepareRemoteInput06
+ * @tc.desc: verify the function of disabling a peripheral device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J77
+ */
 HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware01, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
@@ -541,6 +655,12 @@ HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware01, tes
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, ret);
 }
 
+/**
+ * @tc.name: UnprepareRemoteInput06
+ * @tc.desc: verify the function of disabling a peripheral device.
+ * @tc.type: FUNC
+ * @tc.require: SR000H9J77
+ */
 HWTEST_F(DistributedInputSourceManagerTest, UnregisterDistributedHardware02, testing::ext::TestSize.Level0)
 {
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
