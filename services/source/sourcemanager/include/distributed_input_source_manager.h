@@ -294,8 +294,11 @@ public:
     void RemoveInputDeviceId(const std::string deviceId, const std::string dhId);
     void SetDeviceMapValue(const std::string deviceId, int32_t value);
     bool GetDeviceMapAllDevSwitchOff();
-    int32_t RemoveInputNode(const std::string& devId, const std::string& dhId);
-    int32_t DeleteDevice(const std::string& devId, const std::string& dhId);
+    int32_t CheckDeviceIsExists(const std::string &devId, const std::string &dhId,
+        const InputDeviceId &inputDeviceId, std::vector<InputDeviceId>::iterator &it);
+    int32_t DeleteInputDeviceNodeInfo(const std::string &devId, const std::string &dhId,
+        const std::vector<InputDeviceId>::iterator &it);
+    int32_t UnregCallbackNotify(const std::string &devId, const std::string &dhId);
     void SetInputTypesMap(const std::string deviceId, uint32_t value);
     uint32_t GetInputTypesMap(const std::string deviceId);
     uint32_t GetAllInputTypesMap();

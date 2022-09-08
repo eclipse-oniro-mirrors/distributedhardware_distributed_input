@@ -75,7 +75,7 @@ int32_t WhiteListUtil::Init()
         vecCombinationKey.clear();
 
         std::size_t pos1 = line.find(SPLIT_COMMA);
-        while (std::string::npos != pos1) {
+        while (pos1 != std::string::npos) {
             std::string column = line.substr(0, pos1);
             line = line.substr(pos1 + 1, line.size());
             pos1 = line.find(SPLIT_COMMA);

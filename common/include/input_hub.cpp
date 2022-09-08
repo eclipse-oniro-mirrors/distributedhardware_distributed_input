@@ -677,7 +677,7 @@ std::string InputHub::StringPrintf(const char* format, ...) const
     va_start(ap, format);
     std::string result;
     int32_t ret = vsnprintf_s(space, sizeof(space), sizeof(space) - 1, format, ap);
-    if (ret >= DH_SUCCESS && (size_t)ret < sizeof(space)) {
+    if (ret >= DH_SUCCESS && static_cast<size_t>(ret) < sizeof(space)) {
         result = space;
     } else {
         return "the buffer is overflow!";
@@ -791,26 +791,27 @@ int32_t InputHub::UnregisterFdFromEpoll(int fd) const
 int32_t InputHub::ReadNotifyLocked()
 {
     size_t res;
-    char event_buf[512];
-    size_t event_size;
-    size_t event_pos = 0;
+    char eventBuf[512];
+    size_t eventSize;
+    size_t eventPos = 0;
     struct inotify_event *event;
 
     DHLOGI("readNotify nfd: %d\n", iNotifyFd_);
-    res = (size_t)read(iNotifyFd_, event_buf, sizeof(event_buf));
+    res = static_cast<size_t>(read(iNotifyFd_, eventBuf, sizeof(eventBuf)));
     if (res < sizeof(*event)) {
-        if (errno == EINTR)
+        if (errno == EINTR) {
             return DH_SUCCESS;
+        }
         DHLOGE("could not get event, %s\n", ConvertErrNo().c_str());
         return ERR_DH_INPUT_HUB_GET_EVENT_FAIL;
     }
 
     while (res >= sizeof(*event)) {
-        event = (struct inotify_event *)(event_buf + event_pos);
+        event = reinterpret_cast<struct inotify_event *>(eventBuf + eventPos);
         JudgeDeviceOpenOrClose(*event);
-        event_size = sizeof(*event) + event->len;
-        res -= event_size;
-        event_pos += event_size;
+        eventSize = sizeof(*event) + event->len;
+        res -= eventSize;
+        eventPos += eventSize;
     }
     return DH_SUCCESS;
 }
@@ -1016,23 +1017,23 @@ void InputHub::GetShareMousePathByDhId(std::vector<std::string> dhIds, std::stri
 
 void InputHub::GetDevicesInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string> &datas)
 {
-    uint32_t input_types_ = 0;
+    uint32_t dhType = 0;
 
     if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
-        input_types_ |= INPUT_DEVICE_CLASS_CURSOR;
+        dhType |= INPUT_DEVICE_CLASS_CURSOR;
     }
 
     if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::KEYBOARD)) != 0) {
-        input_types_ |= INPUT_DEVICE_CLASS_KEYBOARD;
+        dhType |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
 
     if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::TOUCHSCREEN)) != 0) {
-        input_types_ |= INPUT_DEVICE_CLASS_TOUCH | INPUT_DEVICE_CLASS_TOUCH_MT;
+        dhType |= INPUT_DEVICE_CLASS_TOUCH | INPUT_DEVICE_CLASS_TOUCH_MT;
     }
 
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto &[id, device] : devices_) {
-        if (device->classes & input_types_) {
+        if (device->classes & dhType) {
             datas.insert(std::pair<int32_t, std::string>(device->fd, device->identifier.descriptor));
         }
     }
@@ -1110,9 +1111,9 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
     for (size_t i = 0; i < count; i++) {
         struct input_event& iev = readBuffer[i];
         if ((iev.type == EV_ABS) && (iev.code == ABS_X || iev.code == ABS_MT_POSITION_X)) {
-            firstIndex = (int32_t)i;
+            firstIndex = static_cast<int32_t>(i);
         } else if (iev.type  == EV_SYN) {
-            lastIndex = (int32_t)i;
+            lastIndex = static_cast<int32_t>(i);
         }
         if ((firstIndex >= 0) && (lastIndex > firstIndex)) {
             absIndexs.emplace_back(std::make_pair((size_t)firstIndex, (size_t)lastIndex));

@@ -46,18 +46,18 @@
 #include "idinput_dbg_itf.h"
 #include "white_list_util.h"
 
-#ifdef __LP64__
-const std::string LIB_LOAD_PATH = "/system/lib64/libdinput_dbg_itf.z.so";
-#else
-const std::string LIB_LOAD_PATH = "/system/lib/libdinput_dbg_itf.z.so";
-#endif
-
 using GetDInputDBGItfFunc = OHOS::DistributedHardware::DistributedInput::IDInputDBGItf* (*)();
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 REGISTER_SYSTEM_ABILITY_BY_ID(DistributedInputSourceManager, DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, true);
+
+#ifdef __LP64__
+const std::string LIB_LOAD_PATH = "/system/lib64/libdinput_dbg_itf.z.so";
+#else
+const std::string LIB_LOAD_PATH = "/system/lib/libdinput_dbg_itf.z.so";
+#endif
 
 DistributedInputSourceManager::DistributedInputSourceManager(int32_t saId, bool runOnCreate)
     : SystemAbility(saId, runOnCreate)
@@ -877,27 +877,52 @@ void DistributedInputSourceManager::handleStartServerCallback(const std::string&
     }
 }
 
-int32_t DistributedInputSourceManager::RemoveInputNode(const std::string& devId, const std::string& dhId)
+int32_t DistributedInputSourceManager::UnregCallbackNotify(const std::string &devId, const std::string &dhId)
 {
-    int32_t ret = DistributedInputInject::GetInstance().UnregisterDistributedHardware(devId, dhId);
-    if (ret != DH_SUCCESS) {
-        DHLOGE("RemoveInputNode called, remove node fail.");
-        for (std::vector<DInputClientUnregistInfo>::iterator iter =
-            unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
-            if (iter->devId == devId && iter->dhId == dhId) {
-                iter->callback->OnResult(iter->devId, iter->dhId,
-                    ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REMOVE_INPUT_NODE_FAIL);
-                unregCallbacks_.erase(iter);
-                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REMOVE_INPUT_NODE_FAIL;
-            }
+    for (auto iter = unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
+        if (iter->devId == devId && iter->dhId == dhId) {
+            iter->callback->OnResult(iter->devId, iter->dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
+            unregCallbacks_.erase(iter);
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
         }
-        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REMOVE_INPUT_NODE_FAIL;
     }
     return DH_SUCCESS;
 }
 
-int32_t DistributedInputSourceManager::DeleteDevice(const std::string& devId, const std::string& dhId)
+int32_t DistributedInputSourceManager::CheckDeviceIsExists(const std::string &devId, const std::string &dhId,
+    const InputDeviceId &inputDeviceId, std::vector<InputDeviceId>::iterator &it)
 {
+    for (; it != inputDevice_.end(); ++it) {
+        if (it->devId == inputDeviceId.devId && it->dhId == inputDeviceId.dhId) {
+            break;
+        }
+    }
+
+    if (it == inputDevice_.end()) {
+        DHLOGE("%s called, deviceId: %s is not exist.", __func__, GetAnonyString(devId).c_str());
+        if (UnregCallbackNotify(devId, dhId) != DH_SUCCESS) {
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
+    }
+
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceManager::DeleteInputDeviceNodeInfo(const std::string &devId, const std::string &dhId,
+    const std::vector<InputDeviceId>::iterator &it)
+{
+    int32_t ret = DistributedInputInject::GetInstance().UnregisterDistributedHardware(devId, dhId);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("RemoveInputNode called, remove node fail.");
+        if (UnregCallbackNotify(devId, dhId) != DH_SUCCESS) {
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
+        }
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REMOVE_INPUT_NODE_FAIL;
+    }
+
+    inputDevice_.erase(it);
+
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = devId;
@@ -909,6 +934,9 @@ int32_t DistributedInputSourceManager::DeleteDevice(const std::string& devId, co
 
     if (callBackHandler_ == nullptr) {
         DHLOGE("UnregisterDistributedHardware callBackHandler_ is null.");
+        if (UnregCallbackNotify(devId, dhId) != DH_SUCCESS) {
+            return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
+        }
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_DELETE_DEVICE_FAIL;
     }
     callBackHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
@@ -937,46 +965,23 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     DHLOGI("Unregister deviceId: %s, dhId: %s", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     std::vector<InputDeviceId>::iterator it = inputDevice_.begin();
-    for (; it != inputDevice_.end(); ++it) {
-        if (it->devId == inputDeviceId.devId && it->dhId == inputDeviceId.dhId) {
-            break;
-        }
-    }
-
-    if (it == inputDevice_.end()) {
-        DHLOGE("%s called, deviceId: %s is not exist.", __func__, GetAnonyString(devId).c_str());
+    if (CheckDeviceIsExists(devId, dhId, inputDeviceId, it) != DH_SUCCESS) {
+        DHLOGE("Unregister deviceId: %s is not exist.", GetAnonyString(devId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in deviceId is not exist");
-        for (std::vector<DInputClientUnregistInfo>::iterator iter =
-            unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
-            if (iter->devId == devId && iter->dhId == dhId) {
-                iter->callback->OnResult(iter->devId, iter->dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
-                unregCallbacks_.erase(iter);
-                return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
-            }
-        }
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
-    // 1.remove input node
-    if (RemoveInputNode(devId, dhId) != DH_SUCCESS) {
-        callback->OnResult(devId, dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
+    if (DeleteInputDeviceNodeInfo(devId, dhId, it) != DH_SUCCESS) {
+        DHLOGE("Unregister deviceId: %s, delete device node failed", GetAnonyString(devId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in remove input node");
-        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
-    }
-
-    // 2.delete device
-    inputDevice_.erase(it);
-    if (DeleteDevice(devId, dhId) != DH_SUCCESS) {
-        callback->OnResult(devId, dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
-        HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in delete device");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in delete input node");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
     HiDumper::GetInstance().DeleteNodeInfo(devId, dhId);
-    // 3.isstart callback
+
+    // isstart callback
     handleStartServerCallback(devId);
     return DH_SUCCESS;
 }

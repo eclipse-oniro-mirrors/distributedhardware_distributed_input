@@ -44,10 +44,10 @@ public:
     size_t StartCollectInputHandler(InputDeviceEvent* buffer, size_t bufferSize);
     void StopCollectInputEvents();
     void StopCollectInputHandler();
-    size_t DeviceIsExists(InputDeviceEvent* event, size_t capacity);
+    size_t DeviceIsExists(InputDeviceEvent* event, size_t bufferSize);
     std::vector<InputDevice> GetAllInputDevices();
     // return efftive dhids
-    AffectDhIds SetSupportInputType(bool enabled, const uint32_t &inputType);
+    AffectDhIds SetSupportInputType(bool enabled, const uint32_t &inputTypes);
     // return efftive dhids
     AffectDhIds SetSharingDevices(bool enabled, std::vector<std::string> dhIds);
     void GetDeviceDhIdByFd(int32_t fd, std::string &dhId);
