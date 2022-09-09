@@ -43,6 +43,8 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "${low_latency_path}/include",
     "${frameworks_path}/include",
     "${distributedinput_path}/inputdevicehandler/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
   ]
 
   cflags = [
@@ -60,23 +62,15 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
   deps = [
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "${low_latency_path}:libdinput_low_latency",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
-    "//foundation/distributedhardware/distributed_input/services/source/transport:libdinput_source_trans",
-    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   defines = [

@@ -28,6 +28,8 @@ ohos_shared_library("libdinput_low_latency") {
     "${frameworks_path}/include",
     "${distributedinput_path}/low_latency/include",
     "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/innerkits/ressched_client/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [ "src/dinput_low_latency.cpp" ]
@@ -39,19 +41,8 @@ ohos_shared_library("libdinput_low_latency") {
   ]
 
   deps = [
-    "${fwk_utils_path}:distributedhardwareutils",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/innerkits/ressched_client:ressched_client",
-    "//third_party/jsoncpp:jsoncpp",
     "//third_party/openssl:libcrypto_static",
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

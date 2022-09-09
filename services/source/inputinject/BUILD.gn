@@ -33,6 +33,9 @@ ohos_shared_library("libdinput_inject") {
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
     "${distributedinput_path}/inputdevicehandler/include",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [
@@ -57,20 +60,12 @@ ohos_shared_library("libdinput_inject") {
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/openssl:libcrypto_static",
-    "${fwk_interfaces_path}:libdhfwk_sdk",
-    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
     "dsoftbus:softbus_client",
-    "eventhandler:libeventhandler",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

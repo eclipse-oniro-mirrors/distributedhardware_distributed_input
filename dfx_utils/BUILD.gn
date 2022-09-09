@@ -28,6 +28,9 @@ ohos_shared_library("libdinput_dfx_utils") {
     "${frameworks_path}/include",
     "${dfx_utils_path}/include",
     "${service_common}/include",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [
@@ -43,17 +46,12 @@ ohos_shared_library("libdinput_dfx_utils") {
 
   deps = [
     "${fwk_utils_path}:distributedhardwareutils",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [
     "c_utils:utils",
     "hisysevent_native:libhisysevent",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

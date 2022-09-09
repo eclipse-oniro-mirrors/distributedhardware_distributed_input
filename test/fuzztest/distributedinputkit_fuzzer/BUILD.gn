@@ -47,6 +47,7 @@ ohos_fuzztest("DistributedInputKitFuzzTest") {
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
     "${services_source_path}/inputinject/include",
+    "//base/notification/eventhandler/interfaces/inner_api",
   ]
 
   cflags = [
@@ -59,28 +60,12 @@ ohos_fuzztest("DistributedInputKitFuzzTest") {
   sources = [ "distributed_input_kit_fuzzer.cpp" ]
 
   deps = [
-    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
     "${distributedinput_path}/interfaces/inner_kits:libdinput_sdk",
-    "${distributedinput_path}/services/sink/inputcollector:libdinput_collector",
-    "${distributedinput_path}/services/sink/sinkmanager:libdinput_sink",
-    "${distributedinput_path}/services/sink/transport:libdinput_sink_trans",
-    "${distributedinput_path}/services/source/inputinject:libdinput_inject",
-    "${distributedinput_path}/services/source/sourcemanager:libdinput_source",
-    "${distributedinput_path}/services/source/transport:libdinput_source_trans",
-    "${distributedinput_path}/sinkhandler:libdinput_sink_handler",
-    "${distributedinput_path}/sourcehandler:libdinput_source_handler",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "${utils_path}:libdinput_utils",
-    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "dsoftbus:softbus_client",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   defines = [

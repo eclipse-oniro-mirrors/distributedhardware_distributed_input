@@ -48,6 +48,7 @@ ohos_unittest("distributed_input_source_handler_test") {
     "${fwk_interfaces_path}/include/ipc",
     "${services_source_path}/inputinject/include",
     "${utils_path}/include",
+    "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
   ]
 
   sources = [
@@ -75,18 +76,12 @@ ohos_unittest("distributed_input_source_handler_test") {
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${innerkits_path}:libdinput_sdk",
-    "${services_source_path}/sourcemanager:libdinput_source",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "${utils_path}:libdinput_utils",
-    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hisysevent_native:libhisysevent",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
 

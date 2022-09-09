@@ -36,6 +36,8 @@ ohos_shared_library("libdinput_sink_handler") {
     "${utils_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
   ]
 
   sources = [
@@ -53,19 +55,13 @@ ohos_shared_library("libdinput_sink_handler") {
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${innerkits_path}:libdinput_sdk",
-    "${services_sink_path}/sinkmanager:libdinput_sink",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "${dfx_utils_path}:libdinput_dfx_utils",
-    "${utils_path}:libdinput_utils",
-    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hisysevent_native:libhisysevent",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
 

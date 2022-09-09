@@ -41,6 +41,14 @@ ohos_shared_library("libdinput_sink") {
     "${fwk_interfaces_path}/include/ipc",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
     "//foundation/window/window_manager/utils/include/",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
+    "//drivers/peripheral/display/interfaces/include",
+    "//drivers/peripheral/base",
+    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
   ]
 
   sources = [
@@ -63,7 +71,6 @@ ohos_shared_library("libdinput_sink") {
   deps = [
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "${low_latency_path}:libdinput_low_latency",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
@@ -71,16 +78,12 @@ ohos_shared_library("libdinput_sink") {
     "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "//foundation/window/window_manager/dm:libdm",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hisysevent_native:libhisysevent",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

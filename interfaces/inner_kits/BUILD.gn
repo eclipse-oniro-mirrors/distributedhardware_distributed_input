@@ -34,6 +34,9 @@ config("input_sdk_public_config") {
     "//third_party/json/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "//foundation/communication/dsoftbus/interfaces/kits/bus_center",
+    "//foundation/communication/dsoftbus/interfaces/kits/common",
   ]
 }
 ohos_shared_library("libdinput_sdk") {
@@ -83,7 +86,6 @@ ohos_shared_library("libdinput_sdk") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
-    "${fwk_interfaces_path}:libdhfwk_sdk",
   ]
 
   defines = [
@@ -94,8 +96,6 @@ ohos_shared_library("libdinput_sdk") {
 
   external_deps = [
     "c_utils:utils",
-    "dsoftbus:softbus_client",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]

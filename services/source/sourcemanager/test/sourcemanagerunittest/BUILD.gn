@@ -54,6 +54,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${low_latency_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
+    "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
   ]
 
   sources = [
@@ -120,18 +121,14 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
-    "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp:devicemanagersdk",
     "//third_party/openssl:libcrypto_static",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "${innerkits_path}:libdinput_sdk",
-    "${distributedinput_path}/inputdevicehandler:libdinput_handler",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
