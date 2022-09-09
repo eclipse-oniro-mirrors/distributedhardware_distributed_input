@@ -129,16 +129,17 @@ std::string GetNodeDesc(std::string parameters)
 {
     nlohmann::json parObj = nlohmann::json::parse(parameters);
     std::string nodeName = "N/A";
-    std::string location = "N/A";
+    std::string physicalPath = "N/A";
     int32_t classes = -1;
 
-    if (parObj.find("name") != parObj.end() && parObj.find("location") != parObj.end() &&
+    if (parObj.find("name") != parObj.end() && parObj.find("physicalPath") != parObj.end() &&
         parObj.find("classes") != parObj.end()) {
         nodeName = parObj.at("name").get<std::string>();
-        location = parObj.at("location").get<std::string>();
+        physicalPath = parObj.at("physicalPath").get<std::string>();
         classes = parObj.at("classes").get<int32_t>();
     }
-    return "{ nodeName: " + nodeName + ", location: " + location + ", classes: " + std::to_string(classes) + " }";
+    return "{ nodeName: " + nodeName + ", physicalPath: " + physicalPath + ", classes: " +
+        std::to_string(classes) + " }";
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

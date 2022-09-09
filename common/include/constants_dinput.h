@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <linux/uinput.h>
+
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
@@ -115,6 +117,8 @@ namespace DistributedInput {
     /* The input device is external (not built-in). */
     constexpr uint32_t INPUT_DEVICE_CLASS_EXTERNAL      = 0x80000000;
 
+    constexpr uint32_t MAX_SIZE_OF_DEVICE_NAME = UINPUT_MAX_NAME_SIZE - 1;
+
     const std::string DH_ID_PREFIX = "Input_";
 
     const std::string DINPUT_SPLIT_COMMA = ", ";
@@ -179,10 +183,10 @@ namespace DistributedInput {
      * Input device Info retrieved from the kernel.
      */
     struct InputDevice {
-        inline InputDevice() : name(""), location(""), uniqueId(""), bus(0), vendor(0), product(0),
+        inline InputDevice() : name(""), physicalPath(""), uniqueId(""), bus(0), vendor(0), product(0),
             version(0), descriptor(""), classes(0) {}
         std::string name;
-        std::string location;
+        std::string physicalPath;
         std::string uniqueId;
         uint16_t bus;
         uint16_t vendor;

@@ -58,7 +58,7 @@ void DistributedInputHandler::StructTransJson(const InputDevice& pBuf, std::stri
         GetAnonyString(pBuf.descriptor).c_str());
     nlohmann::json tmpJson;
     tmpJson["name"] = pBuf.name;
-    tmpJson["location"] = pBuf.location;
+    tmpJson["physicalPath"] = pBuf.physicalPath;
     tmpJson["uniqueId"] = pBuf.uniqueId;
     tmpJson["bus"] = pBuf.bus;
     tmpJson["vendor"] = pBuf.vendor;

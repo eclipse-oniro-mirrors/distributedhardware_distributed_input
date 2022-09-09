@@ -73,7 +73,7 @@ void DistributedInputNodeManager::stringTransJsonTransStruct(const std::string& 
 {
     nlohmann::json recMsg = nlohmann::json::parse(str);
     recMsg.at("name").get_to(pBuf.name);
-    recMsg.at("location").get_to(pBuf.location);
+    recMsg.at("physicalPath").get_to(pBuf.physicalPath);
     recMsg.at("uniqueId").get_to(pBuf.uniqueId);
     recMsg.at("bus").get_to(pBuf.bus);
     recMsg.at("vendor").get_to(pBuf.vendor);

@@ -132,7 +132,7 @@ int32_t DistributedInputInject::StructTransJson(const InputDevice &pBuf, std::st
         GetAnonyString(pBuf.descriptor).c_str());
     nlohmann::json tmpJson;
     tmpJson["name"] = pBuf.name;
-    tmpJson["location"] = pBuf.location;
+    tmpJson["physicalPath"] = pBuf.physicalPath;
     tmpJson["uniqueId"] = pBuf.uniqueId;
     tmpJson["bus"] = pBuf.bus;
     tmpJson["vendor"] = pBuf.vendor;

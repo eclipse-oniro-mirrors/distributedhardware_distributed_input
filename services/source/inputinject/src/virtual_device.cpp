@@ -103,6 +103,9 @@ bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
     }
 
     deviceName_ = VIRTUAL_DEVICE_NAME + deviceName_;
+    if (deviceName_.size() > MAX_SIZE_OF_DEVICE_NAME) {
+        deviceName_ = deviceName_.substr(0, MAX_SIZE_OF_DEVICE_NAME);
+    }
     if (strncpy_s(dev_.name, sizeof(dev_.name), deviceName_.c_str(), deviceName_.size()) != 0) {
         return false;
     }

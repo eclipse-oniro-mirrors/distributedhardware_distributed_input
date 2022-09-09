@@ -535,12 +535,12 @@ int32_t InputHub::QueryInputDeviceInfo(int fd, InputDevice& identifier)
     identifier.product = inputId.product;
     identifier.vendor = inputId.vendor;
     identifier.version = inputId.version;
-    // Get device physical location.
+    // Get device physical physicalPath.
     if (ioctl(fd, EVIOCGPHYS(sizeof(buffer) - 1), &buffer) < 1) {
-        DHLOGE("could not get location for %s\n", ConvertErrNo().c_str());
+        DHLOGE("could not get physicalPath for %s\n", ConvertErrNo().c_str());
     } else {
         buffer[sizeof(buffer) - 1] = '\0';
-        identifier.location = buffer;
+        identifier.physicalPath = buffer;
     }
     // Get device unique id.
     if (ioctl(fd, EVIOCGUNIQ(sizeof(buffer) - 1), &buffer) < 1) {
@@ -695,9 +695,10 @@ void InputHub::GenerateDescriptor(InputDevice& identifier) const
     if (!identifier.uniqueId.empty()) {
         rawDescriptor += "uniqueId:";
         rawDescriptor += identifier.uniqueId;
-    } else if (!identifier.location.empty()) {
-        rawDescriptor += "location:";
-        rawDescriptor += identifier.location;
+    }
+    if (!identifier.physicalPath.empty()) {
+        rawDescriptor += "physicalPath:";
+        rawDescriptor += identifier.physicalPath;
     }
     if (!identifier.name.empty()) {
         rawDescriptor += "name:";
@@ -1071,7 +1072,7 @@ void InputHub::RecordDeviceLog(const int32_t deviceId, const std::string& device
            "  version     %04x\n",
         identifier.bus, identifier.vendor, identifier.product, identifier.version);
     DHLOGI("  name:       \"%s\"\n", identifier.name.c_str());
-    DHLOGI("  location:   \"%s\"\n", identifier.location.c_str());
+    DHLOGI("  physicalPath:   \"%s\"\n", identifier.physicalPath.c_str());
     DHLOGI("  unique id:  \"%s\"\n", identifier.uniqueId.c_str());
     DHLOGI("  descriptor: \"%s\"\n", GetAnonyString(identifier.descriptor).c_str());
 }
