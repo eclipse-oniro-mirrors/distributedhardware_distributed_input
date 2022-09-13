@@ -21,7 +21,7 @@ import(
 ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
   module_out_path = "distributed_input/system"
 
-  # fuzz_config_file = "//foundation/distributedhardware/distributed_input/test/fuzztest/distributedinputsourcetransport_fuzzer"
+  fuzz_config_file = "//foundation/distributedhardware/distributed_input/test/fuzztest/distributedinputsourcetransport_fuzzer"
 
   include_dirs = [
     "//foundation/distributedhardware/distributed_input/services/source/transport/include",
