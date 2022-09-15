@@ -34,6 +34,10 @@ void DistributedInputSinkManagerTest::SetUp()
 
 void DistributedInputSinkManagerTest::TearDown()
 {
+    if (sinkManager_ != nullptr) {
+        delete sinkManager_;
+        sinkManager_ = nullptr;
+    }
 }
 
 void DistributedInputSinkManagerTest::SetUpTestCase()
@@ -47,7 +51,23 @@ void DistributedInputSinkManagerTest::TearDownTestCase()
 HWTEST_F(DistributedInputSinkManagerTest, Init01, testing::ext::TestSize.Level0)
 {
     int32_t ret = sinkManager_->Init();
-    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_MANAGER_INIT_FAIL, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, GetStartTransFlag, testing::ext::TestSize.Level0)
+{
+    DInputServerType flag = DInputServerType::SINK_SERVER_TYPE;
+    sinkManager_->SetStartTransFlag(flag);
+    DInputServerType retFlag = sinkManager_->GetStartTransFlag();
+    EXPECT_EQ(flag, retFlag);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, GetInputTypes, testing::ext::TestSize.Level0)
+{
+    uint32_t inputTypes = static_cast<uint32_t>(DInputDeviceType::MOUSE);
+    sinkManager_->SetInputTypes(inputTypes);
+    uint32_t retType = sinkManager_->GetInputTypes();
+    EXPECT_EQ(inputTypes, retType);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

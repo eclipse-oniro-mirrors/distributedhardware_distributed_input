@@ -36,6 +36,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
+    "${frameworks_path}/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
@@ -50,10 +51,13 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "${distributedinput_path}/inputdevicehandler/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/notification/eventhandler/interfaces/inner_api",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [
     "${common_path}/include/input_hub.cpp",
+    "//foundation/distributedhardware/distributed_input/inputdevicehandler/src/distributed_input_handler.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_inject.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/distributed_input_node_manager.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_device.cpp",
@@ -82,12 +86,14 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/openssl:libcrypto_static",
+    "${distributedinput_path}/interfaces/inner_kits:libdinput_sdk",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "ipc:ipc_core",
+    "dsoftbus:softbus_client",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

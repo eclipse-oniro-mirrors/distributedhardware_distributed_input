@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISRIBUTED_INPUT_INNER_TEST_H
-#define DISRIBUTED_INPUT_INNER_TEST_H
+#ifndef DISRIBUTED_INPUT_SOURCEMANAGER_TEST_H
+#define DISRIBUTED_INPUT_SOURCEMANAGER_TEST_H
 
 #include <functional>
 #include <iostream>
@@ -36,6 +36,7 @@
 #include "start_stop_d_inputs_call_back_stub.h"
 #include "start_stop_result_call_back_stub.h"
 #include "input_node_listener_stub.h"
+#include "simulation_event_listener_stub.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -134,6 +135,13 @@ public:
             const std::string sinkNodeId);
     };
 
+    class TestSimulationEventCb : public OHOS::DistributedHardware::DistributedInput::SimulationEventListenerStub {
+    public:
+        TestSimulationEventCb() = default;
+        virtual ~TestSimulationEventCb() = default;
+        int32_t OnSimulationEvent(uint32_t type, uint32_t code, int32_t value);
+    };
+
 private:
     int32_t StructTransJson(const InputDevice& pBuf, std::string& strDescriptor) const;
     DistributedInputSourceManager* sourceManager_;
@@ -142,4 +150,4 @@ private:
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif // DISRIBUTED_INPUT_INNER_TEST_H
+#endif // DISRIBUTED_INPUT_SOURCEMANAGER_TEST_H

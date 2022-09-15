@@ -47,11 +47,14 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${distributedinput_path}/inputdevicehandler/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/notification/eventhandler/interfaces/inner_api",
+    "${common_path}/mock",
   ]
 
   sources = [
     "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
     "distributed_input_sourcetrans_test.cpp",
+    "${common_path}/mock/session_mock.cpp",
+    "${common_path}/mock/softbus_bus_center_mock.cpp",
   ]
 
   cflags = [
@@ -72,7 +75,6 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
   ]
 

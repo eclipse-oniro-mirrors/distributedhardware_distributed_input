@@ -41,7 +41,14 @@ void DistributedInputSinkTransTest::TearDownTestCase()
 HWTEST_F(DistributedInputSinkTransTest, Init, testing::ext::TestSize.Level0)
 {
     int32_t ret = DistributedInputSinkTransport::GetInstance().Init();
-    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_INIT_FAIL, ret);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().GetSessionIdByNetId(srcId);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_GET_SESSIONID_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput01, testing::ext::TestSize.Level1)
@@ -60,6 +67,14 @@ HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput02, testing::ext::
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPPREPARE_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput03, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg = "";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
 HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput01, testing::ext::TestSize.Level0)
 {
     int32_t sessionId = -1;
@@ -74,6 +89,14 @@ HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput02, testing::ext
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPUNPREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput03, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg = "";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput01, testing::ext::TestSize.Level1)
@@ -92,6 +115,14 @@ HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput02, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTART_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput03, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg = "";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsg);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
 HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput01, testing::ext::TestSize.Level1)
 {
     int32_t sessionId = -1;
@@ -106,6 +137,14 @@ HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput02, testing::ext::Tes
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput03, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg = "";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, GetEventHandler, testing::ext::TestSize.Level1)

@@ -1193,6 +1193,10 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
     DHLOGI("StartRemoteInput called, srcId: %s, sinkId: %s, inputTypes: %d", GetAnonyString(srcId).c_str(),
         GetAnonyString(sinkId).c_str(), inputTypes);
+    if (callback == nullptr) {
+        DHLOGE("StartRemoteInput called, callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
         DHLOGE("StartRemoteInput called, Could not get local device id.");
@@ -1209,8 +1213,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
 
     for (auto iter : staCallbacks_) {
         if (iter.devId == sinkId && iter.inputTypes == inputTypes) {
-            DHLOGE("StartRemoteInput called, srcId: %s, sinkId: %s repeat call.",
-                GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+            DHLOGE("StartRemoteInput called, repeat call.");
             HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
                 ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in already started");
             FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
@@ -1228,7 +1231,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("StartRemoteInput called, start fail.");
-        for (std::vector<DInputClientStartInfo>::iterator it = staCallbacks_.begin(); it != staCallbacks_.end(); it++) {
+        for (auto it = staCallbacks_.begin(); it != staCallbacks_.end(); it++) {
             if (it->devId == sinkId && it->inputTypes == inputTypes) {
                 staCallbacks_.erase(it);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
@@ -1246,6 +1249,10 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
     DHLOGI("StopRemoteInput called, srcId: %s, sinkId: %s, inputTypes: %d", GetAnonyString(srcId).c_str(),
         GetAnonyString(sinkId).c_str(), inputTypes);
+    if (callback == nullptr) {
+        DHLOGE("StopRemoteInput called, callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
         DHLOGE("StopRemoteInput called, Could not get local device id.");
@@ -1278,7 +1285,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
-        for (std::vector<DInputClientStopInfo>::iterator it = stpCallbacks_.begin(); it != stpCallbacks_.end(); it++) {
+        for (auto it = stpCallbacks_.begin(); it != stpCallbacks_.end(); it++) {
             if (it->devId == sinkId && it->inputTypes == inputTypes) {
                 stpCallbacks_.erase(it);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
@@ -1469,6 +1476,10 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &sinkI
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
     DHLOGI("sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
+    if (callback == nullptr) {
+        DHLOGE("StartRemoteInput called, callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
         DHLOGE("Could not get local device id.");
@@ -1505,8 +1516,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &sinkI
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("StartRemoteInput start fail.");
-        for (std::vector<DInputClientStartDhidInfo>::iterator iter = staStringCallbacks_.begin();
-            iter != staStringCallbacks_.end(); iter++) {
+        for (auto iter = staStringCallbacks_.begin(); iter != staStringCallbacks_.end(); iter++) {
             if (iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 staStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
@@ -1523,6 +1533,10 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
     DHLOGI("sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
+    if (callback == nullptr) {
+        DHLOGE("StopRemoteInput called, callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
         DHLOGE("Could not get local device id.");
@@ -1555,8 +1569,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         DHLOGE("StopRemoteInput stop fail.");
-        for (std::vector<DInputClientStopDhidInfo>::iterator iter = stpStringCallbacks_.begin();
-            iter != stpStringCallbacks_.end(); iter++) {
+        for (auto iter = stpStringCallbacks_.begin(); iter != stpStringCallbacks_.end(); iter++) {
             if (iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 stpStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
@@ -1574,6 +1587,10 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
     DHLOGI("srcId: %s, sinkId: %s, dhids size: %d",
         GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
+    if (callback == nullptr) {
+        DHLOGE("StartRemoteInput called, callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
+    }
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
         DHLOGE("Could not get local device id.");
@@ -1610,8 +1627,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("StartRemoteInput start fail.");
-        for (std::vector<DInputClientStartDhidInfo>::iterator iter = staStringCallbacks_.begin();
-            iter != staStringCallbacks_.end(); iter++) {
+        for (auto iter = staStringCallbacks_.begin(); iter != staStringCallbacks_.end(); iter++) {
             if (iter->srcId == srcId && iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 staStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
@@ -1629,6 +1645,10 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
     DHLOGI("srcId: %s, sinkId: %s, vector.string.size: %d",
         GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
+    if (callback == nullptr) {
+        DHLOGE("StopRemoteInput called, callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
+    }
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
         DHLOGE("Could not get local device id.");
@@ -1653,21 +1673,15 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
         }
     }
 
-    DInputClientStopDhidInfo info;
-    info.srcId = srcId;
-    info.sinkId = sinkId;
-    info.dhIds = dhIds;
-    info.callback = callback;
+    DInputClientStopDhidInfo info{srcId, sinkId, dhIds, callback};
     stpStringCallbacks_.push_back(info);
-
     int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(sinkId, dhIds);
     if (ret != DH_SUCCESS) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         DHLOGE("StopRemoteInput stop fail.");
-        for (std::vector<DInputClientStopDhidInfo>::iterator iter = stpStringCallbacks_.begin();
-            iter != stpStringCallbacks_.end(); iter++) {
+        for (auto iter = stpStringCallbacks_.begin(); iter != stpStringCallbacks_.end(); iter++) {
             if (iter->srcId == srcId && iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 stpStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;

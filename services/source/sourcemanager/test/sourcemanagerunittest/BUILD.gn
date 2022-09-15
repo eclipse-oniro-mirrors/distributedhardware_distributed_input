@@ -55,6 +55,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
     "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
+    "${common_path}/mock",
   ]
 
   sources = [
@@ -94,6 +95,8 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_sa_cli_mgr.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
     "distributed_input_sourcemanager_test.cpp",
+    "${common_path}/mock/session_mock.cpp",
+    "${common_path}/mock/softbus_bus_center_mock.cpp",
   ]
 
   cflags = [
@@ -120,7 +123,6 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${low_latency_path}:libdinput_low_latency",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/openssl:libcrypto_static",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "${innerkits_path}:libdinput_sdk",

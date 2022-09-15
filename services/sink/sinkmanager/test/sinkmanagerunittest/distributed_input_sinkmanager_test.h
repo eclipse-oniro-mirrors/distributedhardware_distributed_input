@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISRIBUTED_INPUT_INNER_TEST_H
-#define DISRIBUTED_INPUT_INNER_TEST_H
+#ifndef DISRIBUTED_INPUT_SINKMANAGER_TEST_H
+#define DISRIBUTED_INPUT_SINKMANAGER_TEST_H
 
 
 #include <functional>
@@ -44,4 +44,4 @@ private:
 } // namespace DistributedHardware
 } // namespace OHOS
 
-#endif // DISRIBUTED_INPUT_INNER_TEST_H
+#endif // DISRIBUTED_INPUT_SINKMANAGER_TEST_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,42 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef DISRIBUTED_INPUT_SOURCEINJECT_TEST_H
-#define DISRIBUTED_INPUT_SOURCEINJECT_TEST_H
-
-#include <functional>
-#include <iostream>
-#include <thread>
-#include <refbase.h>
+#ifndef DISRIBUTED_INPUT_COLLECTOR_TEST_H
+#define DISRIBUTED_INPUT_COLLECTOR_TEST_H
 
 #include <gtest/gtest.h>
 
 #include "constants_dinput.h"
-#include "distributed_input_inject.h"
-#include "input_node_listener_stub.h"
+#include "distributed_input_collector.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class DistributedInputSourceInjectTest : public testing::Test {
+class DistributedInputCollectorTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    class TestInputNodeListener : public OHOS::DistributedHardware::DistributedInput::InputNodeListenerStub {
+
+    class DInputSinkCollectorEventHandler : public AppExecFwk::EventHandler {
     public:
-        TestInputNodeListener() = default;
-        virtual ~TestInputNodeListener() = default;
-        void OnNodeOnLine(const std::string srcDevId, const std::string sinkDevId, const std::string sinkNodeId,
-            const std::string sinkNodeDesc);
-        void OnNodeOffLine(const std::string srcDevId, const std::string sinkDevId, const std::string sinkNodeId);
+        explicit DInputSinkCollectorEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+        ~DInputSinkCollectorEventHandler() {}
+
+        void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     };
-private:
-    sptr<TestInputNodeListener> inputNodelistener_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
-
-#endif // DISRIBUTED_INPUT_SOURCEINJECT_TEST_H
+#endif // DISRIBUTED_INPUT_COLLECTOR_TEST_H
