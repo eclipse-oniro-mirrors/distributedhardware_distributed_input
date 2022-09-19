@@ -299,13 +299,7 @@ int32_t DistributedInputClient::ReleaseSource()
     WhiteListUtil::GetInstance().ClearWhiteList();
     {
         std::lock_guard<std::mutex> lock(operationMutex_);
-        for (auto iter : addWhiteListCallbacks_) {
-            iter = nullptr;
-        }
         addWhiteListCallbacks_.clear();
-        for (auto iter : delWhiteListCallbacks_) {
-            iter = nullptr;
-        }
         delWhiteListCallbacks_.clear();
     }
     return DInputSAManager::GetInstance().dInputSourceProxy_->Release();
@@ -320,13 +314,7 @@ int32_t DistributedInputClient::ReleaseSink()
     inputTypes_ = DInputDeviceType::NONE;
     {
         std::lock_guard<std::mutex> lock(operationMutex_);
-        for (auto iter : getSinkScreenInfosCallbacks_) {
-            iter = nullptr;
-        }
         getSinkScreenInfosCallbacks_.clear();
-        for (auto iter : sharingDhIdListeners_) {
-            iter = nullptr;
-        }
         sharingDhIdListeners_.clear();
     }
     WhiteListUtil::GetInstance().ClearWhiteList();
