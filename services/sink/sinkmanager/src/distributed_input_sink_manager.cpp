@@ -250,7 +250,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(cons
     std::vector<std::string> stopOnCmdDhIds;
     StringSplit(strDhids, INPUT_STRING_SPLIT_POINT, stopOnCmdDhIds);
     sinkManagerObj_->DeleteStopDhids(sessionId, stopOnCmdDhIds, stopIndeedDhIds);
-    AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingDhIds(false, stopIndeedDhIds);
+    (void)DistributedInputCollector::GetInstance().SetSharingDhIds(false, stopIndeedDhIds);
     AffectDhIds stopIndeedOnes;
     stopIndeedOnes.noSharingDhIds = stopIndeedDhIds;
     DistributedInputCollector::GetInstance().ReportDhIdSharingState(stopIndeedOnes);
@@ -324,7 +324,6 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
     }
 
     uint32_t count = 0;
-    int rc = 0;
     int leftKeyVal = 0;
     int rightKeyVal = 0;
     int midKeyVal = 0;
@@ -334,7 +333,7 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
             break;
         }
         // Query all key state
-        rc = ioctl(fd, EVIOCGKEY(sizeof(keystate)), keystate);
+        int rc = ioctl(fd, EVIOCGKEY(sizeof(keystate)), keystate);
         if (rc < 0) {
             DHLOGE("read all key state failed, rc=%d ", rc);
             count += 1;
@@ -399,9 +398,8 @@ void DistributedInputSinkManager::DeleteStopDhids(int32_t sessionId, const std::
         DHLOGI("DeleteStopDhids sessionId=%d after has dhid.size=%d.", sessionId, sharingDhIdsMap_[sessionId].size());
     }
     // find which dhid can be stop
-    bool isFind = false;
     for (auto tmp : stopDhIds) {
-        isFind = IsStopDhidOnCmdStillNeed(sessionId, tmp);
+        bool isFind = IsStopDhidOnCmdStillNeed(sessionId, tmp);
         if (!isFind) {
             stopIndeedDhIds.push_back(tmp);
             sharingDhIds_.erase(tmp);
@@ -821,10 +819,8 @@ int32_t DistributedInputSinkManager::RegisterSharingDhIdListener(sptr<ISharingDh
 int32_t DistributedInputSinkManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     DHLOGI("DistributedInputSinkManager Dump.");
-    std::vector<std::string> argsStr;
-    for (auto iter : args) {
-        argsStr.emplace_back(Str16ToStr8(iter));
-    }
+    std::vector<std::string> argsStr(args.size());
+    std::transform(args.begin(), args.end(), argsStr.begin(), [](const auto &item) {return Str16ToStr8(item);});
     std::string result("");
     if (!HiDumper::GetInstance().HiDump(argsStr, result)) {
         DHLOGI("Hidump error.");

@@ -23,7 +23,6 @@
 #include "constants_dinput.h"
 #include "distributed_input_handler.h"
 #include "distributed_input_node_manager.h"
-#include "dinput_struct_data.h"
 #include "i_input_node_listener.h"
 
 namespace OHOS {

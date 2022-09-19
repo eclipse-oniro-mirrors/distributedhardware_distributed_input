@@ -77,6 +77,7 @@ private:
     void NotifyResponseKeyState(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyReceivedEventRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void CalculateLatency(int32_t sessionId, const nlohmann::json &recMsg);
+    std::string JointDhIds(const std::vector<std::string> &dhids);
 
 private:
     std::map<std::string, int32_t> sessionDevMap_;

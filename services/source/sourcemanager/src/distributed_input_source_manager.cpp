@@ -15,6 +15,7 @@
 
 #include "distributed_input_source_manager.h"
 
+#include <algorithm>
 #include <cinttypes>
 #include <dlfcn.h>
 #include <fstream>
@@ -332,7 +333,7 @@ void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteI
 
     RawEvent mEventBuffer[jsonSize];
     int idx = 0;
-    for (nlohmann::json::iterator it = inputData.begin(); it != inputData.end(); ++it) {
+    for (auto it = inputData.begin(); it != inputData.end(); ++it) {
         nlohmann::json oneData = (*it);
         mEventBuffer[idx].when = oneData[INPUT_KEY_WHEN];
         mEventBuffer[idx].type = oneData[INPUT_KEY_TYPE];
@@ -342,7 +343,7 @@ void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteI
         mEventBuffer[idx].path = oneData[INPUT_KEY_PATH];
         RecordEventLog(oneData[INPUT_KEY_WHEN], oneData[INPUT_KEY_TYPE], oneData[INPUT_KEY_CODE],
             oneData[INPUT_KEY_VALUE], oneData[INPUT_KEY_PATH]);
-        idx++;
+        ++idx;
     }
     DistributedInputInject::GetInstance().RegisterDistributedEvent(mEventBuffer, jsonSize);
 }
@@ -401,7 +402,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyRegis
     const AppExecFwk::InnerEvent::Pointer &event)
 {
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     std::string dhId = innerMsg[INPUT_SOURCEMANAGER_KEY_HWID];
@@ -410,8 +411,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyRegis
     InputDeviceId inputDeviceId {deviceId, dhId};
     std::vector<InputDeviceId> tmpInputDevId = sourceManagerObj_->GetInputDeviceId();
     // Find out if the dh exists
-    std::vector<InputDeviceId>::iterator devIt  = std::find(
-        tmpInputDevId.begin(), tmpInputDevId.end(), inputDeviceId);
+    auto devIt  = std::find(tmpInputDevId.begin(), tmpInputDevId.end(), inputDeviceId);
     if (devIt != tmpInputDevId.end()) {
         if (result == false) {
             sourceManagerObj_->RemoveInputDeviceId(deviceId, dhId);
@@ -429,7 +429,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyUnreg
     const AppExecFwk::InnerEvent::Pointer &event)
 {
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     std::string dhId = innerMsg[INPUT_SOURCEMANAGER_KEY_HWID];
@@ -445,7 +445,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyPrepa
     const AppExecFwk::InnerEvent::Pointer &event)
 {
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
@@ -459,7 +459,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyUnpre
     const AppExecFwk::InnerEvent::Pointer &event)
 {
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     bool result = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
@@ -474,7 +474,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
     const AppExecFwk::InnerEvent::Pointer &event)
 {
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     uint32_t inputTypes = innerMsg[INPUT_SOURCEMANAGER_KEY_ITP];
@@ -495,7 +495,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStopC
     const AppExecFwk::InnerEvent::Pointer &event)
 {
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     uint32_t inputTypes = innerMsg[INPUT_SOURCEMANAGER_KEY_ITP];
@@ -528,7 +528,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
 {
     DHLOGI("ProcessEvent NotifyStartDhidCallback()");
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     std::string dhidStr = innerMsg[INPUT_SOURCEMANAGER_KEY_DHID];
@@ -545,7 +545,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStopD
 {
     DHLOGI("ProcessEvent NotifyStopDhidCallback()");
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     std::string dhidStr = innerMsg[INPUT_SOURCEMANAGER_KEY_DHID];
@@ -562,7 +562,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyKeySt
 {
     DHLOGI("ProcessEvent NotifyKeyStateCallback()");
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     std::string deviceId = innerMsg[INPUT_SOURCEMANAGER_KEY_DEVID];
     std::string dhid = innerMsg[INPUT_SOURCEMANAGER_KEY_DHID];
@@ -578,7 +578,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyStart
     const AppExecFwk::InnerEvent::Pointer &event)
 {
     std::shared_ptr<nlohmann::json> dataMsg = event->GetSharedObject<nlohmann::json>();
-    nlohmann::json::iterator it = dataMsg->begin();
+    auto it = dataMsg->begin();
     nlohmann::json innerMsg = *(it);
     int32_t serType = innerMsg[INPUT_SOURCEMANAGER_KEY_RESULT];
     DInputServerType startTransFlag = DInputServerType(serType);
@@ -677,7 +677,7 @@ int32_t DistributedInputSourceManager::Release()
     DHLOGI("exit");
 
     // 1.remove input node
-    for (std::vector<InputDeviceId>::iterator iter = inputDevice_.begin(); iter != inputDevice_.end(); ++iter) {
+    for (auto iter = inputDevice_.begin(); iter != inputDevice_.end(); ++iter) {
         std::string devId = iter->devId;
         std::string dhId = iter->dhId;
         DHLOGI("Release() devId[%s] dhId[%s]", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
@@ -757,7 +757,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
         GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
     // 1.Find out if the dh exists
-    std::vector<InputDeviceId>::iterator it  = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
+    auto it  = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
     if (it != inputDevice_.end()) {
         callback->OnResult(devId, dhId, DH_SUCCESS);
         return DH_SUCCESS;
@@ -771,7 +771,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
             "dinput register distributed hardware failed in create input node.");
         DHLOGE("RegisterDistributedHardware called, create node fail.");
 
-        for (auto iter = regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
+        for (auto iter = regCallbacks_.begin(); iter != regCallbacks_.end(); ++iter) {
             if (iter->devId == devId && iter->dhId == dhId) {
                 iter->callback->OnResult(iter->devId, iter->dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL);
                 regCallbacks_.erase(iter);
@@ -803,7 +803,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
 void DistributedInputSourceManager::handleStartServerCallback(const std::string& devId)
 {
     bool isFindDevice = false;
-    for (std::vector<InputDeviceId>::iterator iter = inputDevice_.begin(); iter != inputDevice_.end(); ++iter) {
+    for (auto iter = inputDevice_.begin(); iter != inputDevice_.end(); ++iter) {
         if (devId == iter->devId) {
             isFindDevice = true;
             break;
@@ -813,7 +813,7 @@ void DistributedInputSourceManager::handleStartServerCallback(const std::string&
         DeviceMap_[devId] = DINPUT_SOURCE_SWITCH_OFF;
         // DeviceMap_ all sink device switch is off,call isstart's callback
         bool isAllDevSwitchOff = true;
-        for (auto it = DeviceMap_.begin(); it != DeviceMap_.end(); it++) {
+        for (auto it = DeviceMap_.begin(); it != DeviceMap_.end(); ++it) {
             if (it->second == DINPUT_SOURCE_SWITCH_ON) {
                 isAllDevSwitchOff = false;
                 break;
@@ -838,7 +838,7 @@ void DistributedInputSourceManager::handleStartServerCallback(const std::string&
 
 int32_t DistributedInputSourceManager::UnregCallbackNotify(const std::string &devId, const std::string &dhId)
 {
-    for (auto iter = unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
+    for (auto iter = unregCallbacks_.begin(); iter != unregCallbacks_.end(); ++iter) {
         if (iter->devId == devId && iter->dhId == dhId) {
             iter->callback->OnResult(iter->devId, iter->dhId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL);
             unregCallbacks_.erase(iter);
@@ -923,7 +923,7 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     InputDeviceId inputDeviceId {devId, dhId};
     DHLOGI("Unregister deviceId: %s, dhId: %s", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
 
-    std::vector<InputDeviceId>::iterator it = inputDevice_.begin();
+    auto it = inputDevice_.begin();
     if (CheckDeviceIsExists(devId, dhId, inputDeviceId, it) != DH_SUCCESS) {
         DHLOGE("Unregister deviceId: %s is not exist.", GetAnonyString(devId).c_str());
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
@@ -986,7 +986,7 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "dinput prepare failed in transport prepare");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
         DHLOGE("Can not send message by softbus, prepare fail.");
-        for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
+        for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); ++iter) {
             if (iter->devId == deviceId) {
                 iter->preCallback->OnResult(iter->devId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL);
                 preCallbacks_.erase(iter);
@@ -1035,7 +1035,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "dinput unprepare failed in transport unprepare");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
-        for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
+        for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); ++iter) {
             if (iter->devId == deviceId) {
                 iter->unpreCallback->OnResult(iter->devId, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL);
                 unpreCallbacks_.erase(iter);
@@ -1083,8 +1083,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("Start fail.");
-        for (std::vector<DInputClientStartInfo>::iterator iter =
-            staCallbacks_.begin(); iter != staCallbacks_.end(); iter++) {
+        for (auto iter = staCallbacks_.begin(); iter != staCallbacks_.end(); ++iter) {
             if (iter->devId == deviceId && iter->inputTypes == inputTypes) {
                 iter->callback->OnResult(iter->devId, iter->inputTypes, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL);
                 staCallbacks_.erase(iter);
@@ -1131,8 +1130,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
-        for (std::vector<DInputClientStopInfo>::iterator iter =
-            stpCallbacks_.begin(); iter != stpCallbacks_.end(); iter++) {
+        for (auto iter = stpCallbacks_.begin(); iter != stpCallbacks_.end(); ++iter) {
             if (iter->devId == deviceId && iter->inputTypes == inputTypes) {
                 iter->callback->OnResult(iter->devId, iter->inputTypes, ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL);
                 stpCallbacks_.erase(iter);
@@ -1190,7 +1188,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("StartRemoteInput called, start fail.");
-        for (auto it = staCallbacks_.begin(); it != staCallbacks_.end(); it++) {
+        for (auto it = staCallbacks_.begin(); it != staCallbacks_.end(); ++it) {
             if (it->devId == sinkId && it->inputTypes == inputTypes) {
                 staCallbacks_.erase(it);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
@@ -1244,7 +1242,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
-        for (auto it = stpCallbacks_.begin(); it != stpCallbacks_.end(); it++) {
+        for (auto it = stpCallbacks_.begin(); it != stpCallbacks_.end(); ++it) {
             if (it->devId == sinkId && it->inputTypes == inputTypes) {
                 stpCallbacks_.erase(it);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
@@ -1347,7 +1345,7 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string &src
     ret = DistributedInputSourceTransport::GetInstance().PrepareRemoteInput(sinkId);
     if (ret != DH_SUCCESS) {
         DHLOGE("Can not send message by softbus, prepare fail.");
-        for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
+        for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); ++iter) {
             if (iter->devId == sinkId) {
                 preCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
@@ -1399,7 +1397,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string &s
     int32_t ret = DistributedInputSourceTransport::GetInstance().UnprepareRemoteInput(sinkId);
     if (ret != DH_SUCCESS) {
         DHLOGE("Can not send message by softbus, unprepare fail.");
-        for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
+        for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); ++iter) {
             if (iter->devId == sinkId) {
                 unpreCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
@@ -1419,7 +1417,7 @@ bool DistributedInputSourceManager::IsStringDataSame(const std::vector<std::stri
     }
     bool isSame = true;
     for (auto oDhid : oldDhIds) {
-        std::vector<std::string>::iterator it = find(newDhIds.begin(), newDhIds.end(), oDhid);
+        auto it = find(newDhIds.begin(), newDhIds.end(), oDhid);
         if (it == newDhIds.end()) {
             isSame = false;
             break;
@@ -1475,7 +1473,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &sinkI
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("StartRemoteInput start fail.");
-        for (auto iter = staStringCallbacks_.begin(); iter != staStringCallbacks_.end(); iter++) {
+        for (auto iter = staStringCallbacks_.begin(); iter != staStringCallbacks_.end(); ++iter) {
             if (iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 staStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
@@ -1528,7 +1526,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         DHLOGE("StopRemoteInput stop fail.");
-        for (auto iter = stpStringCallbacks_.begin(); iter != stpStringCallbacks_.end(); iter++) {
+        for (auto iter = stpStringCallbacks_.begin(); iter != stpStringCallbacks_.end(); ++iter) {
             if (iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 stpStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
@@ -1586,7 +1584,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in transport start");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         DHLOGE("StartRemoteInput start fail.");
-        for (auto iter = staStringCallbacks_.begin(); iter != staStringCallbacks_.end(); iter++) {
+        for (auto iter = staStringCallbacks_.begin(); iter != staStringCallbacks_.end(); ++iter) {
             if (iter->srcId == srcId && iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 staStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
@@ -1640,7 +1638,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in transport stop");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         DHLOGE("StopRemoteInput stop fail.");
-        for (auto iter = stpStringCallbacks_.begin(); iter != stpStringCallbacks_.end(); iter++) {
+        for (auto iter = stpStringCallbacks_.begin(); iter != stpStringCallbacks_.end(); ++iter) {
             if (iter->srcId == srcId && iter->sinkId == sinkId && IsStringDataSame(iter->dhIds, dhIds)) {
                 stpStringCallbacks_.erase(iter);
                 return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
@@ -1847,8 +1845,7 @@ void DistributedInputSourceManager::RunRegisterCallback(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
     std::lock_guard<std::mutex> lock(operationMutex_);
-    for (std::vector<DInputClientRegistInfo>::iterator iter =
-        regCallbacks_.begin(); iter != regCallbacks_.end(); iter++) {
+    for (auto iter = regCallbacks_.begin(); iter != regCallbacks_.end(); ++iter) {
         if (iter->devId == devId && iter->dhId == dhId) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_RIGISTER_MSG");
             iter->callback->OnResult(devId, dhId, status);
@@ -1864,8 +1861,7 @@ void DistributedInputSourceManager::RunUnregisterCallback(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
     std::lock_guard<std::mutex> lock(operationMutex_);
-    for (std::vector<DInputClientUnregistInfo>::iterator iter =
-        unregCallbacks_.begin(); iter != unregCallbacks_.end(); iter++) {
+    for (auto iter = unregCallbacks_.begin(); iter != unregCallbacks_.end(); ++iter) {
         if (iter->devId == devId && iter->dhId == dhId) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_UNRIGISTER_MSG");
             iter->callback->OnResult(devId, dhId, status);
@@ -1881,8 +1877,7 @@ void DistributedInputSourceManager::RunPrepareCallback(
     const std::string& devId, const int32_t& status, const std::string& object)
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
-    for (std::vector<DInputClientPrepareInfo>::iterator iter =
-        preCallbacks_.begin(); iter != preCallbacks_.end(); iter++) {
+    for (auto iter = preCallbacks_.begin(); iter != preCallbacks_.end(); ++iter) {
         if (iter->devId == devId) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_PREPARE_MSG");
             iter->preCallback->OnResult(devId, status);
@@ -1892,8 +1887,8 @@ void DistributedInputSourceManager::RunPrepareCallback(
                 DHLOGE("ProcessEvent DINPUT_SOURCE_MANAGER_PREPARE_MSG addWhiteListCallback is null.");
                 return;
             }
-            for (const auto& iter : addWhiteListCallbacks_) {
-                iter->OnResult(devId, object);
+            for (const auto& it : addWhiteListCallbacks_) {
+                it->OnResult(devId, object);
             }
             return;
         }
@@ -1905,8 +1900,7 @@ void DistributedInputSourceManager::RunPrepareCallback(
 void DistributedInputSourceManager::RunUnprepareCallback(const std::string &devId, const int32_t &status)
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
-    for (std::vector<DInputClientUnprepareInfo>::iterator iter =
-        unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); iter++) {
+    for (auto iter = unpreCallbacks_.begin(); iter != unpreCallbacks_.end(); ++iter) {
         if (iter->devId == devId) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_UNPREPARE_MSG");
             iter->unpreCallback->OnResult(devId, status);
@@ -1916,8 +1910,8 @@ void DistributedInputSourceManager::RunUnprepareCallback(const std::string &devI
                 DHLOGE("ProcessEvent DINPUT_SOURCE_MANAGER_UNPREPARE_MSG delWhiteListCallback is null.");
                 return;
             }
-            for (const auto& iter : delWhiteListCallbacks_) {
-                iter->OnResult(devId);
+            for (const auto& it : delWhiteListCallbacks_) {
+                it->OnResult(devId);
             }
             return;
         }
@@ -1930,8 +1924,7 @@ void DistributedInputSourceManager::RunStartCallback(
     const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
-    for (std::vector<DInputClientStartInfo>::iterator iter = staCallbacks_.begin();
-        iter != staCallbacks_.end(); iter++) {
+    for (auto iter = staCallbacks_.begin(); iter != staCallbacks_.end(); ++iter) {
         if (iter->devId == devId && iter->inputTypes == inputTypes) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_START_MSG");
             iter->callback->OnResult(devId, inputTypes, status);
@@ -1945,8 +1938,7 @@ void DistributedInputSourceManager::RunStopCallback(
     const std::string& devId, const uint32_t& inputTypes, const int32_t& status)
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
-    for (std::vector<DInputClientStopInfo>::iterator iter = stpCallbacks_.begin();
-        iter != stpCallbacks_.end(); iter++) {
+    for (auto iter = stpCallbacks_.begin(); iter != stpCallbacks_.end(); ++iter) {
         if (iter->devId == devId && iter->inputTypes == inputTypes) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_STOP_MSG");
             iter->callback->OnResult(devId, inputTypes, status);
@@ -1969,8 +1961,7 @@ void DistributedInputSourceManager::RunStartDhidCallback(const std::string &sink
         return;
     }
 
-    for (std::vector<DInputClientStartDhidInfo>::iterator iter = staStringCallbacks_.begin();
-        iter != staStringCallbacks_.end(); iter++) {
+    for (auto iter = staStringCallbacks_.begin(); iter != staStringCallbacks_.end(); ++iter) {
         if (iter->sinkId != sinkId || !IsStringDataSame(iter->dhIds, dhidsVec)) {
             continue;
         }
@@ -1991,8 +1982,8 @@ void DistributedInputSourceManager::RunStopDhidCallback(const std::string &sinkI
         return;
     }
 
-    for (std::vector<DInputClientStopDhidInfo>::iterator iter = stpStringCallbacks_.begin();
-        iter != stpStringCallbacks_.end(); iter++) {
+    for (auto iter = stpStringCallbacks_.begin();
+        iter != stpStringCallbacks_.end(); ++iter) {
         if (iter->sinkId != sinkId || !IsStringDataSame(iter->dhIds, dhidsVec)) {
             continue;
         }
@@ -2060,7 +2051,7 @@ void DistributedInputSourceManager::RemoveInputDeviceId(const std::string device
 {
     InputDeviceId inputDeviceId {deviceId, dhId};
 
-    std::vector<InputDeviceId>::iterator it  = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
+    auto it  = std::find(inputDevice_.begin(), inputDevice_.end(), inputDeviceId);
     if (it == inputDevice_.end()) {
         return;
     }
@@ -2074,7 +2065,7 @@ void DistributedInputSourceManager::RemoveInputDeviceId(const std::string device
 bool DistributedInputSourceManager::GetDeviceMapAllDevSwitchOff()
 {
     bool isAllDevSwitchOff = true;
-    for (auto it = DeviceMap_.begin(); it != DeviceMap_.end(); it++) {
+    for (auto it = DeviceMap_.begin(); it != DeviceMap_.end(); ++it) {
         if (it->second == DINPUT_SOURCE_SWITCH_ON) {
             isAllDevSwitchOff = false;
             break;
@@ -2090,7 +2081,7 @@ void DistributedInputSourceManager::SetDeviceMapValue(const std::string deviceId
 
 uint32_t DistributedInputSourceManager::GetInputTypesMap(const std::string deviceId)
 {
-    std::map<std::string, uint32_t>::iterator key = InputTypesMap_.find(deviceId);
+    auto key = InputTypesMap_.find(deviceId);
     if (key != InputTypesMap_.end()) {
         return InputTypesMap_[deviceId];
     }
@@ -2100,8 +2091,7 @@ uint32_t DistributedInputSourceManager::GetInputTypesMap(const std::string devic
 uint32_t DistributedInputSourceManager::GetAllInputTypesMap()
 {
     uint32_t rInputTypes = static_cast<uint32_t>(DInputDeviceType::NONE);
-    std::map<std::string, uint32_t>::iterator iter;
-    for (iter = InputTypesMap_.begin(); iter != InputTypesMap_.end(); iter++) {
+    for (auto iter = InputTypesMap_.begin(); iter != InputTypesMap_.end(); ++iter) {
         rInputTypes |= iter->second;
     }
     return rInputTypes;
@@ -2110,7 +2100,7 @@ uint32_t DistributedInputSourceManager::GetAllInputTypesMap()
 void DistributedInputSourceManager::SetInputTypesMap(const std::string deviceId, uint32_t value)
 {
     if (value == static_cast<uint32_t>(DInputDeviceType::NONE)) {
-        std::map<std::string, uint32_t>::iterator key = InputTypesMap_.find(deviceId);
+        auto key = InputTypesMap_.find(deviceId);
         if (key != InputTypesMap_.end()) {
             InputTypesMap_.erase(key);
             return;
@@ -2451,10 +2441,8 @@ void DistributedInputSourceManager::DScreenSourceSvrRecipient::OnRemoteDied(cons
 int32_t DistributedInputSourceManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     DHLOGI("DistributedInputSourceManager Dump.");
-    std::vector<std::string> argsStr;
-    for (auto iter : args) {
-        argsStr.emplace_back(Str16ToStr8(iter));
-    }
+    std::vector<std::string> argsStr(args.size());
+    std::transform(args.begin(), args.end(), argsStr.begin(), [](const auto &item) {return Str16ToStr8(item);});
     std::string result("");
     if (!HiDumper::GetInstance().HiDump(argsStr, result)) {
         DHLOGI("Hidump error.");

@@ -55,11 +55,9 @@ WhiteListUtil &WhiteListUtil::GetInstance(void)
 
 int32_t WhiteListUtil::Init()
 {
-    const char* const whiteListFilePath =
-        "/vendor/etc/distributedhardware/dinput_business_event_whitelist.cfg";
+    const char* const whiteListFilePath = "/vendor/etc/distributedhardware/dinput_business_event_whitelist.cfg";
     std::ifstream inFile(whiteListFilePath, std::ios::in | std::ios::binary);
     if (!inFile.is_open()) {
-        // file open error
         DHLOGE("WhiteListUtil Init error, file open fail path=%s", whiteListFilePath);
         return ERR_DH_INPUT_WHILTELIST_INIT_FAIL;
     }
@@ -114,15 +112,8 @@ int32_t WhiteListUtil::Init()
     return DH_SUCCESS;
 }
 
-int32_t WhiteListUtil::UnInit(void)
-{
-    DHLOGI("WhiteListUtil UnInit called");
-    ClearWhiteList();
-    return DH_SUCCESS;
-}
-
 void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &vecKeyCode,
-                                        TYPE_COMBINATION_KEY_VEC &vecCombinationKey) const
+    TYPE_COMBINATION_KEY_VEC &vecCombinationKey) const
 {
     std::size_t pos2 = column.find(SPLIT_LINE);
     while (pos2 != std::string::npos) {
@@ -188,8 +179,8 @@ void WhiteListUtil::GetCombKeysHash(TYPE_COMBINATION_KEY_VEC combKeys, std::unor
     WhiteListItemHash hash;
     GetAllComb(combKeys, hash, combKeys.size(), hashSets);
 
-    for (auto &hash : hashSets) {
-        targetSet.insert(hash + std::to_string(lastKey[0]) + std::to_string(lastKeyAction[0]));
+    for (auto &hashSet : hashSets) {
+        targetSet.insert(hashSet + std::to_string(lastKey[0]) + std::to_string(lastKeyAction[0]));
     }
 }
 
@@ -199,7 +190,8 @@ void WhiteListUtil::GetAllComb(TYPE_COMBINATION_KEY_VEC vecs, WhiteListItemHash 
     for (size_t i = 0; i < vecs.size(); i++) {
         TYPE_KEY_CODE_VEC nowVec = vecs[i];
         for (int32_t code : nowVec) {
-            WhiteListItemHash newHash = { hash.hash + std::to_string(code), hash.len + 1 };
+            std::string hashStr = hash.hash + std::to_string(code);
+            WhiteListItemHash newHash(hashStr, hash.len + 1);
             TYPE_COMBINATION_KEY_VEC leftVecs = vecs;
             leftVecs.erase(leftVecs.begin() + i);
             GetAllComb(leftVecs, newHash, targetLen, hashSets);
@@ -241,19 +233,6 @@ int32_t WhiteListUtil::GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST
 
     DHLOGI("GetWhiteList fail, deviceId=%s", GetAnonyString(deviceId).c_str());
     return ERR_DH_INPUT_WHILTELIST_GET_WHILTELIST_FAIL;
-}
-
-bool WhiteListUtil::CheckSubVecData(const TYPE_COMBINATION_KEY_VEC::iterator &iter2,
-                                    const TYPE_KEY_CODE_VEC::iterator &iter3) const
-{
-    bool bIsMatching = false;
-    for (TYPE_KEY_CODE_VEC::iterator iter4 = iter2->begin(); iter4 != iter2->end(); ++iter4) {
-        if (*iter4 == *iter3) {
-            bIsMatching = true;
-            break;
-        }
-    }
-    return bIsMatching;
 }
 
 std::string WhiteListUtil::GetBusinessEventHash(const BusinessEvent &event)

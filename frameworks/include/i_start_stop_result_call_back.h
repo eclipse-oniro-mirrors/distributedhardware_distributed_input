@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 #include <iremote_broker.h>
-#include "dinput_struct_data.h"
 
 namespace OHOS {
 namespace DistributedHardware {

@@ -56,7 +56,7 @@ int32_t DistributedInputSinkSwitch::StartSwitch(int32_t sessionId)
         return ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL;
     } else {
         bool findOld = false;
-        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
+        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); ++it) {
             if ((*it).sessionId == sessionId) {
                 (*it).switchState = true;
                 findOld = true;
@@ -81,7 +81,7 @@ void DistributedInputSinkSwitch::StopSwitch(int32_t sessionId)
         DHLOGE("StopSwitch sessionId: %d fail,switchVector_ is null.", sessionId);
     } else {
         bool findOld = false;
-        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
+        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); ++it) {
             if ((*it).sessionId == sessionId) {
                 (*it).switchState = false;
                 findOld = true;
@@ -103,7 +103,7 @@ void DistributedInputSinkSwitch::StopAllSwitch()
     if (switchVector_.empty()) {
         DHLOGW("StopAllSwitch switchVector_ is null.");
     } else {
-        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
+        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); ++it) {
             (*it).switchState = false;
         }
         DHLOGI("StopAllSwitch success.");
@@ -119,7 +119,7 @@ void DistributedInputSinkSwitch::AddSession(int32_t sessionId)
         DHLOGI("AddSession sessionId: %d add first.", sessionId);
     } else {
         bool findOld = false;
-        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
+        for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); ++it) {
             if ((*it).sessionId == sessionId) {
                 findOld = true;
                 break;
@@ -149,7 +149,7 @@ void DistributedInputSinkSwitch::RemoveSession(int32_t sessionId)
                 findOld = true;
                 break;
             } else {
-                it++;
+                ++it;
             }
         }
         if (findOld) {
@@ -164,7 +164,7 @@ std::vector<int32_t> DistributedInputSinkSwitch::GetAllSessionId()
 {
     std::unique_lock<std::mutex> switchLock(operationMutex_);
     std::vector<int32_t> tmpVecSession;
-    for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
+    for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); ++it) {
         tmpVecSession.push_back((*it).sessionId);
     }
     return tmpVecSession;
@@ -178,7 +178,7 @@ int32_t DistributedInputSinkSwitch::GetSwitchOpenedSession()
         DHLOGE("GetSwitchOpenedSession error, no data.");
         return ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL;
     }
-    for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); it++) {
+    for (std::vector<SwitchStateData>::iterator it = switchVector_.begin(); it < switchVector_.end(); ++it) {
         if ((*it).switchState == true) {
             return (*it).sessionId;
         }

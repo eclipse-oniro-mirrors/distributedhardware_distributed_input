@@ -35,8 +35,11 @@
 ```
 /foundation/distributedhardware/distributed_input
 ├── common                                  # 分布式输入常量定义和公共函数
+├── dfx_utils                               # 分布式输入实现DFX业务的相关实现
 ├── frameworks                              # 分布式输入innerkit接口使用到的回调函数定义
 ├── inputdevicehandler                      # 分布式输入实现分布式硬件管理框架定义的能力查询接口实现
+├── interfaces                              # 分布式输入实现对外接口模块
+├── low_latency                             # 分布式输入实现输入事件跨设备低时延传输能力业务
 ├── sa_profile                              # 分布式输入的SA配置信息
 ├── services                                # 分布式输入的SA具体实现
 │   └── common                              # 分布式输入实现用到的公共常量定义
@@ -50,13 +53,14 @@
 │       └── transport                       # 分布式输入source侧事件接收
 ├── sinkhandler                             # 分布式输入实现的分布式硬件管理框架定义的sink侧部件接入接口
 ├── sourcehandler                           # 分布式输入实现的分布式硬件管理框架定义的source侧部件接入接口
-└── test                                    # 分布式输入的外部接口UT用例
+└── test                                    # 分布式输入fuzz测试的实现
+├── utils                                   # 分布式输入工具类的实现
 ```
 
 ## **约束**
-**语言限制**：C++语言。  
-**组网环境**：必须确保设备在同一个局域网中。  
-**操作系统限制**：OpenHarmony操作系统。  
+**语言限制**：C++语言。
+**组网环境**：必须确保设备在同一个局域网中。
+**操作系统限制**：OpenHarmony操作系统。
 
 ## **说明**
 ### **接口说明**
@@ -80,21 +84,21 @@
 #### **4. 设备下线**
 设备下线后，分布式硬件管理框架去使能下线设备的输入外设，移除分布式输入驱动，此时下线设备的分布式输入外设不可用。
 
-## **涉及仓**
+## **相关仓**
 ****
-**分布式硬件子系统：**  
+**分布式硬件子系统：**
 
 设备管理
-[device_manager](https://gitee.com/openharmony/device_manager)
+[device_manager](https://gitee.com/openharmony/distributedhardware_device_manager)
 
 分步式硬件管理框架
-[distributed_hardware_fwk](https://gitee.com/openharmony/distributed_hardware_fwk)
+[distributed_hardware_fwk](https://gitee.com/openharmony/distributedhardware_distributed_hardware_fwk)
 
 分布式相机
-[distributed_camera](https://gitee.com/openharmony/distributed_camera)
+[distributed_camera](https://gitee.com/openharmony/distributedhardware_distributed_camera)
 
 分布式屏幕
-[distributed_screen](https://gitee.com/openharmony/distributed_screen)
+[distributed_screen](https://gitee.com/openharmony/distributedhardware_distributed_screen)
 
 **分布式输入
-[distributed_input](https://gitee.com/openharmony-sig/distributed_input)**
+[distributed_input](http://mgit-tm.rnd.huawei.com/hmf/distributedhardware/distributed_input)**

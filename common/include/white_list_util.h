@@ -37,7 +37,7 @@ struct WhiteListItemHash {
 
     WhiteListItemHash() : hash(""), len(0) {}
 
-    WhiteListItemHash(std::string hash, int32_t len) : hash(hash), len(len) {}
+    WhiteListItemHash(std::string &hash, int32_t len) : hash(hash), len(len) {}
 };
 
 class WhiteListUtil {
@@ -58,15 +58,12 @@ public:
     bool IsNeedFilterOut(const std::string &deviceId, const BusinessEvent &event);
 private:
     int32_t Init();
-    int32_t UnInit(void);
     WhiteListUtil();
     ~WhiteListUtil();
     WhiteListUtil(const WhiteListUtil &other) = delete;
     const WhiteListUtil &operator=(const WhiteListUtil &other) = delete;
     void ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &vecKeyCode,
-                             TYPE_COMBINATION_KEY_VEC &vecCombinationKey) const;
-    bool CheckSubVecData(const TYPE_COMBINATION_KEY_VEC::iterator &iter2,
-                         const TYPE_KEY_CODE_VEC::iterator &iter3) const;
+        TYPE_COMBINATION_KEY_VEC &vecCombinationKey) const;
     void GetCombKeysHash(TYPE_COMBINATION_KEY_VEC combKeys, std::unordered_set<std::string> &targetSet);
     void GetAllComb(TYPE_COMBINATION_KEY_VEC vecs, WhiteListItemHash hash,
         int32_t targetLen, std::unordered_set<std::string> &hashSets);

@@ -49,7 +49,6 @@ ohos_shared_library("libdinput_source") {
 
   sources = [
     "${common_path}/include/white_list_util.cpp",
-    "${common_path}/include/dinput_struct_data.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
     "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",

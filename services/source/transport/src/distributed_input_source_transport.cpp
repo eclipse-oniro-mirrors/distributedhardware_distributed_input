@@ -423,14 +423,7 @@ int32_t DistributedInputSourceTransport::StartRemoteInput(const std::string &dev
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_DHID;
     jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
     jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
-    std::string strTmp = "";
-    for (auto iter : dhids) {
-        strTmp = strTmp + iter + ".";
-    }
-    if (!strTmp.empty()) {
-        strTmp.erase(strTmp.end() - 1); // delete the last '.' char
-    }
-    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = strTmp;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = JointDhIds(dhids);
     std::string smsg = jsonStr.dump();
     int32_t ret = SendMsg(sessionId, smsg);
     if (ret != DH_SUCCESS) {
@@ -456,14 +449,7 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(const std::string &devi
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_DHID;
     jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
     jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
-    std::string strTmp = "";
-    for (auto iter : dhids) {
-        strTmp = strTmp + iter + ".";
-    }
-    if (!strTmp.empty()) {
-        strTmp.erase(strTmp.end() - 1); // delete the last '.' char
-    }
-    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = strTmp;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = JointDhIds(dhids);
     std::string smsg = jsonStr.dump();
     int32_t ret = SendMsg(sessionId, smsg);
     if (ret != DH_SUCCESS) {
@@ -474,6 +460,15 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(const std::string &devi
     DHLOGI("StopRemoteInput deviceId:%s, sessionId: %d, smsg:%s.", GetAnonyString(deviceId).c_str(),
         sessionId, SetAnonyId(smsg).c_str());
     return DH_SUCCESS;
+}
+
+std::string DistributedInputSourceTransport::JointDhIds(const std::vector<std::string> &dhids)
+{
+    if (dhids.size() <= 0) {
+        return "";
+    }
+    auto dotFold = [](std::string a, std::string b) {return std::move(a) + '.' + std::move(b);};
+    return std::accumulate(std::next(dhids.begin()), dhids.end(), dhids[0], dotFold);
 }
 
 std::string DistributedInputSourceTransport::FindDeviceBySession(int32_t sessionId)

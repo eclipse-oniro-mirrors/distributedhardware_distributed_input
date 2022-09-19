@@ -50,7 +50,6 @@ public:
     AffectDhIds SetSupportInputType(bool enabled, const uint32_t &inputTypes);
     // return efftive dhids
     AffectDhIds SetSharingDevices(bool enabled, std::vector<std::string> dhIds);
-    void GetDeviceDhIdByFd(int32_t fd, std::string &dhId);
     void GetDevicesInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string> &datas);
     void GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
     void GetShareMousePathByDhId(std::vector<std::string> dhIds, std::string &path, std::string &dhId);
@@ -112,7 +111,6 @@ private:
     void CloseDeviceByPathLocked(const std::string& devicePath);
     void CloseAllDevicesLocked();
     void JudgeDeviceOpenOrClose(const inotify_event& event);
-    Device* GetDeviceByDescriptorLocked(const std::string& descriptor);
     Device* GetDeviceByPathLocked(const std::string& devicePath);
     Device* GetDeviceByFdLocked(int fd);
     Device* GetSupportDeviceByFd(int fd);
@@ -129,7 +127,6 @@ private:
     bool TestBit(uint32_t bit, const uint8_t* array);
     /* this macro computes the number of bytes needed to represent a bit array of the specified size */
     uint32_t SizeofBitArray(uint32_t bit);
-    bool IsSupportInputTypes(uint32_t classes);
     void RecordEventLog(const RawEvent* event);
     void RecordDeviceLog(const int32_t deviceId, const std::string& devicePath, const InputDevice& identifier);
     void HandleTouchScreenEvent(struct input_event readBuffer[], const size_t count, std::vector<bool>& needFilted);

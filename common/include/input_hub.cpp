@@ -680,6 +680,7 @@ std::string InputHub::StringPrintf(const char* format, ...) const
     if (ret >= DH_SUCCESS && static_cast<size_t>(ret) < sizeof(space)) {
         result = space;
     } else {
+        va_end(ap);
         return "the buffer is overflow!";
     }
     va_end(ap);
@@ -793,7 +794,6 @@ int32_t InputHub::ReadNotifyLocked()
 {
     size_t res;
     char eventBuf[512];
-    size_t eventSize;
     size_t eventPos = 0;
     struct inotify_event *event;
 
@@ -807,12 +807,15 @@ int32_t InputHub::ReadNotifyLocked()
         return ERR_DH_INPUT_HUB_GET_EVENT_FAIL;
     }
 
-    while (res >= sizeof(*event)) {
-        event = reinterpret_cast<struct inotify_event *>(eventBuf + eventPos);
-        JudgeDeviceOpenOrClose(*event);
-        eventSize = sizeof(*event) + event->len;
-        res -= eventSize;
-        eventPos += eventSize;
+    {
+        size_t eventSize;
+        while (res >= sizeof(*event)) {
+            event = reinterpret_cast<struct inotify_event *>(eventBuf + eventPos);
+            JudgeDeviceOpenOrClose(*event);
+            eventSize = sizeof(*event) + event->len;
+            res -= eventSize;
+            eventPos += eventSize;
+        }
     }
     return DH_SUCCESS;
 }
@@ -853,24 +856,6 @@ void InputHub::CloseAllDevicesLocked()
     while (!devices_.empty()) {
         CloseDeviceForAllLocked(*(devices_.begin()->second));
     }
-}
-
-InputHub::Device* InputHub::GetDeviceByDescriptorLocked(const std::string& descriptor)
-{
-    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
-    for (const auto& device : openingDevices_) {
-        if (device && descriptor == device->identifier.descriptor) {
-            return device.get();
-        }
-    }
-
-    for (const auto& [id, device] : devices_) {
-        if (device && descriptor == device->identifier.descriptor) {
-            return device.get();
-        }
-    }
-
-    return nullptr;
 }
 
 InputHub::Device* InputHub::GetDeviceByPathLocked(const std::string& devicePath)
@@ -937,11 +922,6 @@ uint32_t InputHub::SizeofBitArray(uint32_t bit)
     return ((bit) + round) / divisor;
 }
 
-bool InputHub::IsSupportInputTypes(uint32_t classes)
-{
-    return classes & inputTypes_;
-}
-
 void InputHub::SaveAffectDhId(bool isEnable, const std::string &dhId, AffectDhIds &affDhIds)
 {
     if (isEnable) {
@@ -966,18 +946,6 @@ AffectDhIds InputHub::SetSupportInputType(bool enabled, const uint32_t &inputTyp
     }
 
     return affDhIds;
-}
-
-void InputHub::GetDeviceDhIdByFd(int32_t fd, std::string &dhId)
-{
-    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
-    for (const auto &[id, device] : devices_) {
-        if (device->fd == fd) {
-            dhId = device->identifier.descriptor;
-            return;
-        }
-    }
-    dhId.clear();
 }
 
 AffectDhIds InputHub::SetSharingDevices(bool enabled, std::vector<std::string> dhIds)
