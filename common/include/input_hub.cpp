@@ -960,7 +960,7 @@ AffectDhIds InputHub::SetSupportInputType(bool enabled, const uint32_t &inputTyp
     for (const auto &[id, device] : devices_) {
         if (device->classes & inputTypes_) {
             device->isShare = enabled;
-            DHLOGW("ByType dhid:%s, isshare:%d", device->identifier.descriptor.c_str(), enabled);
+            DHLOGW("ByType dhid:%s, isshare:%d", GetAnonyString(device->identifier.descriptor).c_str(), enabled);
             SaveAffectDhId(enabled, device->identifier.descriptor, affDhIds);
         }
     }
@@ -988,7 +988,7 @@ AffectDhIds InputHub::SetSharingDevices(bool enabled, std::vector<std::string> d
         for (const auto &[id, device] : devices_) {
             if (device->identifier.descriptor == dhId) {
                 device->isShare = enabled;
-                DHLOGW("dhid:%s, isshare:%d", device->identifier.descriptor.c_str(), enabled);
+                DHLOGW("dhid:%s, isshare:%d", GetAnonyString(device->identifier.descriptor).c_str(), enabled);
                 SaveAffectDhId(enabled, device->identifier.descriptor, affDhIds);
                 break;
             }
@@ -1004,7 +1004,7 @@ void InputHub::GetShareMousePathByDhId(std::vector<std::string> dhIds, std::stri
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (auto dhId_ : dhIds) {
         for (const auto &[id, device] : devices_) {
-            DHLOGI("descriptor:%s, isShare[%d], type[%d]", device->identifier.descriptor.c_str(),
+            DHLOGI("descriptor:%s, isShare[%d], type[%d]", GetAnonyString(device->identifier.descriptor).c_str(),
                    device->isShare, device->classes);
             if ((device->identifier.descriptor == dhId_) &&
                 ((device->classes & INPUT_DEVICE_CLASS_CURSOR) != 0)) {

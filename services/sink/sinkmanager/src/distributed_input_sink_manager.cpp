@@ -77,8 +77,7 @@ DistributedInputSinkManager::DInputSinkListener::~DInputSinkListener()
 void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     const int32_t& sessionId, const std::string &deviceId)
 {
-    DHLOGI("onPrepareRemoteInput called, sessionId: %d, devId: %s",
-        sessionId, GetAnonyString(deviceId).c_str());
+    DHLOGI("onPrepareRemoteInput called, sessionId: %d, devId: %s", sessionId, GetAnonyString(deviceId).c_str());
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONPREPARE;
@@ -137,8 +136,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
-    DHLOGI("onStartRemoteInput called, cursessionId: %d, new sessionId: %d",
-        curSessionId, sessionId);
+    DHLOGI("onStartRemoteInput called, cursessionId: %d, new sessionId: %d", curSessionId, sessionId);
     // set new session
     int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
 
@@ -338,7 +336,7 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
         // Query all key state
         rc = ioctl(fd, EVIOCGKEY(sizeof(keystate)), keystate);
         if (rc < 0) {
-            DHLOGE("read all key state failed, rc: ", rc);
+            DHLOGE("read all key state failed, rc=%d ", rc);
             count += 1;
             SleepTimeMs();
             continue;
@@ -371,13 +369,13 @@ bool DistributedInputSinkManager::IsStopDhidOnCmdStillNeed(int32_t sessionId, co
         }
         for (auto dhid : sessionDhid.second) {
             if (stopDhId == dhid) {
-                DHLOGI("IsStopDhidOnCmdStillNeed stopDhId=%s is find in session: %d", stopDhId.c_str(),
+                DHLOGI("IsStopDhidOnCmdStillNeed stopDhId=%s is find in session: %d", GetAnonyString(stopDhId).c_str(),
                     sessionDhid.first);
                 return true;
             }
         }
     }
-    DHLOGW("IsStopDhidOnCmdStillNeed stopDhId=%s is not find.", stopDhId.c_str());
+    DHLOGW("IsStopDhidOnCmdStillNeed stopDhId=%s is not find.", GetAnonyString(stopDhId).c_str());
     return false;
 }
 

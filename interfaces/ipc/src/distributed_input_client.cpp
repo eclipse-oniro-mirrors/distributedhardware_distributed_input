@@ -784,8 +784,7 @@ void DistributedInputClient::UpdateSinkScreenInfos(const std::string &strJson)
     screenTransInfos.clear();
     nlohmann::json inputData = nlohmann::json::parse(strJson);
     size_t jsonSize = inputData.size();
-    DHLOGI("OnResult json str: %s, json size:%d.\n",
-        GetAnonyString(strJson).c_str(), jsonSize);
+    DHLOGI("OnResult json str: %s, json size:%d.\n", GetAnonyString(strJson).c_str(), jsonSize);
     std::vector<std::vector<uint32_t>> transInfos = inputData;
     for (auto info : transInfos) {
         if (info.size() != SINK_SCREEN_INFO_SIZE) {

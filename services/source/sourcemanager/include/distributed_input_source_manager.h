@@ -37,7 +37,6 @@
 #include "distributed_input_source_event_handler.h"
 #include "distributed_input_source_sa_cli_mgr.h"
 #include "distributed_input_source_stub.h"
-#include "idinput_dbg_itf.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -412,10 +411,6 @@ private:
     std::set<BeRegNodeInfo> GetSyncNodeInfo(const std::string& devId);
     void UpdateSyncNodeInfo(const std::string& devId, const std::string& dhId, const std::string &nodeDesc);
     void DeleteSyncNodeInfo(const std::string& devId);
-
-private:
-    IDInputDBGItf* dinputDbgItfPtr_ = nullptr;
-    void InitDinputDBG();
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

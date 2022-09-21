@@ -700,7 +700,7 @@ void DistributedInputSourceTransport::CalculateLatency(int32_t sessionId, const 
 void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const std::string& message)
 {
     if (callback_ == nullptr) {
-        DHLOGE("OnBytesReceived the callback_ is null, the message:%s abort.", message.c_str());
+        DHLOGE("OnBytesReceived the callback_ is null, the message:%s abort.", SetAnonyId(message).c_str());
         return;
     }
     nlohmann::json recMsg = nlohmann::json::parse(message);
@@ -762,8 +762,7 @@ bool DistributedInputSourceTransport::CheckRecivedData(const std::string& messag
     }
 
     if (recMsg.contains(DINPUT_SOFTBUS_KEY_CMD_TYPE) != true) {
-        DHLOGE("OnBytesReceived message:%s is error, not contain cmdType.",
-            message.c_str());
+        DHLOGE("OnBytesReceived message:%s is error, not contain cmdType.", SetAnonyId(message).c_str());
         return false;
     }
 
@@ -796,7 +795,7 @@ void DistributedInputSourceTransport::OnBytesReceived(int32_t sessionId, const v
     }
 
     std::string message(buf, buf + dataLen);
-    DHLOGI("OnBytesReceived message:%s.", message.c_str());
+    DHLOGI("OnBytesReceived message:%s.", SetAnonyId(message).c_str());
     HandleSessionData(sessionId, message);
 
     free(buf);

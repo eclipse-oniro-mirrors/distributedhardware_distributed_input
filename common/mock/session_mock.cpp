@@ -30,8 +30,7 @@ static char g_mySessionName[CHAR_ARRAY_SIZE];
 int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
     std::cout << "CreateSessionServer start sessionName:" << sessionName << std::endl;
-    std::string tmpstr = sessionName;
-    if (tmpstr.size() <= 0) {
+    if (strlen(sessionName) <= 0) {
         std::cout << "CreateSessionServer sessionName is empty." << std::endl;
         return DH_ERROR;
     }
@@ -39,7 +38,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         std::cout << "CreateSessionServer listener is null." << std::endl;
         return DH_ERROR;
     }
-    if (strcpy_s(g_mySessionName, tmpstr.size(), tmpstr.c_str()) != DH_SUCCESS) {
+    if (strcpy_s(g_mySessionName, strlen(sessionName) + 1, sessionName) != DH_SUCCESS) {
         std::cout << "strcpy_s faild" << std::endl;
         return DH_ERROR;
     }

@@ -26,6 +26,7 @@
 #include <sys/inotify.h>
 #include <linux/input.h>
 
+#include "anonymous_string.h"
 #include "distributed_hardware_log.h"
 #include "nlohmann/json.hpp"
 
@@ -75,8 +76,7 @@ bool DistributedInputCollector::InitCollectEventsThread()
     collectThreadID_ = -1;
     int32_t ret = pthread_create(&collectThreadID_, &attr, CollectEventsThread, this);
     if (ret != 0) {
-        DHLOGE(
-            "DistributedInputCollector::InitCollectEventsThread create  thread failed:%d \n", ret);
+        DHLOGE("DistributedInputCollector::InitCollectEventsThread create  thread failed:%d \n", ret);
         pthread_attr_destroy(&attr);
         collectThreadID_ = -1;
         isCollectingEvents_ = false;
@@ -174,14 +174,14 @@ void DistributedInputCollector::ReportDhIdSharingState(const AffectDhIds &dhIds)
     }
 
     for (auto const &id : dhIds.sharingDhIds) {
-        DHLOGI("Sharing DhId: %s", id.c_str());
+        DHLOGI("Sharing DhId: %s", GetAnonyString(id).c_str());
         for (auto iter : sharingDhIdListeners_) {
             iter->OnSharing(id);
         }
     }
 
     for (auto const &id : dhIds.noSharingDhIds) {
-        DHLOGI("No Sharing DhId: %s", id.c_str());
+        DHLOGI("No Sharing DhId: %s", GetAnonyString(id).c_str());
         for (auto iter : sharingDhIdListeners_) {
             iter->OnNoSharing(id);
         }
