@@ -132,6 +132,68 @@ void DistributedInputSinkManager::DInputSinkListener::onUnprepareRemoteInput(con
     DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
 }
 
+void DistributedInputSinkManager::DInputSinkListener::onRelayPrepareRemoteInput(const int32_t &toSrcSessionId,
+    const int32_t &toSinkSessionId, const std::string &deviceId)
+{
+    DHLOGI("toSinkSessionId: %s, devId: %s", GetAnonyInt32(toSinkSessionId).c_str(), GetAnonyString(deviceId).c_str());
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ON_RELAY_PREPARE;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = toSrcSessionId;
+    std::string smsg = "";
+    int ret = DistributedInputCollector::GetInstance().Init(
+        DistributedInputSinkTransport::GetInstance().GetEventHandler());
+    if (ret != DH_SUCCESS) {
+        DHLOGE("DInputSinkListener init InputCollector error.");
+        jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+        jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
+        smsg = jsonStr.dump();
+        DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(toSinkSessionId, smsg);
+        return;
+    }
+
+    DistributedInputSinkSwitch::GetInstance().AddSession(toSinkSessionId);
+
+    // send prepare result and if result ok, send white list
+    TYPE_WHITE_LIST_VEC vecFilter;
+    std::string localNetworkId = GetLocalNetworkId();
+    if (!localNetworkId.empty()) {
+        WhiteListUtil::GetInstance().GetWhiteList(localNetworkId, vecFilter);
+    } else {
+        DHLOGE("query local network id from softbus failed");
+    }
+    if (vecFilter.empty() || vecFilter[0].empty() || vecFilter[0][0].empty()) {
+        DHLOGE("white list is null.");
+        jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
+        jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
+        smsg = jsonStr.dump();
+        DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(toSinkSessionId, smsg);
+        return;
+    }
+    nlohmann::json filterMsg(vecFilter);
+    std::string object = filterMsg.dump();
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
+    jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = object;
+    smsg = jsonStr.dump();
+    DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(toSinkSessionId, smsg);
+}
+
+void DistributedInputSinkManager::DInputSinkListener::onRelayUnprepareRemoteInput(const int32_t &toSrcSessionId,
+    const int32_t &toSinkSessionId, const std::string &deviceId)
+{
+    DHLOGI("toSinkSessionId: %d, devId: %s", toSinkSessionId, GetAnonyString(deviceId).c_str());
+    DistributedInputCollector::GetInstance().SetSharingTypes(false, static_cast<uint32_t>(DInputDeviceType::ALL));
+    DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
+    DistributedInputSinkSwitch::GetInstance().RemoveSession(toSinkSessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ON_RELAY_UNPREPARE;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = toSrcSessionId;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
+    std::string smsg = jsonStr.dump();
+    DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(toSinkSessionId, smsg);
+}
+
 void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
@@ -273,7 +335,161 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(cons
         sinkManagerObj_->SetInputTypes(static_cast<uint32_t>(DInputDeviceType::NONE));
         if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() ==
             ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
+            DHLOGI("all session is stop.");
+            sinkManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
+        }
+    }
+}
+
+void DistributedInputSinkManager::DInputSinkListener::onRelayStartDhidRemoteInput(const int32_t &toSrcSessionId,
+    const int32_t &toSinkSessionId, const std::string &deviceId, const std::string &strDhids)
+{
+    int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
+    DHLOGI("curSessionId:%s, new sessionId: %s", GetAnonyInt32(curSessionId).c_str(),
+        GetAnonyInt32(toSinkSessionId).c_str());
+    // set new session
+    int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(toSinkSessionId);
+    bool result = (startRes == DH_SUCCESS) ? true : false;
+    nlohmann::json jsonStrSta;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ON_RELAY_STARTDHID;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_SESSION_ID] = toSrcSessionId;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = strDhids;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_RESP_VALUE] = result;
+    std::string smsgSta = jsonStrSta.dump();
+    DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(toSinkSessionId, smsgSta);
+
+    if (startRes != DH_SUCCESS) {
+        DHLOGE("StartSwitch error.");
+        return;
+    }
+
+    if (curSessionId == ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
+        DHLOGW("this is the only session.");
+    }
+    std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this,
+        toSinkSessionId, strDhids).detach();
+
+    // add the dhids
+    if (startRes == DH_SUCCESS) {
+        std::vector<std::string> vecStr;
+        StringSplit(strDhids, INPUT_STRING_SPLIT_POINT, vecStr);
+        AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingDhIds(true, vecStr);
+        sinkManagerObj_->StoreStartDhids(toSinkSessionId, affDhIds.sharingDhIds);
+        DistributedInputCollector::GetInstance().ReportDhIdSharingState(affDhIds);
+    }
+}
+
+void DistributedInputSinkManager::DInputSinkListener::onRelayStopDhidRemoteInput(const int32_t &toSrcSessionId,
+    const int32_t &toSinkSessionId, const std::string &deviceId, const std::string &strDhids)
+{
+    DHLOGI("toSinkSessionId: %d", toSinkSessionId);
+    std::vector<std::string> stopIndeedDhIds;
+    std::vector<std::string> stopOnCmdDhIds;
+    StringSplit(strDhids, INPUT_STRING_SPLIT_POINT, stopOnCmdDhIds);
+    sinkManagerObj_->DeleteStopDhids(toSinkSessionId, stopOnCmdDhIds, stopIndeedDhIds);
+    AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingDhIds(false, stopIndeedDhIds);
+    AffectDhIds stopIndeedOnes;
+    stopIndeedOnes.noSharingDhIds = stopIndeedDhIds;
+    DistributedInputCollector::GetInstance().ReportDhIdSharingState(stopIndeedOnes);
+
+    if (DistributedInputCollector::GetInstance().IsAllDevicesStoped()) {
+        DHLOGE("onStopRemoteInputDhid called, all dhid stop sharing, sessionId: %d is closed.", toSinkSessionId);
+        DistributedInputSinkSwitch::GetInstance().StopSwitch(toSinkSessionId);
+    }
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ON_RELAY_STOPDHID;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = toSrcSessionId;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = strDhids;
+    std::string smsg = jsonStr.dump();
+    DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(toSinkSessionId, smsg);
+
+    bool isAllClosed = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
+    if (isAllClosed) {
+        DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
+        sinkManagerObj_->SetInputTypes(static_cast<uint32_t>(DInputDeviceType::NONE));
+        if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() ==
+            ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
             DHLOGI("onStartRemoteInput called, all session is stop.");
+            sinkManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
+        }
+    }
+}
+
+void DistributedInputSinkManager::DInputSinkListener::onRelayStartTypeRemoteInput(const int32_t &toSrcSessionId,
+    const int32_t &toSinkSessionId, const std::string &deviceId, uint32_t inputTypes)
+{
+    int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
+    DHLOGI("curSessionId:%s, new sessionId: %s",
+        GetAnonyInt32(curSessionId).c_str(), GetAnonyInt32(toSinkSessionId).c_str());
+    // set new session
+    int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(toSinkSessionId);
+
+    sinkManagerObj_->SetStartTransFlag((startRes == DH_SUCCESS) ? DInputServerType::SINK_SERVER_TYPE
+        : DInputServerType::NULL_SERVER_TYPE);
+
+    bool result = (startRes == DH_SUCCESS) ? true : false;
+    nlohmann::json jsonStrSta;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ON_RELAY_STARTTYPE;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_RESP_VALUE] = result;
+    jsonStrSta[DINPUT_SOFTBUS_KEY_SESSION_ID] = toSrcSessionId;
+    std::string smsgSta = jsonStrSta.dump();
+    DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(toSinkSessionId, smsgSta);
+
+    if (startRes != DH_SUCCESS) {
+        DHLOGE("StartSwitch error.");
+        return;
+    }
+
+    if (sinkManagerObj_->GetEventHandler() == nullptr) {
+        DHLOGE("eventhandler is null.");
+        return;
+    }
+
+    bool isMouse = (sinkManagerObj_->GetInputTypes() & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0;
+    if (isMouse) {
+        std::map<int32_t, std::string> deviceInfos;
+        DistributedInputCollector::GetInstance().GetDeviceInfoByType(static_cast<uint32_t>(DInputDeviceType::MOUSE),
+            deviceInfos);
+        for (auto deviceInfo : deviceInfos) {
+            DHLOGI("deviceInfo dhId, %s", GetAnonyString(deviceInfo.second).c_str());
+            std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, toSinkSessionId,
+                deviceInfo.second).detach();
+        }
+    }
+}
+
+void DistributedInputSinkManager::DInputSinkListener::onRelayStopTypeRemoteInput(const int32_t &toSrcSessionId,
+    const int32_t &toSinkSessionId, const std::string &deviceId, uint32_t inputTypes)
+{
+    DHLOGI("onStopRemoteInput called, sessionId: %d, inputTypes: %d, curInputTypes: %d",
+        toSinkSessionId, inputTypes, sinkManagerObj_->GetInputTypes());
+
+    sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
+        (sinkManagerObj_->GetInputTypes() & inputTypes));
+    AffectDhIds affDhIds = DistributedInputCollector::GetInstance().SetSharingTypes(false, inputTypes);
+    std::vector<std::string> stopIndeedDhIds;
+    sinkManagerObj_->DeleteStopDhids(toSinkSessionId, affDhIds.noSharingDhIds, stopIndeedDhIds);
+    AffectDhIds stopIndeedOnes;
+    stopIndeedOnes.noSharingDhIds = stopIndeedDhIds;
+    DistributedInputCollector::GetInstance().ReportDhIdSharingState(stopIndeedOnes);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ON_RELAY_STOPTYPE;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = toSrcSessionId;
+    std::string smsg = jsonStr.dump();
+    DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(toSinkSessionId, smsg);
+
+    bool isAllClosed = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
+    if (isAllClosed) {
+        DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
+        if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() ==
+            ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
+            DHLOGI("all session is stop.");
             sinkManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
         }
     }

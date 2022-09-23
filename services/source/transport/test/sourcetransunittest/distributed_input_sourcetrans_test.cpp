@@ -131,10 +131,11 @@ HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput01, testing::ext::TestS
 HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput02, testing::ext::TestSize.Level0)
 {
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    int32_t sessionId = 2;
     int32_t ret = DistributedInputSourceTransport::GetInstance().StopRemoteInput(
         deviceId, static_cast<uint32_t>(DInputDeviceType::ALL));
     EXPECT_EQ(DH_SUCCESS, ret);
-    DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(deviceId);
+    DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(sessionId);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

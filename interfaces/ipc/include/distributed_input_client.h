@@ -111,7 +111,6 @@ public:
     void CheckWhiteListCallback();
     void CheckNodeMonitorCallback();
     void CheckKeyStateCallback();
-    void CheckStartStopResultCallback();
 
     void CheckSinkRegisterCallback();
     void CheckSharingDhIdsCallback();

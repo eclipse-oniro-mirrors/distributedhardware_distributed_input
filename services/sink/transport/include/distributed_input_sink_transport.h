@@ -77,6 +77,12 @@ private:
     void NotifyStartRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg);
 
+    void NotifyRelayPrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyRelayUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyRelayStartDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyRelayStopDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyRelayStartTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyRelayStopTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
 private:
     std::map<std::string, int32_t> sessionDevMap_; // source networkId, sessionId
     std::string mySessionName_;

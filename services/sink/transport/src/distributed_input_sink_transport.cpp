@@ -510,6 +510,128 @@ void DistributedInputSinkTransport::NotifyStopRemoteInputDhid(int32_t sessionId,
     callback_->onStopRemoteInputDhid(sessionId, strTmp);
 }
 
+void DistributedInputSinkTransport::NotifyRelayPrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) || !recMsg.contains(DINPUT_SOFTBUS_KEY_SESSION_ID)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_PREPARE_FOR_REL, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() || !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_PREPARE_FOR_REL, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_PREPARE_FOR_REL deviceId:%s.",
+        GetAnonyString(deviceId).c_str());
+    callback_->onRelayPrepareRemoteInput(toSrcSessionId, sessionId, deviceId);
+}
+
+void DistributedInputSinkTransport::NotifyRelayUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) || !recMsg.contains(DINPUT_SOFTBUS_KEY_SESSION_ID)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_UNPREPARE_FOR_REL, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() || !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_UNPREPARE_FOR_REL, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_UNPREPARE_FOR_REL deviceId:%s.",
+        GetAnonyString(deviceId).c_str());
+    callback_->onRelayUnprepareRemoteInput(toSrcSessionId, sessionId, deviceId);
+}
+
+void DistributedInputSinkTransport::NotifyRelayStartDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START_DHID_FOR_REL, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START_DHID_FOR_REL, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_START_DHID_FOR_REL deviceId:%s.",
+        GetAnonyString(deviceId).c_str());
+    callback_->onRelayStartDhidRemoteInput(toSrcSessionId, sessionId, deviceId, dhids);
+}
+
+void DistributedInputSinkTransport::NotifyRelayStopDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP_DHID_FOR_REL, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP_DHID_FOR_REL, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_DHID_FOR_REL deviceId:%s.",
+        GetAnonyString(deviceId).c_str());
+    callback_->onRelayStopDhidRemoteInput(toSrcSessionId, sessionId, deviceId, dhids);
+}
+
+void DistributedInputSinkTransport::NotifyRelayStartTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START_TYPE_FOR_REL, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_START_TYPE_FOR_REL, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_START_TYPE_FOR_REL deviceId:%s.",
+        GetAnonyString(deviceId).c_str());
+    callback_->onRelayStartTypeRemoteInput(toSrcSessionId, sessionId, deviceId, inputTypes);
+}
+
+void DistributedInputSinkTransport::NotifyRelayStopTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    if (!recMsg.contains(DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !recMsg.contains(DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL, key not exist.");
+        return;
+    }
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL deviceId:%s.",
+        GetAnonyString(deviceId).c_str());
+    callback_->onRelayStopTypeRemoteInput(toSrcSessionId, sessionId, deviceId, inputTypes);
+}
+
 void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const std::string& message)
 {
     if (callback_ == nullptr) {
@@ -561,6 +683,30 @@ void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const s
         }
         case TRANS_SOURCE_MSG_STOP_DHID: {
             NotifyStopRemoteInputDhid(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_PREPARE_FOR_REL: {
+            NotifyRelayPrepareRemoteInput(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_UNPREPARE_FOR_REL: {
+            NotifyRelayUnprepareRemoteInput(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_START_DHID_FOR_REL: {
+            NotifyRelayStartDhidRemoteInput(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_STOP_DHID_FOR_REL: {
+            NotifyRelayStopDhidRemoteInput(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_START_TYPE_FOR_REL: {
+            NotifyRelayStartTypeRemoteInput(sessionId, recMsg);
+            break;
+        }
+        case TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL: {
+            NotifyRelayStopTypeRemoteInput(sessionId, recMsg);
             break;
         }
         default:

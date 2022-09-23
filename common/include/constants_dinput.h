@@ -43,6 +43,7 @@ namespace DistributedInput {
     const uint32_t DHID_LENGTH_MAX = 256;
     const uint32_t DEVID_LENGTH_MAX = 256;
     const uint32_t SCREEN_MSG_MAX = 40 * 1024 * 1024;
+    const uint32_t AUTH_SESSION_SIDE_SERVER = 0;
 
     /*
      * Device Type definitions

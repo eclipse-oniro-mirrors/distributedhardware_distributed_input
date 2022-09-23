@@ -41,6 +41,8 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 enum class ServiceSinkRunningState { STATE_NOT_START, STATE_RUNNING };
+const std::string EVENT_HANDLER_TASKNAME_START_TYPE = "start_type_handle_task";
+const std::string EVENT_HANDLER_TASKNAME_START_DHID = "start_dhid_handle_task";
 
 class DistributedInputSinkManager : public SystemAbility, public DistributedInputSinkStub {
     DECLARE_SYSTEM_ABILITY(DistributedInputSinkManager)
@@ -59,6 +61,19 @@ public:
         void onStopRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes);
         void onStartRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids);
         void onStopRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids);
+
+        void onRelayPrepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId);
+        void onRelayUnprepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId);
+        void onRelayStartDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, const std::string &strDhids);
+        void onRelayStopDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, const std::string &strDhids);
+        void onRelayStartTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, uint32_t inputTypes);
+        void onRelayStopTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, uint32_t inputTypes);
 
     private:
         DistributedInputSinkManager *sinkManagerObj_;

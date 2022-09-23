@@ -41,8 +41,11 @@ public:
 
     int32_t Init();
     void Release();
+    // this open deviceA.sourceSa ---->  deviceB.sinkSa softbus.
     int32_t OpenInputSoftbus(const std::string &remoteDevId);
-    void CloseInputSoftbus(const std::string &remoteDevId);
+    void CloseInputSoftbus(const int32_t sessionId);
+    // this open deviceA.sourceSa ---->  deviceB.sourceSa softbus.
+    int32_t OpenInputSoftbusForRelay(const std::string &srcId);
     void RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback);
 
     int32_t PrepareRemoteInput(const std::string& deviceId);
@@ -57,6 +60,22 @@ public:
     int32_t StartRemoteInput(const std::string &deviceId, const std::vector<std::string> &dhids);
     int32_t StopRemoteInput(const std::string &deviceId, const std::vector<std::string> &dhids);
 
+    int32_t SendRelayPrepareRequest(const std::string &srcId, const std::string &sinkId);
+    int32_t SendRelayUnprepareRequest(const std::string &srcId, const std::string &sinkId);
+    int32_t PrepareRemoteInput(int32_t sessionId, const std::string &deviceId);
+    int32_t UnprepareRemoteInput(int32_t sessionId, const std::string &deviceId);
+    int32_t NotifyOriginPrepareResult(int32_t srcTsrcSeId, const std::string &srcId, const std::string &sinkId,
+        int32_t status);
+    int32_t NotifyOriginUnprepareResult(int32_t srcTsrcSeId, const std::string &srcId, const std::string &sinkId,
+        int32_t status);
+
+    int32_t SendRelayStartDhidRequest(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhids);
+    int32_t SendRelayStopDhidRequest(const std::string &srcId, const std::string &sinkId,
+        const std::vector<std::string> &dhids);
+    int32_t SendRelayStartTypeRequest(const std::string &srcId, const std::string &sinkId, const uint32_t& inputTypes);
+    int32_t SendRelayStopTypeRequest(const std::string &srcId, const std::string &sinkId, const uint32_t& inputTypes);
+
     int32_t OnSessionOpened(int32_t sessionId, int32_t result);
     void OnSessionClosed(int32_t sessionId);
     void OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen);
@@ -64,8 +83,9 @@ public:
 
 private:
     std::string FindDeviceBySession(int32_t sessionId);
+    int32_t FindSessionIdByDevId(bool isToSrc, const std::string &deviceId);
     int32_t SendMsg(int32_t sessionId, std::string &message);
-    int32_t CheckDeviceSessionState(const std::string &remoteDevId);
+    int32_t CheckDeviceSessionState(bool isToSrcSa, const std::string &remoteDevId);
     void HandleSessionData(int32_t sessionId, const std::string& messageData);
     bool CheckRecivedData(const std::string& messageData);
     void NotifyResponsePrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
@@ -76,17 +96,56 @@ private:
     void NotifyResponseStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseKeyState(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyReceivedEventRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveSrcTSrcRelayPrepare(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveSrcTSrcRelayUnprepare(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyResponseRelayPrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyResponseRelayUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveRelayPrepareResult(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveRelayUnprepareResult(int32_t sessionId, const nlohmann::json &recMsg);
+
+    void ReceiveSrcTSrcRelayStartDhid(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveSrcTSrcRelayStopDhid(int32_t sessionId, const nlohmann::json &recMsg);
+    int32_t StartRemoteInputDhids(int32_t sessionId, const std::string &deviceId, const std::string &dhids);
+    int32_t StopRemoteInputDhids(int32_t sessionId, const std::string &deviceId, const std::string &dhids);
+    void NotifyResponseRelayStartDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyResponseRelayStopDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    int32_t NotifyOriginStartDhidResult(int32_t srcTsrcSeId, const std::string &srcId, const std::string &sinkId,
+        int32_t status, const std::string &dhids);
+    int32_t NotifyOriginStopDhidResult(int32_t srcTsrcSeId, const std::string &srcId, const std::string &sinkId,
+        int32_t status, const std::string &dhids);
+    void ReceiveRelayStartDhidResult(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveRelayStopDhidResult(int32_t sessionId, const nlohmann::json &recMsg);
+
+    void ReceiveSrcTSrcRelayStartType(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveSrcTSrcRelayStopType(int32_t sessionId, const nlohmann::json &recMsg);
+    int32_t StartRemoteInputType(int32_t sessionId, const std::string &deviceId, const uint32_t& inputTypes);
+    int32_t StopRemoteInputType(int32_t sessionId, const std::string &deviceId, const uint32_t& inputTypes);
+    void NotifyResponseRelayStartTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    void NotifyResponseRelayStopTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
+    int32_t NotifyOriginStartTypeResult(int32_t sessionId, const std::string &srcId, const std::string &sinkId,
+            int32_t status, uint32_t inputTypes);
+    int32_t NotifyOriginStopTypeResult(int32_t sessionId, const std::string &srcId, const std::string &sinkId,
+            int32_t status, uint32_t inputTypes);
+    void ReceiveRelayStartTypeResult(int32_t sessionId, const nlohmann::json &recMsg);
+    void ReceiveRelayStopTypeResult(int32_t sessionId, const nlohmann::json &recMsg);
+
+    struct DInputSessionInfo {
+        bool isToSrcSa; // [true] is session to source_sa, [false] is session to sink_sa
+        std::string remoteId; // networkId
+    };
+
     void CalculateLatency(int32_t sessionId, const nlohmann::json &recMsg);
     std::string JointDhIds(const std::vector<std::string> &dhids);
+    void RegRespFunMap();
 
 private:
-    std::map<std::string, int32_t> sessionDevMap_;
-    std::map<std::string, bool> channelStatusMap_;
     std::mutex operationMutex_;
     std::set<int32_t> sessionIdSet_;
     std::shared_ptr<DInputSourceTransCallback> callback_;
     std::string mySessionName_ = "";
     std::condition_variable openSessionWaitCond_;
+    std::map<int32_t, DInputSessionInfo> sessionDevMap_; // [sessionId, DInputSessionInfo]
+    std::map<int32_t, bool> channelStatusMap_; // [sessionId, bool]
     uint64_t deltaTime_ = 0;
     uint64_t deltaTimeAll_ = 0;
     uint64_t sendTime_ = 0;
@@ -96,6 +155,9 @@ private:
     std::thread latencyThread_;
     std::string eachLatencyDetails_ = "";
     int32_t sessionId_ = 0;
+    using SourceTransportFunc = void (DistributedInputSourceTransport::*)(int32_t sessionId,
+        const nlohmann::json &recMsg);
+    std::map<int32_t, SourceTransportFunc> memberFuncMap_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

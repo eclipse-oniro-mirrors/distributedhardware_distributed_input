@@ -27,9 +27,21 @@ public:
     virtual void onUnprepareRemoteInput(const int32_t& sessionId) = 0;
     virtual void onStartRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes) = 0;
     virtual void onStopRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes) = 0;
-
     virtual void onStartRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids) = 0;
     virtual void onStopRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids) = 0;
+
+    virtual void onRelayPrepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+        const std::string &deviceId) = 0;
+    virtual void onRelayUnprepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+        const std::string &deviceId) = 0;
+    virtual void onRelayStartDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+        const std::string &deviceId, const std::string &strDhids) = 0;
+    virtual void onRelayStopDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+        const std::string &deviceId, const std::string &strDhids) = 0;
+    virtual void onRelayStartTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+        const std::string &deviceId, uint32_t inputTypes) = 0;
+    virtual void onRelayStopTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+        const std::string &deviceId, uint32_t inputTypes) = 0;
     virtual ~DInputSinkTransCallback() {}
 };
 } // namespace DistributedInput

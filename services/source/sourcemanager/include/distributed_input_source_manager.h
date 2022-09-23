@@ -55,6 +55,17 @@ const uint32_t DINPUT_SOURCE_MANAGER_STOP_DHID_MSG = 8;
 const uint32_t DINPUT_SOURCE_MANAGER_RECEIVE_DATA_MSG = 9;
 const uint32_t DINPUT_SOURCE_MANAGER_STARTSERVER_MSG = 10;
 const uint32_t DINPUT_SOURCE_MANAGER_KEY_STATE_MSG = 11;
+
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_PREPARE_RESULT_TO_ORIGIN   = 12;
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_UNPREPARE_RESULT_TO_ORIGIN = 13;
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_PREPARE_RESULT_MMI   = 14;
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_UNPREPARE_RESULT_MMI = 15;
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_STARTDHID_RESULT_MMI = 16;
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_STOPDHID_RESULT_MMI  = 17;
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_STARTTYPE_RESULT_MMI = 18;
+const uint32_t DINPUT_SOURCE_MANAGER_RELAY_STOPTYPE_RESULT_MMI  = 19;
+
+const std::string INPUT_SOURCEMANAGER_KEY_SESSIONID = "sessionId";
 const std::string INPUT_SOURCEMANAGER_KEY_DEVID = "deviceId";
 const std::string INPUT_SOURCEMANAGER_KEY_HWID = "hardwareId";
 const std::string INPUT_SOURCEMANAGER_KEY_ITP = "inputTypes";
@@ -62,9 +73,11 @@ const std::string INPUT_SOURCEMANAGER_KEY_DHID = "dhids";
 const std::string INPUT_SOURCEMANAGER_KEY_TYPE = "type";
 const std::string INPUT_SOURCEMANAGER_KEY_CODE = "code";
 const std::string INPUT_SOURCEMANAGER_KEY_VALUE = "value";
-const std::string INPUT_SOURCEMANAGER_KEY_FROM_START_DHID = "fromStartDhid";
 const std::string INPUT_SOURCEMANAGER_KEY_RESULT = "result";
 const std::string INPUT_SOURCEMANAGER_KEY_WHITELIST = "whitelist";
+const std::string INPUT_SOURCEMANAGER_KEY_SRC_DEVID = "srcId";
+const std::string INPUT_SOURCEMANAGER_KEY_SINK_DEVID = "sinkId";
+
 const uint32_t DINPUT_SOURCE_SWITCH_OFF = 0;
 const uint32_t DINPUT_SOURCE_SWITCH_ON = 1;
 const uint32_t DINPUT_SOURCE_WRITE_EVENT_SIZE = 1;
@@ -184,6 +197,20 @@ public:
         void onResponseKeyState(const std::string deviceId, const std::string &dhid, const uint32_t type,
             const uint32_t code, const uint32_t value);
         void onReceivedEventRemoteInput(const std::string deviceId, const std::string &event);
+        void onResponseRelayPrepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result,
+            const std::string &object);
+        void onResponseRelayUnprepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result);
+
+        void onReceiveRelayPrepareResult(int32_t status, const std::string &srcId, const std::string &sinkId);
+        void onReceiveRelayUnprepareResult(int32_t status, const std::string &srcId, const std::string &sinkId);
+        void onReceiveRelayStartDhidResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            const std::string &dhids);
+        void onReceiveRelayStopDhidResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            const std::string &dhids);
+        void onReceiveRelayStartTypeResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            uint32_t inputTypes);
+        void onReceiveRelayStopTypeResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            uint32_t inputTypes);
         void RecordEventLog(int64_t when, int32_t type, int32_t code, int32_t value, const std::string& path);
 
     private:
@@ -194,7 +221,7 @@ public:
     public:
         DInputSourceManagerEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
             DistributedInputSourceManager *manager);
-        ~DInputSourceManagerEventHandler() {}
+        ~DInputSourceManagerEventHandler();
 
         void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     private:
@@ -208,7 +235,18 @@ public:
         void NotifyStopDhidCallback(const AppExecFwk::InnerEvent::Pointer &event);
         void NotifyKeyStateCallback(const AppExecFwk::InnerEvent::Pointer &event);
         void NotifyStartServerCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayPrepareCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayUnprepareCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayStartDhidCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayStopDhidCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayStartTypeCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayStopTypeCallback(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayPrepareRemoteInput(const AppExecFwk::InnerEvent::Pointer &event);
+        void NotifyRelayUnprepareRemoteInput(const AppExecFwk::InnerEvent::Pointer &event);
 
+        using SourceEventFunc = void (DInputSourceManagerEventHandler::*)(
+            const AppExecFwk::InnerEvent::Pointer &event);
+        std::map<int32_t, SourceEventFunc> eventFuncMap_;
         DistributedInputSourceManager *sourceManagerObj_;
     };
 
@@ -289,6 +327,7 @@ public:
     void RunStopDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status);
     void RunKeyStateCallback(const std::string &sinkId, const std::string &dhId, const uint32_t type,
         const uint32_t code, const uint32_t value);
+    void RunWhiteListCallback(const std::string &devId, const std::string &object);
 
     DInputServerType GetStartTransFlag();
     void SetStartTransFlag(const DInputServerType flag);
@@ -347,6 +386,24 @@ private:
             : devId(deviceId), inputTypes(types), callback(cb) {}
     };
     // add new prepare/start function
+    struct DInputClientRelayPrepareInfo {
+        std::string srcId;
+        std::string sinkId;
+        sptr<IPrepareDInputCallback> preCallback = nullptr;
+
+        DInputClientRelayPrepareInfo(std::string sourceId, std::string sinkid,
+            sptr<IPrepareDInputCallback> prepareCallback)
+            : srcId(sourceId), sinkId(sinkid), preCallback(prepareCallback) {}
+    };
+    struct DInputClientRelayUnprepareInfo {
+        std::string srcId;
+        std::string sinkId;
+        sptr<IUnprepareDInputCallback> unpreCallback = nullptr;
+        DInputClientRelayUnprepareInfo(std::string sourceId, std::string sinkid,
+            sptr<IUnprepareDInputCallback> unprepareCallback)
+            : srcId(sourceId), sinkId(sinkid), unpreCallback(unprepareCallback) {}
+    };
+
     struct DInputClientStartDhidInfo {
         std::string srcId;
         std::string sinkId;
@@ -358,6 +415,23 @@ private:
         std::string sinkId;
         std::vector<std::string> dhIds;
         sptr<IStartStopDInputsCallback> callback = nullptr;
+    };
+
+    struct DInputClientStartTypeInfo {
+        std::string srcId;
+        std::string sinkId;
+        uint32_t inputTypes;
+        sptr<IStartDInputCallback> callback = nullptr;
+        DInputClientStartTypeInfo(std::string sourceId, std::string sinkid, uint32_t types,
+            sptr<IStartDInputCallback> cb) : srcId(sourceId), sinkId(sinkid), inputTypes(types), callback(cb) {}
+    };
+    struct DInputClientStopTypeInfo {
+        std::string srcId;
+        std::string sinkId;
+        uint32_t inputTypes;
+        sptr<IStopDInputCallback> callback = nullptr;
+        DInputClientStopTypeInfo(std::string sourceId, std::string sinkid, uint32_t types,
+            sptr<IStopDInputCallback> cb) : srcId(sourceId), sinkId(sinkid), inputTypes(types), callback(cb) {}
     };
 
     ServiceSourceRunningState serviceRunningState_ = ServiceSourceRunningState::STATE_NOT_START;
@@ -373,6 +447,13 @@ private:
 
     std::vector<DInputClientStartDhidInfo> staStringCallbacks_;
     std::vector<DInputClientStopDhidInfo> stpStringCallbacks_;
+
+    std::vector<DInputClientRelayPrepareInfo> relayPreCallbacks_;
+    std::vector<DInputClientRelayUnprepareInfo> relayUnpreCallbacks_;
+    std::vector<DInputClientStartDhidInfo> relayStaDhidCallbacks_;
+    std::vector<DInputClientStopDhidInfo> relayStpDhidCallbacks_;
+    std::vector<DInputClientStartTypeInfo> relayStaTypeCallbacks_;
+    std::vector<DInputClientStopTypeInfo> relayStpTypeCallbacks_;
 
     std::set<sptr<IAddWhiteListInfosCallback>> addWhiteListCallbacks_;
     std::set<sptr<IDelWhiteListInfosCallback>> delWhiteListCallbacks_;
@@ -395,6 +476,18 @@ private:
     std::mutex valMutex_;
     std::mutex syncNodeInfoMutex_;
     std::map<std::string, std::set<BeRegNodeInfo>> syncNodeInfoMap_;
+
+    void RunRelayPrepareCallback(const std::string &srcId, const std::string &sinkId, const int32_t &status);
+    void RunRelayUnprepareCallback(const std::string &srcId, const std::string &sinkId, const int32_t &status);
+    void RunRelayStartDhidCallback(const std::string &srcId, const std::string &sinkId, const int32_t &status,
+        const std::string &dhids);
+    void RunRelayStopDhidCallback(const std::string &srcId, const std::string &sinkId, const int32_t &status,
+        const std::string &dhids);
+    void RunRelayStartTypeCallback(const std::string &srcId, const std::string &sinkId, const int32_t &status,
+        uint32_t inputTypes);
+    void RunRelayStopTypeCallback(const std::string &srcId, const std::string &sinkId, const int32_t &status,
+        uint32_t inputTypes);
+
     int32_t RelayStartRemoteInputByType(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
         sptr<IStartDInputCallback> callback);
     int32_t RelayStopRemoteInputByType(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,

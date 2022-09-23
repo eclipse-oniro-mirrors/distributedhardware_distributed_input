@@ -121,33 +121,83 @@ int32_t DistributedInputSourceTransport::Init()
         DHLOGE("Init CreateSessionServer failed, error code %d.", ret);
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_INIT_FAIL;
     }
+    RegRespFunMap();
     return DH_SUCCESS;
+}
+
+void DistributedInputSourceTransport::RegRespFunMap()
+{
+    memberFuncMap_[TRANS_SINK_MSG_ONPREPARE] = &DistributedInputSourceTransport::NotifyResponsePrepareRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_ONUNPREPARE] = &DistributedInputSourceTransport::NotifyResponseUnprepareRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_ONSTART] = &DistributedInputSourceTransport::NotifyResponseStartRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_ONSTOP] = &DistributedInputSourceTransport::NotifyResponseStopRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_BODY_DATA] = &DistributedInputSourceTransport::NotifyReceivedEventRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_LATENCY] = &DistributedInputSourceTransport::CalculateLatency;
+    memberFuncMap_[TRANS_SINK_MSG_DHID_ONSTART] = &DistributedInputSourceTransport::NotifyResponseStartRemoteInputDhid;
+    memberFuncMap_[TRANS_SINK_MSG_DHID_ONSTOP] = &DistributedInputSourceTransport::NotifyResponseStopRemoteInputDhid;
+    memberFuncMap_[TRANS_SINK_MSG_KEY_STATE] = &DistributedInputSourceTransport::NotifyResponseKeyState;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_PREPARE] = &DistributedInputSourceTransport::ReceiveSrcTSrcRelayPrepare;
+    memberFuncMap_[TRANS_SINK_MSG_ON_RELAY_PREPARE] =
+        &DistributedInputSourceTransport::NotifyResponseRelayPrepareRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_ON_RELAY_UNPREPARE] =
+        &DistributedInputSourceTransport::NotifyResponseRelayUnprepareRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE] =
+        &DistributedInputSourceTransport::ReceiveSrcTSrcRelayUnprepare;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT] =
+        &DistributedInputSourceTransport::ReceiveRelayPrepareResult;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT] =
+        &DistributedInputSourceTransport::ReceiveRelayUnprepareResult;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_START_DHID] =
+        &DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartDhid;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID] =
+        &DistributedInputSourceTransport::ReceiveSrcTSrcRelayStopDhid;
+    memberFuncMap_[TRANS_SINK_MSG_ON_RELAY_STARTDHID] =
+        &DistributedInputSourceTransport::NotifyResponseRelayStartDhidRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_ON_RELAY_STOPDHID] =
+        &DistributedInputSourceTransport::NotifyResponseRelayStopDhidRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT] =
+        &DistributedInputSourceTransport::ReceiveRelayStartDhidResult;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT] =
+        &DistributedInputSourceTransport::ReceiveRelayStopDhidResult;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE] =
+        &DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartType;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE] =
+        &DistributedInputSourceTransport::ReceiveSrcTSrcRelayStopType;
+    memberFuncMap_[TRANS_SINK_MSG_ON_RELAY_STARTTYPE] =
+        &DistributedInputSourceTransport::NotifyResponseRelayStartTypeRemoteInput;
+    memberFuncMap_[TRANS_SINK_MSG_ON_RELAY_STOPTYPE] =
+        &DistributedInputSourceTransport::NotifyResponseRelayStopTypeRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT] =
+        &DistributedInputSourceTransport::ReceiveRelayStartTypeResult;
+    memberFuncMap_[TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT] =
+        &DistributedInputSourceTransport::ReceiveRelayStopTypeResult;
 }
 
 void DistributedInputSourceTransport::Release()
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    std::for_each(sessionDevMap_.begin(), sessionDevMap_.end(), [](auto item) { CloseSession(item.second); });
+    std::for_each(sessionDevMap_.begin(), sessionDevMap_.end(), [](auto item) { CloseSession(item.first); });
     (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
     sessionDevMap_.clear();
     channelStatusMap_.clear();
+    memberFuncMap_.clear();
     DistributedInputInject::GetInstance().StopInjectThread();
 }
 
-int32_t DistributedInputSourceTransport::CheckDeviceSessionState(const std::string &devId)
+int32_t DistributedInputSourceTransport::CheckDeviceSessionState(bool isToSrcSa, const std::string &devId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(devId) != 0) {
-        DHLOGI("CheckDeviceSessionState has opened %s", GetAnonyString(devId).c_str());
-        return DH_SUCCESS;
-    } else {
-        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_DEVICE_SESSION_STATE;
+    for (auto tmp : sessionDevMap_) {
+        if (tmp.second.isToSrcSa == isToSrcSa && tmp.second.remoteId == devId) {
+            return DH_SUCCESS;
+        }
     }
+    return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_DEVICE_SESSION_STATE;
 }
 
 int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &remoteDevId)
 {
-    int32_t ret = CheckDeviceSessionState(remoteDevId);
+    int32_t ret = CheckDeviceSessionState(false, remoteDevId);
     if (ret == DH_SUCCESS) {
         DHLOGE("Softbus session has already opened, deviceId: %s", GetAnonyString(remoteDevId).c_str());
         return DH_SUCCESS;
@@ -170,14 +220,15 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
         SessionStatus::OPENING);
     {
         std::unique_lock<std::mutex> sessionLock(operationMutex_);
-        sessionDevMap_[remoteDevId] = sessionId;
+        DInputSessionInfo sessionInfo{false, remoteDevId};
+        sessionDevMap_[sessionId] = sessionInfo;
     }
 
     DHLOGI("Wait for channel session opened.");
     {
         std::unique_lock<std::mutex> waitLock(operationMutex_);
         auto status = openSessionWaitCond_.wait_for(waitLock, std::chrono::seconds(SESSION_WAIT_TIMEOUT_SECOND),
-            [this, remoteDevId] () { return channelStatusMap_[remoteDevId]; });
+            [this, sessionId] () { return channelStatusMap_[sessionId]; });
         if (!status) {
             DHLOGE("OpenSession timeout, remoteDevId: %s, sessionId: %d",
                 GetAnonyString(remoteDevId).c_str(), sessionId);
@@ -187,6 +238,7 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
 
     StartLatencyThread(remoteDevId);
 
+    DistributedInputInject::GetInstance().StartInjectThread();
     DHLOGI("OpenSession success, remoteDevId:%s, sessionId: %d",
         GetAnonyString(remoteDevId).c_str(), sessionId);
     sessionId_ = sessionId;
@@ -199,38 +251,107 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
     return DH_SUCCESS;
 }
 
-void DistributedInputSourceTransport::CloseInputSoftbus(const std::string &remoteDevId)
+void DistributedInputSourceTransport::CloseInputSoftbus(const int32_t sessionId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     // check this device's all hd is close,this device session close.
 
-    if (sessionDevMap_.count(remoteDevId) == 0) {
-        DHLOGI("SessionDevIdMap Not find remoteDevId: %s", GetAnonyString(remoteDevId).c_str());
+    if (sessionDevMap_.count(sessionId) == 0) {
+        DHLOGI("sessionDevMap_ Not find sessionId: %d", sessionId);
         return;
     }
-    int32_t sessionId = sessionDevMap_[remoteDevId];
 
     StopLatencyThread();
 
-    DHLOGI("RemoteDevId: %s, sessionId: %d", GetAnonyString(remoteDevId).c_str(), sessionId);
-    HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::CLOSING);
+    DHLOGI("RemoteDevId: %s, sessionId: %d", GetAnonyString(sessionDevMap_[sessionId].remoteId).c_str(), sessionId);
+    HiDumper::GetInstance().SetSessionStatus(sessionDevMap_[sessionId].remoteId, SessionStatus::CLOSING);
     CloseSession(sessionId);
-    sessionDevMap_.erase(remoteDevId);
-    channelStatusMap_.erase(remoteDevId);
+    sessionDevMap_.erase(sessionId);
+    channelStatusMap_.erase(sessionId);
     DistributedInputInject::GetInstance().StopInjectThread();
 
 #ifdef DINPUT_LOW_LATENCY
     DInputLowLatency::GetInstance().DisableSourceLowLatency();
 #endif
 
-    HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::CLOSED);
-    HiDumper::GetInstance().DeleteSessionInfo(remoteDevId);
+    HiDumper::GetInstance().SetSessionStatus(sessionDevMap_[sessionId].remoteId, SessionStatus::CLOSED);
+    HiDumper::GetInstance().DeleteSessionInfo(sessionDevMap_[sessionId].remoteId);
+}
+
+
+int32_t DistributedInputSourceTransport::OpenInputSoftbusForRelay(const std::string &srcId)
+{
+    int32_t ret = CheckDeviceSessionState(true, srcId);
+    if (ret == DH_SUCCESS) {
+        DHLOGE("Softbus session has already opened, deviceId: %s", GetAnonyString(srcId).c_str());
+        return DH_SUCCESS;
+    }
+
+    ret = Init();
+    if (ret != DH_SUCCESS) {
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_FAIL;
+    }
+
+    std::string peerSessionName = SESSION_NAME_SOURCE + srcId.substr(0, INTERCEPT_STRING_LENGTH);
+    DHLOGI("OpenInputSoftbus peerSessionName:%s", peerSessionName.c_str());
+
+    StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_OPEN_SESSION_START, DINPUT_OPEN_SESSION_TASK);
+    int sessionId = OpenSession(mySessionName_.c_str(), peerSessionName.c_str(), srcId.c_str(), GROUP_ID.c_str(),
+        &g_sessionAttr);
+    if (sessionId < 0) {
+        DHLOGE("OpenSession fail, remoteDevId: %s, sessionId: %s", GetAnonyString(srcId).c_str(),
+               GetAnonyInt32(sessionId).c_str());
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_OPEN_SESSION_START, DINPUT_OPEN_SESSION_TASK);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_FAIL;
+    }
+
+    HiDumper::GetInstance().CreateSessionInfo(srcId, sessionId, mySessionName_, peerSessionName,
+        SessionStatus::OPENING);
+    {
+        std::unique_lock<std::mutex> sessionLock(operationMutex_);
+        DInputSessionInfo sessionInfo{true, srcId};
+        sessionDevMap_[sessionId] = sessionInfo;
+    }
+
+    DHLOGI("Wait for channel session opened.");
+    {
+        std::unique_lock<std::mutex> waitLock(operationMutex_);
+        auto status = openSessionWaitCond_.wait_for(waitLock, std::chrono::seconds(SESSION_WAIT_TIMEOUT_SECOND),
+            [this, sessionId] () { return channelStatusMap_[sessionId]; });
+        if (!status) {
+            DHLOGE("OpenSession timeout, remoteDevId: %s, sessionId: %s",
+                GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str());
+            return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_TIMEOUT;
+        }
+    }
+
+#ifdef DINPUT_LOW_LATENCY
+    DInputLowLatency::GetInstance().EnableSourceLowLatency();
+#endif
+
+    DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%s",
+        GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str());
+    HiDumper::GetInstance().SetSessionStatus(srcId, SessionStatus::OPENED);
+    return DH_SUCCESS;
 }
 
 void DistributedInputSourceTransport::RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback)
 {
     DHLOGI("RegisterSourceRespCallback");
     callback_ = callback;
+}
+
+int32_t DistributedInputSourceTransport::FindSessionIdByDevId(bool isToSrc, const std::string &deviceId)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    int32_t sessionId = -1;
+    for (auto tmp : sessionDevMap_) {
+        if (tmp.second.isToSrcSa == isToSrc && tmp.second.remoteId == deviceId) {
+            sessionId = tmp.first;
+            break;
+        }
+    }
+    return sessionId;
 }
 
 /*
@@ -240,120 +361,450 @@ void DistributedInputSourceTransport::RegisterSourceRespCallback(std::shared_ptr
  */
 int32_t DistributedInputSourceTransport::PrepareRemoteInput(const std::string& deviceId)
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) > 0) {
-        int32_t sessionId = sessionDevMap_[deviceId];
-        nlohmann::json jsonStr;
-        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE;
-        jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
-        jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
-        std::string smsg = jsonStr.dump();
-        int32_t ret = SendMsg(sessionId, smsg);
-        if (ret != DH_SUCCESS) {
-            DHLOGE("PrepareRemoteInput deviceId:%s, sessionId: %d, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str(), ret);
-            return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
-        }
-        DHLOGI("PrepareRemoteInput devId:%s, sessionId: %d, smsg:%s.",
-            GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str());
-        return DH_SUCCESS;
-    } else {
-        DHLOGE("PrepareRemoteInput error, not find this device:%s.",
-            GetAnonyString(deviceId).c_str());
+    int32_t sessionId = FindSessionIdByDevId(false, deviceId);
+    if (sessionId < 0) {
+        DHLOGE("PrepareRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
     }
+    DHLOGI("PrepareRemoteInput sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("PrepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("PrepareRemoteInput devId:%s, sessionId:%s, msg:%s.",
+        GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceTransport::UnprepareRemoteInput(const std::string& deviceId)
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) > 0) {
-        int32_t sessionId = sessionDevMap_[deviceId];
-        nlohmann::json jsonStr;
-        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_UNPREPARE;
-        jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
-        jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
-        std::string smsg = jsonStr.dump();
-        int32_t ret = SendMsg(sessionId, smsg);
-        if (ret != DH_SUCCESS) {
-            DHLOGE("UnprepareRemoteInput deviceId:%s, sessionId: %d, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str(), ret);
-            return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
-        }
-        DHLOGI("UnprepareRemoteInput deviceId:%s, sessionId: %d, smsg:%s.",
-            GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str());
-        return DH_SUCCESS;
-    } else {
-        DHLOGE("UnprepareRemoteInput error, not find this device:%s.",
-            GetAnonyString(deviceId).c_str());
+    int32_t sessionId = FindSessionIdByDevId(false, deviceId);
+    if (sessionId < 0) {
+        DHLOGE("UnprepareRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
     }
+    DHLOGI("UnprepareRemoteInput sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_UNPREPARE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("UnprepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
+    }
+    DHLOGI("UnprepareRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
 }
+
+
+int32_t DistributedInputSourceTransport::PrepareRemoteInput(int32_t srcTsrcSeId, const std::string &deviceId)
+{
+    int32_t sinkSessionId = FindSessionIdByDevId(false, deviceId);
+    if (sinkSessionId < 0) {
+        DHLOGE("PrepareRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("PrepareRemoteInput srcTsrcSeId:%d, sinkSessionId:%d.", srcTsrcSeId, sinkSessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE_FOR_REL;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = srcTsrcSeId;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sinkSessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("PrepareRemoteInput deviceId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("PrepareRemoteInput send success, devId:%s, msg:%s.",
+        GetAnonyString(deviceId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::UnprepareRemoteInput(int32_t srcTsrcSeId, const std::string &deviceId)
+{
+    int32_t sinkSessionId = FindSessionIdByDevId(false, deviceId);
+    if (sinkSessionId < 0) {
+        DHLOGE("UnprepareRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
+    }
+    DHLOGI("UnprepareRemoteInput srcTsrcSeId:%d, sinkSessionId:%d.", srcTsrcSeId, sinkSessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_UNPREPARE_FOR_REL;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = srcTsrcSeId;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sinkSessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("UnprepareRemoteInput deviceId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
+    }
+    DHLOGI("UnprepareRemoteInput send success, devId:%s, msg:%s.",
+        GetAnonyString(deviceId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::StartRemoteInputDhids(int32_t srcTsrcSeId, const std::string &deviceId,
+    const std::string &dhids)
+{
+    int32_t sinkSessionId = FindSessionIdByDevId(false, deviceId);
+    if (sinkSessionId < 0) {
+        DHLOGE("StartRemoteInputDhids error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("StartRemoteInputDhids srcTsrcSeId:%d, sinkSessionId:%d.", srcTsrcSeId, sinkSessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_DHID_FOR_REL;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = srcTsrcSeId;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = dhids;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sinkSessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StartRemoteInputDhids deviceId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("StartRemoteInputDhids send success, devId:%s, msg:%s.", GetAnonyString(deviceId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::StopRemoteInputDhids(int32_t srcTsrcSeId, const std::string &deviceId,
+    const std::string &dhids)
+{
+    int32_t sinkSessionId = FindSessionIdByDevId(false, deviceId);
+    if (sinkSessionId < 0) {
+        DHLOGE("StopRemoteInputDhids error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("StopRemoteInputDhids srcTsrcSeId:%d, sinkSessionId:%d.", srcTsrcSeId, sinkSessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_DHID_FOR_REL;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = srcTsrcSeId;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = dhids;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sinkSessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StopRemoteInputDhids deviceId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("StopRemoteInputDhids send success, devId:%s, msg:%s.", GetAnonyString(deviceId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::StartRemoteInputType(int32_t srcTsrcSeId, const std::string &deviceId,
+    const uint32_t& inputTypes)
+{
+    int32_t sinkSessionId = FindSessionIdByDevId(false, deviceId);
+    if (sinkSessionId < 0) {
+        DHLOGE("StartRemoteInputType error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("StartRemoteInputType srcTsrcSeId:%d, sinkSessionId:%d.", srcTsrcSeId, sinkSessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_TYPE_FOR_REL;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = srcTsrcSeId;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sinkSessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StartRemoteInputType deviceId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("StartRemoteInputType send success, devId:%s, msg:%s.", GetAnonyString(deviceId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::StopRemoteInputType(int32_t srcTsrcSeId, const std::string &deviceId,
+    const uint32_t& inputTypes)
+{
+    int32_t sinkSessionId = FindSessionIdByDevId(false, deviceId);
+    if (sinkSessionId < 0) {
+        DHLOGE("StopRemoteInputType error, not find this device:%s.", GetAnonyString(deviceId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("StopRemoteInputType srcTsrcSeId:%d, sinkSessionId:%d.", srcTsrcSeId, sinkSessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = srcTsrcSeId;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sinkSessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StopRemoteInputType deviceId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("StopRemoteInputType send success, devId:%s, msg:%s.", GetAnonyString(deviceId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::SendRelayPrepareRequest(const std::string &srcId, const std::string &sinkId)
+{
+    int32_t sessionId = FindSessionIdByDevId(true, srcId);
+    if (sessionId < 0) {
+        DHLOGE("SendRelayPrepareRequest error, not find this device:%s.", GetAnonyString(srcId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("SendRelayPrepareRequest sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_PREPARE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = sinkId;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("SendRelayPrepareRequest srcId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("SendRelayPrepareRequest srcId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::SendRelayUnprepareRequest(const std::string &srcId, const std::string &sinkId)
+{
+    int32_t sessionId = FindSessionIdByDevId(true, srcId);
+    if (sessionId < 0) {
+        DHLOGE("SendRelayUnprepareRequest error, not find this device:%s.", GetAnonyString(srcId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("SendRelayUnprepareRequest sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = sinkId;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("SendRelayUnprepareRequest srcId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("SendRelayUnprepareRequest srcId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::NotifyOriginPrepareResult(int32_t srcTsrcSeId, const std::string &srcId,
+    const std::string &sinkId, int32_t status)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT;
+    jsonStr[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = srcId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = status;
+
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(srcTsrcSeId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyOriginPrepareResult srcTsrcSeId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyInt32(srcTsrcSeId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_PREPARE_FAIL;
+    }
+    DHLOGI("NotifyOriginPrepareResult srcTsrcSeId:%d, smsg:%s.", srcTsrcSeId, smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::NotifyOriginUnprepareResult(int32_t srcTsrcSeId, const std::string &srcId,
+    const std::string &sinkId, int32_t status)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT;
+    jsonStr[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = srcId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = status;
+
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(srcTsrcSeId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyOriginUnprepareResult srcTsrcSeId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyInt32(srcTsrcSeId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_UNPREPARE_FAIL;
+    }
+    DHLOGI("NotifyOriginUnprepareResult srcTsrcSeId:%d, smsg:%s.", srcTsrcSeId, smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::NotifyOriginStartDhidResult(int32_t srcTsrcSeId, const std::string &srcId,
+    const std::string &sinkId, int32_t status, const std::string &dhids)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT;
+    jsonStr[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = srcId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = status;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = dhids;
+
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(srcTsrcSeId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyOriginStartDhidResult srcTsrcSeId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyInt32(srcTsrcSeId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("NotifyOriginStartDhidResult srcTsrcSeId:%d, smsg:%s.", srcTsrcSeId, smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::NotifyOriginStopDhidResult(int32_t srcTsrcSeId, const std::string &srcId,
+    const std::string &sinkId, int32_t status, const std::string &dhids)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT;
+    jsonStr[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = srcId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = status;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = dhids;
+
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(srcTsrcSeId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyOriginStopDhidResult srcTsrcSeId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyInt32(srcTsrcSeId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("NotifyOriginStopDhidResult srcTsrcSeId:%d, smsg:%s.", srcTsrcSeId, smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::NotifyOriginStartTypeResult(int32_t srcTsrcSeId, const std::string &srcId,
+    const std::string &sinkId, int32_t status, uint32_t inputTypes)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT;
+    jsonStr[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = srcId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = status;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(srcTsrcSeId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyOriginStartTypeResult srcTsrcSeId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyInt32(srcTsrcSeId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("NotifyOriginStartTypeResult srcTsrcSeId:%d, smsg:%s.", srcTsrcSeId, smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::NotifyOriginStopTypeResult(int32_t srcTsrcSeId, const std::string &srcId,
+    const std::string &sinkId, int32_t status, uint32_t inputTypes)
+{
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT;
+    jsonStr[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = srcId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = status;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(srcTsrcSeId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("NotifyOriginStopTypeResult srcTsrcSeId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyInt32(srcTsrcSeId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("NotifyOriginStopTypeResult srcTsrcSeId:%d, smsg:%s.", srcTsrcSeId, smsg.c_str());
+    return DH_SUCCESS;
+}
+
 
 int32_t DistributedInputSourceTransport::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes)
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) > 0) {
-        int32_t sessionId = sessionDevMap_[deviceId];
-        nlohmann::json jsonStr;
-        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_TYPE;
-        jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
-        jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
-        jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
-        std::string smsg = jsonStr.dump();
-        int32_t ret = SendMsg(sessionId, smsg);
-        if (ret != DH_SUCCESS) {
-            DHLOGE("StartRemoteInput deviceId:%s, sessionId: %d, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str(), ret);
-            return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
-        }
-        DHLOGI("StartRemoteInput deviceId:%s, sessionId: %d, smsg:%s.",
-            GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str());
-        return DH_SUCCESS;
-    } else {
-        DHLOGE("StartRemoteInput error, not find this device:%s.",
-            GetAnonyString(deviceId).c_str());
+    int32_t sessionId = FindSessionIdByDevId(false, deviceId);
+    if (sessionId < 0) {
+        DHLOGE("StartRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
     }
+    DHLOGI("StartRemoteInput sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_TYPE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("StartRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceTransport::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes)
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) > 0) {
-        int32_t sessionId = sessionDevMap_[deviceId];
-        nlohmann::json jsonStr;
-        jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_TYPE;
-        jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
-        jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
-        jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
-        std::string smsg = jsonStr.dump();
-        int32_t ret = SendMsg(sessionId, smsg);
-        if (ret != DH_SUCCESS) {
-            DHLOGE("StopRemoteInput deviceId:%s, sessionId: %d, smsg:%s, SendMsg error, ret:%d.",
-                GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str(), ret);
-            return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
-        }
-        DHLOGI("StopRemoteInput deviceId:%s, sessionId: %d, smsg:%s.",
-            GetAnonyString(deviceId).c_str(), sessionId, SetAnonyId(smsg).c_str());
-        return DH_SUCCESS;
-    } else {
+    int32_t sessionId = FindSessionIdByDevId(false, deviceId);
+    if (sessionId < 0) {
         DHLOGE("StopRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
     }
+    DHLOGI("StopRemoteInput sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_TYPE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonStr[DINPUT_SOFTBUS_KEY_SESSION_ID] = sessionId;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("StopRemoteInput deviceId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(deviceId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
 }
 
 int32_t DistributedInputSourceTransport::LatencyCount(const std::string& deviceId)
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) <= 0) {
+    int32_t sessionId = FindSessionIdByDevId(false, deviceId);
+    if (sessionId < 0) {
         DHLOGE("LatencyCount error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_LATENCY_FAIL;
     }
 
-    int32_t sessionId = sessionDevMap_[deviceId];
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_LATENCY;
     jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
@@ -413,12 +864,13 @@ void DistributedInputSourceTransport::StopLatencyThread()
 int32_t DistributedInputSourceTransport::StartRemoteInput(const std::string &deviceId,
     const std::vector<std::string> &dhids)
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) == 0) {
+    int32_t sessionId = FindSessionIdByDevId(false, deviceId);
+    if (sessionId < 0) {
         DHLOGE("StartRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
     }
-    int32_t sessionId = sessionDevMap_[deviceId];
+    DHLOGI("StartRemoteInput sessionId:%d.", sessionId);
+
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_DHID;
     jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
@@ -439,12 +891,13 @@ int32_t DistributedInputSourceTransport::StartRemoteInput(const std::string &dev
 int32_t DistributedInputSourceTransport::StopRemoteInput(const std::string &deviceId,
     const std::vector<std::string> &dhids)
 {
-    std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) == 0) {
+    int32_t sessionId = FindSessionIdByDevId(false, deviceId);
+    if (sessionId < 0) {
         DHLOGE("StopRemoteInput error, not find this device:%s.", GetAnonyString(deviceId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
     }
-    int32_t sessionId = sessionDevMap_[deviceId];
+    DHLOGI("StopRemoteInput sessionId:%d.", sessionId);
+
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_DHID;
     jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
@@ -462,6 +915,110 @@ int32_t DistributedInputSourceTransport::StopRemoteInput(const std::string &devi
     return DH_SUCCESS;
 }
 
+int32_t DistributedInputSourceTransport::SendRelayStartDhidRequest(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhids)
+{
+    int32_t sessionId = FindSessionIdByDevId(true, srcId);
+    if (sessionId < 0) {
+        DHLOGE("SendRelayStartDhidRequest error, not find this device:%s.", GetAnonyString(srcId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("SendRelayStartDhidRequest sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_START_DHID;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = JointDhIds(dhids);
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("SendRelayStartDhidRequest srcId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("SendRelayStartDhidRequest srcId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::SendRelayStopDhidRequest(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhids)
+{
+    int32_t sessionId = FindSessionIdByDevId(true, srcId);
+    if (sessionId < 0) {
+        DHLOGE("SendRelayStopDhidRequest error, not find this device:%s.", GetAnonyString(srcId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("SendRelayStopDhidRequest sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = JointDhIds(dhids);
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("SendRelayStopDhidRequest srcId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("SendRelayStopDhidRequest srcId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::SendRelayStartTypeRequest(const std::string &srcId, const std::string &sinkId,
+    const uint32_t& inputTypes)
+{
+    int32_t sessionId = FindSessionIdByDevId(true, srcId);
+    if (sessionId < 0) {
+        DHLOGE("SendRelayStartTypeRequest error, not find this device:%s.", GetAnonyString(srcId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("SendRelayStartTypeRequest sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("SendRelayStartTypeRequest srcId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL;
+    }
+    DHLOGI("SendRelayStartTypeRequest srcId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSourceTransport::SendRelayStopTypeRequest(const std::string &srcId, const std::string &sinkId,
+    const uint32_t& inputTypes)
+{
+    int32_t sessionId = FindSessionIdByDevId(true, srcId);
+    if (sessionId < 0) {
+        DHLOGE("SendRelayStopTypeRequest error, not find this device:%s.", GetAnonyString(srcId).c_str());
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("SendRelayStopTypeRequest sessionId:%d.", sessionId);
+
+    nlohmann::json jsonStr;
+    jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE;
+    jsonStr[DINPUT_SOFTBUS_KEY_DEVICE_ID] = sinkId;
+    jsonStr[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = inputTypes;
+    std::string smsg = jsonStr.dump();
+    int32_t ret = SendMsg(sessionId, smsg);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("SendRelayStopTypeRequest srcId:%s, sessionId:%s, smsg:%s, SendMsg error, ret:%d.",
+            GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str(), ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    }
+    DHLOGI("SendRelayStopTypeRequest srcId:%s, sessionId:%s, smsg:%s.",
+        GetAnonyString(srcId).c_str(), GetAnonyInt32(sessionId).c_str(), smsg.c_str());
+    return DH_SUCCESS;
+}
+
 std::string DistributedInputSourceTransport::JointDhIds(const std::vector<std::string> &dhids)
 {
     if (dhids.size() <= 0) {
@@ -474,17 +1031,12 @@ std::string DistributedInputSourceTransport::JointDhIds(const std::vector<std::s
 std::string DistributedInputSourceTransport::FindDeviceBySession(int32_t sessionId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    auto find_item = std::find_if(sessionDevMap_.begin(), sessionDevMap_.end(),
-        [sessionId](const std::map<std::string, int>::value_type item) {
-        return item.second == sessionId;
-    });
-
     std::string devId = "";
-    if (find_item != sessionDevMap_.end()) {
-        devId = (*find_item).first;
-    } else {
-        DHLOGE("findKeyByValue error.");
+    if (sessionDevMap_.count(sessionId) == 0) {
+        DHLOGE("FindDeviceBySession error, has no this sessionId.");
+        return devId;
     }
+    devId = sessionDevMap_[sessionId].remoteId;
     return devId;
 }
 
@@ -492,12 +1044,11 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
 {
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_OPEN_SESSION_START, DINPUT_OPEN_SESSION_TASK);
     if (result != DH_SUCCESS) {
-        std::string deviceId = FindDeviceBySession(sessionId);
-        DHLOGE("session open failed, sessionId: %d, result:%d, "
-            "deviceId:%s", sessionId, result, GetAnonyString(deviceId).c_str());
+        DHLOGE("session open failed, sessionId:%d, result:%d, deviceId:%s", sessionId, result,
+            GetAnonyString(sessionDevMap_[sessionId].remoteId).c_str());
         std::unique_lock<std::mutex> sessionLock(operationMutex_);
-        if (sessionDevMap_.count(deviceId) > 0) {
-            sessionDevMap_.erase(deviceId);
+        if (sessionDevMap_.count(sessionId) > 0) {
+            sessionDevMap_.erase(sessionId);
         }
         return DH_SUCCESS;
     }
@@ -524,12 +1075,19 @@ int32_t DistributedInputSourceTransport::OnSessionOpened(int32_t sessionId, int3
     }
     DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s",
         mySessionName, peerSessionName, GetAnonyString(peerDevId).c_str());
-    {
+
+    if (sessionSide == AUTH_SESSION_SIDE_SERVER) {
+        DHLOGI("session open succeed, sessionId:%s, sessionSide:service", GetAnonyInt32(sessionId).c_str());
         std::lock_guard<std::mutex> notifyLock(operationMutex_);
-        channelStatusMap_[peerDevId] = true;
+        DInputSessionInfo sessionInfo{true, peerDevId};
+        sessionDevMap_[sessionId] = sessionInfo;
+    } else {
+        DHLOGI("session open succeed, sessionId:%s, sessionSide:client", GetAnonyInt32(sessionId).c_str());
+        std::lock_guard<std::mutex> notifyLock(operationMutex_);
+        channelStatusMap_[sessionId] = true;
         openSessionWaitCond_.notify_all();
     }
-    DistributedInputInject::GetInstance().StartInjectThread();
+
     return DH_SUCCESS;
 }
 
@@ -539,10 +1097,12 @@ void DistributedInputSourceTransport::OnSessionClosed(int32_t sessionId)
     DHLOGI("OnSessionClosed, sessionId: %d, deviceId:%s",
         sessionId, GetAnonyString(deviceId).c_str());
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    if (sessionDevMap_.count(deviceId) > 0) {
-        sessionDevMap_.erase(deviceId);
+    if (sessionDevMap_.count(sessionId) > 0) {
+        sessionDevMap_.erase(sessionId);
     }
-    channelStatusMap_.erase(deviceId);
+    if (channelStatusMap_.count(sessionId) > 0) {
+        channelStatusMap_.erase(sessionId);
+    }
     StopLatencyThread();
     DistributedInputInject::GetInstance().StopInjectThread();
 }
@@ -579,7 +1139,7 @@ void DistributedInputSourceTransport::NotifyResponseUnprepareRemoteInput(int32_t
         return;
     }
     callback_->onResponseUnprepareRemoteInput(deviceId, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
-    CloseInputSoftbus(deviceId);
+    CloseInputSoftbus(sessionId);
 }
 
 void DistributedInputSourceTransport::NotifyResponseStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -692,6 +1252,388 @@ void DistributedInputSourceTransport::CalculateLatency(int32_t sessionId, const 
     eachLatencyDetails_ += (std::to_string(deltaTime_) + DINPUT_SPLIT_COMMA);
 }
 
+void DistributedInputSourceTransport::ReceiveSrcTSrcRelayPrepare(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+
+    // continue notify to A_sink_trans
+    int32_t ret = OpenInputSoftbus(deviceId);
+    if (ret != DH_SUCCESS) {
+        callback_->onResponseRelayPrepareRemoteInput(sessionId, deviceId, false, "");
+        return;
+    }
+
+    ret = PrepareRemoteInput(sessionId, deviceId);
+    if (ret != DH_SUCCESS) {
+        callback_->onResponseRelayPrepareRemoteInput(sessionId, deviceId, false, "");
+        return;
+    }
+}
+
+void DistributedInputSourceTransport::ReceiveSrcTSrcRelayUnprepare(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE, data type is error.");
+        return;
+    }
+
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t ret = UnprepareRemoteInput(sessionId, deviceId);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Can not send message by softbus, unprepare fail.");
+        callback_->onResponseRelayUnprepareRemoteInput(sessionId, deviceId, false);
+        return;
+    }
+}
+
+void DistributedInputSourceTransport::NotifyResponseRelayPrepareRemoteInput(int32_t sessionId,
+    const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_PREPARE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_PREPARE, data type is error.");
+        return;
+    }
+    std::string sinkDevId = FindDeviceBySession(sessionId);
+    if (sinkDevId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_PREPARE, sinkDevId is error.");
+        return;
+    }
+    callback_->onResponseRelayPrepareRemoteInput(recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID], sinkDevId,
+        recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE], recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST]);
+}
+
+void DistributedInputSourceTransport::NotifyResponseRelayUnprepareRemoteInput(int32_t sessionId,
+    const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_UNPREPARE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_UNPREPARE, data type is error.");
+        return;
+    }
+    std::string sinkDevId = FindDeviceBySession(sessionId);
+    if (sinkDevId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_UNPREPARE, sinkDevId is error.");
+        return;
+    }
+    callback_->onResponseRelayUnprepareRemoteInput(recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID], sinkDevId,
+        recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
+}
+
+void DistributedInputSourceTransport::ReceiveRelayPrepareResult(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT, data type error.");
+        return;
+    }
+
+    std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
+    std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
+    int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    callback_->onReceiveRelayPrepareResult(status, srcId, sinkId);
+}
+
+void DistributedInputSourceTransport::ReceiveRelayUnprepareResult(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT, data type error.");
+        return;
+    }
+
+    std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
+    std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
+    int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    callback_->onReceiveRelayUnprepareResult(status, srcId, sinkId);
+    CloseInputSoftbus(sessionId);
+}
+
+void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartDhid(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    std::string dhids =  recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    int32_t ret = StartRemoteInputDhids(sessionId, deviceId, dhids);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Can not send message by softbus, start fail.");
+        std::string localNetworkId = GetLocalNetworkId();
+        if (localNetworkId.empty()) {
+            DHLOGE("Could not get local device id.");
+            return;
+        }
+        NotifyOriginStartDhidResult(sessionId, localNetworkId, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_MSG_IS_BAD, dhids);
+    }
+}
+
+void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStopDhid(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    std::string dhids =  recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    int32_t ret = StopRemoteInputDhids(sessionId, deviceId, dhids);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Can not send message by softbus, start fail.");
+        std::string localNetworkId = GetLocalNetworkId();
+        if (localNetworkId.empty()) {
+            DHLOGE("Could not get local device id.");
+            return;
+        }
+        NotifyOriginStopDhidResult(sessionId, localNetworkId, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD, dhids);
+    }
+}
+
+void DistributedInputSourceTransport::NotifyResponseRelayStartDhidRemoteInput(int32_t sessionId,
+    const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTDHID.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTDHID, data type is error.");
+        return;
+    }
+    std::string sinkDevId = FindDeviceBySession(sessionId);
+    if (sinkDevId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTDHID, sinkDevId is error.");
+        return;
+    }
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return;
+    }
+    int32_t srcTsrcSeId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    bool result = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    NotifyOriginStartDhidResult(srcTsrcSeId, localNetworkId, sinkDevId,
+        result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_MSG_IS_BAD, dhids);
+}
+
+void DistributedInputSourceTransport::NotifyResponseRelayStopDhidRemoteInput(int32_t sessionId,
+    const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPDHID.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPDHID, data type is error.");
+        return;
+    }
+    std::string sinkDevId = FindDeviceBySession(sessionId);
+    if (sinkDevId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPDHID, sinkDevId is error.");
+        return;
+    }
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return;
+    }
+    int32_t srcTsrcSeId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    bool result = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    NotifyOriginStopDhidResult(srcTsrcSeId, localNetworkId, sinkDevId,
+        result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD, dhids);
+}
+
+void DistributedInputSourceTransport::ReceiveRelayStartDhidResult(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT, data type error.");
+        return;
+    }
+
+    std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
+    std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
+    int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    callback_->onReceiveRelayStartDhidResult(status, srcId, sinkId, dhids);
+}
+
+void DistributedInputSourceTransport::ReceiveRelayStopDhidResult(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT, data type error.");
+        return;
+    }
+
+    std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
+    std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
+    int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+    callback_->onReceiveRelayStopDhidResult(status, srcId, sinkId, dhids);
+}
+
+void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartType(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t inputTypes =  recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    int32_t ret = StartRemoteInputType(sessionId, deviceId, inputTypes);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Can not send message by softbus, start fail.");
+        std::string localNetworkId = GetLocalNetworkId();
+        if (localNetworkId.empty()) {
+            DHLOGE("Could not get local device id.");
+            return;
+        }
+        NotifyOriginStartTypeResult(sessionId, localNetworkId, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_MSG_IS_BAD, inputTypes);
+    }
+}
+
+void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStopType(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE, data type is error.");
+        return;
+    }
+    std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
+    int32_t inputTypes =  recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    int32_t ret = StopRemoteInputType(sessionId, deviceId, inputTypes);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Can not send message by softbus, start fail.");
+        std::string localNetworkId = GetLocalNetworkId();
+        if (localNetworkId.empty()) {
+            DHLOGE("Could not get local device id.");
+            return;
+        }
+        NotifyOriginStopTypeResult(sessionId, localNetworkId, deviceId,
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD, inputTypes);
+    }
+}
+
+void DistributedInputSourceTransport::NotifyResponseRelayStartTypeRemoteInput(int32_t sessionId,
+    const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTTYPE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTTYPE, data type is error.");
+        return;
+    }
+    std::string sinkDevId = FindDeviceBySession(sessionId);
+    if (sinkDevId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTTYPE, sinkDevId is error.");
+        return;
+    }
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return;
+    }
+    int32_t srcTsrcSeId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    bool result = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    NotifyOriginStartTypeResult(srcTsrcSeId, localNetworkId, sinkDevId,
+        result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_MSG_IS_BAD, inputTypes);
+}
+
+void DistributedInputSourceTransport::NotifyResponseRelayStopTypeRemoteInput(int32_t sessionId,
+    const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPTYPE.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPTYPE, data type is error.");
+        return;
+    }
+    std::string sinkDevId = FindDeviceBySession(sessionId);
+    if (sinkDevId.empty()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPTYPE, sinkDevId is error.");
+        return;
+    }
+    std::string localNetworkId = GetLocalNetworkId();
+    if (localNetworkId.empty()) {
+        DHLOGE("Could not get local device id.");
+        return;
+    }
+    int32_t srcTsrcSeId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
+    bool result = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    NotifyOriginStopTypeResult(srcTsrcSeId, localNetworkId, sinkDevId,
+        result ? DH_SUCCESS : ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_MSG_IS_BAD, inputTypes);
+}
+
+void DistributedInputSourceTransport::ReceiveRelayStartTypeResult(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT, data type error.");
+        return;
+    }
+
+    std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
+    std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
+    int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    callback_->onReceiveRelayStartTypeResult(status, srcId, sinkId, inputTypes);
+}
+
+void DistributedInputSourceTransport::ReceiveRelayStopTypeResult(int32_t sessionId, const nlohmann::json &recMsg)
+{
+    DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT.");
+    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
+        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
+        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT, data type error.");
+        return;
+    }
+
+    std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
+    std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
+    int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
+    uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
+    callback_->onReceiveRelayStopTypeResult(status, srcId, sinkId, inputTypes);
+}
+
 void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const std::string& message)
 {
     if (callback_ == nullptr) {
@@ -704,48 +1646,13 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
     }
 
     int cmdType = recMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE];
-    switch (cmdType) {
-        case TRANS_SINK_MSG_ONPREPARE: {
-            NotifyResponsePrepareRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_ONUNPREPARE: {
-            NotifyResponseUnprepareRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_ONSTART: {
-            NotifyResponseStartRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_ONSTOP: {
-            NotifyResponseStopRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_BODY_DATA: {
-            NotifyReceivedEventRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_LATENCY: {
-            CalculateLatency(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_DHID_ONSTART: {
-            NotifyResponseStartRemoteInputDhid(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_DHID_ONSTOP: {
-            NotifyResponseStopRemoteInputDhid(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SINK_MSG_KEY_STATE: {
-            NotifyResponseKeyState(sessionId, recMsg);
-            break;
-        }
-        default: {
-            DHLOGE("OnBytesReceived cmdType is undefined.");
-            break;
-        }
+    auto iter = memberFuncMap_.find(cmdType);
+    if (iter == memberFuncMap_.end()) {
+        DHLOGE("OnBytesReceived cmdType %d is undefined.", cmdType);
+        return;
     }
+    SourceTransportFunc &func = iter->second;
+    (this->*func)(sessionId, recMsg);
 }
 
 bool DistributedInputSourceTransport::CheckRecivedData(const std::string& message)
