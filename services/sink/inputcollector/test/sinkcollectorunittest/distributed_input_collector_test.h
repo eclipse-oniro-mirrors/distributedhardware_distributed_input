@@ -19,7 +19,9 @@
 #include <gtest/gtest.h>
 
 #include "constants_dinput.h"
+#define private public
 #include "distributed_input_collector.h"
+#undef private
 
 namespace OHOS {
 namespace DistributedHardware {

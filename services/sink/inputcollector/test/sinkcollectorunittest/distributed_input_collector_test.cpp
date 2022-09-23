@@ -68,10 +68,26 @@ HWTEST_F(DistributedInputCollectorTest, Init02, testing::ext::TestSize.Level1)
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputCollectorTest, IsAllDevicesStoped, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputCollectorTest, IsAllDevicesStoped01, testing::ext::TestSize.Level1)
 {
     bool isStop = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
     EXPECT_EQ(true, isStop);
+}
+
+HWTEST_F(DistributedInputCollectorTest, IsAllDevicesStoped02, testing::ext::TestSize.Level1)
+{
+    DistributedInputCollector::GetInstance().inputHub_ = nullptr;
+    bool isStop = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
+    EXPECT_EQ(false, isStop);
+}
+
+HWTEST_F(DistributedInputCollectorTest, GetDeviceInfoByType, testing::ext::TestSize.Level1)
+{
+    DistributedInputCollector::GetInstance().inputHub_ = nullptr;
+    uint32_t inputTypes = 1;
+    std::map<int32_t, std::string> deviceInfo;
+    DistributedInputCollector::GetInstance().GetDeviceInfoByType(inputTypes, deviceInfo);
+    EXPECT_EQ(0, deviceInfo.size());
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

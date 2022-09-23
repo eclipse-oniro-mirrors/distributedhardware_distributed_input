@@ -48,7 +48,13 @@ void DistributedInputSinkManagerTest::TearDownTestCase()
 {
 }
 
-HWTEST_F(DistributedInputSinkManagerTest, Init01, testing::ext::TestSize.Level0)
+HWTEST_F(DistributedInputSinkManagerTest, InitAuto, testing::ext::TestSize.Level0)
+{
+    bool ret = sinkManager_->InitAuto();
+    EXPECT_EQ(true, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, Init, testing::ext::TestSize.Level0)
 {
     int32_t ret = sinkManager_->Init();
     EXPECT_EQ(DH_SUCCESS, ret);
@@ -68,6 +74,49 @@ HWTEST_F(DistributedInputSinkManagerTest, GetInputTypes, testing::ext::TestSize.
     sinkManager_->SetInputTypes(inputTypes);
     uint32_t retType = sinkManager_->GetInputTypes();
     EXPECT_EQ(inputTypes, retType);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, IsStopDhidOnCmdStillNeed01, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 1;
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_123123123123");
+    dhIds.push_back("Input_456456456456");
+    dhIds.push_back("Input_789789789789");
+    sinkManager_->StoreStartDhids(sessionId, dhIds);
+
+    std::string stopDhId = "Input_123123123123";
+    bool ret = sinkManager_->IsStopDhidOnCmdStillNeed(sessionId, stopDhId);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, IsStopDhidOnCmdStillNeed02, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 1;
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_123123123123");
+    dhIds.push_back("Input_456456456456");
+    dhIds.push_back("Input_789789789789");
+    sinkManager_->StoreStartDhids(sessionId, dhIds);
+
+    sessionId = 1000;
+    std::string stopDhId = "Input_123123123123";
+    bool ret = sinkManager_->IsStopDhidOnCmdStillNeed(sessionId, stopDhId);
+    EXPECT_EQ(true, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, DeleteStopDhids01, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 1;
+    std::vector<std::string> stopDhIds;
+    std::vector<std::string> stopIndeedDhIds;
+    stopDhIds.push_back("Input_123123123123");
+    for (auto iter : stopDhIds) {
+        sinkManager_->sharingDhIds_.insert(iter);
+    }
+    sinkManager_->sharingDhIdsMap_[sessionId] = sinkManager_->sharingDhIds_;
+    sinkManager_->DeleteStopDhids(sessionId, stopDhIds, stopIndeedDhIds);
+    EXPECT_EQ(0, sinkManager_->sharingDhIdsMap_.size());
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

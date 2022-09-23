@@ -40,6 +40,7 @@ namespace DistributedInput {
     const uint32_t KEY_DOWN_STATE = 1;
     const uint32_t READ_SLEEP_TIME_MS = 50;
     const uint32_t READ_RETRY_MAX = 5;
+    const uint32_t DHID_LENGTH_MAX = 256;
     /*
      * Device Type definitions
      */

@@ -1132,7 +1132,7 @@ bool InputHub::CheckTouchPointRegion(struct input_event readBuffer[], const AbsI
     for (const auto& [id, sinkInfo] : sinkInfos) {
         auto info = sinkInfo.transformInfo;
         if ((absInfo.absX >= info.sinkWinPhyX) && (absInfo.absX <= (info.sinkWinPhyX + info.sinkProjPhyWidth))
-            && (absInfo.absY >= info.sinkWinPhyY)  && (absInfo.absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
+            && (absInfo.absY >= info.sinkWinPhyY) && (absInfo.absY <= (info.sinkWinPhyY + info.sinkProjPhyHeight))) {
             touchDescriptor = sinkInfo.srcScreenInfo.sourcePhyId;
             readBuffer[absInfo.absXIndex].value = (absInfo.absX - info.sinkWinPhyX) * info.coeffWidth;
             readBuffer[absInfo.absYIndex].value = (absInfo.absY - info.sinkWinPhyY) * info.coeffHeight;
