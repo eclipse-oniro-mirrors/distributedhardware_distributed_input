@@ -74,7 +74,7 @@ int32_t WhiteListUtil::Init()
     std::string line;
     std::size_t lineNum = 0;
     while (getline(inFile, line)) {
-        if ((++lineNum > MAX_LINE_NUM) || CheckLine(line)) {
+        if ((++lineNum > MAX_LINE_NUM) || !IsValidLine(line)) {
             DHLOGE("whitelist cfg file has too many lines or too complicated. lineNum is %d", lineNum);
             break;
         }
@@ -116,7 +116,7 @@ int32_t WhiteListUtil::Init()
     return DH_SUCCESS;
 }
 
-bool WhiteListUtil::CheckLine(const std::string &line) const
+bool WhiteListUtil::IsValidLine(const std::string &line) const
 {
     if (line.size() > MAX_CHAR_PER_LINE_NUM) {
         DHLOGE("This line is too long, size is %d", line.size());

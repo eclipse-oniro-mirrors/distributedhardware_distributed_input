@@ -68,7 +68,7 @@ private:
     void GetAllComb(TYPE_COMBINATION_KEY_VEC vecs, WhiteListItemHash hash,
         int32_t targetLen, std::unordered_set<std::string> &hashSets);
     std::string GetBusinessEventHash(const BusinessEvent &event);
-    bool CheckLine(const std::string &line) const;
+    bool IsValidLine(const std::string &line) const;
     bool CheckIsNumber(const std::string &str) const;
 private:
     TYPE_DEVICE_WHITE_LIST_MAP mapDeviceWhiteList_;
