@@ -26,6 +26,7 @@
 #include "dinput_errcode.h"
 #include "dinput_utils_tool.h"
 #include "distributed_input_source_proxy.h"
+#include "input_check_param.h"
 #include "softbus_bus_center.h"
 #include "white_list_util.h"
 
@@ -324,18 +325,15 @@ int32_t DistributedInputClient::ReleaseSink()
 int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::string& parameters, const std::shared_ptr<RegisterCallback>& callback)
 {
-    DHLOGI("RegisterDistributedHardware called, deviceId: %s,  dhId: %s,  parameters: %s",
+    DHLOGI("DinputRegister called, deviceId: %s,  dhId: %s,  parameters: %s.",
         GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
-
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("RegisterDistributedHardware client fail");
+        DHLOGE("DinputRegister client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (devId.empty() || dhId.empty() || parameters.empty() || !IsJsonData(parameters) || callback == nullptr) {
+    if (!DinputCheckParam::GetInstance().CheckRegisterParam(devId, dhId, parameters, callback)) {
         return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
     }
-
     {
         std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
         for (auto iter : dHardWareFwkRstInfos) {
@@ -343,11 +341,7 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
                 return ERR_DH_INPUT_CLIENT_REGISTER_FAIL;
             }
         }
-
-        DHardWareFwkRegistInfo info;
-        info.devId = devId;
-        info.dhId = dhId;
-        info.callback = callback;
+        DHardWareFwkRegistInfo info {devId, dhId, callback};
         dHardWareFwkRstInfos.push_back(info);
     }
 
@@ -358,18 +352,15 @@ int32_t DistributedInputClient::RegisterDistributedHardware(const std::string& d
 int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::shared_ptr<UnregisterCallback>& callback)
 {
-    DHLOGI("UnregisterDistributedHardware called, deviceId: %s,  dhId: %s",
+    DHLOGI("DinputUnregister called, deviceId: %s,  dhId: %s.",
         GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
-
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("UnregisterDistributedHardware client fail");
+        DHLOGE("DinputUnregister client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (devId.empty() || dhId.empty() || callback == nullptr) {
+    if (!DinputCheckParam::GetInstance().CheckUnregisterParam(devId, dhId, callback)) {
         return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
     }
-
     {
         std::lock_guard<std::mutex> lock(DistributedInputClient::GetInstance().operationMutex_);
         for (auto iter : dHardWareFwkUnRstInfos) {
@@ -377,11 +368,7 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
                 return ERR_DH_INPUT_CLIENT_UNREGISTER_FAIL;
             }
         }
-
-        DHardWareFwkUnRegistInfo info;
-        info.devId = devId;
-        info.dhId = dhId;
-        info.callback = callback;
+        DHardWareFwkUnRegistInfo info {devId, dhId, callback};
         dHardWareFwkUnRstInfos.push_back(info);
     }
 
@@ -389,56 +376,42 @@ int32_t DistributedInputClient::UnregisterDistributedHardware(const std::string&
         new(std::nothrow) UnregisterDInputCb());
 }
 
-int32_t DistributedInputClient::PrepareRemoteInput(
-    const std::string& deviceId, sptr<IPrepareDInputCallback> callback)
+int32_t DistributedInputClient::PrepareRemoteInput(const std::string& deviceId, sptr<IPrepareDInputCallback> callback)
 {
-    DHLOGI("PrepareRemoteInput called, deviceId: %s", GetAnonyString(deviceId).c_str());
-
+    DHLOGI("DinputPrepare called, deviceId: %s.", GetAnonyString(deviceId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("PrepareRemoteInput client fail");
+        DHLOGE("DinputPrepare client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (deviceId.empty() || callback == nullptr) {
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         return ERR_DH_INPUT_CLIENT_PREPARE_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(deviceId, callback);
 }
 
 int32_t DistributedInputClient::UnprepareRemoteInput(const std::string& deviceId,
     sptr<IUnprepareDInputCallback> callback)
 {
-    DHLOGI("UnprepareRemoteInput called, deviceId: %s", GetAnonyString(deviceId).c_str());
-
+    DHLOGI("DinputUnprepare called, deviceId: %s.", GetAnonyString(deviceId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("PrepareRemoteInput client fail");
+        DHLOGE("DinputUnprepare client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (deviceId.empty() || callback == nullptr) {
-        DHLOGE("UnprepareRemoteInput param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         return ERR_DH_INPUT_CLIENT_UNPREPARE_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(deviceId, callback);
 }
 
 int32_t DistributedInputClient::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
-    DHLOGI("StartRemoteInput called, deviceId: %s, inputTypes: %d",
-        GetAnonyString(deviceId).c_str(), inputTypes);
+    DHLOGI("DinputStart called, deviceId: %s, inputTypes: %d.", GetAnonyString(deviceId).c_str(), inputTypes);
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StartRemoteInput client fail");
+        DHLOGE("DinputStart client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (deviceId.empty() || callback == nullptr ||
-        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
-        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
-        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
-        DHLOGE("StartRemoteInput param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
     return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(deviceId, inputTypes, callback);
@@ -447,79 +420,58 @@ int32_t DistributedInputClient::StartRemoteInput(
 int32_t DistributedInputClient::StopRemoteInput(const std::string& deviceId, const uint32_t& inputTypes,
     sptr<IStopDInputCallback> callback)
 {
-    DHLOGI("StopRemoteInput called, deviceId: %s, inputTypes: %d",
-        GetAnonyString(deviceId).c_str(), inputTypes);
+    DHLOGI("DinputStop called, deviceId: %s, inputTypes: %d.", GetAnonyString(deviceId).c_str(), inputTypes);
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StopRemoteInput client fail");
+        DHLOGE("DinputStop client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (deviceId.empty() || callback == nullptr ||
-        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
-        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
-        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
-        DHLOGE("StopRemoteInput param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(deviceId, inputTypes, callback);
 }
 
 int32_t DistributedInputClient::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
     const uint32_t &inputTypes, sptr<IStartDInputCallback> callback)
 {
-    DHLOGI("StartRemoteInput relay by type called, srcId: %s, sinkId: %s, inputTypes: %d",
-        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), inputTypes);
+    DHLOGI("DinputStart called, srcId: %s, sinkId: %s, inputTypes: %d.", GetAnonyString(srcId).c_str(),
+        GetAnonyString(sinkId).c_str(), inputTypes);
 
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StartRemoteInput relay type client fail");
+        DHLOGE("DinputStart relay type client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (srcId.empty() || sinkId.empty() || callback == nullptr ||
-        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
-        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
-        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
-        DHLOGE("StartRemoteInput relay type param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(srcId, sinkId, inputTypes, callback);
 }
 
 int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
     const uint32_t &inputTypes, sptr<IStopDInputCallback> callback)
 {
-    DHLOGI("StopRemoteInput relay by type called, srcId: %s, sinkId: %s, inputTypes: %d",
-        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), inputTypes);
-
+    DHLOGI("DinputStop called, srcId: %s, sinkId: %s, inputTypes: %d.", GetAnonyString(srcId).c_str(),
+        GetAnonyString(sinkId).c_str(), inputTypes);
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StopRemoteInput relay type client fail");
+        DHLOGE("DinputStop relay type client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (srcId.empty() || sinkId.empty() || callback == nullptr ||
-        inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL) ||
-        inputTypes == static_cast<uint32_t>(DInputDeviceType::NONE) ||
-        !(inputTypes & static_cast<uint32_t>(DInputDeviceType::ALL))) {
-        DHLOGE("StopRemoteInput relay type param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(srcId, sinkId, inputTypes, callback);
 }
 
 int32_t DistributedInputClient::PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
     sptr<IPrepareDInputCallback> callback)
 {
-    DHLOGI("PrepareRemoteInput relay called, srcId: %s, sinkId: %s",
-        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+    DHLOGI("DinputPrepare called, srcId: %s, sinkId: %s.", GetAnonyString(srcId).c_str(),
+        GetAnonyString(sinkId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("PrepareRemoteInput relay proxy error, client fail");
+        DHLOGE("DinputPrepare relay proxy error, client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-    if (srcId.empty() || sinkId.empty() || callback == nullptr) {
-        DHLOGE("PrepareRemoteInput relay param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         return ERR_DH_INPUT_CLIENT_PREPARE_FAIL;
     }
     return DInputSAManager::GetInstance().dInputSourceProxy_->PrepareRemoteInput(srcId, sinkId, callback);
@@ -528,16 +480,13 @@ int32_t DistributedInputClient::PrepareRemoteInput(const std::string &srcId, con
 int32_t DistributedInputClient::UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
     sptr<IUnprepareDInputCallback> callback)
 {
-    DHLOGI("UnprepareRemoteInput relay called, srcId: %s, sinkId: %s",
-        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
-
+    DHLOGI("DinputUnprepare called, srcId: %s, sinkId: %s.", GetAnonyString(srcId).c_str(),
+        GetAnonyString(sinkId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("UnprepareRemoteInput relay proxy error, client fail");
+        DHLOGE("DinputUnprepare relay proxy error, client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (srcId.empty() || sinkId.empty() || callback == nullptr) {
-        DHLOGE("UnprepareRemoteInput relay param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         return ERR_DH_INPUT_CLIENT_UNPREPARE_FAIL;
     }
     return DInputSAManager::GetInstance().dInputSourceProxy_->UnprepareRemoteInput(srcId, sinkId, callback);
@@ -546,80 +495,66 @@ int32_t DistributedInputClient::UnprepareRemoteInput(const std::string &srcId, c
 int32_t DistributedInputClient::StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
     sptr<IStartStopDInputsCallback> callback)
 {
-    DHLOGI("StartRemoteInput relay by dhid called, sinkId: %s", GetAnonyString(sinkId).c_str());
-
+    DHLOGI("DinputStart called, sinkId: %s.", GetAnonyString(sinkId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StartRemoteInput dhid proxy error, client fail");
+        DHLOGE("DinputStart dhid proxy error, client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
-        DHLOGE("StartRemoteInput dhid param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(sinkId, dhIds, callback);
 }
 
 int32_t DistributedInputClient::StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
     sptr<IStartStopDInputsCallback> callback)
 {
-    DHLOGI("StopRemoteInput relay by dhid called, sinkId: %s", GetAnonyString(sinkId).c_str());
-
+    DHLOGI("DinputStop called, sinkId: %s.", GetAnonyString(sinkId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StopRemoteInput dhid proxy error, client fail");
+        DHLOGE("DinputStop dhid proxy error, client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
-        DHLOGE("StopRemoteInput dhid param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(sinkId, dhIds, callback);
 }
 
 int32_t DistributedInputClient::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
     const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
 {
-    DHLOGI("StartRemoteInput relay by dhid called, srcId: %s, sinkId: %s",
-        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
-
+    DHLOGI("DinputStart called, srcId: %s, sinkId: %s.", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StartRemoteInput proxy error, client fail");
+        DHLOGE("DinputStart proxy error, client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (srcId.empty() || sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
-        DHLOGE("StartRemoteInput param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         return ERR_DH_INPUT_CLIENT_START_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StartRemoteInput(srcId, sinkId, dhIds, callback);
 }
 
 int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
     const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
 {
-    DHLOGI("StopRemoteInput relay by dhid called, srcId: %s, sinkId: %s",
-        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
-
+    DHLOGI("DinputStop called, srcId: %s, sinkId: %s.", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     if (!DInputSAManager::GetInstance().GetDInputSourceProxy()) {
-        DHLOGE("StopRemoteInput proxy error, client fail");
+        DHLOGE("DinputStop proxy error, client fail.");
         return ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL;
     }
-
-    if (srcId.empty() || sinkId.empty() || callback == nullptr || (dhIds.size() <= 0)) {
-        DHLOGE("StopRemoteInput param error, client fail");
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         return ERR_DH_INPUT_CLIENT_STOP_FAIL;
     }
-
     return DInputSAManager::GetInstance().dInputSourceProxy_->StopRemoteInput(srcId, sinkId, dhIds, callback);
 }
 
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
 {
     DHLOGI("IsNeedFilterOut called, deviceId: %s", GetAnonyString(deviceId).c_str());
+    if (deviceId.empty() || (deviceId.size() > DEVID_LENGTH_MAX)) {
+        DHLOGE("IsNeedFilterOut param deviceId is empty.");
+        return false;
+    }
     return WhiteListUtil::GetInstance().IsNeedFilterOut(deviceId, event);
 }
 
@@ -639,6 +574,10 @@ bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &e
 bool DistributedInputClient::IsStartDistributedInput(const std::string& dhId)
 {
     std::lock_guard<std::mutex> lock(sharingDhIdsMtx_);
+    if (dhId.empty() || (dhId.size() > DHID_LENGTH_MAX)) {
+        DHLOGE("IsStartDistributedInput param dhid is error.");
+        return false;
+    }
     return sharingDhIds_.find(dhId) != sharingDhIds_.end();
 }
 

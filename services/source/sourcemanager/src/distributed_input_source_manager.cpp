@@ -44,6 +44,7 @@
 #include "distributed_input_source_transport.h"
 #include "hisysevent_util.h"
 #include "hidumper.h"
+#include "input_check_param.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -730,22 +731,40 @@ int32_t DistributedInputSourceManager::Release()
     return DH_SUCCESS;
 }
 
+bool DistributedInputSourceManager::CheckRegisterParam(const std::string &devId, const std::string &dhId,
+    const std::string &parameters, sptr<IRegisterDInputCallback> callback)
+{
+    if (devId.empty() || devId.size() > DEVID_LENGTH_MAX) {
+        DHLOGE("CheckParam devId is empty or devId size too long.");
+        return false;
+    }
+    if (dhId.empty() || dhId.size() > DEVID_LENGTH_MAX) {
+        DHLOGE("CheckParam dhId is empty or dhId size too long.");
+        return false;
+    }
+    if (parameters.empty()) {
+        DHLOGE("CheckParam parameters is empty.");
+        return false;
+    }
+    if (callback == nullptr) {
+        DHLOGE("CheckParam callback is null.");
+        return false;
+    }
+    return true;
+}
+
 int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
     const std::string& parameters, sptr<IRegisterDInputCallback> callback)
 {
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_REGISTER, devId, dhId, "dinput register call.");
     DHLOGI("RegisterDistributedHardware called, deviceId: %s,  dhId: %s,  parameters: %s",
         GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
-    if (callback == nullptr) {
-        DHLOGE("RegisterDistributedHardware called, deviceId: %s callback is null.", GetAnonyString(devId).c_str());
+    if (!CheckRegisterParam(devId, dhId, parameters, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_REGISTER_FAIL, devId, dhId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL,
-            "dinput register distributed hardware failed callback is nullptr.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL, "Dinputregister failed callback is nullptr.");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL;
     }
-
     std::lock_guard<std::mutex> lock(operationMutex_);
-
     DInputClientRegistInfo info {devId, dhId, callback};
     regCallbacks_.push_back(info);
     InputDeviceId inputDeviceId {devId, dhId, GetNodeDesc(parameters)};
@@ -844,6 +863,24 @@ int32_t DistributedInputSourceManager::UnregCallbackNotify(const std::string &de
     return DH_SUCCESS;
 }
 
+bool DistributedInputSourceManager::CheckUnregisterParam(const std::string &devId, const std::string &dhId,
+    sptr<IUnregisterDInputCallback> callback)
+{
+    if (devId.empty() || devId.size() > DEVID_LENGTH_MAX) {
+        DHLOGE("CheckParam devId is empty or devId size too long.");
+        return false;
+    }
+    if (dhId.empty() || dhId.size() > DEVID_LENGTH_MAX) {
+        DHLOGE("CheckParam dhId is empty or dhId size too long.");
+        return false;
+    }
+    if (callback == nullptr) {
+        DHLOGE("CheckParam callback is null.");
+        return false;
+    }
+    return true;
+}
+
 int32_t DistributedInputSourceManager::CheckDeviceIsExists(const std::string &devId, const std::string &dhId,
     const InputDeviceId &inputDeviceId, std::vector<InputDeviceId>::iterator &it)
 {
@@ -877,7 +914,6 @@ int32_t DistributedInputSourceManager::DeleteInputDeviceNodeInfo(const std::stri
     }
 
     inputDevice_.erase(it);
-
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = devId;
@@ -903,16 +939,13 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
 {
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNREGISTER, devId, dhId, "dinput unregister call");
     DHLOGI("Unregister called, deviceId: %s,  dhId: %s", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
-
-    if (callback == nullptr) {
-        DHLOGE("Unregister called, deviceId: %s callback is null.", GetAnonyString(devId).c_str());
+    if (!CheckUnregisterParam(devId, dhId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_UNREGISTER_FAIL, devId, dhId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL, "dinput unregister failed in callback is nullptr");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL;
     }
 
     std::lock_guard<std::mutex> lock(operationMutex_);
-
     DInputClientUnregistInfo info {devId, dhId, callback};
     unregCallbacks_.push_back(info);
 
@@ -941,30 +974,18 @@ int32_t DistributedInputSourceManager::UnregisterDistributedHardware(const std::
     return DH_SUCCESS;
 }
 
-bool DistributedInputSourceManager::CheckParameters(const std::string &deviceId, sptr<IRemoteBroker> callback)
-{
-    if (deviceId.empty()) {
-        DHLOGE("DeviceId is empty.");
-        return false;
-    }
-    if (callback == nullptr) {
-        DHLOGE("Callback is null.");
-        return false;
-    }
-    return true;
-}
-
 int32_t DistributedInputSourceManager::PrepareRemoteInput(
     const std::string &deviceId, sptr<IPrepareDInputCallback> callback)
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_PREPARE, deviceId, "Dinput prepare call.");
-    if (!CheckParameters(deviceId, callback)) {
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
+
     DHLOGI("Prepare called, deviceId: %s", GetAnonyString(deviceId).c_str());
     for (auto iter : preCallbacks_) {
         if (iter.devId == deviceId) {
@@ -1011,7 +1032,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId, "Dinput unprepare call.");
-    if (!CheckParameters(deviceId, callback)) {
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
@@ -1049,35 +1070,18 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(
     return DH_SUCCESS;
 }
 
-bool DistributedInputSourceManager::CheckParameters(const std::string &deviceId, const uint32_t& inputTypes,
-    sptr<IRemoteBroker> callback)
-{
-    if (deviceId.empty()) {
-        DHLOGE("DeviceId is empty.");
-        return false;
-    }
-    if (inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL)) {
-        DHLOGE("Inputtype is invalids.");
-        return false;
-    }
-    if (callback == nullptr) {
-        DHLOGE("Callback is null.");
-        return false;
-    }
-    return true;
-}
-
 int32_t DistributedInputSourceManager::StartRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback)
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, deviceId, "Dinput start use call.");
-    if (!CheckParameters(deviceId, inputTypes, callback)) {
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
+
     DHLOGI("Start called, deviceId: %s, inputTypes: %d", GetAnonyString(deviceId).c_str(), inputTypes);
     for (auto iter : staCallbacks_) {
         if (iter.devId == deviceId && iter.inputTypes == inputTypes) {
@@ -1116,12 +1120,13 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, deviceId, "Dinput stop use call");
-    if (!CheckParameters(deviceId, inputTypes, callback)) {
+    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
-        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
+        FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
+
     DHLOGI("Stop called, deviceId: %s, inputTypes: %d", GetAnonyString(deviceId).c_str(), inputTypes);
     for (auto iter : stpCallbacks_) {
         if (iter.devId == deviceId && iter.inputTypes == inputTypes) {
@@ -1154,45 +1159,27 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
     return DH_SUCCESS;
 }
 
-bool DistributedInputSourceManager::CheckParameters(const std::string &srcId, const std::string &sinkId,
-    const uint32_t &inputTypes, sptr<IRemoteBroker> callback)
-{
-    if (srcId.empty() || sinkId.empty()) {
-        DHLOGE("SrcId=%d or sinkId=%d is empty.", srcId.empty(), sinkId.empty());
-        return false;
-    }
-    if (inputTypes > static_cast<uint32_t>(DInputDeviceType::ALL)) {
-        DHLOGE("Inputtype is invalids.");
-        return false;
-    }
-    if (callback == nullptr) {
-        DHLOGE("Callback is null.");
-        return false;
-    }
-    return true;
-}
 int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
     const uint32_t &inputTypes, sptr<IStartDInputCallback> callback)
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "Dinput start use call.");
-    if (!CheckParameters(srcId, sinkId, inputTypes, callback)) {
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput stop param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
+
     DHLOGI("StartRemoteInput called, srcId: %s, sinkId: %s, inputTypes: %d", GetAnonyString(srcId).c_str(),
         GetAnonyString(sinkId).c_str(), inputTypes);
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("StartRemoteInput called, Could not get local device id.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start use failed in get local networkId error.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
-    DHLOGI("StartRemoteInput called, device local networkId is %s", GetAnonyString(localNetworkId).c_str());
     if (srcId != localNetworkId) {
         return RelayStartRemoteInputByType(srcId, sinkId, inputTypes, callback);
     }
@@ -1231,7 +1218,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "Dinput stop use call.");
-    if (!CheckParameters(srcId, sinkId, inputTypes, callback)) {
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1241,13 +1228,11 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
         GetAnonyString(sinkId).c_str(), inputTypes);
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("StopRemoteInput called, Could not get local device id.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop use failed in get networkId.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
-    DHLOGI("StopRemoteInput called, device local networkId is %s", GetAnonyString(localNetworkId).c_str());
     if (srcId != localNetworkId) {
         return RelayStopRemoteInputByType(srcId, sinkId, inputTypes, callback);
     }
@@ -1332,36 +1317,20 @@ int32_t DistributedInputSourceManager::RelayStopRemoteInputByType(
     return dInputSourceProxy->StopRemoteInput(srcId, sinkId, inputTypes, callback);
 }
 
-bool DistributedInputSourceManager::CheckParameters(const std::string &srcId, const std::string &sinkId,
-    sptr<IRemoteBroker> callback)
-{
-    if (srcId.empty() || sinkId.empty()) {
-        DHLOGE("SrcId=%d or sinkId=%d is empty.", srcId.empty(), sinkId.empty());
-        return false;
-    }
-    if (callback == nullptr) {
-        DHLOGE("Callback is null.");
-        return false;
-    }
-    return true;
-}
-
 int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
     sptr<IPrepareDInputCallback> callback)
 {
-    if (!CheckParameters(srcId, sinkId, callback)) {
+    DHLOGI("Dinput prepare, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
-    DHLOGI("srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("Could not get local device id.");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
-    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
     if (srcId != localNetworkId) {
         return RelayPrepareRemoteInput(srcId, sinkId, callback);
     }
@@ -1397,19 +1366,17 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string &src
 int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
     sptr<IUnprepareDInputCallback> callback)
 {
-    if (!CheckParameters(srcId, sinkId, callback)) {
+    DHLOGI("Dinput unprepare, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
     }
-    DHLOGI("srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("Could not get local device id.");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
     }
-    DHLOGI("device local localNetworkId is %s", GetAnonyString(localNetworkId).c_str());
     if (srcId != localNetworkId) {
         return RelayUnprepareRemoteInput(srcId, sinkId, callback);
     }
@@ -1456,51 +1423,25 @@ bool DistributedInputSourceManager::IsStringDataSame(const std::vector<std::stri
     return isSame;
 }
 
-bool DistributedInputSourceManager::CheckParameters(const std::string &sinkId, const std::vector<std::string> &dhIds,
-    sptr<IRemoteBroker> callback)
-{
-    if (sinkId.empty()) {
-        DHLOGE("SinkId is empty.");
-        return false;
-    }
-    if (dhIds.empty()) {
-        DHLOGE("DhIds is empty.");
-        return false;
-    }
-    for (auto iter : dhIds) {
-        if (iter.size() > DHID_LENGTH_MAX) {
-            DHLOGE("DhId length is too long.");
-            return false;
-        }
-    }
-    if (callback == nullptr) {
-        DHLOGE("Callback is null.");
-        return false;
-    }
-    return true;
-}
-
 int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &sinkId,
     const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
-    if (!CheckParameters(sinkId, dhIds, callback)) {
+    DHLOGI("Dinput start, sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
+    if (!DinputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
-    DHLOGI("sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("Could not get local device id.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "dinput start use failed in get networkId");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
-    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
 
     // current device is source device
     for (auto iter : staStringCallbacks_) {
@@ -1538,22 +1479,20 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
-    if (!CheckParameters(sinkId, dhIds, callback)) {
+    DHLOGI("Dinput stop, sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
+    if (!DinputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
-    DHLOGI("sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("Could not get local device id.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "dinput stop use failed in get networkId");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
-    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
     for (auto iter : stpStringCallbacks_) {
         if (iter.sinkId == sinkId && IsStringDataSame(iter.dhIds, dhIds)) {
             HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
@@ -1583,51 +1522,25 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId
     return DH_SUCCESS;
 }
 
-bool DistributedInputSourceManager::CheckParameters(const std::string &srcId, const std::string &sinkId,
-    const std::vector<std::string> &dhIds, sptr<IRemoteBroker> callback)
-{
-    if (srcId.empty() || sinkId.empty()) {
-        DHLOGE("SrcId=%d or sinkId=%d is empty.", srcId.empty(), sinkId.empty());
-        return false;
-    }
-    if (dhIds.empty()) {
-        DHLOGE("DhIds is empty.");
-        return false;
-    }
-    for (auto iter : dhIds) {
-        if (iter.size() > DHID_LENGTH_MAX) {
-            DHLOGE("DhId length is too long.");
-            return false;
-        }
-    }
-    if (callback == nullptr) {
-        DHLOGE("Callback is null.");
-        return false;
-    }
-    return true;
-}
-
 int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
     const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "Dinput start use call.");
-    if (!CheckParameters(srcId, sinkId, dhIds, callback)) {
+    DHLOGI("Dinput start, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
-    DHLOGI("SrcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("Could not get local device id.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start use failed in get networkId.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
-    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
     if (srcId != localNetworkId) {
         return RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
     }
@@ -1666,23 +1579,21 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "Dinput stop use call.");
-    if (!CheckParameters(srcId, sinkId, dhIds, callback)) {
+    DHLOGI("Dinput stop, srcId: %s, sinkId: %s, vector.string.size: %d",
+        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
+    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
-    DHLOGI("srcId: %s, sinkId: %s, vector.string.size: %d",
-        GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("Could not get local device id.");
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop use failed in get networkId.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
-    DHLOGI("device local networkId is %s", GetAnonyString(localNetworkId).c_str());
     if (srcId != localNetworkId) {
         return RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
     }
@@ -1742,6 +1653,10 @@ int32_t DistributedInputSourceManager::RegisterDelWhiteListCallback(sptr<IDelWhi
 int32_t DistributedInputSourceManager::RegisterInputNodeListener(sptr<InputNodeListener> listener)
 {
     DHLOGI("RegisterInputNodeListener, addr: %p", &listener);
+    if (listener == nullptr) {
+        DHLOGE("RegisterInputNodeListener callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_NODE_LISTENER_CALLBACK_ERR;
+    }
     DistributedInputInject::GetInstance().RegisterInputNodeListener(listener);
     SendExistVirNodeInfos(listener);
     return DH_SUCCESS;
@@ -1750,6 +1665,10 @@ int32_t DistributedInputSourceManager::RegisterInputNodeListener(sptr<InputNodeL
 int32_t DistributedInputSourceManager::UnregisterInputNodeListener(sptr<InputNodeListener> listener)
 {
     DHLOGI("UnregisterInputNodeListener, addr: %p", &listener);
+    if (listener == nullptr) {
+        DHLOGE("UnregisterInputNodeListener callback is null.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_NODE_LISTENER_CALLBACK_ERR;
+    }
     DistributedInputInject::GetInstance().UnregisterInputNodeListener(listener);
     return DH_SUCCESS;
 }
@@ -2023,7 +1942,6 @@ void DistributedInputSourceManager::RunStartDhidCallback(const std::string &sink
         dhidsVec.size());
     std::string localNetWorkId = GetLocalNetworkId();
     if (localNetWorkId.empty()) {
-        DHLOGE("Could not get local device id.");
         return;
     }
 
@@ -2044,7 +1962,6 @@ void DistributedInputSourceManager::RunStopDhidCallback(const std::string &sinkI
     StringSplitToVector(dhIds, INPUT_STRING_SPLIT_POINT, dhidsVec);
     std::string localNetworkId = GetLocalNetworkId();
     if (localNetworkId.empty()) {
-        DHLOGE("Could not get local device id.");
         return;
     }
 
@@ -2240,6 +2157,10 @@ void DistributedInputSourceManager::StartDScreenListener::OnMessage(const DHTopi
     DHLOGI("StartDScreenListener OnMessage!");
     if (topic != DHTopic::TOPIC_START_DSCREEN) {
         DHLOGE("this topic is wrong, %d", static_cast<uint32_t>(topic));
+        return;
+    }
+    if (message.size() > SCREEN_MSG_MAX) {
+        DHLOGE("StartDScreenListener message size too long.");
         return;
     }
     std::string sinkDevId = "";

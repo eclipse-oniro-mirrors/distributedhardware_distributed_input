@@ -41,6 +41,9 @@ namespace DistributedInput {
     const uint32_t READ_SLEEP_TIME_MS = 50;
     const uint32_t READ_RETRY_MAX = 5;
     const uint32_t DHID_LENGTH_MAX = 256;
+    const uint32_t DEVID_LENGTH_MAX = 256;
+    const uint32_t SCREEN_MSG_MAX = 40 * 1024 * 1024;
+
     /*
      * Device Type definitions
      */

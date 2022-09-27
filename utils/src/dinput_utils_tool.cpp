@@ -55,10 +55,12 @@ DevInfo GetLocalDeviceInfo()
 
 std::string GetLocalNetworkId()
 {
-    if (GetLocalDeviceInfo().networkId.empty()) {
+    std::string localNetworkId = GetLocalDeviceInfo().networkId;
+    if (localNetworkId.empty()) {
         DHLOGE("local networkId is empty!");
     }
-    return GetLocalDeviceInfo().networkId;
+    DHLOGI("GetLocalNetworkId, device local networkId is %s", GetAnonyString(localNetworkId).c_str());
+    return localNetworkId;
 }
 
 std::string GetUUIDBySoftBus(const std::string &networkId)

@@ -1102,11 +1102,11 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
         for (size_t j = iter.first; j <= iter.second; j++) {
             struct input_event &iev = readBuffer[j];
             if (iev.code == ABS_X || iev.code == ABS_MT_POSITION_X) {
-                absInfo.absX = iev.value;
+                absInfo.absX = (uint32_t)iev.value;
                 absInfo.absXIndex = (int32_t)j;
             }
             if (iev.code == ABS_Y || iev.code == ABS_MT_POSITION_Y) {
-                absInfo.absY = iev.value;
+                absInfo.absY = (uint32_t)iev.value;
                 absInfo.absYIndex = (int32_t)j;
             }
         }

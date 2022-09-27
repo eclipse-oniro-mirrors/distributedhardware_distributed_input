@@ -43,6 +43,7 @@ ohos_shared_library("libdinput_sdk") {
 
   sources = [
     "${common_path}/include/white_list_util.cpp",
+    "${common_path}/include/input_check_param.cpp",
     "${innerkits_path}/src/distributed_input_kit.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
     "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",

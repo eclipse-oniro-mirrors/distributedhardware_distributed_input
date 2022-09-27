@@ -164,15 +164,10 @@ public:
         const std::string &nodeDesc) override;
     virtual int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
     virtual int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
-    bool CheckParameters(const std::string &deviceId, sptr<IRemoteBroker> callback);
-    bool CheckParameters(const std::string& deviceId, const uint32_t& inputTypes, sptr<IRemoteBroker> callback);
-    bool CheckParameters(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
-        sptr<IRemoteBroker> callback);
-    bool CheckParameters(const std::string &srcId, const std::string &sinkId, sptr<IRemoteBroker> callback);
-    bool CheckParameters(const std::string &sinkId, const std::vector<std::string> &dhIds,
-        sptr<IRemoteBroker> callback);
-    bool CheckParameters(const std::string &srcId, const std::string &sinkId, const std::vector<std::string> &dhIds,
-        sptr<IRemoteBroker> callback);
+    bool CheckRegisterParam(const std::string &devId, const std::string &dhId,
+        const std::string &parameters, sptr<IRegisterDInputCallback> callback);
+    bool CheckUnregisterParam(const std::string &devId, const std::string &dhId,
+        sptr<IUnregisterDInputCallback> callback);
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 
     class DInputSourceListener : public DInputSourceTransCallback {

@@ -15,6 +15,7 @@
 
 #include "white_list_util.h"
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -34,6 +35,11 @@ namespace {
     const int32_t COMB_KEY_VEC_MIN_LEN = 2;
     const int32_t LAST_KEY_ACTION_LEN = 1;
     const int32_t LAST_KEY_LEN = 1;
+    const int32_t MAX_LINE_NUM = 100;
+    const int32_t MAX_CHAR_PER_LINE_NUM = 100;
+    const int32_t MAX_SPLIT_COMMA_NUM = 4;
+    const int32_t MAX_SPLIT_LINE_NUM = 12;
+    const int32_t MAX_KEY_CODE_NUM = 4;
 }
 
 WhiteListUtil::WhiteListUtil()
@@ -65,9 +71,13 @@ int32_t WhiteListUtil::Init()
     TYPE_KEY_CODE_VEC vecKeyCode;
     TYPE_COMBINATION_KEY_VEC vecCombinationKey;
     TYPE_WHITE_LIST_VEC vecWhiteList;
-
     std::string line;
+    std::size_t lineNum = 0;
     while (getline(inFile, line)) {
+        if ((++lineNum > MAX_LINE_NUM) || CheckLine(line)) {
+            DHLOGE("whitelist cfg file has too many lines or too complicated. lineNum is %d", lineNum);
+            break;
+        }
         DHLOGI("read whitelist cfg, line=%s", line.c_str());
         vecKeyCode.clear();
         vecCombinationKey.clear();
@@ -81,12 +91,11 @@ int32_t WhiteListUtil::Init()
             ReadLineDataStepOne(column, vecKeyCode, vecCombinationKey);
         }
 
-        if (!line.empty()) {
+        if (CheckIsNumber(line)) {
             int32_t keyCode = std::stoi(line);
             if (keyCode != 0) {
                 vecKeyCode.push_back(keyCode);
             }
-
             if (!vecKeyCode.empty()) {
                 vecCombinationKey.push_back(vecKeyCode);
                 vecKeyCode.clear();
@@ -98,18 +107,45 @@ int32_t WhiteListUtil::Init()
             vecCombinationKey.clear();
         }
     }
-
     inFile.close();
 
     std::string localNetworkId = GetLocalDeviceInfo().networkId;
     if (!localNetworkId.empty()) {
         SyncWhiteList(localNetworkId, vecWhiteList);
-    } else {
-        DHLOGE("query local network id from softbus failed");
     }
-
-    DHLOGI("Local WhiteListUtil init success");
     return DH_SUCCESS;
+}
+
+bool WhiteListUtil::CheckLine(const std::string &line) const
+{
+    if (line.size() > MAX_CHAR_PER_LINE_NUM) {
+        DHLOGE("This line is too long, size is %d", line.size());
+        return false;
+    }
+    if (std::count(line.begin(), line.end(), SPLIT_COMMA[0]) > MAX_SPLIT_COMMA_NUM) {
+        DHLOGE("This line %s has too many SPLIT_COMMA", line.c_str());
+        return false;
+    }
+    if (std::count(line.begin(), line.end(), SPLIT_LINE[0]) > MAX_SPLIT_LINE_NUM) {
+        DHLOGE("This line %s has too many SPLIT_LINE", line.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool WhiteListUtil::CheckIsNumber(const std::string &str) const
+{
+    if (str.empty() || str.size() > MAX_KEY_CODE_NUM) {
+        DHLOGE("KeyCode size %d, is zero or too long.", str.size());
+        return false;
+    }
+    for (char const &c : str) {
+        if (std::isdigit(c) == 0) {
+            DHLOGE("Check KeyCode format fail, %s.", str.c_str());
+            return false;
+        }
+    }
+    return true;
 }
 
 void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &vecKeyCode,
@@ -121,7 +157,7 @@ void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &
         column = column.substr(pos2 + 1, column.size());
         pos2 = column.find(SPLIT_LINE);
 
-        if (!single.empty()) {
+        if (CheckIsNumber(single)) {
             int32_t keyCode = std::stoi(single);
             if (keyCode != 0) {
                 vecKeyCode.push_back(keyCode);
@@ -129,7 +165,7 @@ void WhiteListUtil::ReadLineDataStepOne(std::string &column, TYPE_KEY_CODE_VEC &
         }
     }
 
-    if (!column.empty()) {
+    if (CheckIsNumber(column)) {
         int32_t keyCode = std::stoi(column);
         if (keyCode != 0) {
             vecKeyCode.push_back(keyCode);
