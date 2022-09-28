@@ -44,13 +44,13 @@ namespace {
 
 WhiteListUtil::WhiteListUtil()
 {
-    DHLOGI("Ctor WhiteListUtil, addr: %p", this);
+    DHLOGI("Ctor WhiteListUtil.");
     Init();
 }
 
 WhiteListUtil::~WhiteListUtil()
 {
-    DHLOGI("Dtor WhiteListUtil, addr: %p", this);
+    DHLOGI("Dtor WhiteListUtil.");
 }
 
 WhiteListUtil &WhiteListUtil::GetInstance(void)

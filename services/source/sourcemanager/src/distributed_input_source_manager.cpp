@@ -1652,7 +1652,7 @@ int32_t DistributedInputSourceManager::RegisterDelWhiteListCallback(sptr<IDelWhi
 
 int32_t DistributedInputSourceManager::RegisterInputNodeListener(sptr<InputNodeListener> listener)
 {
-    DHLOGI("RegisterInputNodeListener, addr: %p", &listener);
+    DHLOGI("RegisterInputNodeListener.");
     if (listener == nullptr) {
         DHLOGE("RegisterInputNodeListener callback is null.");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_NODE_LISTENER_CALLBACK_ERR;
@@ -1664,7 +1664,7 @@ int32_t DistributedInputSourceManager::RegisterInputNodeListener(sptr<InputNodeL
 
 int32_t DistributedInputSourceManager::UnregisterInputNodeListener(sptr<InputNodeListener> listener)
 {
-    DHLOGI("UnregisterInputNodeListener, addr: %p", &listener);
+    DHLOGI("UnregisterInputNodeListener.");
     if (listener == nullptr) {
         DHLOGE("UnregisterInputNodeListener callback is null.");
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_NODE_LISTENER_CALLBACK_ERR;

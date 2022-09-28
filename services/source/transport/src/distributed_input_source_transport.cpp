@@ -772,7 +772,7 @@ bool DistributedInputSourceTransport::CheckRecivedData(const std::string& messag
 void DistributedInputSourceTransport::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
     DHLOGI("OnBytesReceived, sessionId: %d, dataLen:%d", sessionId, dataLen);
-    if (sessionId < 0 || data == nullptr || dataLen <= 0) {
+    if (sessionId < 0 || data == nullptr || dataLen <= 0 || dataLen > MSG_MAX_SIZE) {
         DHLOGE("OnBytesReceived param check failed");
         return;
     }
