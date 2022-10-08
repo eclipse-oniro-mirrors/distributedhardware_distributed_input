@@ -116,7 +116,7 @@ void PrepareInputFuzzTest(const uint8_t* data, size_t size)
 
 void StartRemoteInputFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
 
@@ -134,7 +134,7 @@ void StartRemoteInputFuzzTest(const uint8_t* data, size_t size)
 
 void IsNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
 

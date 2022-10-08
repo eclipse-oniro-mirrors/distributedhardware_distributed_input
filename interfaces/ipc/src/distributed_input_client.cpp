@@ -692,7 +692,11 @@ bool DistributedInputClient::IsJsonData(std::string strData) const
 
 void DistributedInputClient::AddWhiteListInfos(const std::string &deviceId, const std::string &strJson) const
 {
-    nlohmann::json inputData = nlohmann::json::parse(strJson);
+    nlohmann::json inputData = nlohmann::json::parse(strJson, nullptr, false);
+    if (inputData.is_discarded()) {
+        DHLOGE("InputData parse failed!");
+        return;
+    }
     size_t jsonSize = inputData.size();
     DHLOGI("AddWhiteListInfosCb OnResult deviceId: %s, json str: %s, json size:%d.\n",
         GetAnonyString(deviceId).c_str(), GetAnonyString(strJson).c_str(), jsonSize);
@@ -709,7 +713,11 @@ void DistributedInputClient::UpdateSinkScreenInfos(const std::string &strJson)
 {
     std::lock_guard<std::mutex> lock(operationMutex_);
     screenTransInfos.clear();
-    nlohmann::json inputData = nlohmann::json::parse(strJson);
+    nlohmann::json inputData = nlohmann::json::parse(strJson, nullptr, false);
+    if (inputData.is_discarded()) {
+        DHLOGE("InputData parse failed!");
+        return;
+    }
     size_t jsonSize = inputData.size();
     DHLOGI("OnResult json str: %s, json size:%d.\n", GetAnonyString(strJson).c_str(), jsonSize);
     std::vector<std::vector<uint32_t>> transInfos = inputData;

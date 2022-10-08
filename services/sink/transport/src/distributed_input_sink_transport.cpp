@@ -639,7 +639,7 @@ void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const s
         return;
     }
 
-    nlohmann::json recMsg = nlohmann::json::parse(message);
+    nlohmann::json recMsg = nlohmann::json::parse(message, nullptr, false);
     if (recMsg.is_discarded()) {
         DHLOGE("OnBytesReceived jsonStr error.");
         return;

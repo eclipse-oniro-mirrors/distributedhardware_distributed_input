@@ -1640,7 +1640,7 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
         DHLOGE("OnBytesReceived the callback_ is null, the message:%s abort.", SetAnonyId(message).c_str());
         return;
     }
-    nlohmann::json recMsg = nlohmann::json::parse(message);
+    nlohmann::json recMsg = nlohmann::json::parse(message, nullptr, false);
     if (CheckRecivedData(message) != true) {
         return;
     }
@@ -1657,7 +1657,7 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
 
 bool DistributedInputSourceTransport::CheckRecivedData(const std::string& message)
 {
-    nlohmann::json recMsg = nlohmann::json::parse(message);
+    nlohmann::json recMsg = nlohmann::json::parse(message, nullptr, false);
     if (recMsg.is_discarded()) {
         DHLOGE("OnBytesReceived jsonStr error.");
         return false;

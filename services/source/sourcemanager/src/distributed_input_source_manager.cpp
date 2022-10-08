@@ -374,7 +374,11 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseKeyState(con
 void DistributedInputSourceManager::DInputSourceListener::onReceivedEventRemoteInput(
     const std::string deviceId, const std::string &event)
 {
-    nlohmann::json inputData = nlohmann::json::parse(event);
+    nlohmann::json inputData = nlohmann::json::parse(event, nullptr, false);
+    if (inputData.is_discarded()) {
+        DHLOGE("inputData parse failed!");
+        return;
+    }
     size_t jsonSize = inputData.size();
     DHLOGI("onReceivedEventRemoteInput called, deviceId: %s, json size:%d.",
         GetAnonyString(deviceId).c_str(), jsonSize);

@@ -132,7 +132,11 @@ bool IsUint64(const nlohmann::json& jsonObj, const std::string& key)
 
 std::string GetNodeDesc(std::string parameters)
 {
-    nlohmann::json parObj = nlohmann::json::parse(parameters);
+    nlohmann::json parObj = nlohmann::json::parse(parameters, nullptr, false);
+    if (parObj.is_discarded()) {
+        DHLOGE("parObj parse failed!");
+        return "";
+    }
     std::string nodeName = "N/A";
     std::string physicalPath = "N/A";
     int32_t classes = -1;

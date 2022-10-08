@@ -71,7 +71,11 @@ int32_t DistributedInputNodeManager::openDevicesNode(const std::string& devId, c
 
 void DistributedInputNodeManager::stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf)
 {
-    nlohmann::json recMsg = nlohmann::json::parse(str);
+    nlohmann::json recMsg = nlohmann::json::parse(str, nullptr, false);
+    if (recMsg.is_discarded()) {
+        DHLOGE("recMsg parse failed!");
+        return;
+    }
     recMsg.at("name").get_to(pBuf.name);
     recMsg.at("physicalPath").get_to(pBuf.physicalPath);
     recMsg.at("uniqueId").get_to(pBuf.uniqueId);

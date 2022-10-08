@@ -63,7 +63,11 @@ void DistributedInputClient::UnregisterDInputCb::OnResult(
 
 void DistributedInputClient::AddWhiteListInfosCb::OnResult(const std::string &deviceId, const std::string &strJson)
 {
-    nlohmann::json inputData = nlohmann::json::parse(strJson);
+    nlohmann::json inputData = nlohmann::json::parse(strJson, nullptr, false);
+    if (inputData.is_discarded()) {
+        DHLOGE("inputData parse error.");
+        return;
+    }
     int jsonSize = inputData.size();
     DHLOGI("AddWhiteListInfosCb OnResult json size:%d.\n", jsonSize);
     TYPE_WHITE_LIST_VEC vecWhiteList = inputData;

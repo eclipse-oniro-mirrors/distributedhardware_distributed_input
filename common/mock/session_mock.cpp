@@ -38,7 +38,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         std::cout << "CreateSessionServer listener is null." << std::endl;
         return DH_ERROR;
     }
-    if (strcpy_s(g_mySessionName, strlen(sessionName) + 1, sessionName) != DH_SUCCESS) {
+    if (strcpy_s(g_mySessionName, strlen(sessionName) + 1, sessionName) != EOK) {
         std::cout << "strcpy_s faild" << std::endl;
         return DH_ERROR;
     }
@@ -64,11 +64,11 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     if (strlen(peerDeviceId) <= 0) {
         return DH_ERROR;
     }
-    if (strncpy_s(g_peerSessionName, CHAR_ARRAY_SIZE + 1, peerSessionName, CHAR_ARRAY_SIZE) != DH_SUCCESS) {
+    if (strncpy_s(g_peerSessionName, CHAR_ARRAY_SIZE + 1, peerSessionName, CHAR_ARRAY_SIZE) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
     }
-    if (strncpy_s(g_peerDeviceId, CHAR_ARRAY_SIZE + 1, peerDeviceId, DEVICE_ID_SIZE_MAX) != DH_SUCCESS) {
+    if (strncpy_s(g_peerDeviceId, CHAR_ARRAY_SIZE + 1, peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
     }
@@ -101,7 +101,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
 
 int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
 {
-    if (strncpy_s(sessionName, len + 1, g_mySessionName, CHAR_ARRAY_SIZE) != DH_SUCCESS) {
+    if (strncpy_s(sessionName, len + 1, g_mySessionName, CHAR_ARRAY_SIZE) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
     }
@@ -110,7 +110,7 @@ int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
 
 int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
 {
-    if (strncpy_s(sessionName, len + 1, g_peerSessionName, CHAR_ARRAY_SIZE) != DH_SUCCESS) {
+    if (strncpy_s(sessionName, len + 1, g_peerSessionName, CHAR_ARRAY_SIZE) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
     }
@@ -119,7 +119,7 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
 
 int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
 {
-    if (strncpy_s(devId, len + 1, g_peerDeviceId, DEVICE_ID_SIZE_MAX) != DH_SUCCESS) {
+    if (strncpy_s(devId, len + 1, g_peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
     }
