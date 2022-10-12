@@ -21,6 +21,7 @@
 #include "session_mock.h"
 
 constexpr int32_t DH_SUCCESS = 0;
+const uint32_t AUTH_SESSION_SIDE_CLIENT = 1;
 constexpr int32_t DH_ERROR = -1;
 constexpr int32_t MOCK_SESSION_ID = 1;
 static ISessionListener g_listener;
@@ -128,7 +129,7 @@ int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
 
 int GetSessionSide(int sessionId)
 {
-    return DH_SUCCESS;
+    return AUTH_SESSION_SIDE_CLIENT;
 }
 
 int SetFileReceiveListener(const char *pkgName, const char *sessionName, const IFileReceiveListener *recvListener,

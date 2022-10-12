@@ -151,7 +151,7 @@ void IsNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
 }
 void StopRemoteInputFuzzTest(const uint8_t* data, size_t  size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
 
@@ -169,7 +169,7 @@ void StopRemoteInputFuzzTest(const uint8_t* data, size_t  size)
 
 void IsTouchEventNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
 
