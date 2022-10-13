@@ -215,7 +215,7 @@ void WhiteListUtil::GetCombKeysHash(TYPE_COMBINATION_KEY_VEC combKeys, std::unor
     WhiteListItemHash hash;
     GetAllComb(combKeys, hash, combKeys.size(), hashSets);
 
-    for (auto &hashSet : hashSets) {
+    for (const auto &hashSet : hashSets) {
         targetSet.insert(hashSet + std::to_string(lastKey[0]) + std::to_string(lastKeyAction[0]));
     }
 }
@@ -274,7 +274,7 @@ int32_t WhiteListUtil::GetWhiteList(const std::string &deviceId, TYPE_WHITE_LIST
 std::string WhiteListUtil::GetBusinessEventHash(const BusinessEvent &event)
 {
     std::string hash = "";
-    for (auto &p : event.pressedKeys) {
+    for (const auto &p : event.pressedKeys) {
         hash += std::to_string(p);
     }
     hash += std::to_string(event.keyCode);

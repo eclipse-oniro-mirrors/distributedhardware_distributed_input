@@ -98,6 +98,24 @@ std::string SetAnonyId(const std::string &message)
     if (IsString(jsonObj, DINPUT_SOFTBUS_KEY_INPUT_DATA)) {
         jsonObj[DINPUT_SOFTBUS_KEY_INPUT_DATA] = GetAnonyString(jsonObj[DINPUT_SOFTBUS_KEY_INPUT_DATA]);
     }
+    if (IsString(jsonObj, DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        std::string dhidStr = jsonObj[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
+        dhidStr.append(".");
+        size_t pos = dhidStr.find(".");
+        std::string anonyDhidStr = "";
+        while (pos != dhidStr.npos) {
+            anonyDhidStr += GetAnonyString(dhidStr.substr(0, pos)) + ".";
+            dhidStr = dhidStr.substr(pos + 1, dhidStr.size());
+            pos = dhidStr.find(".");
+        }
+        jsonObj[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = anonyDhidStr.substr(0, anonyDhidStr.length() - 1);
+    }
+    if (IsString(jsonObj, DINPUT_SOFTBUS_KEY_SRC_DEV_ID)) {
+        jsonObj[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = GetAnonyString(jsonObj[DINPUT_SOFTBUS_KEY_SRC_DEV_ID]);
+    }
+    if (IsString(jsonObj, DINPUT_SOFTBUS_KEY_SINK_DEV_ID)) {
+        jsonObj[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = GetAnonyString(jsonObj[DINPUT_SOFTBUS_KEY_SINK_DEV_ID]);
+    }
     return jsonObj.dump();
 }
 

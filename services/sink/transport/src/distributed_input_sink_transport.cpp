@@ -176,8 +176,7 @@ int32_t DistributedInputSinkTransport::RespPrepareRemoteInput(
     }
 }
 
-int32_t DistributedInputSinkTransport::RespUnprepareRemoteInput(
-    const int32_t sessionId, std::string &smsg)
+int32_t DistributedInputSinkTransport::RespUnprepareRemoteInput(const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
         DHLOGI("RespUnprepareRemoteInput sessionId: %d, smsg:%s.", sessionId, SetAnonyId(smsg).c_str());
@@ -193,8 +192,7 @@ int32_t DistributedInputSinkTransport::RespUnprepareRemoteInput(
     }
 }
 
-int32_t DistributedInputSinkTransport::RespStartRemoteInput(
-    const int32_t sessionId, std::string &smsg)
+int32_t DistributedInputSinkTransport::RespStartRemoteInput(const int32_t sessionId, std::string &smsg)
 {
     if (sessionId > 0) {
         DHLOGI("RespStartRemoteInput sessionId: %d, smsg:%s.", sessionId, SetAnonyId(smsg).c_str());
@@ -271,18 +269,18 @@ int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::strin
         DHLOGE("SendMessage error: message.size() > MSG_MAX_SIZE");
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
     }
-    uint8_t *buf = (uint8_t *)calloc((MSG_MAX_SIZE), sizeof(uint8_t));
+    uint8_t *buf = reinterpret_cast<uint8_t *>(calloc((MSG_MAX_SIZE), sizeof(uint8_t)));
     if (buf == nullptr) {
         DHLOGE("SendMessage: malloc memory failed");
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
     }
     int32_t outLen = 0;
-    if (memcpy_s(buf, MSG_MAX_SIZE, (const uint8_t *)message.c_str(), message.size()) != DH_SUCCESS) {
+    if (memcpy_s(buf, MSG_MAX_SIZE, reinterpret_cast<const uint8_t *>(message.c_str()), message.size()) != EOK) {
         DHLOGE("SendMessage: memcpy memory failed");
         free(buf);
         return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
     }
-    outLen = (int32_t)(message.size());
+    outLen = static_cast<int32_t>(message.size());
     int32_t ret = SendBytes(sessionId, buf, outLen);
     free(buf);
     return ret;
@@ -382,13 +380,13 @@ void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const voi
         return;
     }
 
-    uint8_t *buf = (uint8_t *)calloc(dataLen + 1, sizeof(uint8_t));
+    uint8_t *buf = reinterpret_cast<uint8_t *>(calloc(dataLen + 1, sizeof(uint8_t)));
     if (buf == nullptr) {
         DHLOGE("OnBytesReceived: malloc memory failed");
         return;
     }
 
-    if (memcpy_s(buf, dataLen + 1, (const uint8_t*)data, dataLen) != DH_SUCCESS) {
+    if (memcpy_s(buf, dataLen + 1, reinterpret_cast<const uint8_t *>(data), dataLen) != EOK) {
         DHLOGE("OnBytesReceived: memcpy memory failed");
         free(buf);
         return;

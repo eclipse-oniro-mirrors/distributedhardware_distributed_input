@@ -292,11 +292,6 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteI
     }
 
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("onResponseStartRemoteInputDhid jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DHID] = dhids;
@@ -324,11 +319,6 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStopRemoteIn
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("onResponseStartRemoteInputDhid jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DHID] = dhids;
@@ -413,11 +403,6 @@ void DistributedInputSourceManager::DInputSourceListener::onReceiveRelayPrepareR
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SRC_DEVID] = srcId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SINK_DEVID] = sinkId;
@@ -441,11 +426,6 @@ void DistributedInputSourceManager::DInputSourceListener::onReceiveRelayUnprepar
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SRC_DEVID] = srcId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SINK_DEVID] = sinkId;

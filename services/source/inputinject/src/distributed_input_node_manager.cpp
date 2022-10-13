@@ -130,10 +130,6 @@ int32_t DistributedInputNodeManager::CreateVirtualTouchScreenNode(const std::str
     DHLOGI("CreateVirtualTouchScreenNode start, dhId: %s, sourcePhyWidth: %d, sourcePhyHeight: %d",
         GetAnonyString(dhId).c_str(), sourcePhyWidth, sourcePhyHeight);
     device = std::make_unique<VirtualTouchScreen>(info.deviceInfo, info, sourcePhyWidth - 1, sourcePhyHeight - 1);
-    if (device == nullptr) {
-        DHLOGE("could not create new virtual touch Screen");
-        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
-    }
     if (!device->SetUp(devId, dhId)) {
         DHLOGE("Virtual touch Screen setUp fail, devId: %s, dhId: %s", GetAnonyString(devId).c_str(),
             GetAnonyString(dhId).c_str());

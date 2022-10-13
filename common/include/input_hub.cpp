@@ -220,7 +220,7 @@ size_t InputHub::CollectEvent(RawEvent* buffer, size_t& capacity, Device* device
         if (needFilted[i]) {
             continue;
         }
-        struct input_event& iev = readBuffer[i];
+        const struct input_event& iev = readBuffer[i];
         event->when = ProcessEventTimestamp(iev);
         event->type = iev.type;
         event->code = iev.code;
