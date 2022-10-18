@@ -1325,6 +1325,7 @@ void DistributedInputSourceTransport::NotifyResponseRelayUnprepareRemoteInput(in
     }
     callback_->onResponseRelayUnprepareRemoteInput(recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID], sinkDevId,
         recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
+    CloseInputSoftbus(sessionId);
 }
 
 void DistributedInputSourceTransport::ReceiveRelayPrepareResult(int32_t sessionId, const nlohmann::json &recMsg)
