@@ -126,10 +126,11 @@ void StartRemoteInputFuzzTest(const uint8_t* data, size_t size)
     std::vector<std::string> dhIds= {};
     OHOS::sptr<TestStartDInputCallback> startCb = new (std::nothrow) TestStartDInputCallback();
     OHOS::sptr<TestStopDInputCallback> stopCb = new (std::nothrow) TestStopDInputCallback();
+    DistributedInput::DistributedInputKit::StartRemoteInput(sinkId, inputTypes, startCb);
     DistributedInput::DistributedInputKit::StartRemoteInput(srcId, sinkId, inputTypes, startCb);
-    DistributedInput::DistributedInputKit::StopRemoteInput(srcId, sinkId, inputTypes, stopCb);
     OHOS::sptr<TestIStartStopDInputsCallback> callback = new (std::nothrow) TestIStartStopDInputsCallback();
     DistributedInput::DistributedInputKit::StartRemoteInput(sinkId, dhIds, callback);
+    DistributedInput::DistributedInputKit::StartRemoteInput(srcId, sinkId, dhIds, callback);
 }
 
 void IsNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
@@ -165,6 +166,7 @@ void StopRemoteInputFuzzTest(const uint8_t* data, size_t  size)
     DistributedInput::DistributedInputKit::StopRemoteInput(srcId, sinkId, inputTypes, stopCb);
     OHOS::sptr<TestIStartStopDInputsCallback> callback = new (std::nothrow) TestIStartStopDInputsCallback();
     DistributedInput::DistributedInputKit::StopRemoteInput(sinkId, dhIds, callback);
+    DistributedInput::DistributedInputKit::StopRemoteInput(srcId, sinkId, dhIds, callback);
 }
 
 void IsTouchEventNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
