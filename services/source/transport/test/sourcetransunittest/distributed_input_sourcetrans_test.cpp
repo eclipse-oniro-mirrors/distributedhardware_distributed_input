@@ -49,6 +49,14 @@ HWTEST_F(DistributedInputSourceTransTest, OpenInputSoftbus01, testing::ext::Test
 HWTEST_F(DistributedInputSourceTransTest, OpenInputSoftbus02, testing::ext::TestSize.Level0)
 {
     std::string remoteDevId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    int32_t ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbusForRelay(remoteDevId);
+
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, OpenInputSoftbus03, testing::ext::TestSize.Level0)
+{
+    std::string remoteDevId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
     int32_t ret = DistributedInputSourceTransport::GetInstance().Init();
     EXPECT_EQ(DH_SUCCESS, ret);
     ret = DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(remoteDevId);
@@ -136,6 +144,48 @@ HWTEST_F(DistributedInputSourceTransTest, StopRemoteInput02, testing::ext::TestS
         deviceId, static_cast<uint32_t>(DInputDeviceType::ALL));
     EXPECT_EQ(DH_SUCCESS, ret);
     DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(sessionId);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyOriginPrepareResult01, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    int32_t sessionId = 2;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().NotifyOriginPrepareResult(
+        sessionId, srcId, sinkId, DH_SUCCESS);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyOriginUnprepareResult01, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    int32_t sessionId = 2;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().NotifyOriginUnprepareResult(
+        sessionId, srcId, sinkId, DH_SUCCESS);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyOriginStartDhidResult01, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    int32_t sessionId = 2;
+    std::string dhIds = "Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    int32_t ret = DistributedInputSourceTransport::GetInstance().NotifyOriginStartDhidResult(
+        sessionId, srcId, sinkId, DH_SUCCESS, dhIds);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyOriginStopDhidResult01, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    int32_t sessionId = 2;
+    std::string dhIds = "Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    int32_t ret = DistributedInputSourceTransport::GetInstance().NotifyOriginStopDhidResult(
+        sessionId, srcId, sinkId, DH_SUCCESS, dhIds);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware
