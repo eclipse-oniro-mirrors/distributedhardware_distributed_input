@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import(
     "//foundation/distributedhardware/distributed_input/distributedinput.gni")
 
-ohos_shared_library("libdinput_sink_trans") {
+ohos_shared_library("libdinput_trans_base") {
   include_dirs = [
     "include",
     "${common_path}/include",
@@ -37,16 +37,18 @@ ohos_shared_library("libdinput_sink_trans") {
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
     "//foundation/distributedhardware/distributed_input/services/transportbase/include",
+    "${distributedinput_path}/services/source/inputinject/include",
+    "${distributedinput_path}/inputdevicehandler/include",
+    "${frameworks_path}/include",
   ]
 
   sources = [
-    "src/distributed_input_sink_switch.cpp",
-    "src/distributed_input_sink_transport.cpp",
+    "src/distributed_input_transport_base.cpp",
   ]
 
   defines = [
     "HI_LOG_ENABLE",
-    "DH_LOG_TAG=\"distributedinputsinktransport\"",
+    "DH_LOG_TAG=\"distributedinputtransportbase\"",
     "LOG_DOMAIN=0xD004100",
   ]
 
@@ -61,12 +63,13 @@ ohos_shared_library("libdinput_sink_trans") {
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//foundation/distributedhardware/distributed_input/services/transportbase:libdinput_trans_base",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "hitrace_native:hitrace_meter",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

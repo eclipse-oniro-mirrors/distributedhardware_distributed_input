@@ -38,14 +38,15 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-DistributedInputNodeManager::DistributedInputNodeManager() : isInjectThreadRunning_(false),
-    inputHub_(std::make_unique<InputHub>()), virtualTouchScreenFd_(UN_INIT_FD_VALUE)
+DistributedInputNodeManager::DistributedInputNodeManager() : isInjectThreadCreated_(false),
+    isInjectThreadRunning_(false), inputHub_(std::make_unique<InputHub>()), virtualTouchScreenFd_(UN_INIT_FD_VALUE)
 {
 }
 
 DistributedInputNodeManager::~DistributedInputNodeManager()
 {
     DHLOGI("destructor start");
+    isInjectThreadCreated_.store(false);
     isInjectThreadRunning_.store(false);
     if (eventInjectThread_.joinable()) {
         eventInjectThread_.join();
@@ -179,30 +180,37 @@ int32_t DistributedInputNodeManager::getDevice(const std::string& dhId, VirtualD
 {
     std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
     auto iter = virtualDeviceMap_.find(dhId);
-    if (iter != virtualDeviceMap_.end()) {
-        device = iter->second.get();
-        return DH_SUCCESS;
+    if (iter == virtualDeviceMap_.end()) {
+        return ERR_DH_INPUT_SERVER_SOURCE_GET_DEVICE_FAIL;
     }
-    return ERR_DH_INPUT_SERVER_SOURCE_GET_DEVICE_FAIL;
+    device = iter->second.get();
+    return DH_SUCCESS;
 }
 
 void DistributedInputNodeManager::StartInjectThread()
 {
-    DHLOGI("start");
+    if (isInjectThreadCreated_.load()) {
+        DHLOGI("InjectThread has been created.");
+        return;
+    }
+    DHLOGI("InjectThread does not created");
+    isInjectThreadCreated_.store(true);
     isInjectThreadRunning_.store(true);
     eventInjectThread_ = std::thread(&DistributedInputNodeManager::InjectEvent, this);
-    DHLOGI("end");
 }
 
 void DistributedInputNodeManager::StopInjectThread()
 {
-    DHLOGI("start");
+    if (!isInjectThreadCreated_.load()) {
+        DHLOGI("InjectThread does not created, and not need to stop.");
+    }
+    DHLOGI("InjectThread has been created, and soon will be stopped.");
     isInjectThreadRunning_.store(false);
+    isInjectThreadCreated_.store(false);
     conditionVariable_.notify_all();
     if (eventInjectThread_.joinable()) {
         eventInjectThread_.join();
     }
-    DHLOGI("end");
 }
 
 void DistributedInputNodeManager::ReportEvent(const RawEvent rawEvent)
