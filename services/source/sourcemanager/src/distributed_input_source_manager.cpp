@@ -228,11 +228,6 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseStartRemoteI
     }
 
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("onResponseStartRemoteInput jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_ITP] = inputTypes;
@@ -344,11 +339,6 @@ void DistributedInputSourceManager::DInputSourceListener::onResponseKeyState(con
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("onResponseMouseDown jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DEVID] = deviceId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_DHID] = dhid;
@@ -449,11 +439,6 @@ void DistributedInputSourceManager::DInputSourceListener::onReceiveRelayStartDhi
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SRC_DEVID] = srcId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SINK_DEVID] = sinkId;
@@ -478,11 +463,6 @@ void DistributedInputSourceManager::DInputSourceListener::onReceiveRelayStopDhid
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SRC_DEVID] = srcId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SINK_DEVID] = sinkId;
@@ -507,11 +487,6 @@ void DistributedInputSourceManager::DInputSourceListener::onReceiveRelayStartTyp
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SRC_DEVID] = srcId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SINK_DEVID] = sinkId;
@@ -536,11 +511,6 @@ void DistributedInputSourceManager::DInputSourceListener::onReceiveRelayStopType
         return;
     }
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
-    if (jsonArrayMsg == nullptr) {
-        DHLOGE("jsonArrayMsg is null.");
-        return;
-    }
-
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SRC_DEVID] = srcId;
     tmpJson[INPUT_SOURCEMANAGER_KEY_SINK_DEVID] = sinkId;
@@ -2372,7 +2342,7 @@ void DistributedInputSourceManager::RunRelayStartDhidCallback(const std::string 
         dhids.c_str(), dhidsVec.size());
     bool isCbRun = false;
     for (std::vector<DInputClientStartDhidInfo>::iterator iter = relayStaDhidCallbacks_.begin();
-        iter != relayStaDhidCallbacks_.end(); iter++) {
+        iter != relayStaDhidCallbacks_.end(); ++iter) {
         if (iter->srcId != srcId || iter->sinkId != sinkId || !IsStringDataSame(iter->dhIds, dhidsVec)) {
             continue;
         }
@@ -2394,7 +2364,7 @@ void DistributedInputSourceManager::RunRelayStopDhidCallback(const std::string &
     StringSplitToVector(dhids, INPUT_STRING_SPLIT_POINT, dhidsVec);
     bool isCbRun = false;
     for (std::vector<DInputClientStopDhidInfo>::iterator iter = relayStpDhidCallbacks_.begin();
-        iter != relayStpDhidCallbacks_.end(); iter++) {
+        iter != relayStpDhidCallbacks_.end(); ++iter) {
         if (iter->srcId != srcId || iter->sinkId != sinkId || !IsStringDataSame(iter->dhIds, dhidsVec)) {
             continue;
         }
@@ -2415,7 +2385,7 @@ void DistributedInputSourceManager::RunRelayStartTypeCallback(const std::string 
     bool isCbRun = false;
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     for (std::vector<DInputClientStartTypeInfo>::iterator iter =
-        relayStaTypeCallbacks_.begin(); iter != relayStaTypeCallbacks_.end(); iter++) {
+        relayStaTypeCallbacks_.begin(); iter != relayStaTypeCallbacks_.end(); ++iter) {
         if (iter->srcId == srcId && iter->sinkId == sinkId && iter->inputTypes == inputTypes) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_RELAY_STARTTYPE_RESULT_MMI");
             iter->callback->OnResult(sinkId, inputTypes, status);
@@ -2436,7 +2406,7 @@ void DistributedInputSourceManager::RunRelayStopTypeCallback(const std::string &
     bool isCbRun = false;
     FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     for (std::vector<DInputClientStopTypeInfo>::iterator iter =
-        relayStpTypeCallbacks_.begin(); iter != relayStpTypeCallbacks_.end(); iter++) {
+        relayStpTypeCallbacks_.begin(); iter != relayStpTypeCallbacks_.end(); ++iter) {
         if (iter->srcId == srcId && iter->sinkId == sinkId && iter->inputTypes == inputTypes) {
             DHLOGI("ProcessEvent DINPUT_SOURCE_MANAGER_RELAY_STOPTYPE_RESULT_MMI");
             iter->callback->OnResult(sinkId, inputTypes, status);
