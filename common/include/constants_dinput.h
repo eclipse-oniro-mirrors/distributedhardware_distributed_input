@@ -32,7 +32,7 @@ namespace DistributedInput {
 #define INPUT_KEY_DESCRIPTOR  "descriptor"
 #define INPUT_KEY_PATH "path"
 
-#define VIRTUAL_DEVICE_NAME "Hos Distributed Virtual Device "
+#define VIRTUAL_DEVICE_NAME "DistributedInput "
 #define LONG_BITS (sizeof(long) * 8)
 #define NLONGS(x) (((x) + LONG_BITS - 1) / LONG_BITS)
 
