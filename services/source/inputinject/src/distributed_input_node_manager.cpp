@@ -178,11 +178,10 @@ int32_t DistributedInputNodeManager::CloseDeviceLocked(const std::string &dhId)
 int32_t DistributedInputNodeManager::getDevice(const std::string& dhId, VirtualDevice*& device)
 {
     std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
-    for (const auto& [id, virDevice] : virtualDeviceMap_) {
-        if (id.compare(dhId) == 0) {
-            device = virDevice.get();
-            return DH_SUCCESS;
-        }
+    auto iter = virtualDeviceMap_.find(dhId);
+    if (iter != virtualDeviceMap_.end()) {
+        device = iter->second.get();
+        return DH_SUCCESS;
     }
     return ERR_DH_INPUT_SERVER_SOURCE_GET_DEVICE_FAIL;
 }
