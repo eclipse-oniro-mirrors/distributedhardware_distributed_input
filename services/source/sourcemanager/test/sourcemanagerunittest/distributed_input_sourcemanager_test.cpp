@@ -735,7 +735,6 @@ HWTEST_F(DistributedInputSourceManagerTest, UnregisterSimulationEventListener, t
     sptr<TestSimulationEventCb> callback = new TestSimulationEventCb();
     int32_t ret = sourceManager_->UnregisterSimulationEventListener(callback);
     EXPECT_EQ(DH_SUCCESS, ret);
-    sourceManager_->Release();
 }
 }
 }
