@@ -31,7 +31,6 @@
 #include "singleton.h"
 #include "system_ability.h"
 #include "system_ability_status_change_stub.h"
-#include "nlohmann/json.hpp"
 
 #include "constants_dinput.h"
 #include "dinput_sink_trans_callback.h"
@@ -49,8 +48,6 @@ class DistributedInputSinkManager : public SystemAbility, public DistributedInpu
     DECLARE_SYSTEM_ABILITY(DistributedInputSinkManager)
 
 public:
-    static DistributedInputSinkManager &GetInstance();
-    DistributedInputSinkManager() = default;
     DistributedInputSinkManager(int32_t saId, bool runOnCreate);
     ~DistributedInputSinkManager();
 
@@ -155,8 +152,6 @@ public:
     int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener) override;
 
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
-
-    void AddWhiteList(nlohmann::json &jsonStr);
 
 private:
     void CleanExceptionalInfo(const SrcScreenInfo& srcScreenInfo);

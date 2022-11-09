@@ -25,22 +25,19 @@ class DInputSourceTransCallback {
 public:
     virtual void onResponseRegisterDistributedHardware(const std::string deviceId, const std::string dhId,
         bool result) = 0;
-    virtual void onResponsePrepareRemoteInput(const std::string deviceId, bool result) = 0;
+    virtual void onResponsePrepareRemoteInput(const std::string deviceId, bool result, const std::string &object) = 0;
     virtual void onResponseUnprepareRemoteInput(const std::string deviceId, bool result) = 0;
-    virtual void onResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result,
-        const std::string& object) = 0;
+    virtual void onResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result) = 0;
     virtual void onResponseStopRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result) = 0;
-    virtual void onResponseStartRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result,
-        const std::string& object) = 0;
+    virtual void onResponseStartRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result) = 0;
     virtual void onResponseStopRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result) = 0;
     virtual void onResponseKeyState(const std::string deviceId, const std::string &dhid, const uint32_t type,
         const uint32_t code, const uint32_t value) = 0;
     virtual void onReceivedEventRemoteInput(const std::string deviceId, const std::string &object) = 0;
 
-    virtual void onResponseRelayPrepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result) = 0;
+    virtual void onResponseRelayPrepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result,
+        const std::string &object) = 0;
     virtual void onResponseRelayUnprepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result) = 0;
-    virtual void onResponseRelayStartDhidRemoteInput(const std::string &deviceId, const std::string &object) = 0;
-    virtual void onResponseRelayStartTypeRemoteInput(const std::string &deviceId, const std::string &object) = 0;
 
     virtual void onReceiveRelayPrepareResult(int32_t status, const std::string &srcId, const std::string &sinkId) = 0;
     virtual void onReceiveRelayUnprepareResult(int32_t status, const std::string &srcId, const std::string &sinkId) = 0;

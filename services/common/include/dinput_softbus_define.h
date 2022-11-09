@@ -42,7 +42,8 @@ namespace DistributedInput {
     const uint32_t INTERCEPT_STRING_LENGTH = 20;
 
     const std::string DINPUT_PKG_NAME = "ohos.dhardware.dinput";
-    const std::string SESSION_NAME = "ohos.dhardware.dinput.session";
+    const std::string SESSION_NAME_SOURCE = "ohos.dhardware.dinput.so_";
+    const std::string SESSION_NAME_SINK = "ohos.dhardware.dinput.si_";
     const std::string GROUP_ID = "input_softbus_group_id";
 
     #define DINPUT_SOFTBUS_KEY_CMD_TYPE "dinput_softbus_key_cmd_type"
@@ -60,7 +61,7 @@ namespace DistributedInput {
     #define DINPUT_SOFTBUS_KEY_SRC_DEV_ID "dinput_softbus_key_src_dev_id"
     #define DINPUT_SOFTBUS_KEY_SINK_DEV_ID "dinput_softbus_key_sink_dev_id"
 
-    // src will receive
+    // json value
     const uint32_t TRANS_SINK_MSG_ONPREPARE    = 1;
     const uint32_t TRANS_SINK_MSG_ONUNPREPARE  = 2;
     const uint32_t TRANS_SINK_MSG_ONSTART      = 3;
@@ -70,42 +71,45 @@ namespace DistributedInput {
     const uint32_t TRANS_SINK_MSG_DHID_ONSTART = 7;
     const uint32_t TRANS_SINK_MSG_DHID_ONSTOP  = 8;
     const uint32_t TRANS_SINK_MSG_KEY_STATE    = 9;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_PREPARE    = 10;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE  = 11;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT    = 12;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT  = 13;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_DHID    = 14;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID    = 15;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT  = 16;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT   = 17;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE    = 18;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE    = 19;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT  = 20;
-    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT   = 21;
-    const uint32_t TRANS_SINK_MSG_ON_RELAY_PREPARE    = 22;
-    const uint32_t TRANS_SINK_MSG_ON_RELAY_UNPREPARE  = 23;
-    const uint32_t TRANS_SINK_MSG_ON_RELAY_STARTDHID  = 24;
-    const uint32_t TRANS_SINK_MSG_ON_RELAY_STOPDHID   = 25;
-    const uint32_t TRANS_SINK_MSG_ON_RELAY_STARTTYPE  = 26;
-    const uint32_t TRANS_SINK_MSG_ON_RELAY_STOPTYPE   = 27;
+    // A device is sinkdev, B device is source
+    const uint32_t TRANS_SINK_MSG_ON_RELAY_PREPARE    = 50; // A sink send prepare result to B souce
+    const uint32_t TRANS_SINK_MSG_ON_RELAY_UNPREPARE  = 51;
+    const uint32_t TRANS_SINK_MSG_ON_RELAY_STARTDHID  = 52;
+    const uint32_t TRANS_SINK_MSG_ON_RELAY_STOPDHID   = 53;
+    const uint32_t TRANS_SINK_MSG_ON_RELAY_STARTTYPE  = 54;
+    const uint32_t TRANS_SINK_MSG_ON_RELAY_STOPTYPE   = 55;
 
-    // src or sink
-    const uint32_t TRANS_MSG_SRC_SINK_SPLIT    = 30;
+    const uint32_t TRANS_SOURCE_MSG_PREPARE    = 11;
+    const uint32_t TRANS_SOURCE_MSG_UNPREPARE  = 12;
+    const uint32_t TRANS_SOURCE_MSG_START_TYPE = 13;
+    const uint32_t TRANS_SOURCE_MSG_STOP_TYPE  = 14;
+    const uint32_t TRANS_SOURCE_MSG_START_DHID = 15;
+    const uint32_t TRANS_SOURCE_MSG_STOP_DHID  = 16;
+    // A mmi call prepare, A souce will relay prepare to B source
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_PREPARE    = 17;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE  = 18;
+    // B source relay send prepare to A sink
+    const uint32_t TRANS_SOURCE_MSG_PREPARE_FOR_REL      = 19;
+    const uint32_t TRANS_SOURCE_MSG_UNPREPARE_FOR_REL    = 20;
+    // B source receive A sink result,then notify A source result
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT    = 21;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT  = 22;
 
-    // sink will receive
-    const uint32_t TRANS_SOURCE_MSG_PREPARE    = 31;
-    const uint32_t TRANS_SOURCE_MSG_UNPREPARE  = 32;
-    const uint32_t TRANS_SOURCE_MSG_START_TYPE = 33;
-    const uint32_t TRANS_SOURCE_MSG_STOP_TYPE  = 34;
-    const uint32_t TRANS_SOURCE_MSG_START_DHID = 35;
-    const uint32_t TRANS_SOURCE_MSG_STOP_DHID  = 36;
-    const uint32_t TRANS_SOURCE_MSG_LATENCY    = 37;
-    const uint32_t TRANS_SOURCE_MSG_START_DHID_FOR_REL   = 38;
-    const uint32_t TRANS_SOURCE_MSG_STOP_DHID_FOR_REL    = 39;
-    const uint32_t TRANS_SOURCE_MSG_START_TYPE_FOR_REL   = 40;
-    const uint32_t TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL    = 41;
-    const uint32_t TRANS_SOURCE_MSG_PREPARE_FOR_REL      = 42;
-    const uint32_t TRANS_SOURCE_MSG_UNPREPARE_FOR_REL    = 43;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_DHID    = 23;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID    = 24;
+    const uint32_t TRANS_SOURCE_MSG_START_DHID_FOR_REL    = 25;
+    const uint32_t TRANS_SOURCE_MSG_STOP_DHID_FOR_REL    = 26;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT  = 27;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT   = 28;
+
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE    = 29;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE    = 30;
+    const uint32_t TRANS_SOURCE_MSG_START_TYPE_FOR_REL    = 31;
+    const uint32_t TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL    = 32;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT  = 33;
+    const uint32_t TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT   = 34;
+
+    const uint32_t TRANS_SOURCE_MSG_LATENCY = 40;
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

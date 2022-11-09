@@ -17,10 +17,10 @@
 #define DISTRIBUTED_INPUT_SOURCE_TRANSPORT_H
 
 #include <condition_variable>
-#include <map>
+#include <string>
 #include <mutex>
 #include <set>
-#include <string>
+#include <map>
 #include <vector>
 #include <thread>
 
@@ -30,7 +30,6 @@
 #include "securec.h"
 
 #include "dinput_source_trans_callback.h"
-#include "dinput_transbase_source_callback.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -40,28 +39,23 @@ public:
     static DistributedInputSourceTransport &GetInstance();
     ~DistributedInputSourceTransport();
 
-    class DInputTransbaseSourceListener : public DInputTransbaseSourceCallback {
-    public:
-        DInputTransbaseSourceListener(DistributedInputSourceTransport *transport);
-        virtual ~DInputTransbaseSourceListener();
-        void HandleSessionData(int32_t sessionId, const std::string& messageData);
-
-    private:
-        DistributedInputSourceTransport *sourceTransportObj_;
-    };
-
     int32_t Init();
     void Release();
-
+    // this open deviceA.sourceSa ---->  deviceB.sinkSa softbus.
     int32_t OpenInputSoftbus(const std::string &remoteDevId);
-    void CloseInputSoftbus(const std::string &remoteDevId);
-
+    void CloseInputSoftbus(const int32_t sessionId);
+    // this open deviceA.sourceSa ---->  deviceB.sourceSa softbus.
+    int32_t OpenInputSoftbusForRelay(const std::string &srcId);
     void RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback);
 
     int32_t PrepareRemoteInput(const std::string& deviceId);
     int32_t UnprepareRemoteInput(const std::string& deviceId);
     int32_t StartRemoteInput(const std::string& deviceId, const uint32_t& inputTypes);
     int32_t StopRemoteInput(const std::string& deviceId, const uint32_t& inputTypes);
+    int32_t LatencyCount(const std::string& deviceId);
+    void StartLatencyCount(const std::string& deviceId);
+    void StartLatencyThread(const std::string& deviceId);
+    void StopLatencyThread();
 
     int32_t StartRemoteInput(const std::string &deviceId, const std::vector<std::string> &dhids);
     int32_t StopRemoteInput(const std::string &deviceId, const std::vector<std::string> &dhids);
@@ -88,9 +82,12 @@ public:
     int32_t GetCurrentSessionId();
 
 private:
-    int32_t SendMessage(int32_t sessionId, std::string &message);
-    void HandleData(int32_t sessionId, const std::string& message);
+    std::string FindDeviceBySession(int32_t sessionId);
+    int32_t FindSessionIdByDevId(bool isToSrc, const std::string &deviceId);
+    int32_t SendMsg(int32_t sessionId, std::string &message);
+    int32_t CheckDeviceSessionState(bool isToSrcSa, const std::string &remoteDevId);
     void HandleSessionData(int32_t sessionId, const std::string& messageData);
+    bool CheckRecivedData(const std::string& messageData);
     void NotifyResponsePrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyResponseStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
@@ -131,6 +128,13 @@ private:
             int32_t status, uint32_t inputTypes);
     void ReceiveRelayStartTypeResult(int32_t sessionId, const nlohmann::json &recMsg);
     void ReceiveRelayStopTypeResult(int32_t sessionId, const nlohmann::json &recMsg);
+
+    struct DInputSessionInfo {
+        bool isToSrcSa; // [true] is session to source_sa, [false] is session to sink_sa
+        std::string remoteId; // networkId
+    };
+
+    void CalculateLatency(int32_t sessionId, const nlohmann::json &recMsg);
     std::string JointDhIds(const std::vector<std::string> &dhids);
     void RegRespFunMap();
 
@@ -138,11 +142,19 @@ private:
     std::mutex operationMutex_;
     std::set<int32_t> sessionIdSet_;
     std::shared_ptr<DInputSourceTransCallback> callback_;
-    std::shared_ptr<DistributedInputSourceTransport::DInputTransbaseSourceListener> statuslistener_;
     std::string mySessionName_ = "";
     std::condition_variable openSessionWaitCond_;
+    std::map<int32_t, DInputSessionInfo> sessionDevMap_; // [sessionId, DInputSessionInfo]
+    std::map<int32_t, bool> channelStatusMap_; // [sessionId, bool]
+    uint64_t deltaTime_ = 0;
+    uint64_t deltaTimeAll_ = 0;
+    uint64_t sendTime_ = 0;
+    uint32_t sendNum_ = 0;
+    uint32_t recvNum_ = 0;
+    std::atomic<bool> isLatencyThreadRunning_ = false;
+    std::thread latencyThread_;
+    std::string eachLatencyDetails_ = "";
     int32_t sessionId_ = 0;
-
     using SourceTransportFunc = void (DistributedInputSourceTransport::*)(int32_t sessionId,
         const nlohmann::json &recMsg);
     std::map<int32_t, SourceTransportFunc> memberFuncMap_;

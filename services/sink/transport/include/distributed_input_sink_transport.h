@@ -26,7 +26,6 @@
 #include "nlohmann/json.hpp"
 
 #include "dinput_sink_trans_callback.h"
-#include "dinput_transbase_sink_callback.h"
 #include "dinput_softbus_define.h"
 #include "distributed_input_sink_switch.h"
 
@@ -39,16 +38,6 @@ public:
     DistributedInputSinkTransport();
     ~DistributedInputSinkTransport();
 
-    class DInputTransbaseSinkListener : public DInputTransbaseSinkCallback {
-    public:
-        DInputTransbaseSinkListener(DistributedInputSinkTransport *transport);
-        virtual ~DInputTransbaseSinkListener();
-        void HandleSessionData(int32_t sessionId, const std::string& messageData);
-
-    private:
-        DistributedInputSinkTransport *sinkTransportObj_;
-    };
-
     int32_t Init();
 
     void RegistSinkRespCallback(std::shared_ptr<DInputSinkTransCallback> callback);
@@ -58,6 +47,10 @@ public:
     int32_t RespStopRemoteInput(const int32_t sessionId, std::string &smsg);
     int32_t RespLatency(const int32_t sessionId, std::string &smsg);
     void SendKeyStateNodeMsg(const int32_t sessionId, const std::string& dhId, const uint32_t btnCode);
+
+    int32_t OnSessionOpened(int32_t sessionId, int32_t result);
+    void OnSessionClosed(int32_t sessionId);
+    void OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen);
 
     class DInputSinkEventHandler : public AppExecFwk::EventHandler {
     public:
@@ -70,12 +63,12 @@ public:
 
     std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> GetEventHandler();
     void CloseAllSession();
+    int32_t GetSessionIdByNetId(const std::string &srcId);
+    void GetDeviceIdBySessionId(int32_t sessionId, std::string &srcId);
 
 private:
     int32_t SendMessage(int32_t sessionId, std::string &message);
-    void HandleSessionData(int32_t sessionId, const std::string& message);
-    void HandleData(int32_t sessionId, const std::string& message);
-    void RegRespFunMap();
+    void HandleSessionData(int32_t sessionId, const std::string& messageData);
     void NotifyPrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
@@ -91,14 +84,11 @@ private:
     void NotifyRelayStartTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
     void NotifyRelayStopTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg);
 private:
+    std::map<std::string, int32_t> sessionDevMap_; // source networkId, sessionId
     std::string mySessionName_;
-    std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> eventHandler_;
-    std::shared_ptr<DistributedInputSinkTransport::DInputTransbaseSinkListener> statuslistener_;
-    std::shared_ptr<DInputSinkTransCallback> callback_;
 
-    using SinkTransportFunc = void (DistributedInputSinkTransport::*)(int32_t sessionId,
-        const nlohmann::json &recMsg);
-    std::map<int32_t, SinkTransportFunc> memberFuncMap_;
+    std::shared_ptr<DistributedInputSinkTransport::DInputSinkEventHandler> eventHandler_;
+    std::shared_ptr<DInputSinkTransCallback> callback_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
