@@ -59,6 +59,9 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//drivers/peripheral/base",
     "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
     "${common_path}/mock",
+    "//base/security/access_token/interfaces/innerkits/accesstoken/include",
+    "//base/security/access_token/interfaces/innerkits/nativetoken/include",
+    "//base/security/access_token/interfaces/innerkits/token_setproc/include",
   ]
 
   sources = [
@@ -69,7 +72,6 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_event_handler.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
-    "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
     "distributed_input_sinkmanager_test.cpp",
     "${common_path}/mock/session_mock.cpp",
     "${common_path}/mock/softbus_bus_center_mock.cpp",
@@ -102,6 +104,10 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//third_party/openssl:libcrypto_static",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "//foundation/window/window_manager/dm:libdm",
+    "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",
+    "//base/security/access_token/interfaces/innerkits/accesstoken:libaccesstoken_sdk",
+    "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
+    "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
   ]
 
   external_deps = [

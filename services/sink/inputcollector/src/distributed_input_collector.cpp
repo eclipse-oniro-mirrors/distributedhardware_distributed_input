@@ -76,7 +76,7 @@ bool DistributedInputCollector::InitCollectEventsThread()
     collectThreadID_ = -1;
     int32_t ret = pthread_create(&collectThreadID_, &attr, CollectEventsThread, this);
     if (ret != 0) {
-        DHLOGE("DistributedInputCollector::InitCollectEventsThread create  thread failed:%d \n", ret);
+        DHLOGE("DistributedInputCollector::InitCollectEventsThread create thread failed:%d \n", ret);
         pthread_attr_destroy(&attr);
         collectThreadID_ = -1;
         isCollectingEvents_ = false;

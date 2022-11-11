@@ -44,13 +44,6 @@ HWTEST_F(DistributedInputSinkTransTest, Init, testing::ext::TestSize.Level0)
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId, testing::ext::TestSize.Level0)
-{
-    std::string srcId = "";
-    int32_t ret = DistributedInputSinkTransport::GetInstance().GetSessionIdByNetId(srcId);
-    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_GET_SESSIONID_FAIL, ret);
-}
-
 HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput01, testing::ext::TestSize.Level1)
 {
     int32_t sessionId = -1;

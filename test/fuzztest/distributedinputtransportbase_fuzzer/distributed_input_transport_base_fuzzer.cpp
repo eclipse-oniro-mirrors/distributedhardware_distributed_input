@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "distributed_input_source_transport_fuzzer.h"
+#include "distributed_input_transport_base_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -25,12 +25,11 @@
 #include <refbase.h>
 
 #include "constants_dinput.h"
-#include "distributed_input_inject.h"
-#include "distributed_input_source_transport.h"
+#include "distributed_input_transport_base.h"
 
 namespace OHOS {
 namespace DistributedHardware {
-void OpenInputSoftbusFuzzTest(const uint8_t* data, size_t size)
+void StartSessionFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -40,8 +39,21 @@ void OpenInputSoftbusFuzzTest(const uint8_t* data, size_t size)
 
     const uint32_t sleepTimeUs = 100 * 1000;
     usleep(sleepTimeUs);
-    DistributedInput::DistributedInputSourceTransport::GetInstance().OpenInputSoftbus(remoteDevId);
-    DistributedInput::DistributedInputSourceTransport::GetInstance().CloseInputSoftbus(remoteDevId);
+    DistributedInput::DistributedInputTransportBase::GetInstance().StartSession(remoteDevId);
+    DistributedInput::DistributedInputTransportBase::GetInstance().StopSession(remoteDevId);
+}
+
+void OnSessionOpenedFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+
+    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t result = *(reinterpret_cast<const int32_t*>(data));
+
+    DistributedInput::DistributedInputTransportBase::GetInstance().OnSessionOpened(sessionId, result);
+    DistributedInput::DistributedInputTransportBase::GetInstance().OnSessionClosed(sessionId);
 }
 } // namespace DistributedHardware
 } // namespace OHOS
@@ -49,8 +61,8 @@ void OpenInputSoftbusFuzzTest(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedHardware::DistributedInput::DistributedInputInject::GetInstance();
     /* Run your code on data */
-    OHOS::DistributedHardware::OpenInputSoftbusFuzzTest(data, size);
+    OHOS::DistributedHardware::StartSessionFuzzTest(data, size);
+    OHOS::DistributedHardware::OnSessionOpenedFuzzTest(data, size);
     return 0;
 }

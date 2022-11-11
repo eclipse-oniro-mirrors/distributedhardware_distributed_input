@@ -29,6 +29,7 @@
 #include "singleton.h"
 #include "system_ability.h"
 #include "system_ability_status_change_stub.h"
+#include "input_check_param.h"
 
 #include "constants_dinput.h"
 #include "dinput_context.h"
@@ -188,18 +189,21 @@ public:
         DInputSourceListener(DistributedInputSourceManager *manager);
         virtual ~DInputSourceListener();
         void onResponseRegisterDistributedHardware(const std::string deviceId, const std::string dhId, bool result);
-        void onResponsePrepareRemoteInput(const std::string deviceId, bool result, const std::string &object);
+        void onResponsePrepareRemoteInput(const std::string deviceId, bool result);
         void onResponseUnprepareRemoteInput(const std::string deviceId, bool result);
-        void onResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result);
+        void onResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result,
+            const std::string &object);
         void onResponseStopRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result);
-        void onResponseStartRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result);
+        void onResponseStartRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result,
+            const std::string &object);
         void onResponseStopRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result);
         void onResponseKeyState(const std::string deviceId, const std::string &dhid, const uint32_t type,
             const uint32_t code, const uint32_t value);
         void onReceivedEventRemoteInput(const std::string deviceId, const std::string &event);
-        void onResponseRelayPrepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result,
-            const std::string &object);
+        void onResponseRelayPrepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result);
         void onResponseRelayUnprepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result);
+        void onResponseRelayStartDhidRemoteInput(const std::string &deviceId, const std::string &object);
+        void onResponseRelayStartTypeRemoteInput(const std::string &deviceId, const std::string &object);
 
         void onReceiveRelayPrepareResult(int32_t status, const std::string &srcId, const std::string &sinkId);
         void onReceiveRelayUnprepareResult(int32_t status, const std::string &srcId, const std::string &sinkId);
@@ -304,26 +308,16 @@ public:
     };
 
 public:
-    void RunRegisterCallback(
-        const std::string& devId, const std::string& dhId, const int32_t& status
-    );
-    void RunUnregisterCallback(
-        const std::string& devId, const std::string& dhId, const int32_t& status
-    );
-    void RunPrepareCallback(
-        const std::string& devId, const int32_t& status, const std::string& object
-    );
-    void RunUnprepareCallback(
-        const std::string& devId, const int32_t& status
-    );
-    void RunStartCallback(
-        const std::string& devId, const uint32_t& inputTypes, const int32_t& status
-    );
-    void RunStopCallback(
-        const std::string& devId, const uint32_t& inputTypes, const int32_t& status
-    );
+    void RunRegisterCallback(const std::string& devId, const std::string& dhId, const int32_t& status);
+    void RunUnregisterCallback(const std::string& devId, const std::string& dhId, const int32_t& status);
+    void RunPrepareCallback(const std::string& devId, const int32_t& status);
+    void RunUnprepareCallback(const std::string& devId, const int32_t& status);
+    void RunStartCallback(const std::string& devId, const uint32_t& inputTypes, const int32_t& status,
+        const std::string& object);
+    void RunStopCallback(const std::string& devId, const uint32_t& inputTypes, const int32_t& status);
 
-    void RunStartDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status);
+    void RunStartDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status,
+        const std::string& object);
     void RunStopDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status);
     void RunKeyStateCallback(const std::string &sinkId, const std::string &dhId, const uint32_t type,
         const uint32_t code, const uint32_t value);

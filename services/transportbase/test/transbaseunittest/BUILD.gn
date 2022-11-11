@@ -11,67 +11,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
+import("//build/test.gni")
 import(
     "//foundation/distributedhardware/distributed_input/distributedinput.gni")
+module_out_path = "distributed_input/trans_base"
 
-ohos_shared_library("libdinput_sink_trans") {
+group("transbaseunittest") {
+  testonly = true
+
+  deps = [ ":distributed_input_transbase_test" ]
+}
+
+## UnitTest distributed_input_manager_service_test {{{
+ohos_unittest("distributed_input_transbase_test") {
+  module_out_path = module_out_path
+
   include_dirs = [
-    "include",
-    "${common_path}/include",
+    "//foundation/distributedhardware/distributed_input/services/source/transport/include",
+    "//foundation/distributedhardware/distributed_input/services/transportbase/include",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
+    "${common_path}/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
-    "//third_party/json/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "${service_common}/include",
+    "//third_party/json/include",
+    "${services_source_path}/inputinject/include",
+    "//foundation/communication/dsoftbus/interfaces/kits/transport",
+    "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "${low_latency_path}/include",
-    "${fwk_interfaces_path}/include",
-    "${fwk_interfaces_path}/include/ipc",
-    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "${frameworks_path}/include",
+    "${distributedinput_path}/inputdevicehandler/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//foundation/distributedhardware/distributed_input/services/transportbase/include",
+    "//base/notification/eventhandler/interfaces/inner_api",
+    "${common_path}/mock",
   ]
 
   sources = [
-    "src/distributed_input_sink_switch.cpp",
-    "src/distributed_input_sink_transport.cpp",
+    "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
+    "distributed_input_transbase_test.cpp",
+    "${common_path}/mock/session_mock.cpp",
+    "${common_path}/mock/softbus_bus_center_mock.cpp",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+    "-Dprivate=public",
+    "-Dprotected=public",
   ]
 
   defines = [
     "HI_LOG_ENABLE",
-    "DH_LOG_TAG=\"distributedinputsinktransport\"",
+    "DH_LOG_TAG=\"distributedinpututtest\"",
     "LOG_DOMAIN=0xD004100",
   ]
-
-  if (distributed_input_low_latency) {
-    defines += [ "DINPUT_LOW_LATENCY" ]
-  }
 
   deps = [
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "${low_latency_path}:libdinput_low_latency",
     "${utils_path}:libdinput_utils",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "//foundation/distributedhardware/distributed_input/services/transportbase:libdinput_trans_base",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "hitrace_native:hitrace_meter",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
-
-  subsystem_name = "distributedhardware"
-
-  part_name = "distributed_input"
 }
+## UnitTest distributed_input_manager_service_test }}}

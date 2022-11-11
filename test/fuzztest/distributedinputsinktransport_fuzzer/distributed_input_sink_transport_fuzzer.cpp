@@ -51,31 +51,6 @@ void RespStartRemoteInputFuzzTest(const uint8_t* data, size_t size)
     DistributedInput::DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsg);
     DistributedInput::DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
 }
-
-void OnSessionOpenedFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
-        return;
-    }
-
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    int32_t result = *(reinterpret_cast<const int32_t*>(data));
-
-    DistributedInput::DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
-    DistributedInput::DistributedInputSinkTransport::GetInstance().OnSessionClosed(sessionId);
-}
-
-void OnBytesReceivedFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    const char *msg = reinterpret_cast<const char *>(data);
-    uint16_t dataLen = *(reinterpret_cast<const uint16_t*>(data));
-    DistributedInput::DistributedInputSinkTransport::GetInstance().OnBytesReceived(sessionId, msg, dataLen);
-}
 } // namespace DistributedHardware
 } // namespace OHOS
 
@@ -85,7 +60,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     OHOS::DistributedHardware::RespPrepareRemoteInputFuzzTest(data, size);
     OHOS::DistributedHardware::RespStartRemoteInputFuzzTest(data, size);
-    OHOS::DistributedHardware::OnSessionOpenedFuzzTest(data, size);
-    OHOS::DistributedHardware::OnBytesReceivedFuzzTest(data, size);
     return 0;
 }
