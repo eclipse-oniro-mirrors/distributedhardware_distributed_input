@@ -28,11 +28,11 @@ namespace DistributedInput {
 class StartStopResultCallbackProxy : public IRemoteProxy<IStartStopResultCallback> {
 public:
     explicit StartStopResultCallbackProxy(const sptr<IRemoteObject> &object);
-    virtual ~StartStopResultCallbackProxy() override;
+    ~StartStopResultCallbackProxy() override;
 
-    virtual void OnStart(const std::string &srcId, const std::string &sinkId,
+    void OnStart(const std::string &srcId, const std::string &sinkId,
         std::vector<std::string> &dhIds) override;
-    virtual void OnStop(const std::string &srcId, const std::string &sinkId,
+    void OnStop(const std::string &srcId, const std::string &sinkId,
         std::vector<std::string> &dhIds) override;
 
 private:

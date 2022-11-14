@@ -28,7 +28,7 @@ namespace DistributedInput {
 class GetSinkScreenInfosCallbackStub : public IRemoteStub<IGetSinkScreenInfosCallback> {
 public:
     GetSinkScreenInfosCallbackStub();
-    virtual ~GetSinkScreenInfosCallbackStub() override;
+    ~GetSinkScreenInfosCallbackStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

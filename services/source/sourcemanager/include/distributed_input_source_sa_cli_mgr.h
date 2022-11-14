@@ -44,7 +44,7 @@ private:
     };
     sptr<RemoteCliDeathRecipient> remoteCliDeathRcv;
     sptr<IDistributedSourceInput> GetRemoteCliFromCache(const std::string &devId);
-    void AddRemoteCli(const std::string &devId, sptr<IRemoteObject> object);
+    void AddRemoteCli(const std::string &devId, sptr<IRemoteObject> remote);
     void DeleteRemoteCli(const std::string &devId);
     void DeleteRemoteCli(const sptr<IRemoteObject> object);
     void ProcRemoteCliDied(const sptr<IRemoteObject>& remote);

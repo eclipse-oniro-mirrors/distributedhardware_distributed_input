@@ -119,65 +119,65 @@ typedef struct InputDeviceId {
 
 public:
     DistributedInputSourceManager(int32_t saId, bool runOnCreate);
-    ~DistributedInputSourceManager();
+    ~DistributedInputSourceManager() override;
 
     void OnStart() override;
 
     void OnStop() override;
 
-    virtual int32_t Init() override;
+    int32_t Init() override;
 
-    virtual int32_t Release() override;
+    int32_t Release() override;
 
-    virtual int32_t RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
+    int32_t RegisterDistributedHardware(const std::string& devId, const std::string& dhId,
         const std::string& parameters, sptr<IRegisterDInputCallback> callback) override;
 
-    virtual int32_t UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
+    int32_t UnregisterDistributedHardware(const std::string& devId, const std::string& dhId,
         sptr<IUnregisterDInputCallback> callback) override;
 
-    virtual int32_t PrepareRemoteInput(const std::string &deviceId, sptr<IPrepareDInputCallback> callback) override;
+    int32_t PrepareRemoteInput(const std::string &deviceId, sptr<IPrepareDInputCallback> callback) override;
 
-    virtual int32_t UnprepareRemoteInput(const std::string &deviceId, sptr<IUnprepareDInputCallback> callback) override;
+    int32_t UnprepareRemoteInput(const std::string &deviceId, sptr<IUnprepareDInputCallback> callback) override;
 
-    virtual int32_t StartRemoteInput(
+    int32_t StartRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStartDInputCallback> callback) override;
 
-    virtual int32_t StopRemoteInput(
+    int32_t StopRemoteInput(
         const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback) override;
 
-    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+    int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
         sptr<IStartDInputCallback> callback) override;
 
-    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+    int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
         sptr<IStopDInputCallback> callback) override;
 
-    virtual int32_t PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    int32_t PrepareRemoteInput(const std::string &srcId, const std::string &sinkId,
         sptr<IPrepareDInputCallback> callback) override;
 
-    virtual int32_t UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
+    int32_t UnprepareRemoteInput(const std::string &srcId, const std::string &sinkId,
         sptr<IUnprepareDInputCallback> callback) override;
 
-    virtual int32_t StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+    int32_t StartRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
         sptr<IStartStopDInputsCallback> callback) override;
 
-    virtual int32_t StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
+    int32_t StopRemoteInput(const std::string &sinkId, const std::vector<std::string> &dhIds,
         sptr<IStartStopDInputsCallback> callback) override;
 
-    virtual int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    int32_t StartRemoteInput(const std::string &srcId, const std::string &sinkId,
         const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
 
-    virtual int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    int32_t StopRemoteInput(const std::string &srcId, const std::string &sinkId,
         const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback) override;
 
-    virtual int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) override;
-    virtual int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
-    virtual int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) override;
-    virtual int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener) override;
+    int32_t RegisterAddWhiteListCallback(sptr<IAddWhiteListInfosCallback> addWhiteListCallback) override;
+    int32_t RegisterDelWhiteListCallback(sptr<IDelWhiteListInfosCallback> delWhiteListCallback) override;
+    int32_t RegisterInputNodeListener(sptr<InputNodeListener> listener) override;
+    int32_t UnregisterInputNodeListener(sptr<InputNodeListener> listener) override;
 
-    virtual int32_t SyncNodeInfoRemoteInput(const std::string &userDevId, const std::string &dhId,
+    int32_t SyncNodeInfoRemoteInput(const std::string &userDevId, const std::string &dhId,
         const std::string &nodeDesc) override;
-    virtual int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
-    virtual int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
+    int32_t RegisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
+    int32_t UnregisterSimulationEventListener(sptr<ISimulationEventListener> listener) override;
     bool CheckRegisterParam(const std::string &devId, const std::string &dhId,
         const std::string &parameters, sptr<IRegisterDInputCallback> callback);
     bool CheckUnregisterParam(const std::string &devId, const std::string &dhId,
@@ -186,35 +186,37 @@ public:
 
     class DInputSourceListener : public DInputSourceTransCallback {
     public:
-        DInputSourceListener(DistributedInputSourceManager *manager);
+        explicit DInputSourceListener(DistributedInputSourceManager *manager);
         virtual ~DInputSourceListener();
-        void onResponseRegisterDistributedHardware(const std::string deviceId, const std::string dhId, bool result);
-        void onResponsePrepareRemoteInput(const std::string deviceId, bool result);
-        void onResponseUnprepareRemoteInput(const std::string deviceId, bool result);
-        void onResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result,
-            const std::string &object);
-        void onResponseStopRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result);
-        void onResponseStartRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result,
-            const std::string &object);
-        void onResponseStopRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result);
-        void onResponseKeyState(const std::string deviceId, const std::string &dhid, const uint32_t type,
-            const uint32_t code, const uint32_t value);
-        void onReceivedEventRemoteInput(const std::string deviceId, const std::string &event);
-        void onResponseRelayPrepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result);
-        void onResponseRelayUnprepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result);
-        void onResponseRelayStartDhidRemoteInput(const std::string &deviceId, const std::string &object);
-        void onResponseRelayStartTypeRemoteInput(const std::string &deviceId, const std::string &object);
+        void OnResponseRegisterDistributedHardware(const std::string deviceId, const std::string dhId,
+            bool result) override;
+        void OnResponsePrepareRemoteInput(const std::string deviceId, bool result) override;
+        void OnResponseUnprepareRemoteInput(const std::string deviceId, bool result) override;
+        void OnResponseStartRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result,
+            const std::string &object) override;
+        void OnResponseStopRemoteInput(const std::string deviceId, const uint32_t inputTypes, bool result) override;
+        void OnResponseStartRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result,
+            const std::string &object) override;
+        void OnResponseStopRemoteInputDhid(const std::string deviceId, const std::string &dhids, bool result) override;
+        void OnResponseKeyState(const std::string deviceId, const std::string &dhid, const uint32_t type,
+            const uint32_t code, const uint32_t value) override;
+        void OnReceivedEventRemoteInput(const std::string deviceId, const std::string &event) override;
+        void OnResponseRelayPrepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result) override;
+        void OnResponseRelayUnprepareRemoteInput(int32_t sessionId, const std::string &deviceId, bool result) override;
+        void OnResponseRelayStartDhidRemoteInput(const std::string &deviceId, const std::string &object) override;
+        void OnResponseRelayStartTypeRemoteInput(const std::string &deviceId, const std::string &object) override;
 
-        void onReceiveRelayPrepareResult(int32_t status, const std::string &srcId, const std::string &sinkId);
-        void onReceiveRelayUnprepareResult(int32_t status, const std::string &srcId, const std::string &sinkId);
-        void onReceiveRelayStartDhidResult(int32_t status, const std::string &srcId, const std::string &sinkId,
-            const std::string &dhids);
-        void onReceiveRelayStopDhidResult(int32_t status, const std::string &srcId, const std::string &sinkId,
-            const std::string &dhids);
-        void onReceiveRelayStartTypeResult(int32_t status, const std::string &srcId, const std::string &sinkId,
-            uint32_t inputTypes);
-        void onReceiveRelayStopTypeResult(int32_t status, const std::string &srcId, const std::string &sinkId,
-            uint32_t inputTypes);
+        void OnReceiveRelayPrepareResult(int32_t status, const std::string &srcId, const std::string &sinkId) override;
+        void OnReceiveRelayUnprepareResult(int32_t status, const std::string &srcId,
+            const std::string &sinkId) override;
+        void OnReceiveRelayStartDhidResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            const std::string &dhids) override;
+        void OnReceiveRelayStopDhidResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            const std::string &dhids) override;
+        void OnReceiveRelayStartTypeResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            uint32_t inputTypes) override;
+        void OnReceiveRelayStopTypeResult(int32_t status, const std::string &srcId, const std::string &sinkId,
+            uint32_t inputTypes) override;
         void RecordEventLog(int64_t when, int32_t type, int32_t code, int32_t value, const std::string& path);
 
     private:
@@ -225,7 +227,7 @@ public:
     public:
         DInputSourceManagerEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
             DistributedInputSourceManager *manager);
-        ~DInputSourceManagerEventHandler();
+        ~DInputSourceManagerEventHandler() override;
 
         void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     private:
@@ -257,7 +259,7 @@ public:
     class StartDScreenListener : public PublisherListenerStub {
     public:
         StartDScreenListener();
-        ~StartDScreenListener();
+        ~StartDScreenListener() override;
         void OnMessage(const DHTopic topic, const std::string& message) override;
 
     private:
@@ -268,7 +270,7 @@ public:
     class StopDScreenListener : public PublisherListenerStub {
     public:
         StopDScreenListener();
-        ~StopDScreenListener();
+        ~StopDScreenListener() override;
         void OnMessage(const DHTopic topic, const std::string& message) override;
 
     private:
@@ -277,11 +279,10 @@ public:
 
     class DeviceOfflineListener : public PublisherListenerStub {
     public:
-        DeviceOfflineListener(DistributedInputSourceManager* srcManagerContext);
+        explicit DeviceOfflineListener(DistributedInputSourceManager* srcManagerContext);
+        ~DeviceOfflineListener() override;
 
-        ~DeviceOfflineListener();
-
-        void OnMessage(const DHTopic topic, const std::string& message);
+        void OnMessage(const DHTopic topic, const std::string& message) override;
 
     private:
         void DeleteNodeInfoAndNotify(const std::string& offlineDevId);
@@ -293,7 +294,7 @@ public:
     class DScreenSourceSvrRecipient : public IRemoteObject::DeathRecipient {
     public:
         DScreenSourceSvrRecipient(const std::string& srcDevId, const std::string& sinkDevId, const uint64_t srcWinId);
-        ~DScreenSourceSvrRecipient();
+        ~DScreenSourceSvrRecipient() override;
         void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
 
     private:

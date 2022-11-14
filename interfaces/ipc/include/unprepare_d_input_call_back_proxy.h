@@ -28,10 +28,9 @@ namespace DistributedInput {
 class UnprepareDInputCallbackProxy : public IRemoteProxy<IUnprepareDInputCallback> {
 public:
     explicit UnprepareDInputCallbackProxy(const sptr<IRemoteObject> &object);
+    ~UnprepareDInputCallbackProxy() override;
 
-    virtual ~UnprepareDInputCallbackProxy() override;
-
-    virtual void OnResult(const std::string& deviceId, const int32_t& status) override;
+    void OnResult(const std::string& deviceId, const int32_t& status) override;
 
 private:
     static inline BrokerDelegator<UnprepareDInputCallbackProxy> delegator_;

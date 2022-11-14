@@ -56,31 +56,31 @@ public:
 
     class DInputSinkListener : public DInputSinkTransCallback {
     public:
-        DInputSinkListener(DistributedInputSinkManager *manager);
+        explicit DInputSinkListener(DistributedInputSinkManager *manager);
         ~DInputSinkListener();
-        void onPrepareRemoteInput(const int32_t& sessionId, const std::string &deviceId);
-        void onUnprepareRemoteInput(const int32_t& sessionId);
-        void onStartRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes);
-        void onStopRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes);
-        void onStartRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids);
-        void onStopRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids);
+        void OnPrepareRemoteInput(const int32_t& sessionId, const std::string &deviceId) override;
+        void OnUnprepareRemoteInput(const int32_t& sessionId) override;
+        void OnStartRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes) override;
+        void OnStopRemoteInput(const int32_t& sessionId, const uint32_t& inputTypes) override;
+        void OnStartRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids) override;
+        void OnStopRemoteInputDhid(const int32_t &sessionId, const std::string &strDhids) override;
 
-        void onRelayPrepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
-            const std::string &deviceId);
-        void onRelayUnprepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
-            const std::string &deviceId);
-        void onRelayStartDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
-            const std::string &deviceId, const std::string &strDhids);
-        void onRelayStopDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
-            const std::string &deviceId, const std::string &strDhids);
-        void onRelayStartTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
-            const std::string &deviceId, uint32_t inputTypes);
-        void onRelayStopTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
-            const std::string &deviceId, uint32_t inputTypes);
+        void OnRelayPrepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId) override;
+        void OnRelayUnprepareRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId) override;
+        void OnRelayStartDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, const std::string &strDhids) override;
+        void OnRelayStopDhidRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, const std::string &strDhids) override;
+        void OnRelayStartTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, uint32_t inputTypes) override;
+        void OnRelayStopTypeRemoteInput(const int32_t &toSrcSessionId, const int32_t &toSinkSessionId,
+            const std::string &deviceId, uint32_t inputTypes) override;
 
     private:
         DistributedInputSinkManager *sinkManagerObj_;
-        static inline int bit_is_set(const unsigned long *array, int bit)
+        static inline int BitIsSet(const unsigned long *array, int bit)
         {
             return !!(array[bit / LONG_BITS] & (1LL << (bit % LONG_BITS)));
         }
@@ -91,8 +91,8 @@ public:
 
     class ProjectWindowListener : public PublisherListenerStub {
     public:
-        ProjectWindowListener(DistributedInputSinkManager *manager);
-        ~ProjectWindowListener();
+        explicit ProjectWindowListener(DistributedInputSinkManager *manager);
+        ~ProjectWindowListener() override;
         void OnMessage(const DHTopic topic, const std::string& message) override;
 
     private:
@@ -112,7 +112,7 @@ public:
     class DScreenSinkSvrRecipient : public IRemoteObject::DeathRecipient {
     public:
         DScreenSinkSvrRecipient(const std::string& srcDevId, const uint64_t srcWinId);
-        ~DScreenSinkSvrRecipient();
+        ~DScreenSinkSvrRecipient() override;
         void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
 
     private:
@@ -125,11 +125,11 @@ public:
 
     void OnStop() override;
 
-    virtual int32_t Init() override;
+    int32_t Init() override;
 
-    virtual int32_t Release() override;
+    int32_t Release() override;
 
-    virtual int32_t RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback) override;
+    int32_t RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback) override;
 
     uint32_t GetSinkScreenInfosCbackSize();
 
@@ -139,7 +139,7 @@ public:
 
     uint32_t GetInputTypes();
 
-    void SetInputTypes(const uint32_t& inputTypess);
+    void SetInputTypes(const uint32_t& inputTypes);
 
     /*
      * GetEventHandler, get the ui_service manager service's handler.

@@ -28,10 +28,9 @@ namespace DistributedInput {
 class DistributedInputSourceStub : public IRemoteStub<IDistributedSourceInput> {
 public:
     DistributedInputSourceStub();
-    virtual ~DistributedInputSourceStub() override;
+    ~DistributedInputSourceStub() override;
 
-    virtual int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     int32_t HandleInitDistributedHardware(MessageParcel &reply);

@@ -36,7 +36,7 @@ DECLARE_SINGLE_INSTANCE_BASE(DistributedInputSinkHandler);
 public:
     int32_t InitSink(const std::string& params) override;
     int32_t ReleaseSink() override;
-    int32_t SubscribeLocalHardware(const std::string& dhId, const std::string& parameters) override;
+    int32_t SubscribeLocalHardware(const std::string& dhId, const std::string& params) override;
     int32_t UnsubscribeLocalHardware(const std::string& dhId) override;
     void FinishStartSA(const std::string &params, const sptr<IRemoteObject> &remoteObject);
 

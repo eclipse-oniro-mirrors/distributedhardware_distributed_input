@@ -23,8 +23,8 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class VirtualTouchpad : public VirtualDevice {
 public:
-    VirtualTouchpad(const InputDevice& event);
-    ~VirtualTouchpad();
+    explicit VirtualTouchpad(const InputDevice& event);
+    ~VirtualTouchpad() override;
 protected:
     const std::vector<uint32_t>& GetEventTypes() const override;
     const std::vector<uint32_t>& GetKeys() const override;

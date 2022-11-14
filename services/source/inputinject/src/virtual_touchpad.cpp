@@ -34,7 +34,7 @@ const std::vector<uint32_t> RELBITS {};
 
 VirtualTouchpad::VirtualTouchpad(const InputDevice& event) : VirtualDevice(event)
 {
-    const int ABS_MAX_WHEEL = 71;
+    const int absMaxWheel = 71;
 
     dev_.absmin[ABS_X] = 0;
     dev_.absmax[ABS_X] = 1;
@@ -47,7 +47,7 @@ VirtualTouchpad::VirtualTouchpad(const InputDevice& event) : VirtualDevice(event
     dev_.absflat[ABS_Y] = 0;
 
     dev_.absmin[ABS_WHEEL] = 0;
-    dev_.absmax[ABS_WHEEL] = ABS_MAX_WHEEL;
+    dev_.absmax[ABS_WHEEL] = absMaxWheel;
     dev_.absfuzz[ABS_WHEEL] = 0;
     dev_.absflat[ABS_WHEEL] = 0;
 
