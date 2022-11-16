@@ -28,9 +28,10 @@ namespace DistributedInput {
 class RegisterDInputCallbackProxy : public IRemoteProxy<IRegisterDInputCallback> {
 public:
     explicit RegisterDInputCallbackProxy(const sptr<IRemoteObject> &object);
-    ~RegisterDInputCallbackProxy() override;
 
-    void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status) override;
+    virtual ~RegisterDInputCallbackProxy() override;
+
+    virtual void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status) override;
 
 private:
     static inline BrokerDelegator<RegisterDInputCallbackProxy> delegator_;

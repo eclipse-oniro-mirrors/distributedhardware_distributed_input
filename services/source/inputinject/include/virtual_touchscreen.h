@@ -25,7 +25,7 @@ namespace DistributedInput {
 class VirtualTouchScreen : public VirtualDevice {
 public:
     VirtualTouchScreen(const InputDevice& event, LocalAbsInfo& absInfo, uint32_t phyWidth, uint32_t phyHeight);
-    ~VirtualTouchScreen() override;
+    ~VirtualTouchScreen();
 protected:
     const std::vector<uint32_t>& GetEventTypes() const override;
     const std::vector<uint32_t>& GetKeys() const override;

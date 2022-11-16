@@ -28,7 +28,7 @@ namespace DistributedInput {
 class InputNodeListenerStub : public IRemoteStub<InputNodeListener> {
 public:
     InputNodeListenerStub();
-    ~InputNodeListenerStub() override;
+    virtual ~InputNodeListenerStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

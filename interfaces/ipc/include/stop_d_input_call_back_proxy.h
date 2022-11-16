@@ -28,9 +28,10 @@ namespace DistributedInput {
 class StopDInputCallbackProxy : public IRemoteProxy<IStopDInputCallback> {
 public:
     explicit StopDInputCallbackProxy(const sptr<IRemoteObject> &object);
-    ~StopDInputCallbackProxy() override;
 
-    void OnResult(const std::string& devId, const uint32_t& inputTypes, const int32_t& status) override;
+    virtual ~StopDInputCallbackProxy() override;
+
+    virtual void OnResult(const std::string& devId, const uint32_t& inputTypes, const int32_t& status) override;
 
 private:
     static inline BrokerDelegator<StopDInputCallbackProxy> delegator_;

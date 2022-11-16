@@ -211,7 +211,7 @@ void DistributedInputClient::CheckWhiteListCallback()
         }
     }
     if (!isDelWhiteListCbReg) {
-        sptr<DelWhiteListInfosCb> delCallback = new (std::nothrow) DelWhiteListInfosCb();
+        sptr<DelWhiteListInfosCb> delCallback= new (std::nothrow) DelWhiteListInfosCb();
         int32_t ret =
             DInputSAManager::GetInstance().dInputSourceProxy_->RegisterDelWhiteListCallback(delCallback);
         if (ret == DH_SUCCESS) {

@@ -284,23 +284,23 @@ int32_t DistributedInputNodeManager::GetDeviceInfo(std::string &deviceId)
 void DistributedInputNodeManager::GetDevicesInfoByType(const std::string &networkId, uint32_t inputTypes,
     std::map<int32_t, std::string> &datas)
 {
-    uint32_t inputType = 0;
+    uint32_t input_types_ = 0;
 
     if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
-        inputType |= INPUT_DEVICE_CLASS_CURSOR;
+        input_types_ |= INPUT_DEVICE_CLASS_CURSOR;
     }
 
     if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::KEYBOARD)) != 0) {
-        inputType |= INPUT_DEVICE_CLASS_KEYBOARD;
+        input_types_ |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
 
     if ((inputTypes & static_cast<uint32_t>(DInputDeviceType::MOUSE)) != 0) {
-        inputType |= INPUT_DEVICE_CLASS_TOUCH;
+        input_types_ |= INPUT_DEVICE_CLASS_TOUCH;
     }
 
     std::lock_guard<std::mutex> lock(virtualDeviceMapMutex_);
     for (const auto &[id, virdevice] : virtualDeviceMap_) {
-        if ((virdevice->GetDeviceType() & inputType) && (virdevice->GetNetWorkId() == networkId)) {
+        if ((virdevice->GetDeviceType() & input_types_) && (virdevice->GetNetWorkId() == networkId)) {
             datas.insert(std::pair<int32_t, std::string>(virdevice->GetDeviceFd(), id));
         }
     }

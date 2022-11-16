@@ -26,8 +26,8 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class DistributedInputSourceEventHandler : public AppExecFwk::EventHandler {
 public:
-    explicit DistributedInputSourceEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
-    ~DistributedInputSourceEventHandler() override;
+    DistributedInputSourceEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+    virtual ~DistributedInputSourceEventHandler();
 
     bool ProxyPostTask(const Callback &callback, int64_t delayTime);
 

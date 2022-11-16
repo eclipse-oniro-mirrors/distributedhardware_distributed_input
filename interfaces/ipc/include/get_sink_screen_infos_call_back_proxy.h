@@ -28,9 +28,10 @@ namespace DistributedInput {
 class GetSinkScreenInfosCallbackProxy : public IRemoteProxy<IGetSinkScreenInfosCallback> {
 public:
     explicit GetSinkScreenInfosCallbackProxy(const sptr<IRemoteObject> &object);
-    ~GetSinkScreenInfosCallbackProxy() override;
 
-    void OnResult(const std::string& strJson) override;
+    virtual ~GetSinkScreenInfosCallbackProxy() override;
+
+    virtual void OnResult(const std::string& strJson) override;
 
 private:
     static inline BrokerDelegator<GetSinkScreenInfosCallbackProxy> delegator_;

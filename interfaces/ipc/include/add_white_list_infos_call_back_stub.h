@@ -28,7 +28,7 @@ namespace DistributedInput {
 class AddWhiteListInfosCallbackStub : public IRemoteStub<IAddWhiteListInfosCallback> {
 public:
     AddWhiteListInfosCallbackStub();
-    ~AddWhiteListInfosCallbackStub() override;
+    virtual ~AddWhiteListInfosCallbackStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

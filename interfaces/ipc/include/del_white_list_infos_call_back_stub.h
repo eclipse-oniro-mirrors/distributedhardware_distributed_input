@@ -28,7 +28,7 @@ namespace DistributedInput {
 class DelWhiteListInfosCallbackStub : public IRemoteStub<IDelWhiteListInfosCallback> {
 public:
     DelWhiteListInfosCallbackStub();
-    ~DelWhiteListInfosCallbackStub() override;
+    virtual ~DelWhiteListInfosCallbackStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

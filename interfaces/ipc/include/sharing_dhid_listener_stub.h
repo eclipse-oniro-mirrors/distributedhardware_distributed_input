@@ -28,7 +28,7 @@ namespace DistributedInput {
 class SharingDhIdListenerStub : public IRemoteStub<ISharingDhIdListener> {
 public:
     SharingDhIdListenerStub();
-    ~SharingDhIdListenerStub() override;
+    virtual ~SharingDhIdListenerStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

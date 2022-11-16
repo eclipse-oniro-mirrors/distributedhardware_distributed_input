@@ -61,8 +61,8 @@ public:
 
     class DInputSinkEventHandler : public AppExecFwk::EventHandler {
     public:
-        explicit DInputSinkEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
-        ~DInputSinkEventHandler() override = default;
+        DInputSinkEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+        ~DInputSinkEventHandler() {}
 
         void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
         void RecordEventLog(const std::shared_ptr<nlohmann::json> &events);

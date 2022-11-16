@@ -28,9 +28,10 @@ namespace DistributedInput {
 class DistributedInputSinkStub : public IRemoteStub<IDistributedSinkInput> {
 public:
     DistributedInputSinkStub();
-    ~DistributedInputSinkStub() override;
+    virtual ~DistributedInputSinkStub() override;
 
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    virtual int32_t OnRemoteRequest(
+        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
     int32_t InitInner(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 

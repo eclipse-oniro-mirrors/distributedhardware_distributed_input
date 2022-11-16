@@ -64,6 +64,9 @@ private:
     std::mutex inputNodeManagerMutex_;
     std::set<sptr<InputNodeListener>> inputNodeListeners_;
     std::mutex inputNodeListenersMutex_;
+
+    // The event queue.
+    static const int EVENT_BUFFER_SIZE = 16;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

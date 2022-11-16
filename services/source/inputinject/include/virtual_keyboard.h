@@ -23,8 +23,8 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class VirtualKeyboard : public VirtualDevice {
 public:
-    explicit VirtualKeyboard(const InputDevice& event);
-    ~VirtualKeyboard() override;
+    VirtualKeyboard(const InputDevice& event);
+    ~VirtualKeyboard();
 protected:
     const std::vector<uint32_t>& GetEventTypes() const override;
     const std::vector<uint32_t>& GetKeys() const override;

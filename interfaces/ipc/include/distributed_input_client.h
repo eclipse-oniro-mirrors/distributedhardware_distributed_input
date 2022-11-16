@@ -120,50 +120,50 @@ public:
     class RegisterDInputCb : public OHOS::DistributedHardware::DistributedInput::RegisterDInputCallbackStub {
     public:
         RegisterDInputCb() = default;
-        ~RegisterDInputCb() override = default;
-        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status) override;
+        virtual ~RegisterDInputCb() = default;
+        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status);
     };
 
     class UnregisterDInputCb : public OHOS::DistributedHardware::DistributedInput::UnregisterDInputCallbackStub {
     public:
         UnregisterDInputCb() = default;
-        ~UnregisterDInputCb() override = default;
-        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status) override;
+        virtual ~UnregisterDInputCb() = default;
+        void OnResult(const std::string& devId, const std::string& dhId, const int32_t& status);
     };
 
     class AddWhiteListInfosCb : public OHOS::DistributedHardware::DistributedInput::AddWhiteListInfosCallbackStub {
     public:
         AddWhiteListInfosCb() = default;
-        ~AddWhiteListInfosCb() override = default;
-        void OnResult(const std::string &deviceId, const std::string &strJson) override;
+        virtual ~AddWhiteListInfosCb() = default;
+        void OnResult(const std::string &deviceId, const std::string &strJson);
     };
 
     class DelWhiteListInfosCb : public OHOS::DistributedHardware::DistributedInput::DelWhiteListInfosCallbackStub {
     public:
         DelWhiteListInfosCb() = default;
-        ~DelWhiteListInfosCb() override = default;
-        void OnResult(const std::string &deviceId) override;
+        virtual ~DelWhiteListInfosCb() = default;
+        void OnResult(const std::string &deviceId);
     };
 
     class SharingDhIdListenerCb : public OHOS::DistributedHardware::DistributedInput::SharingDhIdListenerStub {
     public:
         SharingDhIdListenerCb() = default;
-        ~SharingDhIdListenerCb() override = default;
-        int32_t OnSharing(std::string dhId) override;
-        int32_t OnNoSharing(std::string dhId) override;
+        virtual ~SharingDhIdListenerCb() = default;
+        int32_t OnSharing(std::string dhId);
+        int32_t OnNoSharing(std::string dhId);
     };
 
     class GetSinkScreenInfosCb : public OHOS::DistributedHardware::DistributedInput::GetSinkScreenInfosCallbackStub {
     public:
         GetSinkScreenInfosCb() = default;
-        ~GetSinkScreenInfosCb() override = default;
-        void OnResult(const std::string &strJson) override;
+        virtual ~GetSinkScreenInfosCb() = default;
+        void OnResult(const std::string &strJson);
     };
 
     class DInputClientEventHandler : public AppExecFwk::EventHandler {
     public:
-        explicit DInputClientEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
-        ~DInputClientEventHandler() override = default;
+        DInputClientEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+        ~DInputClientEventHandler() {}
 
         void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     };

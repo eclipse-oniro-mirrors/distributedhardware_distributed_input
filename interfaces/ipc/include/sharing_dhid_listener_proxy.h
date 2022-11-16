@@ -28,10 +28,11 @@ namespace DistributedInput {
 class SharingDhIdListenerProxy : public IRemoteProxy<ISharingDhIdListener> {
 public:
     explicit SharingDhIdListenerProxy(const sptr<IRemoteObject> &object);
-    ~SharingDhIdListenerProxy() override;
 
-    int32_t OnSharing(std::string dhId) override;
-    int32_t OnNoSharing(std::string dhId) override;
+    virtual ~SharingDhIdListenerProxy() override;
+
+    virtual int32_t OnSharing(std::string dhId) override;
+    virtual int32_t OnNoSharing(std::string dhId) override;
 
 private:
     static inline BrokerDelegator<SharingDhIdListenerProxy> delegator_;

@@ -38,16 +38,16 @@ enum class HiDumperFlag {
 };
 
 struct NodeInfo {
-    std::string devId = "";
-    std::string virNodeName = "";
-    std::string inputDhId = "";
+    std::string deviceId_ = "";
+    std::string nodeName_ = "";
+    std::string dhId_ = "";
 };
 
 struct SessionInfo {
-    int32_t sesId = 0;
-    std::string mySesName = "";
-    std::string peerSesName = "";
-    SessionStatus sessionState = SessionStatus::CLOSED;
+    int32_t sessionId_ = 0;
+    std::string mySessionName_ = "";
+    std::string peerSessionName_ = "";
+    SessionStatus sessionStatus_ = SessionStatus::CLOSED;
 };
 
 class HiDumper {

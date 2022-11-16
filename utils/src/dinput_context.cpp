@@ -135,24 +135,24 @@ int32_t DInputContext::CalculateTransformInfo(SinkScreenInfo &sinkScreenInfo)
         return ERR_DH_INPUT_CONTEXT_CALCULATE_FAIL;
     }
     TransformInfo transformInfo;
-    transformInfo.sinkWinPhyX = static_cast<uint32_t>(sinkScreenInfo.sinkWinShowX /
-        static_cast<double>(sinkScreenInfo.sinkShowWidth)) * sinkScreenInfo.sinkPhyWidth;
-    transformInfo.sinkWinPhyY = static_cast<uint32_t>(sinkScreenInfo.sinkWinShowY /
-        static_cast<double>(sinkScreenInfo.sinkShowHeight)) * sinkScreenInfo.sinkPhyHeight;
-    transformInfo.sinkProjPhyWidth = static_cast<uint32_t>((sinkScreenInfo.sinkProjShowWidth /
-        static_cast<double>(sinkScreenInfo.sinkShowWidth)) * sinkScreenInfo.sinkPhyWidth);
-    transformInfo.sinkProjPhyHeight = static_cast<uint32_t>((sinkScreenInfo.sinkProjShowHeight /
-        static_cast<double>(sinkScreenInfo.sinkShowHeight)) * sinkScreenInfo.sinkPhyHeight);
+    transformInfo.sinkWinPhyX = (uint32_t)(sinkScreenInfo.sinkWinShowX / (double)(sinkScreenInfo.sinkShowWidth)) *
+        sinkScreenInfo.sinkPhyWidth;
+    transformInfo.sinkWinPhyY = (uint32_t)(sinkScreenInfo.sinkWinShowY / (double)(sinkScreenInfo.sinkShowHeight)) *
+        sinkScreenInfo.sinkPhyHeight;
+    transformInfo.sinkProjPhyWidth = (uint32_t)((sinkScreenInfo.sinkProjShowWidth /
+        (double)sinkScreenInfo.sinkShowWidth) * sinkScreenInfo.sinkPhyWidth);
+    transformInfo.sinkProjPhyHeight = (uint32_t)((sinkScreenInfo.sinkProjShowHeight /
+        (double)sinkScreenInfo.sinkShowHeight) * sinkScreenInfo.sinkPhyHeight);
     if (transformInfo.sinkProjPhyWidth == 0 || transformInfo.sinkProjPhyHeight == 0) {
         DHLOGE("can not calculate transform infomation");
         return ERR_DH_INPUT_CONTEXT_CALCULATE_FAIL;
     }
 
     // coefficient of the sink projection area in the source touch driver
-    transformInfo.coeffWidth = static_cast<double>(sinkScreenInfo.srcScreenInfo.sourcePhyWidth /
-        static_cast<double>(transformInfo.sinkProjPhyWidth));
-    transformInfo.coeffHeight = static_cast<double>(sinkScreenInfo.srcScreenInfo.sourcePhyHeight /
-        static_cast<double>(transformInfo.sinkProjPhyHeight));
+    transformInfo.coeffWidth = (double)(sinkScreenInfo.srcScreenInfo.sourcePhyWidth /
+        (double)(transformInfo.sinkProjPhyWidth));
+    transformInfo.coeffHeight = (double)(sinkScreenInfo.srcScreenInfo.sourcePhyHeight /
+        (double)(transformInfo.sinkProjPhyHeight));
 
     DHLOGI("CalculateTransformInfo sinkWinPhyX = %d, sinkWinPhyY = %d, sinkProjPhyWidth = %d, " +
         "sinkProjPhyHeight = %d, coeffWidth = %f, coeffHeight = %f", transformInfo.sinkWinPhyX,

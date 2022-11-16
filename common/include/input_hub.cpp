@@ -629,14 +629,14 @@ int32_t InputHub::QueryLocalTouchScreenInfo(int fd)
     info.localAbsInfo.absXMax = absInfo.maximum;
     info.localAbsInfo.absMtPositionXMin = absInfo.minimum;
     info.localAbsInfo.absMtPositionXMax = absInfo.maximum;
-    info.sinkPhyWidth = static_cast<uint32_t>(absInfo.maximum + 1);
+    info.sinkPhyWidth = (uint32_t)(absInfo.maximum + 1);
 
     ioctl(fd, EVIOCGABS(ABS_MT_POSITION_Y), &absInfo);
     info.localAbsInfo.absYMin = absInfo.minimum;
     info.localAbsInfo.absYMax = absInfo.maximum;
     info.localAbsInfo.absMtPositionYMin = absInfo.minimum;
     info.localAbsInfo.absMtPositionYMax = absInfo.maximum;
-    info.sinkPhyHeight = static_cast<uint32_t>(absInfo.maximum + 1);
+    info.sinkPhyHeight = (uint32_t)(absInfo.maximum + 1);
 
     ioctl(fd, EVIOCGABS(ABS_PRESSURE), &absInfo);
     info.localAbsInfo.absPressureMin = absInfo.minimum;
@@ -1102,12 +1102,12 @@ void InputHub::HandleTouchScreenEvent(struct input_event readBuffer[], const siz
         for (size_t j = iter.first; j <= iter.second; j++) {
             struct input_event &iev = readBuffer[j];
             if (iev.code == ABS_X || iev.code == ABS_MT_POSITION_X) {
-                absInfo.absX = static_cast<uint32_t>(iev.value);
-                absInfo.absXIndex = static_cast<int32_t>(j);
+                absInfo.absX = (uint32_t)iev.value;
+                absInfo.absXIndex = (int32_t)j;
             }
             if (iev.code == ABS_Y || iev.code == ABS_MT_POSITION_Y) {
-                absInfo.absY = static_cast<uint32_t>(iev.value);
-                absInfo.absYIndex = static_cast<int32_t>(j);
+                absInfo.absY = (uint32_t)iev.value;
+                absInfo.absYIndex = (int32_t)j;
             }
         }
 

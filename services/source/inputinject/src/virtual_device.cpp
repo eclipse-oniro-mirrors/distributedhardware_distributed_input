@@ -57,7 +57,7 @@ bool VirtualDevice::DoIoctl(int32_t fd, int32_t request, const uint32_t value)
 
 bool VirtualDevice::CreateKey()
 {
-    auto fun = [this](int32_t uiSet, const std::vector<uint32_t>& list) -> bool {
+    auto fun = [&](int32_t uiSet, const std::vector<uint32_t>& list) -> bool {
         for (uint32_t evt_type : list) {
             if (!DoIoctl(fd_, uiSet, evt_type)) {
                 DHLOGE("Error setting event type: %u", evt_type);
@@ -139,11 +139,11 @@ bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
     }
     DHLOGI("create fd %d", fd_);
 
-    char sysfsDeviceName[16];
-    if (ioctl(fd_, UI_GET_SYSNAME(sizeof(sysfsDeviceName)), sysfsDeviceName) < 0) {
+    char sysfs_device_name[16];
+    if (ioctl(fd_, UI_GET_SYSNAME(sizeof(sysfs_device_name)), sysfs_device_name) < 0) {
         DHLOGE("Unable to get input device name");
     }
-    DHLOGI("get input device name: %s, fd: %d", GetAnonyString(sysfsDeviceName).c_str(), fd_);
+    DHLOGI("get input device name: %s, fd: %d", GetAnonyString(sysfs_device_name).c_str(), fd_);
     return true;
 }
 

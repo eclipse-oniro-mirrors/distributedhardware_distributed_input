@@ -40,12 +40,12 @@ namespace DistributedInput {
 class DistributedInputHandler : public IHardwareHandler {
 DECLARE_SINGLE_INSTANCE_BASE(DistributedInputHandler);
 public:
-    API_EXPORT int32_t Initialize() override;
+    API_EXPORT virtual int32_t Initialize() override;
     API_EXPORT virtual std::vector<DHItem> Query() override;
     API_EXPORT virtual std::map<std::string, std::string> QueryExtraInfo() override;
-    API_EXPORT bool IsSupportPlugin() override;
-    API_EXPORT void RegisterPluginListener(std::shared_ptr<PluginListener> listener) override;
-    API_EXPORT void UnRegisterPluginListener() override;
+    API_EXPORT virtual bool IsSupportPlugin() override;
+    API_EXPORT virtual void RegisterPluginListener(std::shared_ptr<PluginListener> listener) override;
+    API_EXPORT virtual void UnRegisterPluginListener() override;
 
     API_EXPORT void FindDevicesInfoByType(const uint32_t inputTypes, std::map<int32_t, std::string> &datas);
     API_EXPORT void FindDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<int32_t, std::string> &datas);
@@ -66,8 +66,8 @@ private:
     void StopInputMonitorDeviceThread();
 
     // The event queue.
-    static const int inputDeviceBufferSize = 32;
-    InputDeviceEvent mEventBuffer[inputDeviceBufferSize] = {};
+    static const int INPUT_DEVICE_BUFFER_SIZE = 32;
+    InputDeviceEvent mEventBuffer[INPUT_DEVICE_BUFFER_SIZE] = {};
     std::mutex operationMutex_;
     std::unique_ptr<InputHub> inputHub_;
 };

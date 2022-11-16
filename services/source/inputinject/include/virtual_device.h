@@ -34,7 +34,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class VirtualDevice {
 public:
-    explicit VirtualDevice(const InputDevice& event);
+    VirtualDevice(const InputDevice& event);
     virtual ~VirtualDevice();
     bool DoIoctl(int32_t fd, int32_t request, const uint32_t value);
     bool CreateKey();

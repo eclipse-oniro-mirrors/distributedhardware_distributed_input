@@ -28,7 +28,7 @@ namespace DistributedInput {
 class PrepareDInputCallbackStub : public IRemoteStub<IPrepareDInputCallback> {
 public:
     PrepareDInputCallbackStub();
-    ~PrepareDInputCallbackStub() override;
+    virtual ~PrepareDInputCallbackStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

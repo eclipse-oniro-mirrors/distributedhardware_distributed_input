@@ -249,7 +249,7 @@ void DistributedInputSinkTransport::NotifyPrepareRemoteInput(int32_t sessionId, 
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_PREPARE deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnPrepareRemoteInput(sessionId, deviceId);
+    callback_->onPrepareRemoteInput(sessionId, deviceId);
 }
 
 void DistributedInputSinkTransport::NotifyUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -261,7 +261,7 @@ void DistributedInputSinkTransport::NotifyUnprepareRemoteInput(int32_t sessionId
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     DHLOGI("OnBytesReceived cmdType TRANS_SOURCE_MSG_UNPREPARE deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnUnprepareRemoteInput(sessionId);
+    callback_->onUnprepareRemoteInput(sessionId);
 }
 
 void DistributedInputSinkTransport::NotifyStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -274,7 +274,7 @@ void DistributedInputSinkTransport::NotifyStartRemoteInput(int32_t sessionId, co
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
     DHLOGI("OnBytesRecei,ved cmdType is TRANS_SOURCE_MSG_START_TYPE deviceId:%s inputTypes:%d .",
         GetAnonyString(deviceId).c_str(), inputTypes);
-    callback_->OnStartRemoteInput(sessionId, inputTypes);
+    callback_->onStartRemoteInput(sessionId, inputTypes);
 }
 
 void DistributedInputSinkTransport::NotifyStopRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -286,7 +286,7 @@ void DistributedInputSinkTransport::NotifyStopRemoteInput(int32_t sessionId, con
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_TYPE deviceId:%s.", GetAnonyString(deviceId).c_str());
-    callback_->OnStopRemoteInput(sessionId, inputTypes);
+    callback_->onStopRemoteInput(sessionId, inputTypes);
 }
 
 void DistributedInputSinkTransport::NotifyLatency(int32_t sessionId, const nlohmann::json &recMsg)
@@ -324,7 +324,7 @@ void DistributedInputSinkTransport::NotifyStartRemoteInputDhid(int32_t sessionId
     std::string strTmp = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_START_DHID deviceId:%s .",
            GetAnonyString(deviceId).c_str());
-    callback_->OnStartRemoteInputDhid(sessionId, strTmp);
+    callback_->onStartRemoteInputDhid(sessionId, strTmp);
 }
 
 void DistributedInputSinkTransport::NotifyStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg)
@@ -343,7 +343,7 @@ void DistributedInputSinkTransport::NotifyStopRemoteInputDhid(int32_t sessionId,
     std::string strTmp = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
     DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_DHID deviceId:%s.",
            GetAnonyString(deviceId).c_str());
-    callback_->OnStopRemoteInputDhid(sessionId, strTmp);
+    callback_->onStopRemoteInputDhid(sessionId, strTmp);
 }
 
 void DistributedInputSinkTransport::NotifyRelayPrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -360,7 +360,7 @@ void DistributedInputSinkTransport::NotifyRelayPrepareRemoteInput(int32_t sessio
     int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_PREPARE_FOR_REL deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnRelayPrepareRemoteInput(toSrcSessionId, sessionId, deviceId);
+    callback_->onRelayPrepareRemoteInput(toSrcSessionId, sessionId, deviceId);
 }
 
 void DistributedInputSinkTransport::NotifyRelayUnprepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -377,7 +377,7 @@ void DistributedInputSinkTransport::NotifyRelayUnprepareRemoteInput(int32_t sess
     int32_t toSrcSessionId = recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_UNPREPARE_FOR_REL deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnRelayUnprepareRemoteInput(toSrcSessionId, sessionId, deviceId);
+    callback_->onRelayUnprepareRemoteInput(toSrcSessionId, sessionId, deviceId);
 }
 
 void DistributedInputSinkTransport::NotifyRelayStartDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -399,7 +399,7 @@ void DistributedInputSinkTransport::NotifyRelayStartDhidRemoteInput(int32_t sess
     std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_START_DHID_FOR_REL deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnRelayStartDhidRemoteInput(toSrcSessionId, sessionId, deviceId, dhids);
+    callback_->onRelayStartDhidRemoteInput(toSrcSessionId, sessionId, deviceId, dhids);
 }
 
 void DistributedInputSinkTransport::NotifyRelayStopDhidRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -421,7 +421,7 @@ void DistributedInputSinkTransport::NotifyRelayStopDhidRemoteInput(int32_t sessi
     std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_DHID_FOR_REL deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnRelayStopDhidRemoteInput(toSrcSessionId, sessionId, deviceId, dhids);
+    callback_->onRelayStopDhidRemoteInput(toSrcSessionId, sessionId, deviceId, dhids);
 }
 
 void DistributedInputSinkTransport::NotifyRelayStartTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -443,7 +443,7 @@ void DistributedInputSinkTransport::NotifyRelayStartTypeRemoteInput(int32_t sess
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_START_TYPE_FOR_REL deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnRelayStartTypeRemoteInput(toSrcSessionId, sessionId, deviceId, inputTypes);
+    callback_->onRelayStartTypeRemoteInput(toSrcSessionId, sessionId, deviceId, inputTypes);
 }
 
 void DistributedInputSinkTransport::NotifyRelayStopTypeRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -465,7 +465,7 @@ void DistributedInputSinkTransport::NotifyRelayStopTypeRemoteInput(int32_t sessi
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL deviceId:%s.",
         GetAnonyString(deviceId).c_str());
-    callback_->OnRelayStopTypeRemoteInput(toSrcSessionId, sessionId, deviceId, inputTypes);
+    callback_->onRelayStopTypeRemoteInput(toSrcSessionId, sessionId, deviceId, inputTypes);
 }
 
 void DistributedInputSinkTransport::DInputTransbaseSinkListener::HandleSessionData(int32_t sessionId,

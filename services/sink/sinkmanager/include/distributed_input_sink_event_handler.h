@@ -26,8 +26,8 @@ namespace DistributedHardware {
 namespace DistributedInput {
 class DistributedInputSinkEventHandler : public AppExecFwk::EventHandler {
 public:
-    explicit DistributedInputSinkEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
-    ~DistributedInputSinkEventHandler();
+    DistributedInputSinkEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+    virtual ~DistributedInputSinkEventHandler();
 
     bool ProxyPostTask(const Callback &callback, int64_t delayTime);
 
