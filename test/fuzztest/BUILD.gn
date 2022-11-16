@@ -19,6 +19,5 @@ group("fuzztest") {
     "distributedinputkit_fuzzer:fuzztest",
     "distributedinputsinktransport_fuzzer:fuzztest",
     "distributedinputsourcetransport_fuzzer:fuzztest",
-    "distributedinputtransportbase_fuzzer:fuzztest",
   ]
 }

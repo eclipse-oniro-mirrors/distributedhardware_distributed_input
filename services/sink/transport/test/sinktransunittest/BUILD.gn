@@ -28,7 +28,6 @@ ohos_unittest("distributed_input_sinktrans_test") {
 
   include_dirs = [
     "//foundation/distributedhardware/distributed_input/services/sink/transport/include",
-    "//foundation/distributedhardware/distributed_input/services/transportbase/include",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "${common_path}/include",
@@ -72,7 +71,6 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//foundation/distributedhardware/distributed_input/services/transportbase:libdinput_trans_base",
   ]
 
   external_deps = [

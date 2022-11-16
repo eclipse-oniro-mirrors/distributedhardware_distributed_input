@@ -38,7 +38,6 @@ ohos_shared_library("libdinput_source_trans") {
     "${distributedinput_path}/inputdevicehandler/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//foundation/distributedhardware/distributed_input/services/transportbase/include",
   ]
 
   sources = [ "src/distributed_input_source_transport.cpp" ]
@@ -61,7 +60,6 @@ ohos_shared_library("libdinput_source_trans") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
-    "//foundation/distributedhardware/distributed_input/services/transportbase:libdinput_trans_base",
   ]
 
   external_deps = [

@@ -15,14 +15,10 @@
 
 #include "distributed_input_sourcemanager_test.h"
 
-#include "accesstoken_kit.h"
 #include <fcntl.h>
 #include <iostream>
 #include <thread>
 #include <unistd.h>
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
-#include "softbus_common.h"
 
 #include <linux/input.h>
 
@@ -35,7 +31,6 @@
 #include "dinput_errcode.h"
 
 using namespace testing::ext;
-using namespace OHOS::Security::AccessToken;
 using namespace OHOS::DistributedHardware::DistributedInput;
 using namespace std;
 namespace OHOS {
@@ -44,24 +39,6 @@ namespace DistributedInput {
 void DistributedInputSourceManagerTest::SetUp()
 {
     sourceManager_ = new DistributedInputSourceManager(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, true);
-
-    uint64_t tokenId;
-    const char *perms[2];
-    perms[0] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    perms[1] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .aclsNum = 0,
-        .dcaps = NULL,
-        .perms = perms,
-        .acls = NULL,
-        .processName = "dsoftbus_service",
-        .aplStr = "system_core",
-    };
-    tokenId = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(tokenId);
-    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 
 void DistributedInputSourceManagerTest::TearDown()
