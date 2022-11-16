@@ -17,10 +17,12 @@
 
 #include <mutex>
 
+#include "distributed_hardware_fwk_kit.h"
 #include "distributed_hardware_log.h"
+#include "ipublisher_listener.h"
 
 #include "constants_dinput.h"
-#include "dinput_low_latency.h"
+#include "dinput_context.h"
 #include "hisysevent_util.h"
 
 namespace OHOS {
@@ -46,9 +48,11 @@ void SetSinkProcessExit()
     }
     DHLOGI("exit sa process success.");
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT, "dinput sink sa exit success.");
-#ifdef DINPUT_LOW_LATENCY
-    DInputLowLatency::GetInstance().DisableSinkLowLatency();
-#endif
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Disable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, DISABLE_LOW_LATENCY.dump());
+    }
     _Exit(0);
 }
 
@@ -63,9 +67,11 @@ void SetSourceProcessExit()
     }
     DHLOGI("exit sa process success.");
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT, "dinput source sa exit success.");
-#ifdef DINPUT_LOW_LATENCY
-    DInputLowLatency::GetInstance().DisableSourceLowLatency();
-#endif
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Disable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, DISABLE_LOW_LATENCY.dump());
+    }
     _Exit(0);
 }
 } // namespace DistributedInput

@@ -20,12 +20,13 @@
 #include "linux/input.h"
 
 #include "anonymous_string.h"
+#include "distributed_hardware_fwk_kit.h"
 #include "distributed_hardware_log.h"
 #include "securec.h"
 
 #include "constants_dinput.h"
+#include "dinput_context.h"
 #include "dinput_errcode.h"
-#include "dinput_low_latency.h"
 #include "dinput_softbus_define.h"
 #include "dinput_utils_tool.h"
 #include "hidumper.h"
@@ -313,10 +314,11 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
         DHLOGE("session open failed, sessionId: %d", sessionId);
         return DH_SUCCESS;
     }
-
-#ifdef DINPUT_LOW_LATENCY
-    DInputLowLatency::GetInstance().EnableSinkLowLatency();
-#endif
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Enable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, ENABLE_LOW_LATENCY.dump());
+    }
 
     // return 1 is client
     int32_t sessionSide = GetSessionSide(sessionId);
@@ -351,10 +353,11 @@ int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_
 void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
 {
     DHLOGI("OnSessionClosed, sessionId: %d", sessionId);
-
-#ifdef DINPUT_LOW_LATENCY
-    DInputLowLatency::GetInstance().DisableSinkLowLatency();
-#endif
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Disable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, DISABLE_LOW_LATENCY.dump());
+    }
 
     char peerDevId[DEVICE_ID_SIZE_MAX] = "";
     int ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));

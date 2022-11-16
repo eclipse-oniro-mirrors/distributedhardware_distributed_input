@@ -39,6 +39,7 @@ ohos_unittest("distributed_input_utils_test") {
     "//commonlibrary/c_utils/base/include",
     "${frameworks_path}/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//third_party/json/include",
   ]
 
   sources = [ "dinput_context_test.cpp" ]

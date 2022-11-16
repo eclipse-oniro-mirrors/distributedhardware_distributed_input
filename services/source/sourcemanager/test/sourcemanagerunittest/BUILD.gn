@@ -51,7 +51,6 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "${dfx_utils_path}/include",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "${utils_path}/include",
-    "${low_latency_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
     "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
@@ -112,14 +111,9 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "LOG_DOMAIN=0xD004100",
   ]
 
-  if (distributed_input_low_latency) {
-    defines += [ "DINPUT_LOW_LATENCY" ]
-  }
-
   deps = [
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "${low_latency_path}:libdinput_low_latency",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/openssl:libcrypto_static",

@@ -19,15 +19,16 @@
 #include <cstring>
 
 #include "anonymous_string.h"
+#include "distributed_hardware_fwk_kit.h"
 #include "distributed_hardware_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
 #include "constants_dinput.h"
+#include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "dinput_hitrace.h"
-#include "dinput_low_latency.h"
 #include "dinput_softbus_define.h"
 #include "dinput_utils_tool.h"
 #include "distributed_input_inject.h"
@@ -241,9 +242,11 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbus(const std::string &rem
     DHLOGI("OpenSession success, remoteDevId:%s, sessionId: %d", GetAnonyString(remoteDevId).c_str(), sessionId);
     sessionId_ = sessionId;
 
-#ifdef DINPUT_LOW_LATENCY
-    DInputLowLatency::GetInstance().EnableSourceLowLatency();
-#endif
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Enable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, ENABLE_LOW_LATENCY.dump());
+    }
 
     HiDumper::GetInstance().SetSessionStatus(remoteDevId, SessionStatus::OPENED);
     return DH_SUCCESS;
@@ -268,9 +271,11 @@ void DistributedInputSourceTransport::CloseInputSoftbus(const int32_t sessionId)
     channelStatusMap_.erase(sessionId);
     DistributedInputInject::GetInstance().StopInjectThread();
 
-#ifdef DINPUT_LOW_LATENCY
-    DInputLowLatency::GetInstance().DisableSourceLowLatency();
-#endif
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Enable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, DISABLE_LOW_LATENCY.dump());
+    }
 
     HiDumper::GetInstance().SetSessionStatus(sessionDevMap_[sessionId].remoteId, SessionStatus::CLOSED);
     HiDumper::GetInstance().DeleteSessionInfo(sessionDevMap_[sessionId].remoteId);
@@ -320,10 +325,11 @@ int32_t DistributedInputSourceTransport::OpenInputSoftbusForRelay(const std::str
             return ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_OPEN_SESSION_TIMEOUT;
         }
     }
-
-#ifdef DINPUT_LOW_LATENCY
-    DInputLowLatency::GetInstance().EnableSourceLowLatency();
-#endif
+    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Enable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, ENABLE_LOW_LATENCY.dump());
+    }
 
     DHLOGI("OpenSession success, remoteDevId:%s, sessionId:%d", GetAnonyString(srcId).c_str(), sessionId);
     HiDumper::GetInstance().SetSessionStatus(srcId, SessionStatus::OPENED);

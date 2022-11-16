@@ -21,8 +21,10 @@ ohos_shared_library("libdinput_sink_trans") {
     "${common_path}/include",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
+    "${frameworks_path}/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
+    "${fwk_interfaces_path}/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
     "//third_party/json/include",
@@ -30,7 +32,6 @@ ohos_shared_library("libdinput_sink_trans") {
     "${service_common}/include",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
-    "${low_latency_path}/include",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
@@ -49,14 +50,10 @@ ohos_shared_library("libdinput_sink_trans") {
     "LOG_DOMAIN=0xD004100",
   ]
 
-  if (distributed_input_low_latency) {
-    defines += [ "DINPUT_LOW_LATENCY" ]
-  }
-
   deps = [
     "${dfx_utils_path}:libdinput_dfx_utils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
     "${fwk_utils_path}:distributedhardwareutils",
-    "${low_latency_path}:libdinput_low_latency",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",

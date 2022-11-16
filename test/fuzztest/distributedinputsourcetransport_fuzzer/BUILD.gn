@@ -31,6 +31,7 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "//commonlibrary/c_utils/base/include",
     "${fwk_common_path}/log/include",
     "${fwk_common_path}/utils/include",
+    "${fwk_interfaces_path}/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
     "${service_common}/include",
@@ -40,7 +41,6 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
-    "${low_latency_path}/include",
     "${frameworks_path}/include",
     "${distributedinput_path}/inputdevicehandler/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
@@ -61,6 +61,7 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
 
   deps = [
     "${dfx_utils_path}:libdinput_dfx_utils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",

@@ -27,10 +27,13 @@
 
 #include "single_instance.h"
 
+#include "constants.h"
+#include "device_type.h"
 #include "distributed_hardware_fwk_kit.h"
 #include "distributed_hardware_log.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "nlohmann/json.hpp"
 #include "system_ability_definition.h"
 
 #include "i_dinput_context.h"
@@ -39,6 +42,15 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
+const nlohmann::json ENABLE_LOW_LATENCY = {
+    {DH_TYPE, DHType::INPUT},
+    {LOW_LATENCY_ENABLE, true},
+};
+
+const nlohmann::json DISABLE_LOW_LATENCY = {
+    {DH_TYPE, DHType::INPUT},
+    {LOW_LATENCY_ENABLE, false},
+};
 class DInputContext {
 DECLARE_SINGLE_INSTANCE_BASE(DInputContext);
 public:
