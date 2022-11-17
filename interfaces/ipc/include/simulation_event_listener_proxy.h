@@ -28,10 +28,9 @@ namespace DistributedInput {
 class SimulationEventListenerProxy : public IRemoteProxy<ISimulationEventListener> {
 public:
     explicit SimulationEventListenerProxy(const sptr<IRemoteObject> &object);
+    ~SimulationEventListenerProxy() override;
 
-    virtual ~SimulationEventListenerProxy() override;
-
-    virtual int32_t OnSimulationEvent(uint32_t type, uint32_t code, int32_t value) override;
+    int32_t OnSimulationEvent(uint32_t type, uint32_t code, int32_t value) override;
 
 private:
     static inline BrokerDelegator<SimulationEventListenerProxy> delegator_;

@@ -1119,7 +1119,7 @@ void DistributedInputSourceTransport::NotifyResponsePrepareRemoteInput(int32_t s
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, deviceId is error.");
         return;
     }
-    callback_->onResponsePrepareRemoteInput(deviceId, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE],
+    callback_->OnResponsePrepareRemoteInput(deviceId, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE],
         recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST]);
 }
 
@@ -1136,7 +1136,7 @@ void DistributedInputSourceTransport::NotifyResponseUnprepareRemoteInput(int32_t
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONUNPREPARE, deviceId is error.");
         return;
     }
-    callback_->onResponseUnprepareRemoteInput(deviceId, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
+    callback_->OnResponseUnprepareRemoteInput(deviceId, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
     CloseInputSoftbus(sessionId);
 }
 
@@ -1152,7 +1152,7 @@ void DistributedInputSourceTransport::NotifyResponseStartRemoteInput(int32_t ses
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONSTART, deviceId is error.");
         return;
     }
-    callback_->onResponseStartRemoteInput(
+    callback_->OnResponseStartRemoteInput(
         deviceId, recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE], recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
 }
 
@@ -1168,7 +1168,7 @@ void DistributedInputSourceTransport::NotifyResponseStopRemoteInput(int32_t sess
         DHLOGE("OnBytesReceived cmdType TRANS_SINK_MSG_ONSTOP, deviceId is error.");
         return;
     }
-    callback_->onResponseStopRemoteInput(
+    callback_->OnResponseStopRemoteInput(
         deviceId, recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE], recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
 }
 
@@ -1185,7 +1185,7 @@ void DistributedInputSourceTransport::NotifyResponseStartRemoteInputDhid(int32_t
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTART, deviceId is error.");
         return;
     }
-    callback_->onResponseStartRemoteInputDhid(
+    callback_->OnResponseStartRemoteInputDhid(
         deviceId, recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID], recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
 }
 
@@ -1201,7 +1201,7 @@ void DistributedInputSourceTransport::NotifyResponseStopRemoteInputDhid(int32_t 
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTOP, deviceId is error.");
         return;
     }
-    callback_->onResponseStopRemoteInputDhid(
+    callback_->OnResponseStopRemoteInputDhid(
         deviceId, recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID], recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
 }
 
@@ -1213,7 +1213,7 @@ void DistributedInputSourceTransport::NotifyResponseKeyState(int32_t sessionId, 
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_KEY_STATE, deviceId is error.");
         return;
     }
-    callback_->onResponseKeyState(deviceId, recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_DHID],
+    callback_->OnResponseKeyState(deviceId, recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_DHID],
         recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_TYPE], recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_CODE],
         recMsg[DINPUT_SOFTBUS_KEY_KEYSTATE_VALUE]);
 }
@@ -1232,7 +1232,7 @@ void DistributedInputSourceTransport::NotifyReceivedEventRemoteInput(int32_t ses
         return;
     }
     std::string inputDataStr = recMsg[DINPUT_SOFTBUS_KEY_INPUT_DATA];
-    callback_->onReceivedEventRemoteInput(deviceId, inputDataStr);
+    callback_->OnReceivedEventRemoteInput(deviceId, inputDataStr);
 }
 
 void DistributedInputSourceTransport::CalculateLatency(int32_t sessionId, const nlohmann::json &recMsg)
@@ -1262,13 +1262,13 @@ void DistributedInputSourceTransport::ReceiveSrcTSrcRelayPrepare(int32_t session
     // continue notify to A_sink_trans
     int32_t ret = OpenInputSoftbus(deviceId);
     if (ret != DH_SUCCESS) {
-        callback_->onResponseRelayPrepareRemoteInput(sessionId, deviceId, false, "");
+        callback_->OnResponseRelayPrepareRemoteInput(sessionId, deviceId, false, "");
         return;
     }
 
     ret = PrepareRemoteInput(sessionId, deviceId);
     if (ret != DH_SUCCESS) {
-        callback_->onResponseRelayPrepareRemoteInput(sessionId, deviceId, false, "");
+        callback_->OnResponseRelayPrepareRemoteInput(sessionId, deviceId, false, "");
         return;
     }
 }
@@ -1285,7 +1285,7 @@ void DistributedInputSourceTransport::ReceiveSrcTSrcRelayUnprepare(int32_t sessi
     int32_t ret = UnprepareRemoteInput(sessionId, deviceId);
     if (ret != DH_SUCCESS) {
         DHLOGE("Can not send message by softbus, unprepare fail.");
-        callback_->onResponseRelayUnprepareRemoteInput(sessionId, deviceId, false);
+        callback_->OnResponseRelayUnprepareRemoteInput(sessionId, deviceId, false);
         return;
     }
 }
@@ -1305,7 +1305,7 @@ void DistributedInputSourceTransport::NotifyResponseRelayPrepareRemoteInput(int3
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_PREPARE, sinkDevId is error.");
         return;
     }
-    callback_->onResponseRelayPrepareRemoteInput(recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID], sinkDevId,
+    callback_->OnResponseRelayPrepareRemoteInput(recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID], sinkDevId,
         recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE], recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST]);
 }
 
@@ -1323,7 +1323,7 @@ void DistributedInputSourceTransport::NotifyResponseRelayUnprepareRemoteInput(in
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_UNPREPARE, sinkDevId is error.");
         return;
     }
-    callback_->onResponseRelayUnprepareRemoteInput(recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID], sinkDevId,
+    callback_->OnResponseRelayUnprepareRemoteInput(recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID], sinkDevId,
         recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE]);
     CloseInputSoftbus(sessionId);
 }
@@ -1341,7 +1341,7 @@ void DistributedInputSourceTransport::ReceiveRelayPrepareResult(int32_t sessionI
     std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
     std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
     int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
-    callback_->onReceiveRelayPrepareResult(status, srcId, sinkId);
+    callback_->OnReceiveRelayPrepareResult(status, srcId, sinkId);
 }
 
 void DistributedInputSourceTransport::ReceiveRelayUnprepareResult(int32_t sessionId, const nlohmann::json &recMsg)
@@ -1357,7 +1357,7 @@ void DistributedInputSourceTransport::ReceiveRelayUnprepareResult(int32_t sessio
     std::string srcId = recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID];
     std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
     int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
-    callback_->onReceiveRelayUnprepareResult(status, srcId, sinkId);
+    callback_->OnReceiveRelayUnprepareResult(status, srcId, sinkId);
     CloseInputSoftbus(sessionId);
 }
 
@@ -1476,7 +1476,7 @@ void DistributedInputSourceTransport::ReceiveRelayStartDhidResult(int32_t sessio
     std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
     int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
     std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
-    callback_->onReceiveRelayStartDhidResult(status, srcId, sinkId, dhids);
+    callback_->OnReceiveRelayStartDhidResult(status, srcId, sinkId, dhids);
 }
 
 void DistributedInputSourceTransport::ReceiveRelayStopDhidResult(int32_t sessionId, const nlohmann::json &recMsg)
@@ -1494,7 +1494,7 @@ void DistributedInputSourceTransport::ReceiveRelayStopDhidResult(int32_t session
     std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
     int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
     std::string dhids = recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID];
-    callback_->onReceiveRelayStopDhidResult(status, srcId, sinkId, dhids);
+    callback_->OnReceiveRelayStopDhidResult(status, srcId, sinkId, dhids);
 }
 
 void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartType(int32_t sessionId, const nlohmann::json &recMsg)
@@ -1612,7 +1612,7 @@ void DistributedInputSourceTransport::ReceiveRelayStartTypeResult(int32_t sessio
     std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
     int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
-    callback_->onReceiveRelayStartTypeResult(status, srcId, sinkId, inputTypes);
+    callback_->OnReceiveRelayStartTypeResult(status, srcId, sinkId, inputTypes);
 }
 
 void DistributedInputSourceTransport::ReceiveRelayStopTypeResult(int32_t sessionId, const nlohmann::json &recMsg)
@@ -1630,7 +1630,7 @@ void DistributedInputSourceTransport::ReceiveRelayStopTypeResult(int32_t session
     std::string sinkId = recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID];
     int32_t status = recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE];
     uint32_t inputTypes = recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE];
-    callback_->onReceiveRelayStopTypeResult(status, srcId, sinkId, inputTypes);
+    callback_->OnReceiveRelayStopTypeResult(status, srcId, sinkId, inputTypes);
 }
 
 void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const std::string& message)

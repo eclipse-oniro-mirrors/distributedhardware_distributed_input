@@ -106,11 +106,11 @@ int32_t HiDumper::GetAllNodeInfos(std::string& result)
     for (auto iter = nodeInfos_.begin(); iter != nodeInfos_.end(); iter++) {
         result.append("\n{");
         result.append("\n   deviceid :   ");
-        result.append(GetAnonyString((*iter).deviceId_));
+        result.append(GetAnonyString((*iter).devId));
         result.append("\n   nodename :   ");
-        result.append((*iter).nodeName_);
+        result.append((*iter).virNodeName);
         result.append("\n   dhId :   ");
-        result.append(GetAnonyString((*iter).dhId_));
+        result.append(GetAnonyString((*iter).inputDhId));
         result.append("\n},");
     }
     return DH_SUCCESS;
@@ -121,7 +121,7 @@ void HiDumper::DeleteNodeInfo(const std::string& deviceId, const std::string& dh
     DHLOGI("DeleteNodeInfo Dump.");
     std::lock_guard<std::mutex> node_lock(nodeMutex_);
     for (auto iter = nodeInfos_.begin(); iter != nodeInfos_.end();) {
-        if ((*iter).deviceId_.compare(deviceId) == 0 && (*iter).dhId_.compare(dhId) == 0) {
+        if ((*iter).devId.compare(deviceId) == 0 && (*iter).inputDhId.compare(dhId) == 0) {
             iter = nodeInfos_.erase(iter);
         } else {
             iter++;
@@ -138,18 +138,18 @@ int32_t HiDumper::GetSessionInfo(std::string& result)
         result.append("\n   remotedevid :   ");
         result.append(GetAnonyString(iter->first));
         result.append("\n   sessionid :   ");
-        result.append(std::to_string(iter->second.sessionId_));
+        result.append(std::to_string(iter->second.sesId));
         result.append("\n   mysessionname :   ");
-        result.append(iter->second.mySessionName_);
+        result.append(iter->second.mySesName);
         result.append("\n   peersessionname :   ");
-        result.append(iter->second.peerSessionName_);
+        result.append(iter->second.peerSesName);
 
         std::string sessionStatus("");
-        auto item = SESSION_STATUS.find(iter->second.sessionStatus_);
+        auto item = SESSION_STATUS.find(iter->second.sessionState);
         if (item == SESSION_STATUS.end()) {
             sessionStatus = "unknown state";
         } else {
-            sessionStatus = SESSION_STATUS.find(iter->second.sessionStatus_)->second;
+            sessionStatus = SESSION_STATUS.find(iter->second.sessionState)->second;
         }
         result.append("\n   sessionstate :   ");
         result.append(sessionStatus);
@@ -187,9 +187,9 @@ void HiDumper::SaveNodeInfo(const std::string& deviceId, const std::string& node
 {
     std::lock_guard<std::mutex> node_lock(nodeMutex_);
     NodeInfo nodeInfo = {
-        .deviceId_ = deviceId,
-        .nodeName_ = nodeName,
-        .dhId_ = dhId,
+        .devId = deviceId,
+        .virNodeName = nodeName,
+        .inputDhId = dhId,
     };
     nodeInfos_.push_back(nodeInfo);
 }
@@ -201,10 +201,10 @@ void HiDumper::CreateSessionInfo(const std::string& remoteDevId, const int32_t& 
     auto iter = sessionInfos_.find(remoteDevId);
     if (iter == sessionInfos_.end()) {
         SessionInfo sessionInfo = {
-            .sessionId_ = sessionId,
-            .mySessionName_ = mySessionName,
-            .peerSessionName_ = peerSessionName,
-            .sessionStatus_ = sessionStatus,
+            .sesId = sessionId,
+            .mySesName = mySessionName,
+            .peerSesName = peerSessionName,
+            .sessionState = sessionStatus,
         };
         sessionInfos_[remoteDevId] = sessionInfo;
     }
@@ -218,7 +218,7 @@ void HiDumper::SetSessionStatus(const std::string& remoteDevId, const SessionSta
         DHLOGI("remote deviceid does not exist");
         return;
     }
-    sessionInfos_[remoteDevId].sessionStatus_ = sessionStatus;
+    sessionInfos_[remoteDevId].sessionState = sessionStatus;
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

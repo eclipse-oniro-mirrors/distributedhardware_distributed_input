@@ -74,10 +74,10 @@ DistributedInputSinkManager::DInputSinkListener::~DInputSinkListener()
     DHLOGI("DInputSinkListener destory.");
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
+void DistributedInputSinkManager::DInputSinkListener::OnPrepareRemoteInput(
     const int32_t& sessionId, const std::string &deviceId)
 {
-    DHLOGI("onPrepareRemoteInput called, sessionId: %d, devId: %s", sessionId, GetAnonyString(deviceId).c_str());
+    DHLOGI("OnPrepareRemoteInput called, sessionId: %d, devId: %s", sessionId, GetAnonyString(deviceId).c_str());
 
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_ONPREPARE;
@@ -104,7 +104,7 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
         DHLOGE("query local network id from softbus failed");
     }
     if (vecFilter.empty() || vecFilter[0].empty() || vecFilter[0][0].empty()) {
-        DHLOGE("onPrepareRemoteInput called, white list is null.");
+        DHLOGE("OnPrepareRemoteInput called, white list is null.");
         jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
         jsonStr[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "";
         smsg = jsonStr.dump();
@@ -119,10 +119,10 @@ void DistributedInputSinkManager::DInputSinkListener::onPrepareRemoteInput(
     DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onUnprepareRemoteInput(const int32_t& sessionId)
+void DistributedInputSinkManager::DInputSinkListener::OnUnprepareRemoteInput(const int32_t& sessionId)
 {
-    DHLOGI("onUnprepareRemoteInput called, sessionId: %d", sessionId);
-    onStopRemoteInput(sessionId, static_cast<uint32_t>(DInputDeviceType::ALL));
+    DHLOGI("OnUnprepareRemoteInput called, sessionId: %d", sessionId);
+    OnStopRemoteInput(sessionId, static_cast<uint32_t>(DInputDeviceType::ALL));
     DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
 
     nlohmann::json jsonStr;
@@ -132,7 +132,7 @@ void DistributedInputSinkManager::DInputSinkListener::onUnprepareRemoteInput(con
     DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onRelayPrepareRemoteInput(const int32_t &toSrcSessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnRelayPrepareRemoteInput(const int32_t &toSrcSessionId,
     const int32_t &toSinkSessionId, const std::string &deviceId)
 {
     DHLOGI("toSinkSessionId: %s, devId: %s", GetAnonyInt32(toSinkSessionId).c_str(), GetAnonyString(deviceId).c_str());
@@ -178,7 +178,7 @@ void DistributedInputSinkManager::DInputSinkListener::onRelayPrepareRemoteInput(
     DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(toSinkSessionId, smsg);
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onRelayUnprepareRemoteInput(const int32_t &toSrcSessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnRelayUnprepareRemoteInput(const int32_t &toSrcSessionId,
     const int32_t &toSinkSessionId, const std::string &deviceId)
 {
     DHLOGI("toSinkSessionId: %d, devId: %s", toSinkSessionId, GetAnonyString(deviceId).c_str());
@@ -194,11 +194,11 @@ void DistributedInputSinkManager::DInputSinkListener::onRelayUnprepareRemoteInpu
     DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(toSinkSessionId, smsg);
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
+void DistributedInputSinkManager::DInputSinkListener::OnStartRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
-    DHLOGI("onStartRemoteInput called, cursessionId: %d, new sessionId: %d", curSessionId, sessionId);
+    DHLOGI("OnStartRemoteInput called, cursessionId: %d, new sessionId: %d", curSessionId, sessionId);
     // set new session
     int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
 
@@ -235,10 +235,10 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInput(
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
+void DistributedInputSinkManager::DInputSinkListener::OnStopRemoteInput(
     const int32_t& sessionId, const uint32_t& inputTypes)
 {
-    DHLOGI("onStopRemoteInput called, sessionId: %d, inputTypes: %d, curInputTypes: %d",
+    DHLOGI("OnStopRemoteInput called, sessionId: %d, inputTypes: %d, curInputTypes: %d",
         sessionId, inputTypes, sinkManagerObj_->GetInputTypes());
 
     sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
@@ -268,11 +268,11 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInput(
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInputDhid(const int32_t &sessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnStartRemoteInputDhid(const int32_t &sessionId,
     const std::string &strDhids)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
-    DHLOGE("onStartRemoteInputDhid called, cursessionId: %d, new sessionId: %d",
+    DHLOGE("OnStartRemoteInputDhid called, cursessionId: %d, new sessionId: %d",
         curSessionId, sessionId);
     // set new session
     int32_t startRes = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
@@ -285,12 +285,12 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInputDhid(con
     DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsgSta);
 
     if (startRes != DH_SUCCESS) {
-        DHLOGE("onStartRemoteInputDhid StartSwitch error.");
+        DHLOGE("OnStartRemoteInputDhid StartSwitch error.");
         return;
     }
 
     if (curSessionId == ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
-        DHLOGW("onStartRemoteInputDhid called, this is the only session.");
+        DHLOGW("OnStartRemoteInputDhid called, this is the only session.");
     }
 
     std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, sessionId, strDhids).detach();
@@ -304,10 +304,10 @@ void DistributedInputSinkManager::DInputSinkListener::onStartRemoteInputDhid(con
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(const int32_t &sessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnStopRemoteInputDhid(const int32_t &sessionId,
     const std::string &strDhids)
 {
-    DHLOGI("onStopRemoteInputDhid called, sessionId: %d", sessionId);
+    DHLOGI("OnStopRemoteInputDhid called, sessionId: %d", sessionId);
     std::vector<std::string> stopIndeedDhIds;
     std::vector<std::string> stopOnCmdDhIds;
     StringSplit(strDhids, INPUT_STRING_SPLIT_POINT, stopOnCmdDhIds);
@@ -318,7 +318,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(cons
     DistributedInputCollector::GetInstance().ReportDhIdSharingState(stopIndeedOnes);
 
     if (DistributedInputCollector::GetInstance().IsAllDevicesStoped()) {
-        DHLOGE("onStopRemoteInputDhid called, all dhid stop sharing, sessionId: %d is closed.", sessionId);
+        DHLOGE("OnStopRemoteInputDhid called, all dhid stop sharing, sessionId: %d is closed.", sessionId);
         DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
     }
 
@@ -341,7 +341,7 @@ void DistributedInputSinkManager::DInputSinkListener::onStopRemoteInputDhid(cons
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onRelayStartDhidRemoteInput(const int32_t &toSrcSessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnRelayStartDhidRemoteInput(const int32_t &toSrcSessionId,
     const int32_t &toSinkSessionId, const std::string &deviceId, const std::string &strDhids)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
@@ -379,7 +379,7 @@ void DistributedInputSinkManager::DInputSinkListener::onRelayStartDhidRemoteInpu
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onRelayStopDhidRemoteInput(const int32_t &toSrcSessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnRelayStopDhidRemoteInput(const int32_t &toSrcSessionId,
     const int32_t &toSinkSessionId, const std::string &deviceId, const std::string &strDhids)
 {
     DHLOGI("toSinkSessionId: %d", toSinkSessionId);
@@ -393,7 +393,7 @@ void DistributedInputSinkManager::DInputSinkListener::onRelayStopDhidRemoteInput
     DistributedInputCollector::GetInstance().ReportDhIdSharingState(stopIndeedOnes);
 
     if (DistributedInputCollector::GetInstance().IsAllDevicesStoped()) {
-        DHLOGE("onStopRemoteInputDhid called, all dhid stop sharing, sessionId: %d is closed.", toSinkSessionId);
+        DHLOGE("OnStopRemoteInputDhid called, all dhid stop sharing, sessionId: %d is closed.", toSinkSessionId);
         DistributedInputSinkSwitch::GetInstance().StopSwitch(toSinkSessionId);
     }
 
@@ -411,13 +411,13 @@ void DistributedInputSinkManager::DInputSinkListener::onRelayStopDhidRemoteInput
         sinkManagerObj_->SetInputTypes(static_cast<uint32_t>(DInputDeviceType::NONE));
         if (DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession() ==
             ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL) {
-            DHLOGI("onStartRemoteInput called, all session is stop.");
+            DHLOGI("OnStartRemoteInput called, all session is stop.");
             sinkManagerObj_->SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
         }
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onRelayStartTypeRemoteInput(const int32_t &toSrcSessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnRelayStartTypeRemoteInput(const int32_t &toSrcSessionId,
     const int32_t &toSinkSessionId, const std::string &deviceId, uint32_t inputTypes)
 {
     int32_t curSessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
@@ -461,10 +461,10 @@ void DistributedInputSinkManager::DInputSinkListener::onRelayStartTypeRemoteInpu
     }
 }
 
-void DistributedInputSinkManager::DInputSinkListener::onRelayStopTypeRemoteInput(const int32_t &toSrcSessionId,
+void DistributedInputSinkManager::DInputSinkListener::OnRelayStopTypeRemoteInput(const int32_t &toSrcSessionId,
     const int32_t &toSinkSessionId, const std::string &deviceId, uint32_t inputTypes)
 {
-    DHLOGI("onStopRemoteInput called, sessionId: %d, inputTypes: %d, curInputTypes: %d",
+    DHLOGI("OnStopRemoteInput called, sessionId: %d, inputTypes: %d, curInputTypes: %d",
         toSinkSessionId, inputTypes, sinkManagerObj_->GetInputTypes());
 
     sinkManagerObj_->SetInputTypes(sinkManagerObj_->GetInputTypes() -
@@ -556,15 +556,15 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
             SleepTimeMs();
             continue;
         }
-        leftKeyVal = bit_is_set(keystate, BTN_LEFT);
+        leftKeyVal = BitIsSet(keystate, BTN_LEFT);
         if (leftKeyVal != 0) {
             DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhid, BTN_LEFT);
         }
-        rightKeyVal = bit_is_set(keystate, BTN_RIGHT);
+        rightKeyVal = BitIsSet(keystate, BTN_RIGHT);
         if (rightKeyVal != 0) {
             DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhid, BTN_RIGHT);
         }
-        midKeyVal = bit_is_set(keystate, BTN_MIDDLE);
+        midKeyVal = BitIsSet(keystate, BTN_MIDDLE);
         if (midKeyVal != 0) {
             DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhid, BTN_MIDDLE);
         }
@@ -774,7 +774,7 @@ DInputServerType DistributedInputSinkManager::GetStartTransFlag()
 }
 void DistributedInputSinkManager::SetStartTransFlag(const DInputServerType flag)
 {
-    DHLOGI("Set Sink isStartTrans_ %d", (int32_t)flag);
+    DHLOGI("Set Sink isStartTrans_ %d", static_cast<int32_t>(flag));
     isStartTrans_ = flag;
 }
 
@@ -894,8 +894,8 @@ int32_t DistributedInputSinkManager::ProjectWindowListener::UpdateSinkScreenInfo
     sinkScreenInfo.sinkShowWidth = GetScreenWidth();
     sinkScreenInfo.sinkShowHeight = GetScreenHeight();
     LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
-    sinkScreenInfo.sinkPhyWidth = (uint32_t)(info.absMtPositionXMax + 1);
-    sinkScreenInfo.sinkPhyHeight = (uint32_t)(info.absMtPositionYMax + 1);
+    sinkScreenInfo.sinkPhyWidth = static_cast<uint32_t>(info.absMtPositionXMax + 1);
+    sinkScreenInfo.sinkPhyHeight = static_cast<uint32_t>(info.absMtPositionYMax + 1);
     DHLOGI("sinkShowWinId: %d, sinkProjShowWidth: %d, sinkProjShowHeight: %d, sinkWinShowX: %d, sinkWinShowY: %d,"
         "sinkShowWidth: %d, sinkShowHeight: %d, sinkPhyWidth: %d, sinkPhyHeight: %d", sinkScreenInfo.sinkShowWinId,
         sinkScreenInfo.sinkProjShowWidth, sinkScreenInfo.sinkProjShowHeight, sinkScreenInfo.sinkWinShowX,

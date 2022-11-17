@@ -28,13 +28,12 @@ namespace DistributedInput {
 class InputNodeListenerProxy : public IRemoteProxy<InputNodeListener> {
 public:
     explicit InputNodeListenerProxy(const sptr<IRemoteObject> &object);
+    ~InputNodeListenerProxy() override;
 
-    virtual ~InputNodeListenerProxy() override;
-
-    virtual void OnNodeOnLine(const std::string srcDevId, const std::string sinkDevId,
+    void OnNodeOnLine(const std::string srcDevId, const std::string sinkDevId,
         const std::string sinkNodeId, const std::string sinkNodeDesc) override;
 
-    virtual void OnNodeOffLine(const std::string srcDevId, const std::string sinkDevId,
+    void OnNodeOffLine(const std::string srcDevId, const std::string sinkDevId,
         const std::string sinkNodeId) override;
 
 private:

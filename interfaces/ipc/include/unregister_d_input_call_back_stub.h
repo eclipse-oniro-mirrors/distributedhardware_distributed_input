@@ -28,7 +28,7 @@ namespace DistributedInput {
 class UnregisterDInputCallbackStub : public IRemoteStub<IUnregisterDInputCallback> {
 public:
     UnregisterDInputCallbackStub();
-    virtual ~UnregisterDInputCallbackStub() override;
+    ~UnregisterDInputCallbackStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

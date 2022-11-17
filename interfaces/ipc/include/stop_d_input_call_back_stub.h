@@ -28,7 +28,7 @@ namespace DistributedInput {
 class StopDInputCallbackStub : public IRemoteStub<IStopDInputCallback> {
 public:
     StopDInputCallbackStub();
-    virtual ~StopDInputCallbackStub() override;
+    ~StopDInputCallbackStub() override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 

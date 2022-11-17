@@ -28,10 +28,9 @@ namespace DistributedInput {
 class DelWhiteListInfosCallbackProxy : public IRemoteProxy<IDelWhiteListInfosCallback> {
 public:
     explicit DelWhiteListInfosCallbackProxy(const sptr<IRemoteObject> &object);
+    ~DelWhiteListInfosCallbackProxy() override;
 
-    virtual ~DelWhiteListInfosCallbackProxy() override;
-
-    virtual void OnResult(const std::string& deviceId) override;
+    void OnResult(const std::string& deviceId) override;
 
 private:
     static inline BrokerDelegator<DelWhiteListInfosCallbackProxy> delegator_;

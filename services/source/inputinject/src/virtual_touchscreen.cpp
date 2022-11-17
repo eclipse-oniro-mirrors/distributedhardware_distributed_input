@@ -40,12 +40,12 @@ VirtualTouchScreen::VirtualTouchScreen(const InputDevice& event, LocalAbsInfo& a
     uint32_t phyHeight) : VirtualDevice(event)
 {
     dev_.absmin[ABS_X] = 0;
-    dev_.absmax[ABS_X] = (int32_t)phyWidth;
+    dev_.absmax[ABS_X] = static_cast<int32_t>(phyWidth);
     dev_.absfuzz[ABS_X] = 0;
     dev_.absflat[ABS_X] = 0;
 
     dev_.absmin[ABS_Y] = 0;
-    dev_.absmax[ABS_Y] = (int32_t)phyHeight;
+    dev_.absmax[ABS_Y] = static_cast<int32_t>(phyHeight);
     dev_.absfuzz[ABS_Y] = 0;
     dev_.absflat[ABS_Y] = 0;
 
@@ -70,12 +70,12 @@ VirtualTouchScreen::VirtualTouchScreen(const InputDevice& event, LocalAbsInfo& a
     dev_.absflat[ABS_MT_ORIENTATION] = 0;
 
     dev_.absmin[ABS_MT_POSITION_X] = 0;
-    dev_.absmax[ABS_MT_POSITION_X] = (int32_t)phyWidth;
+    dev_.absmax[ABS_MT_POSITION_X] = static_cast<int32_t>(phyWidth);
     dev_.absfuzz[ABS_MT_POSITION_X] = 0;
     dev_.absflat[ABS_MT_POSITION_X] = 0;
 
     dev_.absmin[ABS_MT_POSITION_Y] = 0;
-    dev_.absmax[ABS_MT_POSITION_Y] = (int32_t)phyHeight;
+    dev_.absmax[ABS_MT_POSITION_Y] = static_cast<int32_t>(phyHeight);
     dev_.absfuzz[ABS_MT_POSITION_Y] = 0;
     dev_.absflat[ABS_MT_POSITION_Y] = 0;
 

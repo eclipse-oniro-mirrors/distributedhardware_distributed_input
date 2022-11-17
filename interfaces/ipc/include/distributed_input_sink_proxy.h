@@ -31,19 +31,18 @@ class DistributedInputSinkProxy : public IRemoteProxy<IDistributedSinkInput> {
 public:
 
     explicit DistributedInputSinkProxy(const sptr<IRemoteObject> &object);
+    ~DistributedInputSinkProxy() override;
 
-    virtual ~DistributedInputSinkProxy() override;
+    int32_t Init() override;
 
-    virtual int32_t Init() override;
+    int32_t Release() override;
 
-    virtual int32_t Release() override;
+    int32_t RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback) override;
 
-    virtual int32_t RegisterGetSinkScreenInfosCallback(sptr<IGetSinkScreenInfosCallback> callback) override;
+    int32_t NotifyStartDScreen(const SrcScreenInfo& srcScreenRemoteCtrlInfo) override;
+    int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
 
-    virtual int32_t NotifyStartDScreen(const SrcScreenInfo& srcScreenRemoteCtrlInfo) override;
-    virtual int32_t NotifyStopDScreen(const std::string& srcScreenInfoKey) override;
-
-    virtual int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener) override;
+    int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener) override;
 
 private:
     bool SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply);
