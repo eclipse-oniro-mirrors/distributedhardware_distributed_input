@@ -102,7 +102,7 @@ public:
 
 void PrepareInputFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
@@ -145,7 +145,7 @@ void IsNeedFilterOutFuzzTest(const uint8_t* data, size_t size)
     int32_t keyAction = *(reinterpret_cast<const int32_t*>(data));
     DistributedInput::BusinessEvent event;
     event.pressedKeys.push_back(pressedKey);
-    event.keyAction = keyCode;
+    event.keyCode = keyCode;
     event.keyAction = keyAction;
 
     DistributedInput::DistributedInputKit::IsNeedFilterOut(deviceId, event);

@@ -23,9 +23,9 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-class DinputCheckParam {
+class DInputCheckParam {
 public:
-    static DinputCheckParam &GetInstance(void);
+    static DInputCheckParam &GetInstance(void);
     bool CheckParam(const std::string &deviceId, sptr<IRemoteBroker> callback);
     bool CheckParam(const std::string &deviceId, const uint32_t &inputTypes, sptr<IRemoteBroker> callback);
     bool CheckParam(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
@@ -41,8 +41,8 @@ public:
         const std::shared_ptr<UnregisterCallback> &callback);
 
 private:
-    DinputCheckParam() = default;
-    ~DinputCheckParam() = default;
+    DInputCheckParam() = default;
+    ~DInputCheckParam() = default;
 };
 
 } // namespace DistributedInput

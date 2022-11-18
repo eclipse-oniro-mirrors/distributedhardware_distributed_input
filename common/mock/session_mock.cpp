@@ -31,7 +31,7 @@ static char g_mySessionName[CHAR_ARRAY_SIZE];
 int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
     std::cout << "CreateSessionServer start sessionName:" << sessionName << std::endl;
-    if (strlen(sessionName) <= 0) {
+    if (strlen(sessionName) == 0) {
         std::cout << "CreateSessionServer sessionName is empty." << std::endl;
         return DH_ERROR;
     }
@@ -59,10 +59,10 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId, const char *groupId,
     const SessionAttribute *attr)
 {
-    if (strlen(peerSessionName) <= 0) {
+    if (strlen(peerSessionName) == 0) {
         return DH_ERROR;
     }
-    if (strlen(peerDeviceId) <= 0) {
+    if (strlen(peerDeviceId) == 0) {
         return DH_ERROR;
     }
     if (strncpy_s(g_peerSessionName, CHAR_ARRAY_SIZE + 1, peerSessionName, CHAR_ARRAY_SIZE) != EOK) {

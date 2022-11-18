@@ -794,7 +794,6 @@ int32_t InputHub::ReadNotifyLocked()
 {
     size_t res;
     char eventBuf[512];
-    size_t eventPos = 0;
     struct inotify_event *event;
 
     DHLOGI("readNotify nfd: %d\n", iNotifyFd_);
@@ -808,7 +807,8 @@ int32_t InputHub::ReadNotifyLocked()
     }
 
     {
-        size_t eventSize;
+        size_t eventSize = 0;
+        size_t eventPos = 0;
         while (res >= sizeof(*event)) {
             event = reinterpret_cast<struct inotify_event *>(eventBuf + eventPos);
             JudgeDeviceOpenOrClose(*event);

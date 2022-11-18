@@ -1281,7 +1281,7 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_PREPARE, deviceId, "Dinput prepare call.");
-    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
@@ -1334,7 +1334,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId, "Dinput unprepare call.");
-    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
@@ -1377,7 +1377,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, deviceId, "Dinput start use call.");
-    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
@@ -1422,7 +1422,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, deviceId, "Dinput stop use call");
-    if (!DinputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
@@ -1466,7 +1466,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "Dinput start use call.");
-    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1520,7 +1520,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
 {
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "Dinput stop use call.");
-    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1629,7 +1629,7 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string &src
     sptr<IPrepareDInputCallback> callback)
 {
     DHLOGI("Dinput prepare, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
-    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1675,7 +1675,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string &s
     sptr<IUnprepareDInputCallback> callback)
 {
     DHLOGI("Dinput unprepare, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
-    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1737,7 +1737,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &sinkI
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "dinput start use call");
     DHLOGI("Dinput start, sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
-    if (!DinputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1788,7 +1788,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "dinput stop use call");
     DHLOGI("Dinput stop, sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
-    if (!DinputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1836,7 +1836,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
     StartAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "Dinput start use call.");
     DHLOGI("Dinput start, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
-    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
@@ -1889,7 +1889,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "Dinput stop use call.");
     DHLOGI("Dinput stop, srcId: %s, sinkId: %s, vector.string.size: %d",
         GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
-    if (!DinputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
+    if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
             ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);

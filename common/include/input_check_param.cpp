@@ -22,12 +22,12 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-DinputCheckParam &DinputCheckParam::GetInstance(void)
+DInputCheckParam &DInputCheckParam::GetInstance(void)
 {
-    static DinputCheckParam instance;
+    static DInputCheckParam instance;
     return instance;
 }
-bool DinputCheckParam::CheckParam(const std::string &deviceId, sptr<IRemoteBroker> callback)
+bool DInputCheckParam::CheckParam(const std::string &deviceId, sptr<IRemoteBroker> callback)
 {
     if (deviceId.empty() || deviceId.size() > DEVID_LENGTH_MAX) {
         DHLOGE("CheckParam deviceId is empty or deviceId size too long.");
@@ -40,7 +40,7 @@ bool DinputCheckParam::CheckParam(const std::string &deviceId, sptr<IRemoteBroke
     return true;
 }
 
-bool DinputCheckParam::CheckParam(const std::string& deviceId, const uint32_t& inputTypes,
+bool DInputCheckParam::CheckParam(const std::string& deviceId, const uint32_t& inputTypes,
     sptr<IRemoteBroker> callback)
 {
     if (deviceId.empty() || deviceId.size() > DEVID_LENGTH_MAX) {
@@ -60,7 +60,7 @@ bool DinputCheckParam::CheckParam(const std::string& deviceId, const uint32_t& i
     return true;
 }
 
-bool DinputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
+bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
     sptr<IRemoteBroker> callback)
 {
     if (srcId.empty() || srcId.size() > DEVID_LENGTH_MAX) {
@@ -84,7 +84,7 @@ bool DinputCheckParam::CheckParam(const std::string &srcId, const std::string &s
     return true;
 }
 
-bool DinputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId,
+bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId,
     sptr<IRemoteBroker> callback)
 {
     if (srcId.empty() || srcId.size() > DEVID_LENGTH_MAX) {
@@ -102,7 +102,7 @@ bool DinputCheckParam::CheckParam(const std::string &srcId, const std::string &s
     return true;
 }
 
-bool DinputCheckParam::CheckParam(const std::string &sinkId, const std::vector<std::string> &dhIds,
+bool DInputCheckParam::CheckParam(const std::string &sinkId, const std::vector<std::string> &dhIds,
     sptr<IRemoteBroker> callback)
 {
     if (sinkId.empty() || sinkId.size() > DEVID_LENGTH_MAX) {
@@ -126,7 +126,7 @@ bool DinputCheckParam::CheckParam(const std::string &sinkId, const std::vector<s
     return true;
 }
 
-bool DinputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId,
+bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId,
     const std::vector<std::string> &dhIds, sptr<IRemoteBroker> callback)
 {
     if (srcId.empty() || srcId.size() > DEVID_LENGTH_MAX) {
@@ -154,7 +154,7 @@ bool DinputCheckParam::CheckParam(const std::string &srcId, const std::string &s
     return true;
 }
 
-bool DinputCheckParam::CheckRegisterParam(const std::string &devId, const std::string &dhId,
+bool DInputCheckParam::CheckRegisterParam(const std::string &devId, const std::string &dhId,
     const std::string &parameters, const std::shared_ptr<RegisterCallback> &callback)
 {
     if (devId.empty() || devId.size() > DEVID_LENGTH_MAX) {
@@ -176,7 +176,7 @@ bool DinputCheckParam::CheckRegisterParam(const std::string &devId, const std::s
     return true;
 }
 
-bool DinputCheckParam::CheckUnregisterParam(const std::string &devId, const std::string &dhId,
+bool DInputCheckParam::CheckUnregisterParam(const std::string &devId, const std::string &dhId,
     const std::shared_ptr<UnregisterCallback> &callback)
 {
     if (devId.empty() || devId.size() > DEVID_LENGTH_MAX) {

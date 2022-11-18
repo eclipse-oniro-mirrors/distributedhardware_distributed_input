@@ -38,10 +38,8 @@ DistributedInputClient &DistributedInputClient::GetInstance()
 void DistributedInputClient::RegisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
 {
-    for (std::vector<DHardWareFwkRegistInfo>::iterator iter =
-        DistributedInputClient::GetInstance().dHardWareFwkRstInfos.begin();
-        iter != DistributedInputClient::GetInstance().dHardWareFwkRstInfos.end();
-        iter++) {
+    auto iter = DistributedInputClient::GetInstance().dHardWareFwkRstInfos.begin();
+    for (; iter != DistributedInputClient::GetInstance().dHardWareFwkRstInfos.end(); ++iter) {
         if (iter->devId == devId && iter->dhId == dhId) {
             iter->callback->OnRegisterResult(devId, dhId, status, "");
             DistributedInputClient::GetInstance().dHardWareFwkRstInfos.erase(iter);
@@ -52,12 +50,9 @@ void DistributedInputClient::RegisterDInputCb::OnResult(
 
 void DistributedInputClient::UnregisterDInputCb::OnResult(
     const std::string& devId, const std::string& dhId, const int32_t& status)
-
 {
-    for (std::vector<DHardWareFwkUnRegistInfo>::iterator iter =
-        DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.begin();
-        iter != DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.end();
-        iter++) {
+    auto iter = DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.begin();
+    for (; iter != DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.end(); ++iter) {
         if (iter->devId == devId && iter->dhId == dhId) {
             iter->callback->OnUnregisterResult(devId, dhId, status, "");
             DistributedInputClient::GetInstance().dHardWareFwkUnRstInfos.erase(iter);

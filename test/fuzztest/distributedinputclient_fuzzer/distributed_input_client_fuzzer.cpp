@@ -57,7 +57,7 @@ public:
 
 void RegisterDistributedHardwareFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
@@ -72,9 +72,9 @@ void RegisterDistributedHardwareFuzzTest(const uint8_t* data, size_t size)
     std::shared_ptr<TestRegisterInputCallback> registerCb = std::make_shared<TestRegisterInputCallback>();
     std::shared_ptr<TestUnregisterInputCallback> unregisterCb = std::make_shared<TestUnregisterInputCallback>();
 
-    int32_t ret = DistributedInput::DistributedInputSourceHandler::GetInstance().RegisterDistributedHardware(
+    DistributedInput::DistributedInputSourceHandler::GetInstance().RegisterDistributedHardware(
         rDevId, rDhId, enableParam, registerCb);
-    ret = DistributedInput::DistributedInputSourceHandler::GetInstance().UnregisterDistributedHardware(
+    DistributedInput::DistributedInputSourceHandler::GetInstance().UnregisterDistributedHardware(
         rDevId, rDhId, unregisterCb);
 }
 } // namespace DistributedHardware
