@@ -77,6 +77,34 @@ void DistributedInputInnerTest::TestStopDInputCallback::OnResult(
     return;
 }
 
+void DistributedInputInnerTest::TestInputNodeListener::OnNodeOnLine(const std::string srcDevId,
+    const std::string sinkDevId, const std::string sinkNodeId, const std::string sinkNodeDesc)
+{
+    (void)srcDevId;
+    (void)sinkDevId;
+    (void)sinkNodeId;
+    (void)sinkNodeDesc;
+    return;
+}
+
+void DistributedInputInnerTest::TestInputNodeListener::OnNodeOffLine(const std::string srcDevId,
+    const std::string sinkDevId, const std::string sinkNodeId)
+{
+    (void)srcDevId;
+    (void)sinkDevId;
+    (void)sinkNodeId;
+    return;
+}
+
+int32_t DistributedInputInnerTest::TestSimulationEventListenerStub::OnSimulationEvent(uint32_t type, uint32_t code,
+    int32_t value)
+{
+    (void)type;
+    (void)code;
+    (void)value;
+    return DH_SUCCESS;
+}
+
 int DistributedInputInnerTest::CheckSourceProxy() const
 {
     OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
@@ -408,6 +436,83 @@ HWTEST_F(DistributedInputInnerTest, IsTouchEventNeedFilterOut01, testing::ext::T
     event.absY = 20;
     ret = DistributedInputKit::IsTouchEventNeedFilterOut(event);
     EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput01, testing::ext::TestSize.Level0)
+{
+    uint32_t flag = 1;
+    DInputServerType retFlag = DistributedInputKit::IsStartDistributedInput(flag);
+    EXPECT_EQ(DInputServerType::NULL_SERVER_TYPE, retFlag);
+}
+
+HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput02, testing::ext::TestSize.Level0)
+{
+    std::string dhId = "IsStartDistributedInput02";
+    bool ret = DistributedInputKit::IsStartDistributedInput(dhId);
+    EXPECT_EQ(true, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, IsStartDistributedInput03, testing::ext::TestSize.Level0)
+{
+    std::string dhId = "";
+    bool ret = DistributedInputKit::IsStartDistributedInput(dhId);
+    EXPECT_EQ(true, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, RegisterInputNodeListener01, testing::ext::TestSize.Level0)
+{
+    sptr<TestInputNodeListener> listener = new TestInputNodeListener();
+    int32_t ret = DistributedInputKit::RegisterInputNodeListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, RegisterInputNodeListener02, testing::ext::TestSize.Level0)
+{
+    sptr<TestInputNodeListener> listener = nullptr;
+    int32_t ret = DistributedInputKit::RegisterInputNodeListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, UnregisterInputNodeListener01, testing::ext::TestSize.Level0)
+{
+    sptr<TestInputNodeListener> listener = new TestInputNodeListener();
+    int32_t ret = DistributedInputKit::UnregisterInputNodeListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, UnregisterInputNodeListener02, testing::ext::TestSize.Level0)
+{
+    sptr<TestInputNodeListener> listener = nullptr;
+    int32_t ret = DistributedInputKit::UnregisterInputNodeListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, RegisterSimulationEventListener01, testing::ext::TestSize.Level0)
+{
+    sptr<TestSimulationEventListenerStub> listener = new TestSimulationEventListenerStub();
+    int32_t ret = DistributedInputKit::RegisterSimulationEventListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, RegisterSimulationEventListener02, testing::ext::TestSize.Level0)
+{
+    sptr<TestSimulationEventListenerStub> listener = nullptr;
+    int32_t ret = DistributedInputKit::RegisterSimulationEventListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, UnregisterSimulationEventListener01, testing::ext::TestSize.Level0)
+{
+    sptr<TestSimulationEventListenerStub> listener = new TestSimulationEventListenerStub();
+    int32_t ret = DistributedInputKit::UnregisterSimulationEventListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputInnerTest, UnregisterSimulationEventListener02, testing::ext::TestSize.Level0)
+{
+    sptr<TestSimulationEventListenerStub> listener = nullptr;
+    int32_t ret = DistributedInputKit::UnregisterSimulationEventListener(listener);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

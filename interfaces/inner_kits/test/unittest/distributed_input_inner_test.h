@@ -28,11 +28,13 @@
 
 #include "constants_dinput.h"
 #include "distributed_input_kit.h"
+#include "input_node_listener_stub.h"
 #include "i_distributed_sink_input.h"
 #include "i_distributed_source_input.h"
 #include "prepare_d_input_call_back_stub.h"
 #include "start_d_input_call_back_stub.h"
 #include "stop_d_input_call_back_stub.h"
+#include "simulation_event_listener_stub.h"
 #include "unprepare_d_input_call_back_stub.h"
 
 namespace OHOS {
@@ -77,6 +79,26 @@ public:
         TestStopDInputCallback() = default;
         virtual ~TestStopDInputCallback() = default;
         void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status);
+    };
+
+    class TestInputNodeListener : public
+        OHOS::DistributedHardware::DistributedInput::InputNodeListenerStub {
+    public:
+        TestInputNodeListener() = default;
+        virtual ~TestInputNodeListener() = default;
+        void OnNodeOnLine(const std::string srcDevId, const std::string sinkDevId,
+            const std::string sinkNodeId, const std::string sinkNodeDesc);
+
+        void OnNodeOffLine(const std::string srcDevId, const std::string sinkDevId,
+            const std::string sinkNodeId);
+    };
+
+    class TestSimulationEventListenerStub : public
+        OHOS::DistributedHardware::DistributedInput::SimulationEventListenerStub {
+    public:
+        TestSimulationEventListenerStub() = default;
+        virtual ~TestSimulationEventListenerStub() = default;
+        int32_t OnSimulationEvent(uint32_t type, uint32_t code, int32_t value);
     };
 };
 } // namespace DistributedInput
