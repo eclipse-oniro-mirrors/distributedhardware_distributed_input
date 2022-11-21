@@ -185,7 +185,7 @@ public:
 
     class DInputSourceListener : public DInputSourceTransCallback {
     public:
-        DInputSourceListener(DistributedInputSourceManager *manager);
+        explicit DInputSourceListener(DistributedInputSourceManager *manager);
         virtual ~DInputSourceListener();
         void OnResponseRegisterDistributedHardware(const std::string deviceId, const std::string dhId,
             bool result) override;
