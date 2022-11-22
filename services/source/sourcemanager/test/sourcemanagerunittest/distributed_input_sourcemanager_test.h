@@ -142,6 +142,13 @@ public:
         int32_t OnSimulationEvent(uint32_t type, uint32_t code, int32_t value);
     };
 
+    class TestStartStopDInputsCb : public
+        OHOS::DistributedHardware::DistributedInput::StartStopDInputsCallbackStub {
+    public:
+        TestStartStopDInputsCb() = default;
+        virtual ~TestStartStopDInputsCb() = default;
+        void OnResultDhids(const std::string &devId, const int32_t &status);
+    };
 private:
     int32_t StructTransJson(const InputDevice& pBuf, std::string& strDescriptor) const;
     DistributedInputSourceManager* sourceManager_;

@@ -60,6 +60,12 @@ HWTEST_F(DistributedInputSinkManagerTest, Init, testing::ext::TestSize.Level0)
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
+HWTEST_F(DistributedInputSinkManagerTest, Release, testing::ext::TestSize.Level0)
+{
+    int32_t ret = sinkManager_->Release();
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
 HWTEST_F(DistributedInputSinkManagerTest, GetStartTransFlag, testing::ext::TestSize.Level0)
 {
     DInputServerType flag = DInputServerType::SINK_SERVER_TYPE;
@@ -117,6 +123,20 @@ HWTEST_F(DistributedInputSinkManagerTest, DeleteStopDhids01, testing::ext::TestS
     sinkManager_->sharingDhIdsMap_[sessionId] = sinkManager_->sharingDhIds_;
     sinkManager_->DeleteStopDhids(sessionId, stopDhIds, stopIndeedDhIds);
     EXPECT_EQ(0, sinkManager_->sharingDhIdsMap_.size());
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, GetSinkScreenInfosCbackSize01, testing::ext::TestSize.Level0)
+{
+    uint32_t ret = sinkManager_->GetSinkScreenInfosCbackSize();
+    EXPECT_EQ(0, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, Dump_01, testing::ext::TestSize.Level1)
+{
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sinkManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

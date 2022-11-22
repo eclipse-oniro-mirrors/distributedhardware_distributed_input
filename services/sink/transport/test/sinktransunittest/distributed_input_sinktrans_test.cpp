@@ -169,6 +169,82 @@ HWTEST_F(DistributedInputSinkTransTest, StartSwitch02, testing::ext::TestSize.Le
     int32_t ret = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId+10);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL, ret);
 }
+
+HWTEST_F(DistributedInputSinkTransTest, StartSwitch03, testing::ext::TestSize.Level1)
+{
+    DistributedInputSinkSwitch::GetInstance().InitSwitch();
+    int32_t sessionId = 1002;
+    int32_t ret = DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, GetAllSessionId, testing::ext::TestSize.Level1)
+{
+    DistributedInputSinkSwitch::GetInstance().InitSwitch();
+    int32_t sessionId = 1000;
+    DistributedInputSinkSwitch::GetInstance().AddSession(sessionId);
+    DistributedInputSinkSwitch::GetInstance().AddSession(sessionId + 1);
+    DistributedInputSinkSwitch::GetInstance().AddSession(sessionId + 2);
+    std::vector<int32_t> tmpVecSession = DistributedInputSinkSwitch::GetInstance().GetAllSessionId();
+    EXPECT_EQ(3, tmpVecSession.size());
+}
+
+HWTEST_F(DistributedInputSinkTransTest, GetSwitchOpenedSession01, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1010;
+    DistributedInputSinkSwitch::GetInstance().AddSession(sessionId);
+    DistributedInputSinkSwitch::GetInstance().AddSession(sessionId + 1);
+    DistributedInputSinkSwitch::GetInstance().AddSession(sessionId + 2);
+    int32_t ret = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, GetSwitchOpenedSession02, testing::ext::TestSize.Level1)
+{
+    int32_t ret = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, GetSwitchOpenedSession03, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1013;
+    DistributedInputSinkSwitch::GetInstance().AddSession(sessionId);
+    DistributedInputSinkSwitch::GetInstance().StartSwitch(sessionId);
+    int32_t ret = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
+    EXPECT_EQ(sessionId, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespLatency01, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 0;
+    std::string smsg = "";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespLatency(sessionId, smsg);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespLatency02, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg = "";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespLatency(sessionId, smsg);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, GetDeviceIdBySessionId, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg = "";
+    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(sessionId, smsg);
+    EXPECT_EQ("", smsg);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, SendMessage, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg = "qwerzsdgertgdfgbrtyhuert6345634tgadsgfq13451234rfaDSFQ34FQQWEFWQERQWEFQWEFASEFQWERQWERQWER123";
+    int32_t ret = DistributedInputSinkTransport::GetInstance().SendMessage(sessionId, smsg);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
