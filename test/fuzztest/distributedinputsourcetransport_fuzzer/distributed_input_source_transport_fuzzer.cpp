@@ -62,13 +62,13 @@ void OnSessionOpenedFuzzTest(const uint8_t* data, size_t size)
 
 void OnBytesReceivedFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
 
     int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
     const char *msg = reinterpret_cast<const char *>(data);
-    uint16_t dataLen = *(reinterpret_cast<const uint16_t*>(data));
+    uint32_t dataLen = static_cast<const uint32_t>(size);
     DistributedInput::DistributedInputSourceTransport::GetInstance().OnBytesReceived(sessionId, msg, dataLen);
 }
 } // namespace DistributedHardware
