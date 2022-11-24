@@ -31,6 +31,7 @@
 #include "input_node_listener_stub.h"
 #include "i_distributed_sink_input.h"
 #include "i_distributed_source_input.h"
+#include "start_stop_d_inputs_call_back_stub.h"
 #include "prepare_d_input_call_back_stub.h"
 #include "start_d_input_call_back_stub.h"
 #include "stop_d_input_call_back_stub.h"
@@ -79,6 +80,14 @@ public:
         TestStopDInputCallback() = default;
         virtual ~TestStopDInputCallback() = default;
         void OnResult(const std::string& deviceId, const uint32_t& inputTypes, const int32_t& status);
+    };
+
+    class TestStartStopDInputCallback : public
+        OHOS::DistributedHardware::DistributedInput::StartStopDInputsCallbackStub {
+    public:
+        TestStartStopDInputCallback() = default;
+        virtual ~TestStartStopDInputCallback() = default;
+        void OnResultDhids(const std::string &devId, const int32_t &status);
     };
 
     class TestInputNodeListener : public

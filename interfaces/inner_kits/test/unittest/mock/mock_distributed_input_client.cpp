@@ -117,8 +117,20 @@ int32_t DistributedInputClient::PrepareRemoteInput(
     return DH_SUCCESS;
 }
 
+int32_t DistributedInputClient::PrepareRemoteInput(
+    const std::string &srcId, const std::string &sinkId, sptr<IPrepareDInputCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
 int32_t DistributedInputClient::UnprepareRemoteInput(
     const std::string& deviceId, sptr<IUnprepareDInputCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputClient::UnprepareRemoteInput(
+    const std::string &srcId, const std::string &sinkId, sptr<IUnprepareDInputCallback> callback)
 {
     return DH_SUCCESS;
 }
@@ -129,8 +141,20 @@ int32_t DistributedInputClient::StartRemoteInput(
     return DH_SUCCESS;
 }
 
+int32_t DistributedInputClient::StartRemoteInput(
+    const std::string &sinkId, const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
 int32_t DistributedInputClient::StopRemoteInput(
     const std::string& deviceId, const uint32_t& inputTypes, sptr<IStopDInputCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputClient::StopRemoteInput(
+    const std::string &sinkId, const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
 {
     return DH_SUCCESS;
 }
@@ -143,6 +167,18 @@ int32_t DistributedInputClient::StartRemoteInput(const std::string &srcId, const
 
 int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
     const uint32_t &inputTypes, sptr<IStopDInputCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputClient::StartRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
+{
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const std::string &sinkId,
+    const std::vector<std::string> &dhIds, sptr<IStartStopDInputsCallback> callback)
 {
     return DH_SUCCESS;
 }

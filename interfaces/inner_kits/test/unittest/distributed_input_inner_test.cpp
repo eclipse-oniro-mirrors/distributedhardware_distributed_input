@@ -77,6 +77,14 @@ void DistributedInputInnerTest::TestStopDInputCallback::OnResult(
     return;
 }
 
+void DistributedInputInnerTest::TestStartStopDInputCallback::OnResultDhids(
+    const std::string &devId, const int32_t &status)
+{
+    (void)devId;
+    (void)status;
+    return;
+}
+
 void DistributedInputInnerTest::TestInputNodeListener::OnNodeOnLine(const std::string srcDevId,
     const std::string sinkDevId, const std::string sinkNodeId, const std::string sinkNodeDesc)
 {
@@ -96,8 +104,8 @@ void DistributedInputInnerTest::TestInputNodeListener::OnNodeOffLine(const std::
     return;
 }
 
-int32_t DistributedInputInnerTest::TestSimulationEventListenerStub::OnSimulationEvent(uint32_t type, uint32_t code,
-    int32_t value)
+int32_t DistributedInputInnerTest::TestSimulationEventListenerStub::OnSimulationEvent(
+    uint32_t type, uint32_t code, int32_t value)
 {
     (void)type;
     (void)code;
@@ -164,24 +172,26 @@ HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput01, testing::ext::TestSize
 HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput02, testing::ext::TestSize.Level0)
 {
     string deviceId = "";
-    sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
+    sptr<TestPrepareDInputCallback> callback = nullptr;
     int32_t ret = DistributedInputKit::PrepareRemoteInput(deviceId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput03, testing::ext::TestSize.Level0)
 {
-    string deviceId = "PrepareRemoteInput01";
-    sptr<TestPrepareDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::PrepareRemoteInput(deviceId, callback);
+    std::string srcId = "PrepareRemoteInput_test";
+    std::string sinkId = "PrepareRemoteInput_test";
+    sptr<IPrepareDInputCallback> callback = new TestPrepareDInputCallback();
+    int32_t ret = DistributedInputKit::PrepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, PrepareRemoteInput04, testing::ext::TestSize.Level0)
 {
-    string deviceId = "";
+    std::string srcId = "";
+    std::string sinkId = "";
     sptr<TestPrepareDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::PrepareRemoteInput(deviceId, callback);
+    int32_t ret = DistributedInputKit::PrepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -196,24 +206,26 @@ HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput01, testing::ext::TestSi
 HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput02, testing::ext::TestSize.Level0)
 {
     string deviceId = "";
-    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    sptr<TestUnprepareDInputCallback> callback = nullptr;
     int32_t ret = DistributedInputKit::UnprepareRemoteInput(deviceId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput03, testing::ext::TestSize.Level0)
 {
-    string deviceId = "UnprepareRemoteInput01";
-    sptr<TestUnprepareDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::UnprepareRemoteInput(deviceId, callback);
+    std::string srcId = "PrepareRemoteInput_src";
+    std::string sinkId = "PrepareRemoteInput_sink";
+    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    int32_t ret = DistributedInputKit::UnprepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, UnprepareRemoteInput04, testing::ext::TestSize.Level0)
 {
-    string deviceId = "";
+    std::string srcId = "";
+    std::string sinkId = "";
     sptr<TestUnprepareDInputCallback> callback = nullptr;
-    int32_t ret = DistributedInputKit::UnprepareRemoteInput(deviceId, callback);
+    int32_t ret = DistributedInputKit::UnprepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -229,7 +241,7 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput01, testing::ext::TestSize.L
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput02, testing::ext::TestSize.Level0)
 {
     string deviceId = "";
-    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    sptr<TestStartDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(DH_SUCCESS, ret);
@@ -237,19 +249,19 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput02, testing::ext::TestSize.L
 
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput03, testing::ext::TestSize.Level0)
 {
-    string deviceId = "StartRemoteInput01";
-    sptr<TestStartDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    std::string sinkId = "StartRemoteInput_sink";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<TestStartStopDInputCallback> callback = new TestStartStopDInputCallback();
+    int32_t ret = DistributedInputKit::StartRemoteInput(sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput04, testing::ext::TestSize.Level0)
 {
-    string deviceId = "";
-    sptr<TestStartDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StartRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    std::string sinkId = "";
+    std::vector<std::string> dhIds;
+    sptr<TestStartStopDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputKit::StartRemoteInput(sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -267,7 +279,7 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput06, testing::ext::TestSize.L
 {
     string srcId = "";
     string sinkId = "";
-    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    sptr<TestStartDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StartRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(DH_SUCCESS, ret);
@@ -275,11 +287,11 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput06, testing::ext::TestSize.L
 
 HWTEST_F(DistributedInputInnerTest, StartRemoteInput07, testing::ext::TestSize.Level0)
 {
-    string srcId = "StartRemoteInput03-src";
-    string sinkId = "StartRemoteInput03-sink";
-    sptr<TestStartDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StartRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    string srcId = "StartRemoteInput01-src";
+    string sinkId = "StartRemoteInput01-sink";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<TestStartStopDInputCallback> callback = new TestStartStopDInputCallback();
+    int32_t ret = DistributedInputKit::StartRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -287,9 +299,9 @@ HWTEST_F(DistributedInputInnerTest, StartRemoteInput08, testing::ext::TestSize.L
 {
     string srcId = "";
     string sinkId = "";
-    sptr<TestStartDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StartRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    std::vector<std::string> dhIds;
+    sptr<TestStartStopDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputKit::StartRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -305,7 +317,7 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput01, testing::ext::TestSize.Le
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput02, testing::ext::TestSize.Level0)
 {
     string deviceId = "";
-    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    sptr<TestStopDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(DH_SUCCESS, ret);
@@ -313,19 +325,19 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput02, testing::ext::TestSize.Le
 
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput03, testing::ext::TestSize.Level0)
 {
-    string deviceId = "StopRemoteInput01";
-    sptr<TestStopDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    std::string sinkId = "StartRemoteInput_test";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<TestStartStopDInputCallback> callback = new TestStartStopDInputCallback();
+    int32_t ret = DistributedInputKit::StopRemoteInput(sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput04, testing::ext::TestSize.Level0)
 {
-    string deviceId = "";
-    sptr<TestStopDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StopRemoteInput(deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    std::string sinkId = "";
+    std::vector<std::string> dhIds;
+    sptr<TestStartStopDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputKit::StopRemoteInput(sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -343,7 +355,7 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput06, testing::ext::TestSize.Le
 {
     string srcId = "";
     string sinkId = "";
-    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    sptr<TestStopDInputCallback> callback = nullptr;
     int32_t ret =
         DistributedInputKit::StopRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
     EXPECT_EQ(DH_SUCCESS, ret);
@@ -351,11 +363,11 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput06, testing::ext::TestSize.Le
 
 HWTEST_F(DistributedInputInnerTest, StopRemoteInput07, testing::ext::TestSize.Level0)
 {
-    string srcId = "StopRemoteInput03-src";
-    string sinkId = "StopRemoteInput03-sink";
-    sptr<TestStopDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StopRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    string srcId = "StartRemoteInput01-src";
+    string sinkId = "StartRemoteInput01-sink";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<TestStartStopDInputCallback> callback = new TestStartStopDInputCallback();
+    int32_t ret = DistributedInputKit::StopRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -363,9 +375,9 @@ HWTEST_F(DistributedInputInnerTest, StopRemoteInput08, testing::ext::TestSize.Le
 {
     string srcId = "";
     string sinkId = "";
-    sptr<TestStopDInputCallback> callback = nullptr;
-    int32_t ret =
-        DistributedInputKit::StopRemoteInput(srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    std::vector<std::string> dhIds;
+    sptr<TestStartStopDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputKit::StopRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 

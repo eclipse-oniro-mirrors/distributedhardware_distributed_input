@@ -1,0 +1,77 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
+module_out_path = "distributed_input/dfx_utils"
+
+group("dfxtest") {
+  testonly = true
+
+  deps = [ ":distributed_input_dfx_test" ]
+}
+
+## IpcTest distributed_input_dfx_test {{{
+ohos_unittest("distributed_input_dfx_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "include",
+    "${common_path}/include",
+    "//commonlibrary/c_utils/base/include",
+    "//utils/system/safwk/native/include",
+    "${fwk_common_path}/log/include",
+    "${fwk_common_path}/utils/include",
+    "${fwk_utils_path}/include/log",
+    "${fwk_utils_path}/include",
+    "${frameworks_path}/include",
+    "${dfx_utils_path}/include",
+    "${service_common}/include",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+  ]
+
+  sources = [
+    "${dfx_utils_path}/src/hidumper.cpp",
+    "distributed_input_dfx_test.cpp",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  defines = [
+    "HI_LOG_ENABLE",
+    "DH_LOG_TAG=\"distributedinpututtest\"",
+    "LOG_DOMAIN=0xD004100",
+  ]
+
+  deps = [
+    "${fwk_utils_path}:distributedhardwareutils",
+    "//third_party/openssl:libcrypto_static",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hisysevent_native:libhisysevent",
+  ]
+
+  cflags_cc = [ "-DHILOG_ENABLE" ]
+}
+## UnitTest distributed_input_dfx_test }}}

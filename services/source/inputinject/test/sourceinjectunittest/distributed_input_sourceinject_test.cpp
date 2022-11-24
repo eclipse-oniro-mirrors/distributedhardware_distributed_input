@@ -131,6 +131,14 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedHardware03, testin
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
+HWTEST_F(DistributedInputSourceInjectTest, UnregisterDistributedHardware_001, testing::ext::TestSize.Level1)
+{
+    std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string dhId = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    int32_t ret = DistributedInputInject::GetInstance().UnregisterDistributedHardware(devId, dhId);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
 HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent01, testing::ext::TestSize.Level1)
 {
     struct RawEvent writeBuffer[4];
@@ -261,6 +269,68 @@ HWTEST_F(DistributedInputSourceInjectTest, UnRegisterInputNodeListener, testing:
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
+HWTEST_F(DistributedInputSourceInjectTest, GetDhIdsByInputType_001, testing::ext::TestSize.Level1)
+{
+    std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    std::string dhId = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    dhIds.push_back(dhId);
+    int32_t ret = DistributedInputInject::GetInstance().GetDhIdsByInputType(devId,
+        static_cast<uint32_t>(DInputDeviceType::ALL), dhIds);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, InputDeviceEventInject_001, testing::ext::TestSize.Level1)
+{
+    std::shared_ptr<RawEvent> rawEvent = std::make_shared<RawEvent>();
+    DistributedInputInject::GetInstance().InputDeviceEventInject(rawEvent);
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, SyncNodeOnlineInfo_001, testing::ext::TestSize.Level1)
+{
+    std::string srcDevId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkDevId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string sinkNodeId = "usb-hiusb-ehci-2.1/input1";
+    std::string sinkNodeDesc = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    DistributedInputInject::GetInstance().SyncNodeOnlineInfo(srcDevId, sinkDevId, sinkNodeId, sinkNodeDesc);
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, StartInjectThread_001, testing::ext::TestSize.Level1)
+{
+    DistributedInputInject::GetInstance().StartInjectThread();
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, StopInjectThread_001, testing::ext::TestSize.Level1)
+{
+    DistributedInputInject::GetInstance().StopInjectThread();
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, GenerateVirtualTouchScreenDHId_001, testing::ext::TestSize.Level1)
+{
+    std::string ret = DistributedInputInject::GetInstance().GenerateVirtualTouchScreenDHId(1, 1860, 980);
+    EXPECT_NE(0, ret.size());
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, CreateVirtualTouchScreenNode_001, testing::ext::TestSize.Level1)
+{
+    std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string dhId = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    int32_t ret = DistributedInputInject::GetInstance().CreateVirtualTouchScreenNode(devId, dhId, 1, 1860, 980);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, RemoveVirtualTouchScreenNode_001, testing::ext::TestSize.Level1)
+{
+    std::string dhId = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    int32_t ret = DistributedInputInject::GetInstance().RemoveVirtualTouchScreenNode(dhId);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceInjectTest, GetVirtualTouchScreenFd_001, testing::ext::TestSize.Level1)
+{
+    int32_t ret = DistributedInputInject::GetInstance().GetVirtualTouchScreenFd();
+    EXPECT_NE(-1, ret);
+}
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
