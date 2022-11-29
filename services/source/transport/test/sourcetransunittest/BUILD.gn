@@ -48,14 +48,14 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${distributedinput_path}/inputdevicehandler/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/notification/eventhandler/interfaces/inner_api",
-    "${common_path}/mock",
+    "${common_path}/test/mock",
   ]
 
   sources = [
     "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
     "distributed_input_sourcetrans_test.cpp",
-    "${common_path}/mock/session_mock.cpp",
-    "${common_path}/mock/softbus_bus_center_mock.cpp",
+    "${common_path}/test/mock/session_mock.cpp",
+    "${common_path}/test/mock/softbus_bus_center_mock.cpp",
   ]
 
   cflags = [

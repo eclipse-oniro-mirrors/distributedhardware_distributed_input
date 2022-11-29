@@ -57,7 +57,7 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//drivers/peripheral/display/interfaces/include",
     "//drivers/peripheral/base",
     "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-    "${common_path}/mock",
+    "${common_path}/test/mock",
   ]
 
   sources = [
@@ -70,8 +70,8 @@ ohos_unittest("distributed_input_sinkmanager_test") {
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
     "distributed_input_sinkmanager_test.cpp",
-    "${common_path}/mock/session_mock.cpp",
-    "${common_path}/mock/softbus_bus_center_mock.cpp",
+    "${common_path}/test/mock/session_mock.cpp",
+    "${common_path}/test/mock/softbus_bus_center_mock.cpp",
   ]
 
   cflags = [

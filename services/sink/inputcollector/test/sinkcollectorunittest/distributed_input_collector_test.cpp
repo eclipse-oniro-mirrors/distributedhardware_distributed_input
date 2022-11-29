@@ -81,25 +81,13 @@ HWTEST_F(DistributedInputCollectorTest, IsAllDevicesStoped02, testing::ext::Test
     EXPECT_EQ(false, isStop);
 }
 
-HWTEST_F(DistributedInputCollectorTest, GetDeviceInfoByType, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputCollectorTest, GetDeviceInfoByType01, testing::ext::TestSize.Level1)
 {
     DistributedInputCollector::GetInstance().inputHub_ = nullptr;
     uint32_t inputTypes = 1;
     std::map<int32_t, std::string> deviceInfo;
     DistributedInputCollector::GetInstance().GetDeviceInfoByType(inputTypes, deviceInfo);
     EXPECT_EQ(0, deviceInfo.size());
-}
-
-HWTEST_F(DistributedInputCollectorTest, DistributedInputCollectorTest_001, testing::ext::TestSize.Level1)
-{
-    DistributedInputCollector::GetInstance().StartCollectEventsThread();
-    std::vector<std::string> sharingDhIds = {"1ds56v18e1v21v8v1erv15r1v8r1j1ty8"};
-    std::vector<std::string> noSharingDhIds = {"1ds56v18e1v21v8v1erv15r1v8r1j1ty8"};
-    AffectDhIds dhIds {sharingDhIds, noSharingDhIds};
-    std::string mouseNodePath = "mouseNodePath_test";
-    std::string dhid = "dhid_test";
-    DistributedInputCollector::GetInstance().ReportDhIdSharingState(dhIds);
-    DistributedInputCollector::GetInstance().GetMouseNodePath(sharingDhIds, mouseNodePath, dhid);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

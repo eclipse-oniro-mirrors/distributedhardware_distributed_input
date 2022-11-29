@@ -280,31 +280,6 @@ HWTEST_F(DistributedInputSourceInjectTest, GetDhIdsByInputType_001, testing::ext
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSourceInjectTest, InputDeviceEventInject_001, testing::ext::TestSize.Level1)
-{
-    std::shared_ptr<RawEvent> rawEvent = std::make_shared<RawEvent>();
-    DistributedInputInject::GetInstance().InputDeviceEventInject(rawEvent);
-}
-
-HWTEST_F(DistributedInputSourceInjectTest, SyncNodeOnlineInfo_001, testing::ext::TestSize.Level1)
-{
-    std::string srcDevId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
-    std::string sinkDevId = "umkyu1b165e1be98151891erbe8r91ev";
-    std::string sinkNodeId = "usb-hiusb-ehci-2.1/input1";
-    std::string sinkNodeDesc = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
-    DistributedInputInject::GetInstance().SyncNodeOnlineInfo(srcDevId, sinkDevId, sinkNodeId, sinkNodeDesc);
-}
-
-HWTEST_F(DistributedInputSourceInjectTest, StartInjectThread_001, testing::ext::TestSize.Level1)
-{
-    DistributedInputInject::GetInstance().StartInjectThread();
-}
-
-HWTEST_F(DistributedInputSourceInjectTest, StopInjectThread_001, testing::ext::TestSize.Level1)
-{
-    DistributedInputInject::GetInstance().StopInjectThread();
-}
-
 HWTEST_F(DistributedInputSourceInjectTest, GenerateVirtualTouchScreenDHId_001, testing::ext::TestSize.Level1)
 {
     std::string ret = DistributedInputInject::GetInstance().GenerateVirtualTouchScreenDHId(1, 1860, 980);
