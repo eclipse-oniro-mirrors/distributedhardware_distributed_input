@@ -26,6 +26,8 @@
 
 #include "constants_dinput.h"
 #include "distributed_input_sink_manager.h"
+#include "get_sink_screen_infos_call_back_stub.h"
+#include "sharing_dhid_listener_stub.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -37,6 +39,22 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 
+    class TestGetSinkScreenInfosCb : public
+        OHOS::DistributedHardware::DistributedInput::GetSinkScreenInfosCallbackStub {
+    public:
+        TestGetSinkScreenInfosCb() = default;
+        virtual ~TestGetSinkScreenInfosCb() = default;
+        void OnResult(const std::string& strJson) override;
+    };
+
+    class TestSharingDhIdListenerStub : public
+        OHOS::DistributedHardware::DistributedInput::SharingDhIdListenerStub {
+    public:
+        TestSharingDhIdListenerStub() = default;
+        virtual ~TestSharingDhIdListenerStub() = default;
+        int32_t OnSharing(std::string dhId) override;
+        int32_t OnNoSharing(std::string dhId) override;
+    };
 private:
     DistributedInputSinkManager* sinkManager_;
 };

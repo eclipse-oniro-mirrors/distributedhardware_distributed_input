@@ -53,6 +53,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//base/notification/eventhandler/interfaces/inner_api",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+    "${common_path}/test/mock",
   ]
 
   sources = [
@@ -66,6 +67,7 @@ ohos_unittest("distributed_input_inner_sourceinject_test") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchpad.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject/src/virtual_touchscreen.cpp",
     "distributed_input_sourceinject_test.cpp",
+    "${common_path}/test/mock/softbus_bus_center_mock.cpp",
   ]
 
   cflags = [

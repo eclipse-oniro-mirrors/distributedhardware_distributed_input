@@ -35,6 +35,20 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+private:
+    nlohmann::json jsonStr1_;
+    nlohmann::json jsonStr2_;
+    nlohmann::json jsonStr3_;
+    nlohmann::json jsonStr4_;
+    nlohmann::json jsonStr5_;
+    nlohmann::json jsonStr6_;
+    nlohmann::json jsonStr7_;
+    nlohmann::json jsonStr8_;
+    nlohmann::json jsonStr9_;
+    nlohmann::json jsonStr10_;
+    nlohmann::json jsonStr11_;
+    nlohmann::json jsonStr12_;
+    nlohmann::json jsonStr13_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

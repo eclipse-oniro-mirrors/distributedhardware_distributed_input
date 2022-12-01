@@ -25,6 +25,7 @@
 
 #include "constants_dinput.h"
 #include "distributed_input_inject.h"
+#include "distributed_input_node_manager.h"
 #include "input_node_listener_stub.h"
 
 namespace OHOS {

@@ -410,7 +410,6 @@ int32_t DistributedInputSourceTransport::UnprepareRemoteInput(const std::string&
     return DH_SUCCESS;
 }
 
-
 int32_t DistributedInputSourceTransport::PrepareRemoteInput(int32_t srcTsrcSeId, const std::string &deviceId)
 {
     int32_t sinkSessionId = FindSessionIdByDevId(false, deviceId);

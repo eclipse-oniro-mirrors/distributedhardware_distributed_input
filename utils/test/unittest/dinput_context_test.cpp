@@ -17,6 +17,8 @@
 
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_utils_tool.h"
+#include "dinput_softbus_define.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -176,6 +178,67 @@ HWTEST_F(DInputContextTest, CalculateTransformInfo003, testing::ext::TestSize.Le
     int32_t ret = DInputContext::GetInstance().CalculateTransformInfo(sinkScreenInfo);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
+
+HWTEST_F(DInputContextTest, GetLocalDeviceInfo_001, testing::ext::TestSize.Level1)
+{
+    DevInfo devInfo = GetLocalDeviceInfo();
+    EXPECT_NE(0, devInfo.networkId.size());
+}
+
+HWTEST_F(DInputContextTest, GetLocalNetworkId_001, testing::ext::TestSize.Level1)
+{
+    std::string ret = GetLocalNetworkId();
+    EXPECT_NE(0, ret.size());
+}
+
+HWTEST_F(DInputContextTest, GetUUIDBySoftBus_001, testing::ext::TestSize.Level1)
+{
+    std::string networkId = "";
+    std::string ret = GetUUIDBySoftBus(networkId);
+    EXPECT_EQ(0, ret.size());
+
+    networkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    ret = GetUUIDBySoftBus(networkId);
+    EXPECT_EQ(0, ret.size());
+}
+
+HWTEST_F(DInputContextTest, GetCurrentTime_001, testing::ext::TestSize.Level1)
+{
+    uint64_t ret = GetCurrentTime();
+    EXPECT_NE(0, ret);
+}
+
+HWTEST_F(DInputContextTest, SetAnonyId_001, testing::ext::TestSize.Level1)
+{
+    std::string message = "";
+    std::string ret = SetAnonyId(message);
+    EXPECT_EQ(0, ret.size());
+}
+
+HWTEST_F(DInputContextTest, SetAnonyId_002, testing::ext::TestSize.Level1)
+{
+    nlohmann::json jsonObj;
+    std::string deviceId = "deviceId_test";
+    std::string inputData = "inputData_data";
+    std::string vecDhId = "dhId_123.dhId_456.dhId_789";
+    std::string srcDevId = "srcDevId_test";
+    std::string sinkDevId = "sinkDevId_test";
+    jsonObj[DINPUT_SOFTBUS_KEY_DEVICE_ID] = deviceId;
+    jsonObj[DINPUT_SOFTBUS_KEY_INPUT_DATA] = inputData;
+    jsonObj[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = vecDhId;
+    jsonObj[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = srcDevId;
+    jsonObj[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = sinkDevId;
+    std::string ret = SetAnonyId(jsonObj.dump());
+    EXPECT_NE(0, ret.size());
+}
+
+HWTEST_F(DInputContextTest, GetNodeDesc_001, testing::ext::TestSize.Level1)
+{
+    std::string parameters = "";
+    std::string ret = GetNodeDesc(parameters);
+    EXPECT_EQ(0, ret.size());
+}
+
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "dinput_errcode.h"
 #include "distributed_input_sinktrans_test.h"
+
+#include "nlohmann/json.hpp"
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -22,8 +24,72 @@ using namespace std;
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
+namespace {
+    const int32_t SESSIONID = 1;
+    const int32_t SRCTSRCSEID = 1;
+    const std::string DEVID = "umkyu1b165e1be98151891erbe8r91ev";
+    const std::string DHID = "Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    const std::string SINKID = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    const uint32_t INPUTTYPE = static_cast<uint32_t>(DInputDeviceType::ALL);
+}
+
 void DistributedInputSinkTransTest::SetUp()
 {
+    jsonStr1_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE;
+    jsonStr1_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr1_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
+
+    jsonStr2_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_UNPREPARE;
+    jsonStr2_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr2_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
+
+    jsonStr3_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE_FOR_REL;
+    jsonStr3_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr3_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SRCTSRCSEID;
+
+    jsonStr4_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_UNPREPARE_FOR_REL;
+    jsonStr4_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr4_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SRCTSRCSEID;
+
+    jsonStr5_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_DHID_FOR_REL;
+    jsonStr5_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr5_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SRCTSRCSEID;
+    jsonStr5_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = DHID;
+
+    jsonStr6_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_DHID_FOR_REL;
+    jsonStr6_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr6_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SRCTSRCSEID;
+    jsonStr6_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = DHID;
+
+    jsonStr7_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_TYPE_FOR_REL;
+    jsonStr7_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr7_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SRCTSRCSEID;
+    jsonStr7_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = INPUTTYPE;
+
+    jsonStr8_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL;
+    jsonStr8_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr8_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SRCTSRCSEID;
+    jsonStr8_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = INPUTTYPE;
+
+    jsonStr9_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_PREPARE;
+    jsonStr9_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = SINKID;
+
+    jsonStr10_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE;
+    jsonStr10_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = SINKID;
+
+    jsonStr11_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_TYPE;
+    jsonStr11_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr11_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
+    jsonStr11_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = INPUTTYPE;
+
+    jsonStr12_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_TYPE;
+    jsonStr12_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr12_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
+    jsonStr12_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = INPUTTYPE;
+
+    jsonStr13_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_LATENCY;
+    jsonStr13_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
+    jsonStr13_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
 }
 
 void DistributedInputSinkTransTest::TearDown()
@@ -44,11 +110,20 @@ HWTEST_F(DistributedInputSinkTransTest, Init, testing::ext::TestSize.Level0)
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId, testing::ext::TestSize.Level0)
+HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId_001, testing::ext::TestSize.Level0)
 {
     std::string srcId = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().GetSessionIdByNetId(srcId);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_GET_SESSIONID_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId_002, testing::ext::TestSize.Level0)
+{
+    std::string srcId = "umkyu1b165e1be98151891erbe8r91ev";
+    DistributedInputSinkTransport::GetInstance().sessionDevMap_[srcId] = 1;
+    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(1, srcId);
+    int32_t ret = DistributedInputSinkTransport::GetInstance().GetSessionIdByNetId(srcId);
+    EXPECT_EQ(1, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput01, testing::ext::TestSize.Level1)
@@ -69,6 +144,8 @@ HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput02, testing::ext::
 
 HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr1_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr3_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
@@ -93,6 +170,8 @@ HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput02, testing::ext
 
 HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr2_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr4_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
@@ -117,6 +196,9 @@ HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput02, testing::ext::Te
 
 HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr5_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr7_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr11_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsg);
@@ -141,6 +223,9 @@ HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput02, testing::ext::Tes
 
 HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr6_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr8_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr12_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
@@ -178,6 +263,34 @@ HWTEST_F(DistributedInputSinkTransTest, StartSwitch03, testing::ext::TestSize.Le
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_START_SWITCH_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSinkTransTest, StopSwitch01, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1000;
+    SwitchStateData switchStateData {sessionId, true};
+    DistributedInputSinkSwitch::GetInstance().switchVector_.push_back(switchStateData);
+    DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
+    EXPECT_EQ(false, DistributedInputSinkSwitch::GetInstance().switchVector_[0].switchState);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, StopAllSwitch01, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1000;
+    SwitchStateData switchStateData {sessionId, true};
+    DistributedInputSinkSwitch::GetInstance().switchVector_.push_back(switchStateData);
+    DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
+    EXPECT_EQ(false, DistributedInputSinkSwitch::GetInstance().switchVector_[0].switchState);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RemoveSession01, testing::ext::TestSize.Level1)
+{
+    DistributedInputSinkSwitch::GetInstance().switchVector_.clear();
+    int32_t sessionId = 1000;
+    SwitchStateData switchStateData {sessionId, true};
+    DistributedInputSinkSwitch::GetInstance().switchVector_.push_back(switchStateData);
+    DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
+    EXPECT_EQ(0, DistributedInputSinkSwitch::GetInstance().switchVector_.size());
+}
+
 HWTEST_F(DistributedInputSinkTransTest, GetAllSessionId, testing::ext::TestSize.Level1)
 {
     DistributedInputSinkSwitch::GetInstance().InitSwitch();
@@ -201,6 +314,7 @@ HWTEST_F(DistributedInputSinkTransTest, GetSwitchOpenedSession01, testing::ext::
 
 HWTEST_F(DistributedInputSinkTransTest, GetSwitchOpenedSession02, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkSwitch::GetInstance().switchVector_.clear();
     int32_t ret = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_GET_OPEN_SESSION_FAIL, ret);
 }
@@ -224,26 +338,49 @@ HWTEST_F(DistributedInputSinkTransTest, RespLatency01, testing::ext::TestSize.Le
 
 HWTEST_F(DistributedInputSinkTransTest, RespLatency02, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr13_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
+    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(sessionId, smsg);
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespLatency(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSinkTransTest, GetDeviceIdBySessionId, testing::ext::TestSize.Level1)
-{
-    int32_t sessionId = 1;
-    std::string smsg = "";
-    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(sessionId, smsg);
-    EXPECT_EQ("", smsg);
-}
-
-HWTEST_F(DistributedInputSinkTransTest, SendMessage, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputSinkTransTest, SendMessage_001, testing::ext::TestSize.Level1)
 {
     int32_t sessionId = 1;
     std::string smsg = "qwerzsdgertgdfgbrtyhuert6345634tgadsgfq13451234rfaDSFQ34FQQWEFWQERQWEFQWEFASEFQWERQWERQWER123";
     int32_t ret = DistributedInputSinkTransport::GetInstance().SendMessage(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, OnSessionOpened_001, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    int32_t result = 1;
+    int32_t ret = DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, OnSessionOpened_002, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    int32_t result = 0;
+    int32_t ret = DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, OnSessionClosed_001, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string networkId = "umkyu1b165e1be98151891erbe8r91ev";
+    char *data = nullptr;
+    uint32_t dataLen = 100;
+    DistributedInputSinkTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSinkTransport::GetInstance().OnBytesReceived(sessionId, data, dataLen);
+    DistributedInputSinkTransport::GetInstance().sessionDevMap_[networkId] = sessionId;
+    DistributedInputSinkTransport::GetInstance().OnSessionClosed(sessionId);
+    EXPECT_EQ(0, DistributedInputSinkTransport::GetInstance().sessionDevMap_.size());
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

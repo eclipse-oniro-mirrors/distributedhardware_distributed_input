@@ -25,9 +25,9 @@ const uint32_t AUTH_SESSION_SIDE_CLIENT = 1;
 constexpr int32_t DH_ERROR = -1;
 constexpr int32_t MOCK_SESSION_ID = 1;
 static ISessionListener g_listener;
-static char g_peerDeviceId[CHAR_ARRAY_SIZE];
-static char g_peerSessionName[CHAR_ARRAY_SIZE];
-static char g_mySessionName[CHAR_ARRAY_SIZE];
+static char g_peerDeviceId[CHAR_ARRAY_SIZE + 1];
+static char g_peerSessionName[CHAR_ARRAY_SIZE + 1];
+static char g_mySessionName[CHAR_ARRAY_SIZE + 1];
 int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
     std::cout << "CreateSessionServer start sessionName:" << sessionName << std::endl;

@@ -70,6 +70,13 @@ HWTEST_F(DistributedInputCollectorTest, Init02, testing::ext::TestSize.Level1)
 
 HWTEST_F(DistributedInputCollectorTest, IsAllDevicesStoped01, testing::ext::TestSize.Level1)
 {
+    uint32_t inputTypes = 1;
+    std::map<int32_t, std::string> deviceInfo;
+    std::vector<std::string> dhIds;
+    std::string mouseNodePath = "mouseNodePath_test";
+    std::string dhid = "dhid_test";
+    DistributedInputCollector::GetInstance().GetDeviceInfoByType(inputTypes, deviceInfo);
+    DistributedInputCollector::GetInstance().GetMouseNodePath(dhIds, mouseNodePath, dhid);
     bool isStop = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
     EXPECT_EQ(true, isStop);
 }
@@ -77,17 +84,24 @@ HWTEST_F(DistributedInputCollectorTest, IsAllDevicesStoped01, testing::ext::Test
 HWTEST_F(DistributedInputCollectorTest, IsAllDevicesStoped02, testing::ext::TestSize.Level1)
 {
     DistributedInputCollector::GetInstance().inputHub_ = nullptr;
+    uint32_t inputTypes = 1;
+    std::map<int32_t, std::string> deviceInfo;
+    std::vector<std::string> dhIds;
+    std::string mouseNodePath = "mouseNodePath_test";
+    std::string dhid = "dhid_test";
+    DistributedInputCollector::GetInstance().GetDeviceInfoByType(inputTypes, deviceInfo);
+    DistributedInputCollector::GetInstance().GetMouseNodePath(dhIds, mouseNodePath, dhid);
     bool isStop = DistributedInputCollector::GetInstance().IsAllDevicesStoped();
     EXPECT_EQ(false, isStop);
 }
 
-HWTEST_F(DistributedInputCollectorTest, GetDeviceInfoByType01, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputCollectorTest, SetSharingTypes01, testing::ext::TestSize.Level1)
 {
-    DistributedInputCollector::GetInstance().inputHub_ = nullptr;
-    uint32_t inputTypes = 1;
-    std::map<int32_t, std::string> deviceInfo;
-    DistributedInputCollector::GetInstance().GetDeviceInfoByType(inputTypes, deviceInfo);
-    EXPECT_EQ(0, deviceInfo.size());
+    DistributedInputCollector::GetInstance().inputHub_ = std::make_unique<InputHub>();
+    bool enabled = true;
+    uint32_t inputType = static_cast<uint32_t>(DInputDeviceType::ALL);
+    AffectDhIds ret = DistributedInputCollector::GetInstance().SetSharingTypes(enabled, inputType);
+    EXPECT_EQ(0, ret.sharingDhIds.size());
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

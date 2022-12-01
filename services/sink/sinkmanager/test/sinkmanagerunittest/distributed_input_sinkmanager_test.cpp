@@ -18,6 +18,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "nlohmann/json.hpp"
 
 #include "dinput_errcode.h"
 
@@ -46,6 +47,23 @@ void DistributedInputSinkManagerTest::SetUpTestCase()
 
 void DistributedInputSinkManagerTest::TearDownTestCase()
 {
+}
+
+void DistributedInputSinkManagerTest::TestGetSinkScreenInfosCb::OnResult(const std::string& strJson)
+{
+    (void)strJson;
+}
+
+int32_t DistributedInputSinkManagerTest::TestSharingDhIdListenerStub::OnSharing(std::string dhId)
+{
+    (void)dhId;
+    return DH_SUCCESS;
+}
+
+int32_t DistributedInputSinkManagerTest::TestSharingDhIdListenerStub::OnNoSharing(std::string dhId)
+{
+    (void)dhId;
+    return DH_SUCCESS;
 }
 
 HWTEST_F(DistributedInputSinkManagerTest, InitAuto, testing::ext::TestSize.Level0)
@@ -89,26 +107,20 @@ HWTEST_F(DistributedInputSinkManagerTest, IsStopDhidOnCmdStillNeed01, testing::e
     dhIds.push_back("Input_123123123123");
     dhIds.push_back("Input_456456456456");
     dhIds.push_back("Input_789789789789");
+    sinkManager_->StoreStartDhids(100, dhIds);
     sinkManager_->StoreStartDhids(sessionId, dhIds);
 
     std::string stopDhId = "Input_123123123123";
     bool ret = sinkManager_->IsStopDhidOnCmdStillNeed(sessionId, stopDhId);
-    EXPECT_EQ(false, ret);
+    EXPECT_EQ(true, ret);
 }
 
 HWTEST_F(DistributedInputSinkManagerTest, IsStopDhidOnCmdStillNeed02, testing::ext::TestSize.Level0)
 {
-    int32_t sessionId = 1;
-    std::vector<std::string> dhIds;
-    dhIds.push_back("Input_123123123123");
-    dhIds.push_back("Input_456456456456");
-    dhIds.push_back("Input_789789789789");
-    sinkManager_->StoreStartDhids(sessionId, dhIds);
-
-    sessionId = 1000;
+    int32_t sessionId = 1000;
     std::string stopDhId = "Input_123123123123";
     bool ret = sinkManager_->IsStopDhidOnCmdStillNeed(sessionId, stopDhId);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
 }
 
 HWTEST_F(DistributedInputSinkManagerTest, DeleteStopDhids01, testing::ext::TestSize.Level0)
@@ -121,14 +133,118 @@ HWTEST_F(DistributedInputSinkManagerTest, DeleteStopDhids01, testing::ext::TestS
         sinkManager_->sharingDhIds_.insert(iter);
     }
     sinkManager_->sharingDhIdsMap_[sessionId] = sinkManager_->sharingDhIds_;
+    sinkManager_->DeleteStopDhids(100, stopDhIds, stopIndeedDhIds);
     sinkManager_->DeleteStopDhids(sessionId, stopDhIds, stopIndeedDhIds);
     EXPECT_EQ(0, sinkManager_->sharingDhIdsMap_.size());
 }
+
 
 HWTEST_F(DistributedInputSinkManagerTest, GetSinkScreenInfosCbackSize01, testing::ext::TestSize.Level0)
 {
     uint32_t ret = sinkManager_->GetSinkScreenInfosCbackSize();
     EXPECT_EQ(0, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, RegisterGetSinkScreenInfosCallback_01, testing::ext::TestSize.Level1)
+{
+    sptr<TestGetSinkScreenInfosCb> callback = new TestGetSinkScreenInfosCb();
+    int32_t ret = sinkManager_->RegisterGetSinkScreenInfosCallback(callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, StringSplit_01, testing::ext::TestSize.Level1)
+{
+    char splitPoint = '.';
+    std::string str = "";
+    std::vector<std::string> vecStr;
+    sinkManager_->statuslistener_->StringSplit(str, splitPoint, vecStr);
+
+    str = "123,123,123,123";
+    sinkManager_->statuslistener_->StringSplit(str, splitPoint, vecStr);
+    EXPECT_NE(0, vecStr.size());
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, OnMessage_01, testing::ext::TestSize.Level1)
+{
+    int32_t ret = sinkManager_->Init();
+    sinkManager_->OnStart();
+    sinkManager_->OnStop();
+    std::string message = "";
+    sinkManager_->projectWindowListener_->OnMessage(DHTopic::TOPIC_START_DSCREEN, message);
+    sinkManager_->projectWindowListener_->OnMessage(DHTopic::TOPIC_SINK_PROJECT_WINDOW_INFO, message);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, ParseMessage_01, testing::ext::TestSize.Level1)
+{
+    std::string message = "";
+    std::string srcDeviceId = "";
+    uint64_t srcWinId = 0;
+    SinkScreenInfo sinkScreenInfo;
+    int32_t ret = sinkManager_->projectWindowListener_->ParseMessage(message, srcDeviceId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, ParseMessage_02, testing::ext::TestSize.Level1)
+{
+    std::string srcDevId = "umkyu1b165e1be98151891erbe8r91ev";
+    uint64_t srcWinId = 1;
+    uint64_t sinkShowWinId = 1;
+    uint32_t sinkShowWidth = 1860;
+    uint32_t sinkShowHeigth = 980;
+    uint32_t sinkShowX = 100;
+    uint32_t sinkShowY = 100;
+    nlohmann::json jsonObj;
+    jsonObj[SOURCE_DEVICE_ID] = srcDevId;
+    jsonObj[SOURCE_WINDOW_ID] = srcWinId;
+    jsonObj[SINK_SHOW_WINDOW_ID] = sinkShowWinId;
+    jsonObj[SINK_PROJECT_SHOW_WIDTH] = sinkShowWidth;
+    jsonObj[SINK_PROJECT_SHOW_HEIGHT] = sinkShowHeigth;
+    jsonObj[SINK_WINDOW_SHOW_X] = sinkShowX;
+    jsonObj[SINK_WINDOW_SHOW_Y] = sinkShowY;
+    SinkScreenInfo sinkScreenInfo;
+    int32_t ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, UpdateSinkScreenInfoCache_01, testing::ext::TestSize.Level1)
+{
+    int32_t ret = sinkManager_->Init();
+    EXPECT_EQ(DH_SUCCESS, ret);
+    std::string srcDevId = "umkyu1b165e1be98151891erbe8r91ev";
+    uint64_t srcWinId = 1;
+    SinkScreenInfo sinkScreenInfoTmp {2, 1860, 980, 200, 200};
+    ret = sinkManager_->projectWindowListener_->UpdateSinkScreenInfoCache(srcDevId, srcWinId, sinkScreenInfoTmp);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, NotifyStartDScreen_01, testing::ext::TestSize.Level1)
+{
+    SrcScreenInfo srcScreenInfo {"devid_test", "uuid_test", 1, 1, 1860, 980, "srcphyid", 1, 980, 490};
+    int32_t ret = sinkManager_->NotifyStartDScreen(srcScreenInfo);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, NotifyStopDScreen_01, testing::ext::TestSize.Level1)
+{
+    std::string srcScreenInfoKey  = "";
+    int32_t ret = sinkManager_->NotifyStopDScreen(srcScreenInfoKey);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_SCREEN_INFO_IS_EMPTY, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, NotifyStopDScreen_02, testing::ext::TestSize.Level1)
+{
+    std::string srcScreenInfoKey  = "srcScreenInfoKey_test";
+    int32_t ret = sinkManager_->NotifyStopDScreen(srcScreenInfoKey);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, RegisterSharingDhIdListener_01, testing::ext::TestSize.Level1)
+{
+    sptr<TestSharingDhIdListenerStub> sharingDhIdListener = new TestSharingDhIdListenerStub();
+    int32_t ret = sinkManager_->RegisterSharingDhIdListener(sharingDhIdListener);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSinkManagerTest, Dump_01, testing::ext::TestSize.Level1)
