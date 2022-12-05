@@ -14,5 +14,11 @@
 group("test") {
   testonly = true
 
-  deps = [ "ipcunittest:ipcunittest" ]
+  deps = [
+    "ipcunittest:ipcunittest",
+    "addwhitelistinfoscallbackunittest:addwhitelistinfoscallbackunittest",
+    "delwhitelistinfoscallbackunittest:delwhitelistinfoscallbackunittest",
+    "unpreparedinputcallbackunittest:unpreparedinputcallbackunittest",
+    "unregisterdinputcallbackunittest:unregisterdinputcallbackunittest"
+  ]
 }
