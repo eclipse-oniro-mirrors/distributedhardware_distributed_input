@@ -100,8 +100,17 @@ HWTEST_F(DistributedInputCollectorTest, SetSharingTypes01, testing::ext::TestSiz
     DistributedInputCollector::GetInstance().inputHub_ = std::make_unique<InputHub>();
     bool enabled = true;
     uint32_t inputType = static_cast<uint32_t>(DInputDeviceType::ALL);
+
     AffectDhIds ret = DistributedInputCollector::GetInstance().SetSharingTypes(enabled, inputType);
     EXPECT_EQ(0, ret.sharingDhIds.size());
+    std::vector<std::string> sharingDhIds;
+    sharingDhIds.push_back("sharingDhId_test");
+    std::vector<std::string> noSharingDhIds;
+    noSharingDhIds.push_back("noSharingDhId_test");
+    AffectDhIds affectDhIds {sharingDhIds, noSharingDhIds};
+    DistributedInputCollector::GetInstance().ReportDhIdSharingState(affectDhIds);
+    DistributedInputCollector::GetInstance().sharingDhIdListeners_.clear();
+    DistributedInputCollector::GetInstance().ReportDhIdSharingState(affectDhIds);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

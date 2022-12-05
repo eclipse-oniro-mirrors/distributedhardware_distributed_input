@@ -19,6 +19,7 @@
 
 #include "dinput_errcode.h"
 #include "hidumper.h"
+#include "hisysevent_util.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -77,14 +78,22 @@ HWTEST_F(DInputDfxUtilsTest, GetAllNodeInfos_001, testing::ext::TestSize.Level1)
     std::string dhId = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
     std::string nodeName = "DistributedInput_123456";
     HiDumper::GetInstance().SaveNodeInfo(devId, nodeName, dhId);
-    EXPECT_EQ(1, HiDumper::GetInstance().nodeInfos_.size());
+    std::string dhId1 = "dhId1_test";
+    HiDumper::GetInstance().SaveNodeInfo(devId, nodeName, dhId1);
+    EXPECT_EQ(2, HiDumper::GetInstance().nodeInfos_.size());
 
     std::string result = "";
     int32_t ret = HiDumper::GetInstance().GetAllNodeInfos(result);
     EXPECT_EQ(DH_SUCCESS, ret);
 
+    HiDumper::GetInstance().DeleteNodeInfo(devId, dhId1);
     HiDumper::GetInstance().DeleteNodeInfo(devId, dhId);
     EXPECT_EQ(0, HiDumper::GetInstance().nodeInfos_.size());
+    std::string status = "status_ok";
+    std::string msg = "msg_test";
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(status, msg);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(status, devId, msg);
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(status, devId, dhId, msg);
 }
 
 HWTEST_F(DInputDfxUtilsTest, GetSessionInfo_001, testing::ext::TestSize.Level1)
@@ -100,7 +109,12 @@ HWTEST_F(DInputDfxUtilsTest, GetSessionInfo_001, testing::ext::TestSize.Level1)
     EXPECT_EQ(1, HiDumper::GetInstance().sessionInfos_.size());
 
     sessionStatus = SessionStatus::CLOSED;
+    HiDumper::GetInstance().CreateSessionInfo(remoteDevId, sessionId, mySessionName, peerSessionName, sessionStatus);
+    EXPECT_EQ(1, HiDumper::GetInstance().sessionInfos_.size());
+
+    sessionStatus = SessionStatus::CLOSING;
     HiDumper::GetInstance().SetSessionStatus(remoteDevId1, sessionStatus);
+    HiDumper::GetInstance().SetSessionStatus(remoteDevId, sessionStatus);
 
 
     HiDumper::GetInstance().DeleteSessionInfo(remoteDevId);
@@ -110,6 +124,13 @@ HWTEST_F(DInputDfxUtilsTest, GetSessionInfo_001, testing::ext::TestSize.Level1)
 
     int32_t ret = HiDumper::GetInstance().GetSessionInfo(result);
     EXPECT_EQ(DH_SUCCESS, ret);
+    std::string status = "status_ok";
+    std::string msg = "msg_test";
+    int32_t errorCode = 1;
+    std::string dhId = "1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    HisyseventUtil::GetInstance().SysEventWriteFault(status, msg);
+    HisyseventUtil::GetInstance().SysEventWriteFault(status, remoteDevId, errorCode, msg);
+    HisyseventUtil::GetInstance().SysEventWriteFault(status, remoteDevId, dhId, errorCode, msg);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

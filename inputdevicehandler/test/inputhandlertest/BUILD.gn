@@ -14,20 +14,19 @@
 import("//build/test.gni")
 import(
     "//foundation/distributedhardware/distributed_input/distributedinput.gni")
-module_out_path = "distributed_input/dfx_utils"
+module_out_path = "distributed_input/input_handler"
 
-group("dfxtest") {
+group("inputhandlertest") {
   testonly = true
 
-  deps = [ ":distributed_input_dfx_test" ]
+  deps = [ ":distributed_input_handler_test" ]
 }
 
-## IpcTest distributed_input_dfx_test {{{
-ohos_unittest("distributed_input_dfx_test") {
+## HandlerTest distributed_input_handler_test {{{
+ohos_unittest("distributed_input_handler_test") {
   module_out_path = module_out_path
 
   include_dirs = [
-    "include",
     "${common_path}/include",
     "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
@@ -35,18 +34,22 @@ ohos_unittest("distributed_input_dfx_test") {
     "${fwk_common_path}/utils/include",
     "${fwk_utils_path}/include/log",
     "${fwk_utils_path}/include",
-    "${frameworks_path}/include",
-    "${dfx_utils_path}/include",
     "${service_common}/include",
+    "${frameworks_path}/include",
+    "${utils_path}/include",
+    "//third_party/json/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/distributedhardware/distributed_input/inputdevicehandler/include",
   ]
 
   sources = [
-    "${dfx_utils_path}/src/hidumper.cpp",
-    "${dfx_utils_path}/src/hisysevent_util.cpp",
-    "distributed_input_dfx_test.cpp",
+    "${common_path}/include/input_hub.cpp",
+    "//foundation/distributedhardware/distributed_input/inputdevicehandler/src/distributed_input_handler.cpp",
+    "distributed_input_handler_test.cpp",
   ]
 
   cflags = [
@@ -65,14 +68,15 @@ ohos_unittest("distributed_input_dfx_test") {
 
   deps = [
     "${fwk_utils_path}:distributedhardwareutils",
+    "${utils_path}:libdinput_utils",
     "//third_party/openssl:libcrypto_static",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hisysevent_native:libhisysevent",
+    "dsoftbus:softbus_client",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
 }
-## UnitTest distributed_input_dfx_test }}}
+## UnitTest distributed_input_handler_test }}}
