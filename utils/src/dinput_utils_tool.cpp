@@ -32,10 +32,6 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-namespace {
-    const char *const DESCRIPTOR = "descriptor";
-}
-
 DevInfo GetLocalDeviceInfo()
 {
     DevInfo devInfo{"", "", 0};
@@ -134,16 +130,31 @@ bool IsInt32(const nlohmann::json& jsonObj, const std::string& key)
     return res;
 }
 
-bool IsUint32(const nlohmann::json& jsonObj, const std::string& key)
+
+bool IsUInt16(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT16_MAX;
+    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    return res;
+}
+
+bool IsUInt32(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT32_MAX;
     DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
     return res;
 }
 
-bool IsUint64(const nlohmann::json& jsonObj, const std::string& key)
+bool IsUInt64(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT64_MAX;
+    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    return res;
+}
+
+bool IsArray(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_array();
     DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
     return res;
 }
@@ -159,11 +170,11 @@ std::string GetNodeDesc(std::string parameters)
     std::string physicalPath = "N/A";
     int32_t classes = -1;
 
-    if (parObj.find("name") != parObj.end() && parObj.find("physicalPath") != parObj.end() &&
-        parObj.find("classes") != parObj.end()) {
-        nodeName = parObj.at("name").get<std::string>();
-        physicalPath = parObj.at("physicalPath").get<std::string>();
-        classes = parObj.at("classes").get<int32_t>();
+    if (parObj.find(DEVICE_NAME) != parObj.end() && parObj.find(PHYSICAL_PATH) != parObj.end() &&
+        parObj.find(CLASSES) != parObj.end()) {
+        nodeName = parObj.at(DEVICE_NAME).get<std::string>();
+        physicalPath = parObj.at(PHYSICAL_PATH).get<std::string>();
+        classes = parObj.at(CLASSES).get<int32_t>();
     }
     return "{ nodeName: " + nodeName + ", physicalPath: " + physicalPath + ", classes: " +
         std::to_string(classes) + " }";

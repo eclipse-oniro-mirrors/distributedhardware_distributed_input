@@ -21,10 +21,10 @@
 #include <map>
 #include <unordered_map>
 
+#include <libevdev/libevdev.h>
+#include <linux/input.h>
 #include <sys/epoll.h>
 #include <sys/inotify.h>
-
-#include <linux/input.h>
 
 #include "constants_dinput.h"
 
@@ -95,7 +95,14 @@ private:
     int32_t RefreshEpollItem(bool isSleep);
 
     int32_t OpenInputDeviceLocked(const std::string& devicePath);
-    int32_t QueryInputDeviceInfo(int fd, InputDevice& identifier);
+    int32_t QueryInputDeviceInfo(int32_t fd, InputDevice& identifier);
+    void QueryEventInfo(int32_t fd, InputDevice& identifier);
+    struct libevdev* GetLibEvDev(int32_t fd);
+    void GetEventTypes(struct libevdev* dev, InputDevice& identifier);
+    int32_t GetEventKeys(struct libevdev* dev, InputDevice& identifier);
+    int32_t GetABSInfo(struct libevdev* dev, InputDevice& identifier);
+    int32_t GetRELTypes(struct libevdev* dev, InputDevice& identifier);
+    void GetProperties(struct libevdev* dev, InputDevice& identifier);
     int32_t MakeDevice(int fd, std::unique_ptr<Device> device);
     void GenerateDescriptor(InputDevice& identifier) const;
     std::string StringPrintf(const char* format, ...) const;
@@ -164,6 +171,7 @@ private:
     std::atomic<uint32_t> inputTypes_;
     std::atomic<bool> isStartCollectEvent_;
     std::atomic<bool> isStartCollectHandler_;
+    std::unordered_map<std::string, bool> sharedDHIds_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

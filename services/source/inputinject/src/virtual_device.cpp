@@ -26,14 +26,16 @@
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-VirtualDevice::VirtualDevice()
-    : deviceName_(""), netWorkId_(""), busType_(0), vendorId_(0), productId_(0), version_(0), classes_(0)
-{
+namespace {
+    constexpr uint32_t ABS_MIN_POS = 1;
+    constexpr uint32_t ABS_MAX_POS = 2;
+    constexpr uint32_t ABS_FUZZ_POS = 3;
+    constexpr uint32_t ABS_FLAT_POS = 4;
 }
-
 VirtualDevice::VirtualDevice(const InputDevice& event) : deviceName_(event.name), busType_(event.bus),
     vendorId_(event.vendor), productId_(event.product), version_(event.version), classes_(event.classes)
 {
+    DHLOGI("VirtualDevice ctor!");
 }
 
 VirtualDevice::~VirtualDevice()
@@ -55,7 +57,7 @@ bool VirtualDevice::DoIoctl(int32_t fd, int32_t request, const uint32_t value)
     return true;
 }
 
-bool VirtualDevice::CreateKey()
+bool VirtualDevice::CreateKey(const InputDevice& inputDevice)
 {
     auto fun = [this](int32_t uiSet, const std::vector<uint32_t>& list) -> bool {
         for (uint32_t evt_type : list) {
@@ -66,20 +68,34 @@ bool VirtualDevice::CreateKey()
         }
         return true;
     };
-
     std::map<int32_t, std::vector<uint32_t>> evt_type;
-    evt_type[UI_SET_EVBIT] = GetEventTypes();
-    evt_type[UI_SET_KEYBIT] = GetKeys();
-    evt_type[UI_SET_PROPBIT] = GetProperties();
-    evt_type[UI_SET_ABSBIT] = GetAbs();
-    evt_type[UI_SET_RELBIT] = GetRelBits();
+    evt_type[UI_SET_EVBIT] = inputDevice.eventTypes;
+    evt_type[UI_SET_KEYBIT] = inputDevice.eventKeys;
+    evt_type[UI_SET_PROPBIT] = inputDevice.properties;
+    evt_type[UI_SET_ABSBIT] = inputDevice.absTypes;
+    evt_type[UI_SET_RELBIT] = inputDevice.relTypes;
     for (auto &it : evt_type) {
         if (!fun(it.first, it.second)) {
             return false;
         }
     }
-
     return true;
+}
+
+void VirtualDevice::SetABSInfo(struct uinput_user_dev& inputUserDev, const InputDevice& inputDevice)
+{
+    DHLOGI("SetABSInfo!");
+    for (const auto item : inputDevice.absInfos) {
+        int absCode = item.first;
+        std::vector<int32_t> absInfo = item.second;
+        DHLOGI("SetABSInfo nodeName: %s, absCode: %d, absMin: %d, absMax: %d, absFuzz: %d, absFlat: %d",
+            inputDevice.name.c_str(), absCode, absInfo[ABS_MIN_POS], absInfo[ABS_MAX_POS], absInfo[ABS_FUZZ_POS],
+            absInfo[ABS_FLAT_POS]);
+        inputUserDev.absmin[absCode] = absInfo[ABS_MIN_POS];
+        inputUserDev.absmax[absCode] = absInfo[ABS_MAX_POS];
+        inputUserDev.absfuzz[absCode] = absInfo[ABS_FUZZ_POS];
+        inputUserDev.absflat[absCode] = absInfo[ABS_FLAT_POS];
+    }
 }
 
 bool VirtualDevice::SetPhys(const std::string deviceName, std::string dhId)
@@ -94,7 +110,7 @@ bool VirtualDevice::SetPhys(const std::string deviceName, std::string dhId)
     return true;
 }
 
-bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
+bool VirtualDevice::SetUp(const InputDevice& inputDevice, const std::string& devId, const std::string& dhId)
 {
     fd_ = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (fd_ < 0) {
@@ -120,10 +136,12 @@ bool VirtualDevice::SetUp(const std::string& devId, const std::string& dhId)
         return false;
     }
 
-    if (!CreateKey()) {
+    if (!CreateKey(inputDevice)) {
         DHLOGE("Failed to create KeyValue");
         return false;
     }
+
+    SetABSInfo(dev_, inputDevice);
 
     if (write(fd_, &dev_, sizeof(dev_)) < 0) {
         DHLOGE("Unable to set input device info");

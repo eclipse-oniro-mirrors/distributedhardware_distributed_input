@@ -48,6 +48,7 @@ ohos_shared_library("libdinput_sink") {
     "//drivers/peripheral/display/interfaces/include",
     "//drivers/peripheral/base",
     "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+    "//third_party/libevdev/libevdev/"
   ]
 
   sources = [
@@ -73,6 +74,7 @@ ohos_shared_library("libdinput_sink") {
     "//foundation/distributedhardware/distributed_input/services/sink/transport:libdinput_sink_trans",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "//foundation/window/window_manager/dm:libdm",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [
