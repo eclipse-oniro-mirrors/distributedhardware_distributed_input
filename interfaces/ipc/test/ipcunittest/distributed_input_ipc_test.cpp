@@ -15,6 +15,8 @@
 
 #include "distributed_input_ipc_test.h"
 
+#include "nlohmann/json.hpp"
+
 #include "dinput_errcode.h"
 
 using namespace testing::ext;
@@ -82,6 +84,33 @@ HWTEST_F(DistributedInputIpcTest, CheckSourceRegisterCallback01, testing::ext::T
     EXPECT_EQ(false, ret);
 }
 
+HWTEST_F(DistributedInputIpcTest, CheckSinkRegisterCallback01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "46qweqwe46q5qw4e";
+    BusinessEvent event;
+    DistributedInputClient::GetInstance().CheckSinkRegisterCallback();
+    bool ret = DistributedInputClient::GetInstance().IsNeedFilterOut(deviceId, event);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, CheckSharingDhIdsCallback01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "46qweqwe46q5qw4e";
+    BusinessEvent event;
+    DistributedInputClient::GetInstance().CheckSharingDhIdsCallback();
+    bool ret = DistributedInputClient::GetInstance().IsNeedFilterOut(deviceId, event);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, CheckSinkScreenInfoCallback01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "46qweqwe46q5qw4e";
+    BusinessEvent event;
+    DistributedInputClient::GetInstance().CheckSinkScreenInfoCallback();
+    bool ret = DistributedInputClient::GetInstance().IsNeedFilterOut(deviceId, event);
+    EXPECT_EQ(false, ret);
+}
+
 HWTEST_F(DistributedInputIpcTest, IsNeedFilterOut01, testing::ext::TestSize.Level1)
 {
     std::string deviceId = "46qweqwe46q5qw4e";
@@ -98,9 +127,67 @@ HWTEST_F(DistributedInputIpcTest, IsNeedFilterOut02, testing::ext::TestSize.Leve
     EXPECT_EQ(false, ret);
 }
 
+HWTEST_F(DistributedInputIpcTest, IsNeedFilterOut03, testing::ext::TestSize.Level1)
+{
+    std::string deviceId(280, 'e');
+    BusinessEvent event;
+    bool ret = DistributedInputClient::GetInstance().IsNeedFilterOut(deviceId, event);
+    EXPECT_EQ(false, ret);
+}
+
 HWTEST_F(DistributedInputIpcTest, IsTouchEventNeedFilterOut01, testing::ext::TestSize.Level1)
 {
     TouchScreenEvent event = {100, 100};
+    bool ret = DistributedInputClient::GetInstance().IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, IsTouchEventNeedFilterOut02, testing::ext::TestSize.Level1)
+{
+    TouchScreenEvent event = {100, 100};
+    nlohmann::json jsonObj;
+    jsonObj = {{10, 10, 100, 100}};
+    DistributedInputClient::GetInstance().UpdateSinkScreenInfos(jsonObj.dump());
+    bool ret = DistributedInputClient::GetInstance().IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(true, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, IsTouchEventNeedFilterOut03, testing::ext::TestSize.Level1)
+{
+    TouchScreenEvent event = {100, 100};
+    nlohmann::json jsonObj;
+    jsonObj = {{10, 10, 100, 80}};
+    DistributedInputClient::GetInstance().UpdateSinkScreenInfos(jsonObj.dump());
+    bool ret = DistributedInputClient::GetInstance().IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, IsTouchEventNeedFilterOut04, testing::ext::TestSize.Level1)
+{
+    TouchScreenEvent event = {100, 100};
+    nlohmann::json jsonObj;
+    jsonObj = {{10, 10, 80, 100}};
+    DistributedInputClient::GetInstance().UpdateSinkScreenInfos(jsonObj.dump());
+    bool ret = DistributedInputClient::GetInstance().IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, IsTouchEventNeedFilterOut05, testing::ext::TestSize.Level1)
+{
+    TouchScreenEvent event = {100, 100};
+    nlohmann::json jsonObj;
+    jsonObj = {{110, 10, 100, 100}};
+    DistributedInputClient::GetInstance().UpdateSinkScreenInfos(jsonObj.dump());
+    bool ret = DistributedInputClient::GetInstance().IsTouchEventNeedFilterOut(event);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, IsTouchEventNeedFilterOut06, testing::ext::TestSize.Level1)
+{
+    TouchScreenEvent event = {100, 100};
+    nlohmann::json jsonObj;
+    jsonObj = {{10, 110, 100, 100}};
+    DistributedInputClient::GetInstance().UpdateSinkScreenInfos(jsonObj.dump());
     bool ret = DistributedInputClient::GetInstance().IsTouchEventNeedFilterOut(event);
     EXPECT_EQ(false, ret);
 }
@@ -115,6 +202,13 @@ HWTEST_F(DistributedInputIpcTest, IsStartDistributedInput01, testing::ext::TestS
 HWTEST_F(DistributedInputIpcTest, IsStartDistributedInput02, testing::ext::TestSize.Level1)
 {
     std::string dhId = "654ew6qw4f6w1e6f1w6e5f";
+    bool ret = DistributedInputClient::GetInstance().IsStartDistributedInput(dhId);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, IsStartDistributedInput03, testing::ext::TestSize.Level1)
+{
+    std::string dhId(280, 'e');
     bool ret = DistributedInputClient::GetInstance().IsStartDistributedInput(dhId);
     EXPECT_EQ(false, ret);
 }
@@ -227,8 +321,9 @@ HWTEST_F(DistributedInputIpcTest, DelWhiteListInfos01, testing::ext::TestSize.Le
 
 HWTEST_F(DistributedInputIpcTest, UpdateSinkScreenInfos01, testing::ext::TestSize.Level1)
 {
-    std::string strJson = "[[1080][720][10][10]]";
-    DistributedInputClient::GetInstance().UpdateSinkScreenInfos(strJson);
+    nlohmann::json jsonObj;
+    jsonObj = {{1080, 720, 10, 10}};
+    DistributedInputClient::GetInstance().UpdateSinkScreenInfos(jsonObj.dump());
     std::string strData = "{3413";
     bool ret = DistributedInputClient::GetInstance().IsJsonData(strData);
     EXPECT_EQ(false, ret);
@@ -249,6 +344,117 @@ HWTEST_F(DistributedInputIpcTest, NotifyStopDScreen01, testing::ext::TestSize.Le
     std::string srcScreenInfoKey = "q65we46qw54e6q5we46q";
     int32_t ret = DistributedInputClient::GetInstance().NotifyStopDScreen(networkId, srcScreenInfoKey);
     EXPECT_EQ(ERR_DH_INPUT_RPC_GET_REMOTE_DINPUT_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, RegisterDistributedHardware01, testing::ext::TestSize.Level1)
+{
+    std::string devId;
+    std::string dhId;
+    std::string parameters;
+    std::shared_ptr<RegisterCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().RegisterDistributedHardware(devId, dhId, parameters, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, UnregisterDistributedHardware01, testing::ext::TestSize.Level1)
+{
+    std::string devId;
+    std::string dhId;
+    std::shared_ptr<UnregisterCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().UnregisterDistributedHardware(devId, dhId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, PrepareRemoteInput01, testing::ext::TestSize.Level1)
+{
+    string deviceId = "PrepareRemoteInput01";
+    sptr<IPrepareDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().PrepareRemoteInput(deviceId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, UnprepareRemoteInput01, testing::ext::TestSize.Level0)
+{
+    string deviceId = "UnprepareRemoteInput01";
+    sptr<IUnprepareDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().UnprepareRemoteInput(deviceId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StartRemoteInput01, testing::ext::TestSize.Level0)
+{
+    string deviceId = "StartRemoteInput01";
+    sptr<IStartDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StartRemoteInput(
+        deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StartRemoteInput02, testing::ext::TestSize.Level0)
+{
+    std::string sinkId = "StartRemoteInput_sink";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<IStartStopDInputsCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StartRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StartRemoteInput03, testing::ext::TestSize.Level0)
+{
+    string srcId = "StartRemoteInput01-src";
+    string sinkId = "StartRemoteInput01-sink";
+    sptr<IStartDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StartRemoteInput(
+        srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StartRemoteInput04, testing::ext::TestSize.Level0)
+{
+    string srcId = "StartRemoteInput01-src";
+    string sinkId = "StartRemoteInput01-sink";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<IStartStopDInputsCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StartRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StopRemoteInput01, testing::ext::TestSize.Level0)
+{
+    string deviceId = "StopRemoteInput01";
+    sptr<IStopDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StopRemoteInput(
+        deviceId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StopRemoteInput02, testing::ext::TestSize.Level0)
+{
+    std::string sinkId = "StartRemoteInput_test";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<IStartStopDInputsCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StopRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StopRemoteInput03, testing::ext::TestSize.Level0)
+{
+    string srcId = "StopRemoteInput03-src";
+    string sinkId = "StopRemoteInput03-sink";
+    sptr<IStopDInputCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StopRemoteInput(
+        srcId, sinkId, static_cast<uint32_t>(DInputDeviceType::ALL), callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputIpcTest, StopRemoteInput04, testing::ext::TestSize.Level0)
+{
+    string srcId = "StartRemoteInput01-src";
+    string sinkId = "StartRemoteInput01-sink";
+    std::vector<std::string> dhIds = {"dhIds_test"};
+    sptr<IStartStopDInputsCallback> callback = nullptr;
+    int32_t ret = DistributedInputClient::GetInstance().StopRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_CLIENT_GET_SOURCE_PROXY_FAIL, ret);
 }
 
 } // namespace DistributedInput

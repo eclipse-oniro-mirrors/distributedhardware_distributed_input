@@ -192,6 +192,8 @@ HWTEST_F(DistributedInputSourceInjectTest, RegisterDistributedEvent01, testing::
 
     size_t count = (size_t)(sizeof(writeBuffer) / sizeof(RawEvent));
     DistributedInputInject::GetInstance().inputNodeManager_ = std::make_unique<DistributedInputNodeManager>();
+    DistributedInputInject::GetInstance().StartInjectThread();
+    DistributedInputInject::GetInstance().StopInjectThread();
     int32_t ret = DistributedInputInject::GetInstance().RegisterDistributedEvent(writeBuffer, count);
     EXPECT_EQ(DH_SUCCESS, ret);
 }

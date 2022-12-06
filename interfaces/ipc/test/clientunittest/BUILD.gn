@@ -1,0 +1,141 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import(
+    "//foundation/distributedhardware/distributed_input/distributedinput.gni")
+module_out_path = "distributed_input/ipc"
+
+group("clientunittest") {
+  testonly = true
+
+  deps = [ ":distributed_input_client_test" ]
+}
+
+## UnitTest distributed_input_client_test {{{
+ohos_unittest("distributed_input_client_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${common_path}/include",
+    "${frameworks_path}/include",
+    "${fwk_common_path}/log/include",
+    "${fwk_common_path}/utils/include",
+    "${fwk_interfaces_path}/include",
+    "${fwk_interfaces_path}/include/ipc",
+    "${fwk_utils_path}/include",
+    "${fwk_utils_path}/include/log",
+    "${innerkits_path}/include",
+    "${innerkits_path}/src",
+    "${ipc_path}/include",
+    "${ipc_path}/src",
+    "${utils_path}/include",
+    "//commonlibrary/c_utils/base/include",
+    "//third_party/json/include",
+    "//utils/system/safwk/native/include",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
+    "//foundation/communication/dsoftbus/interfaces/kits/bus_center",
+    "//foundation/communication/dsoftbus/interfaces/kits/common",
+    "${services_source_path}/sourcemanager/include",
+    "${services_source_path}/inputinject/include",
+    "${services_source_path}/transport/include",
+    "${service_common}/include",
+    "${services_sink_path}/transport/include",
+    "${services_sink_path}/inputcollector/include",
+    "${services_sink_path}/sinkmanager/include",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/utils/include/",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
+    "//drivers/peripheral/display/interfaces/include",
+    "//drivers/peripheral/base",
+    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+    "${distributedinput_path}/inputdevicehandler/include",
+  ]
+
+  sources = [
+    "distributed_input_client_test.cpp",
+    "mock_samanager.cpp",
+    "${common_path}/include/white_list_util.cpp",
+    "${common_path}/include/input_check_param.cpp",
+    "${ipc_path}/src/add_white_list_infos_call_back_proxy.cpp",
+    "${ipc_path}/src/add_white_list_infos_call_back_stub.cpp",
+    "${ipc_path}/src/del_white_list_infos_call_back_proxy.cpp",
+    "${ipc_path}/src/del_white_list_infos_call_back_stub.cpp",
+    "${ipc_path}/src/get_sink_screen_infos_call_back_proxy.cpp",
+    "${ipc_path}/src/get_sink_screen_infos_call_back_stub.cpp",
+    "${ipc_path}/src/distributed_input_client.cpp",
+    "${ipc_path}/src/distributed_input_sink_proxy.cpp",
+    "${ipc_path}/src/distributed_input_sink_stub.cpp",
+    "${ipc_path}/src/distributed_input_source_proxy.cpp",
+    "${ipc_path}/src/distributed_input_source_stub.cpp",
+    "${ipc_path}/src/input_node_listener_proxy.cpp",
+    "${ipc_path}/src/input_node_listener_stub.cpp",
+    "${ipc_path}/src/prepare_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/prepare_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/register_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/register_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/sharing_dhid_listener_proxy.cpp",
+    "${ipc_path}/src/sharing_dhid_listener_stub.cpp",
+    "${ipc_path}/src/simulation_event_listener_proxy.cpp",
+    "${ipc_path}/src/simulation_event_listener_stub.cpp",
+    "${ipc_path}/src/start_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/start_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/start_stop_d_inputs_call_back_proxy.cpp",
+    "${ipc_path}/src/start_stop_d_inputs_call_back_stub.cpp",
+    "${ipc_path}/src/start_stop_result_call_back_proxy.cpp",
+    "${ipc_path}/src/start_stop_result_call_back_stub.cpp",
+    "${ipc_path}/src/stop_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/stop_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/unprepare_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/unprepare_d_input_call_back_stub.cpp",
+    "${ipc_path}/src/unregister_d_input_call_back_proxy.cpp",
+    "${ipc_path}/src/unregister_d_input_call_back_stub.cpp",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  defines = [
+    "HI_LOG_ENABLE",
+    "DH_LOG_TAG=\"distributedinpututtest\"",
+    "LOG_DOMAIN=0xD004100",
+  ]
+
+  deps = [
+    "${dfx_utils_path}:libdinput_dfx_utils",
+    "${fwk_interfaces_path}:libdhfwk_sdk",
+    "${fwk_utils_path}:distributedhardwareutils",
+    "${utils_path}:libdinput_utils",
+    "//foundation/distributedhardware/distributed_input/services/source/sourcemanager:libdinput_source",
+    "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager:libdinput_sink",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//foundation/window/window_manager/dm:libdm",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags_cc = [ "-DHILOG_ENABLE" ]
+}
+## UnitTest distributed_input_client_test }}}

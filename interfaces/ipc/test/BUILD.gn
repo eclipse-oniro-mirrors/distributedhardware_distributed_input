@@ -19,6 +19,8 @@ group("test") {
     "addwhitelistinfoscallbackunittest:addwhitelistinfoscallbackunittest",
     "delwhitelistinfoscallbackunittest:delwhitelistinfoscallbackunittest",
     "unpreparedinputcallbackunittest:unpreparedinputcallbackunittest",
-    "unregisterdinputcallbackunittest:unregisterdinputcallbackunittest"
+    "unregisterdinputcallbackunittest:unregisterdinputcallbackunittest",
+    "clientunittest:clientunittest",
+    "dinputsourcecallbackunittest:dinputsourcecallbackunittest",
   ]
 }
