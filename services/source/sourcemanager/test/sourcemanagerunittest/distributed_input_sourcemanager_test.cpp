@@ -40,6 +40,8 @@ namespace DistributedInput {
 void DistributedInputSourceManagerTest::SetUp()
 {
     sourceManager_ = new DistributedInputSourceManager(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, true);
+    statuslistener_ = std::make_shared<DistributedInputSourceManager::DInputSourceListener>(sourceManager_);
+    DistributedInputSourceManagerTest::RegisterSourceRespCallback(statuslistener_);
 }
 
 void DistributedInputSourceManagerTest::TearDown()
@@ -53,6 +55,11 @@ void DistributedInputSourceManagerTest::SetUpTestCase()
 void DistributedInputSourceManagerTest::TearDownTestCase()
 {
     _Exit(0);
+}
+
+void DistributedInputSourceManagerTest::RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback)
+{
+    callback_ = callback;
 }
 
 void DistributedInputSourceManagerTest::TestRegisterDInputCb::OnResult(
@@ -867,6 +874,60 @@ HWTEST_F(DistributedInputSourceManagerTest, SyncNodeInfoRemoteInput_01, testing:
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByType_01, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    uint32_t inputTypes = 7;
+    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    DistributedInputSourceManager::DInputClientStartTypeInfo info{srcId, sinkId, inputTypes, callback};
+    sourceManager_->relayStaTypeCallbacks_.push_back(info);
+    int32_t ret = sourceManager_->RelayStartRemoteInputByType(srcId, sinkId, inputTypes, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByType_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    uint32_t inputTypes = 7;
+    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    DistributedInputSourceManager::DInputClientStartTypeInfo info{srcId, sinkId, inputTypes, callback};
+    sourceManager_->relayStaTypeCallbacks_.push_back(info);
+    srcId = "networkiddf4g65sd4fg65sd4fg6s5d4fg65sd4fg6sd";
+    sinkId = "46f5gs4df65g4s6df5g46s5df4g65sd4fg65sdfg";
+    inputTypes = 1;
+    int32_t ret = sourceManager_->RelayStartRemoteInputByType(srcId, sinkId, inputTypes, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByType_01, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    uint32_t inputTypes = 7;
+    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    DistributedInputSourceManager::DInputClientStopTypeInfo info{srcId, sinkId, inputTypes, callback};
+    sourceManager_->relayStpTypeCallbacks_.push_back(info);
+    int32_t ret = sourceManager_->RelayStopRemoteInputByType(srcId, sinkId, inputTypes, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByType_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    uint32_t inputTypes = 7;
+    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    DistributedInputSourceManager::DInputClientStopTypeInfo info{srcId, sinkId, inputTypes, callback};
+    sourceManager_->relayStpTypeCallbacks_.push_back(info);
+    srcId = "networkiddf4g65sd4fg65sd4fg6s5d4fg65sd4fg6sd";
+    sinkId = "46f5gs4df65g4s6df5g46s5df4g65sd4fg65sdfg";
+    inputTypes = 1;
+    int32_t ret = sourceManager_->RelayStopRemoteInputByType(srcId, sinkId, inputTypes, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
 HWTEST_F(DistributedInputSourceManagerTest, RelayPrepareRemoteInput_01, testing::ext::TestSize.Level1)
 {
     std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
@@ -878,6 +939,19 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayPrepareRemoteInput_01, testing:
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, RelayPrepareRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
+    DistributedInputSourceManager::DInputClientRelayPrepareInfo info(srcId, sinkId, callback);
+    sourceManager_->relayPreCallbacks_.push_back(info);
+    srcId = "networkiddf4g65sd4fg65sd4fg6s5d4fg65sd4fg6sd";
+    sinkId = "46f5gs4df65g4s6df5g46s5df4g65sd4fg65sdfg";
+    int32_t ret = sourceManager_->RelayPrepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
 HWTEST_F(DistributedInputSourceManagerTest, RelayUnprepareRemoteInput_01, testing::ext::TestSize.Level1)
 {
     std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
@@ -887,6 +961,19 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayUnprepareRemoteInput_01, testin
     sourceManager_->relayUnpreCallbacks_.push_back(info);
     int32_t ret = sourceManager_->RelayUnprepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayUnprepareRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    DistributedInputSourceManager::DInputClientRelayUnprepareInfo info(srcId, sinkId, callback);
+    sourceManager_->relayUnpreCallbacks_.push_back(info);
+    srcId = "networkiddf4g65sd4fg65sd4fg6s5d4fg65sd4fg6sd";
+    sinkId = "46f5gs4df65g4s6df5g46s5df4g65sd4fg65sdfg";
+    int32_t ret = sourceManager_->RelayUnprepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByDhid_01, testing::ext::TestSize.Level1)
@@ -902,6 +989,23 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByDhid_01, test
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByDhid_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("input_slkdiek3kddkeojfe");
+    sptr<TestStartStopDInputsCb> callback = new TestStartStopDInputsCb();
+    DistributedInputSourceManager::DInputClientStartDhidInfo info{srcId, sinkId, dhIds, callback};
+    sourceManager_->relayStaDhidCallbacks_.push_back(info);
+    srcId = "networkiddf4g65sd4fg65sd4fg6s5d4fg65sd4fg6sd";
+    sinkId = "46f5gs4df65g4s6df5g46s5df4g65sd4fg65sdfg";
+    dhIds.clear();
+    dhIds.push_back("input_4s56df4g6s5df4g65sdf4g65sd4f");
+    int32_t ret = sourceManager_->RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
 HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByDhid_01, testing::ext::TestSize.Level1)
 {
     std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
@@ -913,6 +1017,23 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByDhid_01, testi
     sourceManager_->relayStpDhidCallbacks_.push_back(info);
     int32_t ret = sourceManager_->RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByDhid_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("input_slkdiek3kddkeojfe");
+    sptr<TestStartStopDInputsCb> callback = new TestStartStopDInputsCb();
+    DistributedInputSourceManager::DInputClientStopDhidInfo info{srcId, sinkId, dhIds, callback};
+    sourceManager_->relayStpDhidCallbacks_.push_back(info);
+    srcId = "networkiddf4g65sd4fg65sd4fg6s5d4fg65sd4fg6sd";
+    sinkId = "46f5gs4df65g4s6df5g46s5df4g65sd4fg65sdfg";
+    dhIds.clear();
+    dhIds.push_back("input_4s56df4g6s5df4g65sdf4g65sd4f");
+    int32_t ret = sourceManager_->RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RunRegisterCallback_01, testing::ext::TestSize.Level1)
@@ -1145,6 +1266,27 @@ HWTEST_F(DistributedInputSourceManagerTest, GetSyncNodeInfo_01, testing::ext::Te
     std::string dhId = "input_slkdiek3kddkeojfe";
     std::string nodeDesc = "input_deviceid:umkyu1b165e1be98151891erbe8r91ev, input_dhid:slkdiek3kddkeojfe";
     sourceManager_->syncNodeInfoMap_[userDevId].insert({userDevId, dhId, nodeDesc});
+    std::string devId = "sd6f4s6d5f46s5d4f654564sdfdfsdfsdfd55";
+    sourceManager_->GetSyncNodeInfo(devId);
+    EXPECT_EQ(1, sourceManager_->GetSyncNodeInfo(userDevId).size());
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UpdateSyncNodeInfo_01, testing::ext::TestSize.Level1)
+{
+    std::string userDevId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string dhId = "input_slkdiek3kddkeojfe";
+    std::string nodeDesc = "input_deviceid:umkyu1b165e1be98151891erbe8r91ev, input_dhid:slkdiek3kddkeojfe";
+    sourceManager_->syncNodeInfoMap_[userDevId].insert({userDevId, dhId, nodeDesc});
+    sourceManager_->UpdateSyncNodeInfo(userDevId, dhId, nodeDesc);
+    EXPECT_EQ(1, sourceManager_->syncNodeInfoMap_.size());
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UpdateSyncNodeInfo_02, testing::ext::TestSize.Level1)
+{
+    std::string userDevId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string dhId = "input_slkdiek3kddkeojfe";
+    std::string nodeDesc = "input_deviceid:umkyu1b165e1be98151891erbe8r91ev, input_dhid:slkdiek3kddkeojfe";
+    sourceManager_->syncNodeInfoMap_.clear();
     sourceManager_->UpdateSyncNodeInfo(userDevId, dhId, nodeDesc);
     EXPECT_EQ(1, sourceManager_->syncNodeInfoMap_.size());
 }
@@ -1166,6 +1308,473 @@ HWTEST_F(DistributedInputSourceManagerTest, Dump_01, testing::ext::TestSize.Leve
     int32_t ret = sourceManager_->Dump(fd, args);
     EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
 }
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseRegisterDistributedHardware_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhId = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    bool result = true;
+    callback_->OnResponseRegisterDistributedHardware(deviceId, dhId, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponsePrepareRemoteInput_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    bool result = true;
+    std::string object = "46sdf5g454dfsdfg4sd6fg";
+    callback_->OnResponsePrepareRemoteInput(deviceId, result, object);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseUnprepareRemoteInput_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    bool result = true;
+    callback_->OnResponseUnprepareRemoteInput(deviceId, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStartRemoteInput_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    uint32_t inputTypes = 7;
+    bool result = true;
+    callback_->OnResponseStartRemoteInput(deviceId, inputTypes, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStopRemoteInput_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    uint32_t inputTypes = 7;
+    bool result = true;
+    callback_->OnResponseStopRemoteInput(deviceId, inputTypes, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStartRemoteInputDhid_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhids = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    bool result = true;
+    callback_->OnResponseStartRemoteInputDhid(deviceId, dhids, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStopRemoteInputDhid_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhids = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    bool result = true;
+    callback_->OnResponseStopRemoteInputDhid(deviceId, dhids, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseKeyState_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhid = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    const uint32_t type = 7;
+    const uint32_t code = 3;
+    const uint32_t value = 1;
+    callback_->OnResponseKeyState(deviceId, dhid, type, code, value);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseRelayPrepareRemoteInput_01, testing::ext::TestSize.Level1)
+{
+    int32_t toSrcSessionId = 1;
+    std::string deviceId = "as5d4a65sd4a65sd456as4d";
+    bool result = true;
+    std::string object = "46sdf5g454dfsdfg4sd6fg";
+    callback_->OnResponseRelayPrepareRemoteInput(toSrcSessionId, deviceId, result, object);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseRelayUnprepareRemoteInput_01, testing::ext::TestSize.Level1)
+{
+    int32_t toSrcSessionId = 1;
+    std::string deviceId = "as5d4a65sd4a65sd456as4d";
+    bool result = true;
+    callback_->OnResponseRelayUnprepareRemoteInput(toSrcSessionId, deviceId, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayPrepareResult_01, testing::ext::TestSize.Level1)
+{
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    callback_->OnReceiveRelayPrepareResult(status, srcId, sinkId);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayUnprepareResult_01, testing::ext::TestSize.Level1)
+{
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    callback_->OnReceiveRelayUnprepareResult(status, srcId, sinkId);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStartDhidResult_01, testing::ext::TestSize.Level1)
+{
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    std::string dhid = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    callback_->OnReceiveRelayStartDhidResult(status, srcId, sinkId, dhid);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStopDhidResult_01, testing::ext::TestSize.Level1)
+{
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    std::string dhid = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    callback_->OnReceiveRelayStopDhidResult(status, srcId, sinkId, dhid);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStartTypeResult_01, testing::ext::TestSize.Level1)
+{
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    uint32_t inputTypes = 7;
+    callback_->OnReceiveRelayStartTypeResult(status, srcId, sinkId, inputTypes);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStopTypeResult_01, testing::ext::TestSize.Level1)
+{
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    uint32_t inputTypes = 7;
+    callback_->OnReceiveRelayStopTypeResult(status, srcId, sinkId, inputTypes);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, InitAuto_01, testing::ext::TestSize.Level1)
+{
+    bool ret = sourceManager_->InitAuto();
+    EXPECT_EQ(true, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseRegisterDistributedHardware_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhId = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    bool result = true;
+    callback_->OnResponseRegisterDistributedHardware(deviceId, dhId, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponsePrepareRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    bool result = true;
+    std::string object = "46sdf5g454dfsdfg4sd6fg";
+    callback_->OnResponsePrepareRemoteInput(deviceId, result, object);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseUnprepareRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    bool result = true;
+    callback_->OnResponseUnprepareRemoteInput(deviceId, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStartRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    uint32_t inputTypes = 7;
+    bool result = true;
+    callback_->OnResponseStartRemoteInput(deviceId, inputTypes, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStopRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    uint32_t inputTypes = 7;
+    bool result = true;
+    callback_->OnResponseStopRemoteInput(deviceId, inputTypes, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStartRemoteInputDhid_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhids = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    bool result = true;
+    callback_->OnResponseStartRemoteInputDhid(deviceId, dhids, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseStopRemoteInputDhid_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhids = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    bool result = true;
+    callback_->OnResponseStopRemoteInputDhid(deviceId, dhids, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseKeyState_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    std::string deviceId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string dhid = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    const uint32_t type = 7;
+    const uint32_t code = 3;
+    const uint32_t value = 1;
+    callback_->OnResponseKeyState(deviceId, dhid, type, code, value);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseRelayPrepareRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t toSrcSessionId = 1;
+    std::string deviceId = "as5d4a65sd4a65sd456as4d";
+    bool result = true;
+    std::string object = "46sdf5g454dfsdfg4sd6fg";
+    callback_->OnResponseRelayPrepareRemoteInput(toSrcSessionId, deviceId, result, object);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnResponseRelayUnprepareRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t toSrcSessionId = 1;
+    std::string deviceId = "as5d4a65sd4a65sd456as4d";
+    bool result = true;
+    callback_->OnResponseRelayUnprepareRemoteInput(toSrcSessionId, deviceId, result);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayPrepareResult_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    callback_->OnReceiveRelayPrepareResult(status, srcId, sinkId);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayUnprepareResult_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    callback_->OnReceiveRelayUnprepareResult(status, srcId, sinkId);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStartDhidResult_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    std::string dhid = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    callback_->OnReceiveRelayStartDhidResult(status, srcId, sinkId, dhid);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStopDhidResult_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    std::string dhid = "Input_s4df65s5d6f56asd5f6asdfasdfasdfv";
+    callback_->OnReceiveRelayStopDhidResult(status, srcId, sinkId, dhid);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStartTypeResult_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    uint32_t inputTypes = 7;
+    callback_->OnReceiveRelayStartTypeResult(status, srcId, sinkId, inputTypes);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, OnReceiveRelayStopTypeResult_02, testing::ext::TestSize.Level1)
+{
+    sourceManager_->InitAuto();
+
+    int32_t status = 1;
+    std::string srcId = "djfhskjdhf5465456ds4f654sdf6";
+    std::string sinkId = "asd4a65sd46as4da6s4d6asdasdafwebrb";
+    uint32_t inputTypes = 7;
+    callback_->OnReceiveRelayStopTypeResult(status, srcId, sinkId, inputTypes);
+
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    int32_t ret = sourceManager_->Dump(fd, args);
+    EXPECT_EQ(ERR_DH_INPUT_HIDUMP_DUMP_PROCESS_FAIL, ret);
+}
+
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS

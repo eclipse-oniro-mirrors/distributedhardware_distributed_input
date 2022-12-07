@@ -38,6 +38,8 @@
 #include "input_node_listener_stub.h"
 #include "simulation_event_listener_stub.h"
 
+#include "dinput_source_trans_callback.h"
+
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
@@ -149,9 +151,13 @@ public:
         virtual ~TestStartStopDInputsCb() = default;
         void OnResultDhids(const std::string &devId, const int32_t &status);
     };
+
+    void RegisterSourceRespCallback(std::shared_ptr<DInputSourceTransCallback> callback);
 private:
     int32_t StructTransJson(const InputDevice& pBuf, std::string& strDescriptor) const;
     DistributedInputSourceManager* sourceManager_;
+    std::shared_ptr<DistributedInputSourceManager::DInputSourceListener> statuslistener_;
+    std::shared_ptr<DInputSourceTransCallback> callback_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware
