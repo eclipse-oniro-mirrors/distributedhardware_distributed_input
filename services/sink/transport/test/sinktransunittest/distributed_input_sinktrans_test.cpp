@@ -17,6 +17,7 @@
 
 #include "nlohmann/json.hpp"
 #include "dinput_errcode.h"
+#include "distributed_input_sink_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -25,6 +26,7 @@ namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
+    const int32_t MESSAGE_MAX_SIZE = 46 * 1024;
     const int32_t SESSIONID = 1;
     const int32_t SRCTSRCSEID = 1;
     const std::string DEVID = "umkyu1b165e1be98151891erbe8r91ev";
@@ -35,6 +37,9 @@ namespace {
 
 void DistributedInputSinkTransTest::SetUp()
 {
+    std::string cmdType = "cmdType_test";
+    jsonStr_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = cmdType;
+
     jsonStr1_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE;
     jsonStr1_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
     jsonStr1_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
@@ -124,6 +129,7 @@ HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId_002, testing::ext::T
     DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(1, srcId);
     int32_t ret = DistributedInputSinkTransport::GetInstance().GetSessionIdByNetId(srcId);
     EXPECT_EQ(1, ret);
+    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(100, srcId);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput01, testing::ext::TestSize.Level1)
@@ -144,12 +150,29 @@ HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput02, testing::ext::
 
 HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkManager sinkMgr(4810, false);
+    std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener =
+        std::make_shared<DistributedInputSinkManager::DInputSinkListener>(&sinkMgr);
+    DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
+    std::string message = "";
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, message);
+    message = "message_test";
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, message);
+    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr_.dump());
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr1_.dump());
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr3_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput04, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg(MESSAGE_MAX_SIZE, 'a');
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput01, testing::ext::TestSize.Level0)
@@ -170,12 +193,24 @@ HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput02, testing::ext
 
 HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkManager sinkMgr(4810, false);
+    std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener =
+        std::make_shared<DistributedInputSinkManager::DInputSinkListener>(&sinkMgr);
+    DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr2_.dump());
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr4_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput04, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg(MESSAGE_MAX_SIZE, 'a');
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPUNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput01, testing::ext::TestSize.Level1)
@@ -196,6 +231,10 @@ HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput02, testing::ext::Te
 
 HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkManager sinkMgr(4810, false);
+    std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener =
+        std::make_shared<DistributedInputSinkManager::DInputSinkListener>(&sinkMgr);
+    DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr5_.dump());
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr7_.dump());
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr11_.dump());
@@ -203,6 +242,14 @@ HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput03, testing::ext::Te
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput04, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg(MESSAGE_MAX_SIZE, 'a');
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsg);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTART_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput01, testing::ext::TestSize.Level1)
@@ -223,6 +270,10 @@ HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput02, testing::ext::Tes
 
 HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput03, testing::ext::TestSize.Level1)
 {
+    DistributedInputSinkManager sinkMgr(4810, false);
+    std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener =
+        std::make_shared<DistributedInputSinkManager::DInputSinkListener>(&sinkMgr);
+    DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr6_.dump());
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr8_.dump());
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr12_.dump());
@@ -230,6 +281,14 @@ HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput03, testing::ext::Tes
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput04, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg(MESSAGE_MAX_SIZE, 'a');
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTOP_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, GetEventHandler, testing::ext::TestSize.Level1)
@@ -267,9 +326,13 @@ HWTEST_F(DistributedInputSinkTransTest, StopSwitch01, testing::ext::TestSize.Lev
 {
     int32_t sessionId = 1000;
     SwitchStateData switchStateData {sessionId, true};
+    DistributedInputSinkSwitch::GetInstance().switchVector_.clear();
+    DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
     DistributedInputSinkSwitch::GetInstance().switchVector_.push_back(switchStateData);
     DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
     EXPECT_EQ(false, DistributedInputSinkSwitch::GetInstance().switchVector_[0].switchState);
+    sessionId = 2000;
+    DistributedInputSinkSwitch::GetInstance().StopSwitch(sessionId);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, StopAllSwitch01, testing::ext::TestSize.Level1)
@@ -286,6 +349,7 @@ HWTEST_F(DistributedInputSinkTransTest, RemoveSession01, testing::ext::TestSize.
     DistributedInputSinkSwitch::GetInstance().switchVector_.clear();
     int32_t sessionId = 1000;
     SwitchStateData switchStateData {sessionId, true};
+    DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
     DistributedInputSinkSwitch::GetInstance().switchVector_.push_back(switchStateData);
     DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
     EXPECT_EQ(0, DistributedInputSinkSwitch::GetInstance().switchVector_.size());
@@ -341,9 +405,16 @@ HWTEST_F(DistributedInputSinkTransTest, RespLatency02, testing::ext::TestSize.Le
     DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr13_.dump());
     int32_t sessionId = 1;
     std::string smsg = "";
-    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(sessionId, smsg);
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespLatency(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkTransTest, RespLatency03, testing::ext::TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    std::string smsg(MESSAGE_MAX_SIZE, 'a');
+    int32_t ret = DistributedInputSinkTransport::GetInstance().RespLatency(sessionId, smsg);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESP_LATENCY_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSinkTransTest, SendMessage_001, testing::ext::TestSize.Level1)
@@ -356,7 +427,7 @@ HWTEST_F(DistributedInputSinkTransTest, SendMessage_001, testing::ext::TestSize.
 
 HWTEST_F(DistributedInputSinkTransTest, OnSessionOpened_001, testing::ext::TestSize.Level1)
 {
-    int32_t sessionId = 1;
+    int32_t sessionId = 0;
     int32_t result = 1;
     int32_t ret = DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
     EXPECT_EQ(DH_SUCCESS, ret);
@@ -372,15 +443,20 @@ HWTEST_F(DistributedInputSinkTransTest, OnSessionOpened_002, testing::ext::TestS
 
 HWTEST_F(DistributedInputSinkTransTest, OnSessionClosed_001, testing::ext::TestSize.Level1)
 {
-    int32_t sessionId = 1;
+    int32_t sessionId = -1;
     std::string networkId = "umkyu1b165e1be98151891erbe8r91ev";
     char *data = nullptr;
     uint32_t dataLen = 100;
+    std::string dhId = "dhId_test";
+    uint32_t btnCode = 0;
     DistributedInputSinkTransport::GetInstance().sessionDevMap_.clear();
     DistributedInputSinkTransport::GetInstance().OnBytesReceived(sessionId, data, dataLen);
     DistributedInputSinkTransport::GetInstance().sessionDevMap_[networkId] = sessionId;
     DistributedInputSinkTransport::GetInstance().OnSessionClosed(sessionId);
     EXPECT_EQ(0, DistributedInputSinkTransport::GetInstance().sessionDevMap_.size());
+    DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhId, btnCode);
+    sessionId = 0;
+    DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhId, btnCode);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

@@ -108,8 +108,10 @@ HWTEST_F(DistributedInputSinkManagerTest, IsStopDhidOnCmdStillNeed01, testing::e
     dhIds.push_back("Input_456456456456");
     dhIds.push_back("Input_789789789789");
     sinkManager_->StoreStartDhids(100, dhIds);
+    std::set<std::string> dhIdSet;
+    dhIdSet.insert("Input_123123123123");
+    sinkManager_->sharingDhIdsMap_[sessionId] = dhIdSet;
     sinkManager_->StoreStartDhids(sessionId, dhIds);
-
     std::string stopDhId = "Input_123123123123";
     bool ret = sinkManager_->IsStopDhidOnCmdStillNeed(sessionId, stopDhId);
     EXPECT_EQ(true, ret);
@@ -148,6 +150,13 @@ HWTEST_F(DistributedInputSinkManagerTest, GetSinkScreenInfosCbackSize01, testing
 HWTEST_F(DistributedInputSinkManagerTest, RegisterGetSinkScreenInfosCallback_01, testing::ext::TestSize.Level1)
 {
     sptr<TestGetSinkScreenInfosCb> callback = new TestGetSinkScreenInfosCb();
+    int32_t ret = sinkManager_->RegisterGetSinkScreenInfosCallback(callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, RegisterGetSinkScreenInfosCallback_02, testing::ext::TestSize.Level1)
+{
+    sptr<TestGetSinkScreenInfosCb> callback = nullptr;
     int32_t ret = sinkManager_->RegisterGetSinkScreenInfosCallback(callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
@@ -206,6 +215,58 @@ HWTEST_F(DistributedInputSinkManagerTest, ParseMessage_02, testing::ext::TestSiz
     int32_t ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
         srcDevId, srcWinId, sinkScreenInfo);
     EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSinkManagerTest, ParseMessage_04, testing::ext::TestSize.Level1)
+{
+    std::string srcDevId = "umkyu1b165e1be98151891erbe8r91ev";
+    SinkScreenInfo sinkScreenInfo;
+    uint64_t srcWinId = 1;
+    uint64_t sinkShowWinId = 1;
+    uint32_t sinkShowWidth = 1860;
+    uint32_t sinkShowHeigth = 980;
+    uint32_t sinkShowX = 100;
+    nlohmann::json jsonObj;
+    jsonObj[SOURCE_DEVICE_ID] = srcWinId;
+    int32_t ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
+
+    jsonObj[SOURCE_DEVICE_ID] = srcDevId;
+    jsonObj[SOURCE_WINDOW_ID] = srcDevId;
+    ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
+
+    jsonObj[SOURCE_WINDOW_ID] = srcWinId;
+    jsonObj[SINK_SHOW_WINDOW_ID] = srcDevId;
+    ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
+
+    jsonObj[SINK_SHOW_WINDOW_ID] = sinkShowWinId;
+    jsonObj[SINK_PROJECT_SHOW_WIDTH] = srcDevId;
+    ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
+
+    jsonObj[SINK_PROJECT_SHOW_WIDTH] = sinkShowWidth;
+    jsonObj[SINK_PROJECT_SHOW_HEIGHT] = srcDevId;
+    ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
+
+    jsonObj[SINK_PROJECT_SHOW_HEIGHT] = sinkShowHeigth;
+    jsonObj[SINK_WINDOW_SHOW_X] = srcDevId;
+    ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
+
+    jsonObj[SINK_WINDOW_SHOW_X] = sinkShowX;
+    jsonObj[SINK_WINDOW_SHOW_Y] = srcDevId;
+    ret = sinkManager_->projectWindowListener_->ParseMessage(jsonObj.dump(),
+        srcDevId, srcWinId, sinkScreenInfo);
+    EXPECT_EQ(ERR_DH_INPUT_JSON_PARSE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSinkManagerTest, UpdateSinkScreenInfoCache_01, testing::ext::TestSize.Level1)

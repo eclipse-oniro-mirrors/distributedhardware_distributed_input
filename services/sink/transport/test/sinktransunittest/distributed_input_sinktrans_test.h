@@ -36,6 +36,7 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 private:
+    nlohmann::json jsonStr_;
     nlohmann::json jsonStr1_;
     nlohmann::json jsonStr2_;
     nlohmann::json jsonStr3_;

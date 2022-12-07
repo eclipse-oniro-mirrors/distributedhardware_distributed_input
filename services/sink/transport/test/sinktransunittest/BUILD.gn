@@ -43,6 +43,23 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${utils_path}/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "${common_path}/test/mock",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/include",
+    "${fwk_interfaces_path}/include/ipc",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/utils/include/",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
+    "//drivers/peripheral/display/interfaces/include",
+    "//drivers/peripheral/base",
+    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+    "${innerkits_path}/include",
+    "${innerkits_path}/src",
+    "${ipc_path}/include",
+    "${ipc_path}/src",
+    "${services_sink_path}/inputcollector/include",
   ]
 
   sources = [
@@ -51,6 +68,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "distributed_input_sinktrans_test.cpp",
     "${common_path}/test/mock/session_mock.cpp",
     "${common_path}/test/mock/softbus_bus_center_mock.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
   ]
 
   cflags = [
@@ -73,10 +91,15 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "${services_sink_path}/sinkmanager:libdinput_sink",
+    "${services_sink_path}/inputcollector:libdinput_collector",
+    "//foundation/window/window_manager/dm:libdm",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]
