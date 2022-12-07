@@ -15,6 +15,7 @@
 
 #include "distributed_input_sourcemanager_test.h"
 
+#include <cstdlib>
 #include <fcntl.h>
 #include <iostream>
 #include <thread>
@@ -51,6 +52,7 @@ void DistributedInputSourceManagerTest::SetUpTestCase()
 
 void DistributedInputSourceManagerTest::TearDownTestCase()
 {
+    _Exit(0);
 }
 
 void DistributedInputSourceManagerTest::TestRegisterDInputCb::OnResult(

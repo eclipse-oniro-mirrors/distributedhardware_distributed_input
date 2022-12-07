@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "dinput_errcode.h"
 #include "distributed_input_sourcetrans_test.h"
+
+#include <cstdlib>
+#include "dinput_errcode.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -36,6 +38,7 @@ void DistributedInputSourceTransTest::SetUpTestCase()
 
 void DistributedInputSourceTransTest::TearDownTestCase()
 {
+    _Exit(0);
 }
 
 HWTEST_F(DistributedInputSourceTransTest, OpenInputSoftbus01, testing::ext::TestSize.Level0)
