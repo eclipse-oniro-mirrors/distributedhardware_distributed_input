@@ -16,7 +16,10 @@
 #include "distributed_input_sourcetrans_test.h"
 
 #include <cstdlib>
+
 #include "dinput_errcode.h"
+#include "dinput_softbus_define.h"
+#include "distributed_input_source_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -136,6 +139,26 @@ HWTEST_F(DistributedInputSourceTransTest, StartRemoteInput02, testing::ext::Test
     std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
     int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(
         deviceId, static_cast<uint32_t>(DInputDeviceType::ALL));
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, StartRemoteInput03, testing::ext::TestSize.Level0)
+{
+    std::string deviceId = "";
+    std::string dhid = "Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    std::vector<std::string> dhids;
+    dhids.push_back(dhid);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, dhids);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, StartRemoteInput04, testing::ext::TestSize.Level0)
+{
+    std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string dhid = "Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
+    std::vector<std::string> dhids;
+    dhids.push_back(dhid);
+    int32_t ret = DistributedInputSourceTransport::GetInstance().StartRemoteInput(deviceId, dhids);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -373,6 +396,188 @@ HWTEST_F(DistributedInputSourceTransTest, SendRelayStopTypeRequest_01, testing::
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
+HWTEST_F(DistributedInputSourceTransTest, LatencyCount01, testing::ext::TestSize.Level0)
+{
+    std::string deviceId = "deviceId";
+    int32_t ret = DistributedInputSourceTransport::GetInstance().LatencyCount(deviceId);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_LATENCY_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, LatencyCount02, testing::ext::TestSize.Level0)
+{
+    std::string deviceId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = false;
+    dInputSessionInfo.remoteId = deviceId;
+    int32_t sessionId = 2;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().LatencyCount(deviceId);
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::GetInstance().StopLatencyThread();
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, SendRelayStartDhidRequest_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::vector<std::string> dhids;
+    dhids.push_back("Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8");
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = true;
+    dInputSessionInfo.remoteId = srcId;
+    int32_t sessionId = -1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().SendRelayStartDhidRequest(srcId, sinkId, dhids);
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, SendRelayStopDhidRequest_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::vector<std::string> dhids;
+    dhids.push_back("Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8");
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = true;
+    dInputSessionInfo.remoteId = srcId;
+    int32_t sessionId = -1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().SendRelayStopDhidRequest(srcId, sinkId, dhids);
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, SendRelayStartTypeRequest_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::vector<std::string> dhids;
+    dhids.push_back("Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8");
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = true;
+    dInputSessionInfo.remoteId = srcId;
+    int32_t sessionId = -1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().SendRelayStartTypeRequest(srcId, sinkId,
+        static_cast<uint32_t>(DInputDeviceType::ALL));
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, SendRelayStopTypeRequest_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    std::string sinkId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::vector<std::string> dhids;
+    dhids.push_back("Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8");
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = true;
+    dInputSessionInfo.remoteId = srcId;
+    int32_t sessionId = -1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().SendRelayStopTypeRequest(srcId, sinkId,
+        static_cast<uint32_t>(DInputDeviceType::ALL));
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, JointDhIds01, testing::ext::TestSize.Level0)
+{
+    std::vector<std::string> dhids;
+    std::string ret = DistributedInputSourceTransport::GetInstance().JointDhIds(dhids);
+    EXPECT_EQ("", ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, FindDeviceBySession01, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 0;
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = true;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    std::string ret = DistributedInputSourceTransport::GetInstance().FindDeviceBySession(sessionId);
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    EXPECT_EQ("", ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, OnSessionOpened01, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 0;
+    int32_t result = ERR_DH_INPUT_SERVER_SOURCE_TRANSPORT_STOP_FAIL;
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = true;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    int32_t ret = DistributedInputSourceTransport::GetInstance().OnSessionOpened(sessionId, result);
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyResponsePrepareRemoteInput01, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 0;
+    nlohmann::json recMsg;
+    recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+    recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST] = false;
+    DistributedInputSourceTransport::GetInstance().NotifyResponsePrepareRemoteInput(sessionId, recMsg);
+    EXPECT_EQ(false, recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST].is_string());
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyResponsePrepareRemoteInput02, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 0;
+    nlohmann::json recMsg;
+    recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+    recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "false";
+    DistributedInputSourceTransport::GetInstance().NotifyResponsePrepareRemoteInput(sessionId, recMsg);
+    EXPECT_EQ(true, recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST].is_string());
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyResponsePrepareRemoteInput03, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 0;
+    nlohmann::json recMsg;
+    recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+    recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST] = "false";
+    DistributedInputSourceTransport::DInputSessionInfo dInputSessionInfo;
+    dInputSessionInfo.isToSrcSa = true;
+    dInputSessionInfo.remoteId = "f6d4c08647073e02e7a78f09473aa122ff57fc81c00981fcf5be989e7d112591";
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = dInputSessionInfo;
+    DistributedInputSourceManager srcMgr(4810, false);
+    std::shared_ptr<DistributedInputSourceManager::DInputSourceListener> srcListener =
+        std::make_shared<DistributedInputSourceManager::DInputSourceListener>(&srcMgr);
+    DistributedInputSourceTransport::GetInstance().callback_ = srcListener;
+    DistributedInputSourceTransport::GetInstance().NotifyResponsePrepareRemoteInput(sessionId, recMsg);
+    EXPECT_EQ(true, recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST].is_string());
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyResponseUnprepareRemoteInput01, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 0;
+    nlohmann::json recMsg;
+    recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE] = "false";
+    DistributedInputSourceTransport::GetInstance().NotifyResponseUnprepareRemoteInput(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStartRemoteInput(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStopRemoteInput(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStartRemoteInputDhid(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStopRemoteInputDhid(sessionId, recMsg);
+    EXPECT_EQ(false, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean());
+}
+
+HWTEST_F(DistributedInputSourceTransTest, NotifyResponseUnprepareRemoteInput02, testing::ext::TestSize.Level0)
+{
+    int32_t sessionId = 0;
+    nlohmann::json recMsg;
+    recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE] = false;
+    DistributedInputSourceTransport::GetInstance().NotifyResponseUnprepareRemoteInput(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStartRemoteInput(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStopRemoteInput(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStartRemoteInputDhid(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseStopRemoteInputDhid(sessionId, recMsg);
+    DistributedInputSourceTransport::GetInstance().NotifyResponseKeyState(sessionId, recMsg);
+    EXPECT_EQ(true, recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean());
+}
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
