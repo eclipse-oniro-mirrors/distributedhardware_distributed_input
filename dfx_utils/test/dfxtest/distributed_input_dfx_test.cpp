@@ -79,6 +79,7 @@ HWTEST_F(DInputDfxUtilsTest, GetAllNodeInfos_001, testing::ext::TestSize.Level1)
     std::string nodeName = "DistributedInput_123456";
     HiDumper::GetInstance().SaveNodeInfo(devId, nodeName, dhId);
     std::string dhId1 = "dhId1_test";
+    std::string devId1 = "devId1_test";
     HiDumper::GetInstance().SaveNodeInfo(devId, nodeName, dhId1);
     EXPECT_EQ(2, HiDumper::GetInstance().nodeInfos_.size());
 
@@ -87,6 +88,8 @@ HWTEST_F(DInputDfxUtilsTest, GetAllNodeInfos_001, testing::ext::TestSize.Level1)
     EXPECT_EQ(DH_SUCCESS, ret);
 
     HiDumper::GetInstance().DeleteNodeInfo(devId, dhId1);
+    HiDumper::GetInstance().DeleteNodeInfo(devId1, dhId);
+    HiDumper::GetInstance().DeleteNodeInfo(devId1, dhId1);
     HiDumper::GetInstance().DeleteNodeInfo(devId, dhId);
     EXPECT_EQ(0, HiDumper::GetInstance().nodeInfos_.size());
     std::string status = "status_ok";
@@ -103,10 +106,12 @@ HWTEST_F(DInputDfxUtilsTest, GetSessionInfo_001, testing::ext::TestSize.Level1)
     int32_t sessionId = 1;
     std::string mySessionName = "mySessionName_test";
     std::string peerSessionName = "peerSessionName_test";
-    SessionStatus sessionStatus = SessionStatus::OPENED;
+    SessionStatus sessionStatus = static_cast<SessionStatus>(0x04);
     std::string result = "";
     HiDumper::GetInstance().CreateSessionInfo(remoteDevId, sessionId, mySessionName, peerSessionName, sessionStatus);
     EXPECT_EQ(1, HiDumper::GetInstance().sessionInfos_.size());
+    int32_t ret = HiDumper::GetInstance().GetSessionInfo(result);
+    EXPECT_EQ(DH_SUCCESS, ret);
 
     sessionStatus = SessionStatus::CLOSED;
     HiDumper::GetInstance().CreateSessionInfo(remoteDevId, sessionId, mySessionName, peerSessionName, sessionStatus);
@@ -116,14 +121,14 @@ HWTEST_F(DInputDfxUtilsTest, GetSessionInfo_001, testing::ext::TestSize.Level1)
     HiDumper::GetInstance().SetSessionStatus(remoteDevId1, sessionStatus);
     HiDumper::GetInstance().SetSessionStatus(remoteDevId, sessionStatus);
 
+    ret = HiDumper::GetInstance().GetSessionInfo(result);
+    EXPECT_EQ(DH_SUCCESS, ret);
 
     HiDumper::GetInstance().DeleteSessionInfo(remoteDevId);
     EXPECT_EQ(0, HiDumper::GetInstance().sessionInfos_.size());
 
     HiDumper::GetInstance().DeleteSessionInfo(remoteDevId1);
 
-    int32_t ret = HiDumper::GetInstance().GetSessionInfo(result);
-    EXPECT_EQ(DH_SUCCESS, ret);
     std::string status = "status_ok";
     std::string msg = "msg_test";
     int32_t errorCode = 1;

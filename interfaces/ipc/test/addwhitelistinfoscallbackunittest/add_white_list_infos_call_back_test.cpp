@@ -311,6 +311,19 @@ HWTEST_F(AddWhiteListInfosCallbackTest, StartStopResultCallbackStub01, testing::
     EXPECT_STREQ(sinkId.c_str(), ((sptr<TestStartStopResultCallbackStub> &)callBackStubPtr)->sinkId_.c_str());
 }
 
+HWTEST_F(AddWhiteListInfosCallbackTest, StartStopResultCallbackStub02, testing::ext::TestSize.Level1)
+{
+    sptr<IRemoteObject> callBackStubPtr = new TestStartStopResultCallbackStub();
+    StartStopResultCallbackProxy callBackProxy(callBackStubPtr);
+    std::string srcId = "srcId_test";
+    std::string sinkId = "sinkId_test";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("dhId_test");
+    callBackProxy.OnStop(srcId, sinkId, dhIds);
+    EXPECT_STREQ(srcId.c_str(), ((sptr<TestStartStopResultCallbackStub> &)callBackStubPtr)->srcId_.c_str());
+    EXPECT_STREQ(sinkId.c_str(), ((sptr<TestStartStopResultCallbackStub> &)callBackStubPtr)->sinkId_.c_str());
+}
+
 HWTEST_F(AddWhiteListInfosCallbackTest, StopDInputCallbackStub01, testing::ext::TestSize.Level1)
 {
     sptr<IRemoteObject> callBackStubPtr = new TestStopDInputCallbackStub();
