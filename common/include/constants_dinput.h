@@ -148,36 +148,6 @@ namespace DistributedInput {
 
     const std::string SINK_WINDOW_SHOW_Y = "sinkWinShowY";
 
-    const std::string DEVICE_NAME = "name";
-
-    const std::string PHYSICAL_PATH = "physicalPath";
-
-    const std::string UNIQUE_ID = "uniqueId";
-
-    const std::string BUS = "bus";
-
-    const std::string VENDOR = "vendor";
-
-    const std::string PRODUCT = "product";
-
-    const std::string VERSION = "version";
-
-    const std::string DESCRIPTOR = "descriptor";
-
-    const std::string CLASSES = "classes";
-
-    const std::string EVENT_TYPES = "eventTypes";
-
-    const std::string EVENT_KEYS = "eventKeys";
-
-    const std::string ABS_TYPES = "absTypes";
-
-    const std::string ABS_INFOS = "absInfos";
-
-    const std::string REL_TYPES = "relTypes";
-
-    const std::string PROPERTIES = "properties";
-
     constexpr uint32_t SCREEN_ID_DEFAULT = 0;
 
     constexpr uint32_t DEFAULT_VALUE = 0;
@@ -229,12 +199,6 @@ namespace DistributedInput {
         uint16_t version;
         std::string descriptor;
         uint32_t classes;
-        std::vector<uint32_t> eventTypes;
-        std::vector<uint32_t> eventKeys;
-        std::vector<uint32_t> absTypes;
-        std::map<uint32_t, std::vector<int32_t>> absInfos;
-        std::vector<uint32_t> relTypes;
-        std::vector<uint32_t> properties;
     };
 
     /*

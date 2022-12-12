@@ -57,21 +57,15 @@ void DistributedInputHandler::StructTransJson(const InputDevice& pBuf, std::stri
     DHLOGI("[%s] %d, %d, %d, %d, %s.\n", (pBuf.name).c_str(), pBuf.bus, pBuf.vendor, pBuf.product, pBuf.version,
         GetAnonyString(pBuf.descriptor).c_str());
     nlohmann::json tmpJson;
-    tmpJson[DEVICE_NAME] = pBuf.name;
-    tmpJson[PHYSICAL_PATH] = pBuf.physicalPath;
-    tmpJson[UNIQUE_ID] = pBuf.uniqueId;
-    tmpJson[BUS] = pBuf.bus;
-    tmpJson[VENDOR] = pBuf.vendor;
-    tmpJson[PRODUCT] = pBuf.product;
-    tmpJson[VERSION] = pBuf.version;
-    tmpJson[DESCRIPTOR] = pBuf.descriptor;
-    tmpJson[CLASSES] = pBuf.classes;
-    tmpJson[EVENT_TYPES] = pBuf.eventTypes;
-    tmpJson[EVENT_KEYS] = pBuf.eventKeys;
-    tmpJson[ABS_TYPES] = pBuf.absTypes;
-    tmpJson[ABS_INFOS] = pBuf.absInfos;
-    tmpJson[REL_TYPES] = pBuf.relTypes;
-    tmpJson[PROPERTIES] = pBuf.properties;
+    tmpJson["name"] = pBuf.name;
+    tmpJson["physicalPath"] = pBuf.physicalPath;
+    tmpJson["uniqueId"] = pBuf.uniqueId;
+    tmpJson["bus"] = pBuf.bus;
+    tmpJson["vendor"] = pBuf.vendor;
+    tmpJson["product"] = pBuf.product;
+    tmpJson["version"] = pBuf.version;
+    tmpJson["descriptor"] = pBuf.descriptor;
+    tmpJson["classes"] = pBuf.classes;
 
     std::ostringstream stream;
     stream << tmpJson.dump();

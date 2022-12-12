@@ -39,7 +39,6 @@ ohos_shared_library("libdinput_source_handler") {
     "${services_source_path}/inputinject/include",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
-    "//third_party/libevdev/libevdev/"
   ]
 
   sources = [
@@ -59,7 +58,6 @@ ohos_shared_library("libdinput_source_handler") {
     "${innerkits_path}:libdinput_sdk",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "${dfx_utils_path}:libdinput_dfx_utils",
-    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

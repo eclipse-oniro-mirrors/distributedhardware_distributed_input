@@ -24,8 +24,6 @@
 #include <string>
 #include <thread>
 
-#include "nlohmann/json.hpp"
-
 #include "constants_dinput.h"
 #include "input_hub.h"
 #include "virtual_device.h"
@@ -58,9 +56,8 @@ public:
 
 private:
     void AddDeviceLocked(const std::string& dhId, std::unique_ptr<VirtualDevice> device);
-    int32_t CreateHandle(const InputDevice& inputDevice, const std::string& devId, const std::string& dhId);
-    void ParseInputDeviceJson(const std::string& str, InputDevice& pBuf);
-    void VerifyInputDevice(const nlohmann::json& inputDeviceJson, InputDevice& pBuf);
+    int32_t CreateHandle(InputDevice event, const std::string& devId, const std::string& dhId);
+    void stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf);
     void InjectEvent();
 
     /* the key is dhId, and the value is virtualDevice */
@@ -74,7 +71,6 @@ private:
     std::queue<std::shared_ptr<RawEvent>> injectQueue_;
     std::unique_ptr<InputHub> inputHub_;
     int32_t virtualTouchScreenFd_;
-    std::once_flag callOnceFlag_;
 };
 } // namespace DistributedInput
 } // namespace DistributedHardware

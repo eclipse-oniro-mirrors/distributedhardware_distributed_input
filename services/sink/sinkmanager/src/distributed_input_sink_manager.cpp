@@ -848,32 +848,32 @@ int32_t DistributedInputSinkManager::ProjectWindowListener::ParseMessage(const s
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     srcDeviceId = jsonObj[SOURCE_DEVICE_ID].get<std::string>();
-    if (!IsUInt64(jsonObj, SOURCE_WINDOW_ID)) {
+    if (!IsUint64(jsonObj, SOURCE_WINDOW_ID)) {
         DHLOGE("sourceWinId key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     srcWinId = jsonObj[SOURCE_WINDOW_ID].get<uint64_t>();
-    if (!IsUInt64(jsonObj, SINK_SHOW_WINDOW_ID)) {
+    if (!IsUint64(jsonObj, SINK_SHOW_WINDOW_ID)) {
         DHLOGE("sinkWinId key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     sinkScreenInfo.sinkShowWinId = jsonObj[SINK_SHOW_WINDOW_ID].get<uint64_t>();
-    if (!IsUInt32(jsonObj, SINK_PROJECT_SHOW_WIDTH)) {
+    if (!IsUint32(jsonObj, SINK_PROJECT_SHOW_WIDTH)) {
         DHLOGE("sourceWinHeight key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     sinkScreenInfo.sinkProjShowWidth = jsonObj[SINK_PROJECT_SHOW_WIDTH].get<std::uint32_t>();
-    if (!IsUInt32(jsonObj, SINK_PROJECT_SHOW_HEIGHT)) {
+    if (!IsUint32(jsonObj, SINK_PROJECT_SHOW_HEIGHT)) {
         DHLOGE("sourceWinHeight key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     sinkScreenInfo.sinkProjShowHeight = jsonObj[SINK_PROJECT_SHOW_HEIGHT].get<std::uint32_t>();
-    if (!IsUInt32(jsonObj, SINK_WINDOW_SHOW_X)) {
+    if (!IsUint32(jsonObj, SINK_WINDOW_SHOW_X)) {
         DHLOGE("sourceWinHeight key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     sinkScreenInfo.sinkWinShowX = jsonObj[SINK_WINDOW_SHOW_X].get<std::uint32_t>();
-    if (!IsUInt32(jsonObj, SINK_WINDOW_SHOW_Y)) {
+    if (!IsUint32(jsonObj, SINK_WINDOW_SHOW_Y)) {
         DHLOGE("sourceWinHeight key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }

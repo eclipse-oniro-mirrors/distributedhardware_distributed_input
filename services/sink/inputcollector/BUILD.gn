@@ -33,7 +33,6 @@ ohos_shared_library("libdinput_collector") {
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//third_party/libevdev/libevdev/"
   ]
 
   sources = [
@@ -52,7 +51,6 @@ ohos_shared_library("libdinput_collector") {
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/openssl:libcrypto_static",
-    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

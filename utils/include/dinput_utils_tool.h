@@ -36,13 +36,11 @@ std::string GetLocalNetworkId();
 std::string GetUUIDBySoftBus(const std::string &networkId);
 uint64_t GetCurrentTime();
 std::string SetAnonyId(const std::string &message);
-/* IsString, IsUInt32 and IsUInt64 are used to valid json key */
+/* IsString, IsUint32 and IsUint64 are used to valid json key */
 bool IsString(const nlohmann::json& jsonObj, const std::string& key);
 bool IsInt32(const nlohmann::json& jsonObj, const std::string& key);
-bool IsUInt16(const nlohmann::json& jsonObj, const std::string& key);
-bool IsUInt32(const nlohmann::json& jsonObj, const std::string& key);
-bool IsUInt64(const nlohmann::json& jsonObj, const std::string& key);
-bool IsArray(const nlohmann::json& jsonObj, const std::string& key);
+bool IsUint32(const nlohmann::json& jsonObj, const std::string& key);
+bool IsUint64(const nlohmann::json& jsonObj, const std::string& key);
 std::string GetNodeDesc(std::string parameters);
 } // namespace DistributedInput
 } // namespace DistributedHardware

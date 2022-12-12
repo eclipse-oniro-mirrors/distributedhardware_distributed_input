@@ -36,7 +36,6 @@ config("input_sdk_public_config") {
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/communication/dsoftbus/interfaces/kits/bus_center",
     "//foundation/communication/dsoftbus/interfaces/kits/common",
-    "//third_party/libevdev/libevdev/"
   ]
 }
 ohos_shared_library("libdinput_sdk") {
@@ -86,7 +85,6 @@ ohos_shared_library("libdinput_sdk") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
-    "//third_party/libevdev:libevdev",
   ]
 
   defines = [

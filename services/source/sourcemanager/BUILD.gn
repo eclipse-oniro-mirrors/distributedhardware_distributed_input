@@ -44,7 +44,6 @@ ohos_shared_library("libdinput_source") {
     "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
     "//foundation/communication/dsoftbus/interfaces/kits/bus_center",
     "//foundation/communication/dsoftbus/interfaces/kits/common",
-    "//third_party/libevdev/libevdev/"
   ]
 
   sources = [
@@ -102,7 +101,6 @@ ohos_shared_library("libdinput_source") {
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
     "//foundation/distributedhardware/distributed_input/services/source/transport:libdinput_source_trans",
     "${fwk_interfaces_path}:libdhfwk_sdk",
-    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

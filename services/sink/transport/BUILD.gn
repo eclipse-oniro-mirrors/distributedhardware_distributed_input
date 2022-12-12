@@ -37,7 +37,6 @@ ohos_shared_library("libdinput_sink_trans") {
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
-    "//third_party/libevdev/libevdev/"
   ]
 
   sources = [
@@ -59,7 +58,6 @@ ohos_shared_library("libdinput_sink_trans") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

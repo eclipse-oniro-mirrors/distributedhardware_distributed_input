@@ -2660,17 +2660,17 @@ int32_t DistributedInputSourceManager::StartDScreenListener::ParseMessage(const 
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     sinkDevId = jsonObj[SINK_DEVICE_ID].get<std::string>();
-    if (!IsUInt64(jsonObj, SOURCE_WINDOW_ID)) {
+    if (!IsUint64(jsonObj, SOURCE_WINDOW_ID)) {
         DHLOGE("sourceWinId key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     srcScreenInfo.sourceWinId = jsonObj[SOURCE_WINDOW_ID].get<uint64_t>();
-    if (!IsUInt32(jsonObj, SOURCE_WINDOW_WIDTH)) {
+    if (!IsUint32(jsonObj, SOURCE_WINDOW_WIDTH)) {
         DHLOGE("sourceWinWidth key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     srcScreenInfo.sourceWinWidth = jsonObj[SOURCE_WINDOW_WIDTH].get<std::uint32_t>();
-    if (!IsUInt32(jsonObj, SOURCE_WINDOW_HEIGHT)) {
+    if (!IsUint32(jsonObj, SOURCE_WINDOW_HEIGHT)) {
         DHLOGE("sourceWinHeight key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
@@ -2770,7 +2770,7 @@ int32_t DistributedInputSourceManager::StopDScreenListener::ParseMessage(const s
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
     sinkDevId = jsonObj[SINK_DEVICE_ID].get<std::string>();
-    if (!IsUInt64(jsonObj, SOURCE_WINDOW_ID)) {
+    if (!IsUint64(jsonObj, SOURCE_WINDOW_ID)) {
         DHLOGE("sourceWinId key is invalid");
         return ERR_DH_INPUT_JSON_PARSE_FAIL;
     }
