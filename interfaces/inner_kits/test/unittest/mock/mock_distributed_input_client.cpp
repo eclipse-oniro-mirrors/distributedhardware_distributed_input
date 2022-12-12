@@ -15,12 +15,12 @@
 
 #include "distributed_input_client.h"
 
-#include "distributed_hardware_log.h"
 #include "nlohmann/json.hpp"
 
 #include "constants_dinput.h"
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "white_list_util.h"
 
 namespace OHOS {

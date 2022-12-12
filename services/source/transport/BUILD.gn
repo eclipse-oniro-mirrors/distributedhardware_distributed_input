@@ -45,7 +45,7 @@ ohos_shared_library("libdinput_source_trans") {
 
   defines = [
     "HI_LOG_ENABLE",
-    "DH_LOG_TAG=\"distributedinpusourcetransport\"",
+    "DH_LOG_TAG=\"distributedinputsourcetransport\"",
     "LOG_DOMAIN=0xD004100",
   ]
 

@@ -22,14 +22,13 @@
 #include <unistd.h>
 
 #include "anonymous_string.h"
-#include "dinput_utils_tool.h"
-#include "distributed_hardware_log.h"
-
 #include "softbus_bus_center.h"
 
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "dinput_softbus_define.h"
+#include "dinput_utils_tool.h"
 
 namespace OHOS {
 namespace DistributedHardware {

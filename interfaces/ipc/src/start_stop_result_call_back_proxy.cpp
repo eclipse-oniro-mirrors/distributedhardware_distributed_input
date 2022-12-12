@@ -17,7 +17,7 @@
 #include "parcel.h"
 
 #include "dinput_errcode.h"
-#include "distributed_hardware_log.h"
+#include "dinput_log.h"
 #include "start_stop_result_call_back_proxy.h"
 
 namespace OHOS {

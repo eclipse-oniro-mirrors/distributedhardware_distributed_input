@@ -15,9 +15,8 @@
 
 #include "distributed_input_sink_handler.h"
 
-#include "distributed_hardware_log.h"
-
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "hisysevent_util.h"
 #include "i_distributed_sink_input.h"
 #include "load_d_input_sink_callback.h"

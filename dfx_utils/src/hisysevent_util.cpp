@@ -17,7 +17,7 @@
 
 #include "anonymous_string.h"
 #include "dinput_errcode.h"
-#include "distributed_hardware_log.h"
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

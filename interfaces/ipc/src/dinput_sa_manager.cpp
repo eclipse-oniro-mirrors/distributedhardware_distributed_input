@@ -15,12 +15,12 @@
 
 #include "dinput_sa_manager.h"
 
-#include "distributed_hardware_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

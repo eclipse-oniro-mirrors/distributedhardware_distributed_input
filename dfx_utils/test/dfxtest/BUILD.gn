@@ -38,12 +38,14 @@ ohos_unittest("distributed_input_dfx_test") {
     "${frameworks_path}/include",
     "${dfx_utils_path}/include",
     "${service_common}/include",
+    "${utils_path}/include",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [
+    "${utils_path}/src/dinput_log.cpp",
     "${dfx_utils_path}/src/hidumper.cpp",
     "${dfx_utils_path}/src/hisysevent_util.cpp",
     "distributed_input_dfx_test.cpp",
@@ -71,6 +73,7 @@ ohos_unittest("distributed_input_dfx_test") {
   external_deps = [
     "c_utils:utils",
     "hisysevent_native:libhisysevent",
+    "hiviewdfx_hilog_native:libhilog",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

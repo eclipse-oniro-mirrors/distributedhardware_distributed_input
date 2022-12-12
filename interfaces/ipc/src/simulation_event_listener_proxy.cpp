@@ -15,10 +15,11 @@
 
 #include "simulation_event_listener_proxy.h"
 
-#include "distributed_hardware_log.h"
-#include "dinput_errcode.h"
 #include "ipc_types.h"
 #include "parcel.h"
+
+#include "dinput_errcode.h"
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

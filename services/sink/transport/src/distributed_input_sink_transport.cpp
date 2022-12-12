@@ -21,12 +21,12 @@
 
 #include "anonymous_string.h"
 #include "distributed_hardware_fwk_kit.h"
-#include "distributed_hardware_log.h"
 #include "securec.h"
 
 #include "constants_dinput.h"
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "dinput_softbus_define.h"
 #include "dinput_utils_tool.h"
 #include "hidumper.h"

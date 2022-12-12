@@ -29,11 +29,11 @@
 #include <utility>
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 
 #include "constants_dinput.h"
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "dh_utils_tool.h"
 
 namespace OHOS {

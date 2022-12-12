@@ -18,11 +18,11 @@
 #include <mutex>
 
 #include "distributed_hardware_fwk_kit.h"
-#include "distributed_hardware_log.h"
 #include "ipublisher_listener.h"
 
 #include "constants_dinput.h"
 #include "dinput_context.h"
+#include "dinput_log.h"
 #include "hisysevent_util.h"
 
 namespace OHOS {

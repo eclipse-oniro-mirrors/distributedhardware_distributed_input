@@ -15,8 +15,7 @@
 
 #include "load_d_input_source_callback.h"
 
-#include "distributed_hardware_log.h"
-
+#include "dinput_log.h"
 #include "distributed_input_source_handler.h"
 #include "hisysevent_util.h"
 

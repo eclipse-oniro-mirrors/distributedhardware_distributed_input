@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
+#include "input_check_param.h"
 
 #include "constants_dinput.h"
-#include "distributed_hardware_log.h"
-
-#include "input_check_param.h"
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

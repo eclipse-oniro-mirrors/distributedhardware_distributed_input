@@ -15,9 +15,10 @@
 
 #include "del_white_list_infos_call_back_proxy.h"
 
-#include "distributed_hardware_log.h"
 #include "ipc_types.h"
 #include "parcel.h"
+
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

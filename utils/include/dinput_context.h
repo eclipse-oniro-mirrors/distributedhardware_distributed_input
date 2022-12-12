@@ -30,12 +30,12 @@
 #include "constants.h"
 #include "device_type.h"
 #include "distributed_hardware_fwk_kit.h"
-#include "distributed_hardware_log.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
 #include "system_ability_definition.h"
 
+#include "dinput_log.h"
 #include "i_dinput_context.h"
 
 namespace OHOS {

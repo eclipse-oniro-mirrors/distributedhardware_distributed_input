@@ -16,7 +16,6 @@
 #include "distributed_input_client.h"
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
 #include "system_ability_definition.h"
@@ -24,6 +23,7 @@
 #include "constants_dinput.h"
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "dinput_utils_tool.h"
 #include "distributed_input_source_proxy.h"
 #include "input_check_param.h"

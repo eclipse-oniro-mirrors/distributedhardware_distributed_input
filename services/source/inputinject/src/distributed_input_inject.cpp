@@ -18,11 +18,11 @@
 #include <sstream>
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 #include "dh_utils_tool.h"
 #include "nlohmann/json.hpp"
 
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "dinput_utils_tool.h"
 
 namespace OHOS {

@@ -15,11 +15,11 @@
 
 #include "add_white_list_infos_call_back_stub.h"
 
-#include "distributed_hardware_log.h"
 #include "string_ex.h"
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

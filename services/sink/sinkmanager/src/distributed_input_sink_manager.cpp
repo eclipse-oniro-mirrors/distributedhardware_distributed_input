@@ -23,7 +23,6 @@
 #include "anonymous_string.h"
 #include "dinput_softbus_define.h"
 #include "distributed_hardware_fwk_kit.h"
-#include "distributed_hardware_log.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "nlohmann/json.hpp"
@@ -37,6 +36,7 @@
 
 #include "dinput_context.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "dinput_sa_process_state.h"
 #include "dinput_utils_tool.h"
 #include "hidumper.h"

@@ -18,7 +18,7 @@
 #include "ipc_types.h"
 #include "parcel.h"
 
-#include "distributed_hardware_log.h"
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

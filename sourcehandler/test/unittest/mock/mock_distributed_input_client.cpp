@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "distributed_input_client.h"
+
 #include "nlohmann/json.hpp"
-#include "distributed_hardware_log.h"
 
 #include "constants_dinput.h"
-#include "distributed_input_client.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "white_list_util.h"
 
 namespace OHOS {

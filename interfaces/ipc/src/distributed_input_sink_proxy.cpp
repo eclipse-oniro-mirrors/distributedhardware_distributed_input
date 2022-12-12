@@ -16,9 +16,9 @@
 #include "distributed_input_sink_proxy.h"
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "dinput_utils_tool.h"
 #include "i_get_sink_screen_infos_call_back.h"
 

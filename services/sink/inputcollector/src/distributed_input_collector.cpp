@@ -27,10 +27,10 @@
 #include <linux/input.h>
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 #include "nlohmann/json.hpp"
 
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 
 namespace OHOS {
 namespace DistributedHardware {

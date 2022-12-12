@@ -179,6 +179,10 @@ namespace DistributedInput {
 
     const std::string PROPERTIES = "properties";
 
+    const std::string DINPUT_LOG_TITLE_TAG = "DINPUT";
+
+    constexpr int32_t LOG_MAX_LEN = 4096;
+
     constexpr uint32_t SCREEN_ID_DEFAULT = 0;
 
     constexpr uint32_t DEFAULT_VALUE = 0;

@@ -37,6 +37,7 @@ ohos_shared_library("libdinput_utils") {
 
   sources = [
     "src/dinput_context.cpp",
+    "src/dinput_log.cpp",
     "src/dinput_utils_tool.cpp",
     "src/dinput_sa_process_state.cpp",
   ]
@@ -58,6 +59,7 @@ ohos_shared_library("libdinput_utils") {
     "dsoftbus:softbus_client",
     "samgr:samgr_proxy",
     "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
   ]
 
   subsystem_name = "distributedhardware"

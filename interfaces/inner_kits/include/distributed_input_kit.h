@@ -19,17 +19,16 @@
 #include <string>
 #include <vector>
 
-#include "distributed_hardware_log.h"
-
 #include "constants_dinput.h"
+#include "dinput_log.h"
 #include "distributed_input_client.h"
+#include "i_prepare_d_input_call_back.h"
 #include "i_register_d_input_call_back.h"
 #include "i_start_d_input_call_back.h"
 #include "i_stop_d_input_call_back.h"
 #include "i_start_stop_d_inputs_call_back.h"
 #include "i_start_stop_result_call_back.h"
 #include "i_unregister_d_input_call_back.h"
-#include "i_prepare_d_input_call_back.h"
 #include "i_unprepare_d_input_call_back.h"
 
 namespace OHOS {

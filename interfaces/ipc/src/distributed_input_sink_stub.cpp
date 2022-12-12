@@ -16,10 +16,10 @@
 #include "distributed_input_sink_stub.h"
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
+#include "dinput_log.h"
 #include "i_sharing_dhid_listener.h"
 
 namespace OHOS {

@@ -21,7 +21,6 @@
 #include <fstream>
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 #include "dinput_softbus_define.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -36,6 +35,7 @@
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
 #include "dinput_hitrace.h"
+#include "dinput_log.h"
 #include "dinput_sa_process_state.h"
 #include "dinput_utils_tool.h"
 #include "distributed_input_client.h"

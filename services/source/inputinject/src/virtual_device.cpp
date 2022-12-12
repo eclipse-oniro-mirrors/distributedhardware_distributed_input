@@ -18,9 +18,9 @@
 #include <securec.h>
 
 #include "anonymous_string.h"
-#include "distributed_hardware_log.h"
 
 #include "constants_dinput.h"
+#include "dinput_log.h"
 #include "hidumper.h"
 
 namespace OHOS {
