@@ -42,6 +42,7 @@ ohos_unittest("distributed_input_client_test") {
     "${utils_path}/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/json/include",
+    "//third_party/libevdev/libevdev/",
     "//utils/system/safwk/native/include",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/communication/dsoftbus/interfaces/kits/bus_center",
@@ -128,6 +129,7 @@ ohos_unittest("distributed_input_client_test") {
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager:libdinput_sink",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/window/window_manager/dm:libdm",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

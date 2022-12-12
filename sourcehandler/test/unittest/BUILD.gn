@@ -49,6 +49,7 @@ ohos_unittest("distributed_input_source_handler_test") {
     "${services_source_path}/inputinject/include",
     "${utils_path}/include",
     "//base/hiviewdfx/hisysevent/interfaces/native/innerkits/hisysevent/include",
+    "//third_party/libevdev/libevdev/",
   ]
 
   sources = [
@@ -77,6 +78,7 @@ ohos_unittest("distributed_input_source_handler_test") {
     "${fwk_utils_path}:distributedhardwareutils",
     "${innerkits_path}:libdinput_sdk",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

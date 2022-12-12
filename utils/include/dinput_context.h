@@ -37,7 +37,6 @@
 #include "system_ability_definition.h"
 
 #include "i_dinput_context.h"
-#include "input_hub.h"
 
 namespace OHOS {
 namespace DistributedHardware {

@@ -39,6 +39,7 @@ ohos_fuzztest("DistributedInputClientFuzzTest") {
     "${service_common}/include",
     "${common_path}/include",
     "//third_party/json/include",
+    "//third_party/libevdev/libevdev/",
     "//foundation/distributedhardware/distributed_hardware_fwk/common/log/include",
     "//foundation/distributedhardware/distributed_hardware_fwk/common/utils/include",
     "//foundation/distributedhardware/distributed_hardware_fwk/utils/include/log",
@@ -63,6 +64,7 @@ ohos_fuzztest("DistributedInputClientFuzzTest") {
 
   deps = [
     "${distributedinput_path}/sourcehandler:libdinput_source_handler",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

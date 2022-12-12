@@ -41,6 +41,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${fwk_interfaces_path}/include/ipc",
     "${service_common}/include",
     "//third_party/json/include",
+    "//third_party/libevdev/libevdev/",
     "${services_source_path}/inputinject/include",
     "${services_source_path}/transport/include",
     "${services_source_path}/sourcemanager/include",
@@ -84,6 +85,7 @@ ohos_unittest("distributed_input_sourcetrans_test") {
     "${utils_path}:libdinput_utils",
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager:libdinput_source",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

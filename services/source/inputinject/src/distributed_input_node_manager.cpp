@@ -22,18 +22,14 @@
 #include <unistd.h>
 
 #include "anonymous_string.h"
+#include "dinput_utils_tool.h"
 #include "distributed_hardware_log.h"
-#include "nlohmann/json.hpp"
 
 #include "softbus_bus_center.h"
 
 #include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "dinput_softbus_define.h"
-#include "virtual_keyboard.h"
-#include "virtual_mouse.h"
-#include "virtual_touchpad.h"
-#include "virtual_touchscreen.h"
 
 namespace OHOS {
 namespace DistributedHardware {
@@ -60,64 +56,94 @@ DistributedInputNodeManager::~DistributedInputNodeManager()
 int32_t DistributedInputNodeManager::openDevicesNode(const std::string& devId, const std::string& dhId,
     const std::string& parameters)
 {
+    if (devId.size() > DEV_ID_LENGTH_MAX || devId.empty() || dhId.size() > DH_ID_LENGTH_MAX || dhId.empty() ||
+        parameters.size() > STRING_MAX_SIZE || parameters.empty()) {
+        DHLOGE("Params is invalid!");
+        return ERR_DH_INPUT_SERVER_SOURCE_OPEN_DEVICE_NODE_FAIL;
+    }
     InputDevice event;
-    stringTransJsonTransStruct(parameters, event);
+    ParseInputDeviceJson(parameters, event);
     if (CreateHandle(event, devId, dhId) < 0) {
+        DHLOGE("Can not create virtual node!");
         return ERR_DH_INPUT_SERVER_SOURCE_OPEN_DEVICE_NODE_FAIL;
     }
 
     return DH_SUCCESS;
 }
 
-void DistributedInputNodeManager::stringTransJsonTransStruct(const std::string& str, InputDevice& pBuf)
+void DistributedInputNodeManager::ParseInputDeviceJson(const std::string& str, InputDevice& pBuf)
 {
-    nlohmann::json recMsg = nlohmann::json::parse(str, nullptr, false);
-    if (recMsg.is_discarded()) {
+    nlohmann::json inputDeviceJson = nlohmann::json::parse(str, nullptr, false);
+    if (inputDeviceJson.is_discarded()) {
         DHLOGE("recMsg parse failed!");
         return;
     }
-    recMsg.at("name").get_to(pBuf.name);
-    recMsg.at("physicalPath").get_to(pBuf.physicalPath);
-    recMsg.at("uniqueId").get_to(pBuf.uniqueId);
-    recMsg.at("bus").get_to(pBuf.bus);
-    recMsg.at("vendor").get_to(pBuf.vendor);
-    recMsg.at("product").get_to(pBuf.product);
-    recMsg.at("version").get_to(pBuf.version);
-    recMsg.at("descriptor").get_to(pBuf.descriptor);
-    recMsg.at("classes").get_to(pBuf.classes);
+    VerifyInputDevice(inputDeviceJson, pBuf);
 }
 
-int32_t DistributedInputNodeManager::CreateHandle(InputDevice event, const std::string& devId, const std::string& dhId)
+void DistributedInputNodeManager::VerifyInputDevice(const nlohmann::json& inputDeviceJson, InputDevice& pBuf)
+{
+    if (IsString(inputDeviceJson, DEVICE_NAME)) {
+        pBuf.name = inputDeviceJson[DEVICE_NAME].get<std::string>();
+    }
+    if (IsString(inputDeviceJson, PHYSICAL_PATH)) {
+        pBuf.physicalPath = inputDeviceJson[PHYSICAL_PATH].get<std::string>();
+    }
+    if (IsString(inputDeviceJson, UNIQUE_ID)) {
+        pBuf.uniqueId = inputDeviceJson[UNIQUE_ID].get<std::string>();
+    }
+    if (IsUInt16(inputDeviceJson, BUS)) {
+        pBuf.bus = inputDeviceJson[BUS].get<uint16_t>();
+    }
+    if (IsUInt16(inputDeviceJson, VENDOR)) {
+        pBuf.vendor = inputDeviceJson[VENDOR].get<uint16_t>();
+    }
+    if (IsUInt16(inputDeviceJson, PRODUCT)) {
+        pBuf.product = inputDeviceJson[PRODUCT].get<uint16_t>();
+    }
+    if (IsUInt16(inputDeviceJson, VERSION)) {
+        pBuf.version = inputDeviceJson[VERSION].get<uint16_t>();
+    }
+    if (IsString(inputDeviceJson, DESCRIPTOR)) {
+        pBuf.descriptor = inputDeviceJson[DESCRIPTOR].get<std::string>();
+    }
+    if (IsUInt32(inputDeviceJson, CLASSES)) {
+        pBuf.classes = inputDeviceJson[CLASSES].get<uint32_t>();
+    }
+    if (IsArray(inputDeviceJson, EVENT_TYPES)) {
+        pBuf.eventTypes = inputDeviceJson[EVENT_TYPES].get<std::vector<uint32_t>>();
+    }
+    if (IsArray(inputDeviceJson, EVENT_KEYS)) {
+        pBuf.eventKeys = inputDeviceJson[EVENT_KEYS].get<std::vector<uint32_t>>();
+    }
+    if (IsArray(inputDeviceJson, ABS_TYPES)) {
+        pBuf.absTypes = inputDeviceJson[ABS_TYPES].get<std::vector<uint32_t>>();
+    }
+    if (IsArray(inputDeviceJson, ABS_INFOS)) {
+        pBuf.absInfos = inputDeviceJson[ABS_INFOS].get<std::map<uint32_t, std::vector<int32_t>>>();
+    }
+    if (IsArray(inputDeviceJson, REL_TYPES)) {
+        pBuf.relTypes = inputDeviceJson[REL_TYPES].get<std::vector<uint32_t>>();
+    }
+    if (IsArray(inputDeviceJson, PROPERTIES)) {
+        pBuf.properties = inputDeviceJson[PROPERTIES].get<std::vector<uint32_t>>();
+    }
+}
+
+int32_t DistributedInputNodeManager::CreateHandle(const InputDevice& inputDevice, const std::string& devId,
+    const std::string& dhId)
 {
     std::unique_lock<std::mutex> my_lock(operationMutex_);
-    std::unique_ptr<VirtualDevice> device;
-    if (event.classes & INPUT_DEVICE_CLASS_KEYBOARD) {
-        device = std::make_unique<VirtualKeyboard>(event);
-    } else if (event.classes & INPUT_DEVICE_CLASS_CURSOR) {
-        device = std::make_unique<VirtualMouse>(event);
-    } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH_MT) {
-        inputHub_->ScanInputDevices(DEVICE_PATH);
-        LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
-        device = std::make_unique<VirtualTouchScreen>(event, info, info.absMtPositionXMax, info.absMtPositionYMax);
-    } else if (event.classes & INPUT_DEVICE_CLASS_TOUCH) {
-        device = std::make_unique<VirtualTouchpad>(event);
-    } else {
-        DHLOGW("could not find the deviceType\n");
-        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
-    }
+    std::call_once(callOnceFlag_, [this]() { inputHub_->ScanInputDevices(DEVICE_PATH); });
+    std::unique_ptr<VirtualDevice> virtualDevice = std::make_unique<VirtualDevice>(inputDevice);
 
-    if (device == nullptr) {
-        DHLOGE("could not create new virtual device == null\n");
-        return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
-    }
+    virtualDevice->SetNetWorkId(devId);
 
-    device->SetNetWorkId(devId);
-
-    if (!device->SetUp(devId, dhId)) {
+    if (!virtualDevice->SetUp(inputDevice, devId, dhId)) {
         DHLOGE("could not create new virtual device\n");
         return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;
     }
-    AddDeviceLocked(event.descriptor, std::move(device));
+    AddDeviceLocked(inputDevice.descriptor, std::move(virtualDevice));
     return DH_SUCCESS;
 }
 
@@ -129,8 +155,8 @@ int32_t DistributedInputNodeManager::CreateVirtualTouchScreenNode(const std::str
     LocalAbsInfo info = DInputContext::GetInstance().GetLocalTouchScreenInfo().localAbsInfo;
     DHLOGI("CreateVirtualTouchScreenNode start, dhId: %s, sourcePhyWidth: %d, sourcePhyHeight: %d",
         GetAnonyString(dhId).c_str(), sourcePhyWidth, sourcePhyHeight);
-    device = std::make_unique<VirtualTouchScreen>(info.deviceInfo, info, sourcePhyWidth - 1, sourcePhyHeight - 1);
-    if (!device->SetUp(devId, dhId)) {
+    device = std::make_unique<VirtualDevice>(info.deviceInfo);
+    if (!device->SetUp(info.deviceInfo, devId, dhId)) {
         DHLOGE("Virtual touch Screen setUp fail, devId: %s, dhId: %s", GetAnonyString(devId).c_str(),
             GetAnonyString(dhId).c_str());
         return ERR_DH_INPUT_SERVER_SOURCE_CREATE_HANDLE_FAIL;

@@ -551,7 +551,7 @@ int32_t DistributedInputClient::StopRemoteInput(const std::string &srcId, const 
 bool DistributedInputClient::IsNeedFilterOut(const std::string& deviceId, const BusinessEvent& event)
 {
     DHLOGI("IsNeedFilterOut called, deviceId: %s", GetAnonyString(deviceId).c_str());
-    if (deviceId.empty() || (deviceId.size() > DEVID_LENGTH_MAX)) {
+    if (deviceId.empty() || (deviceId.size() > DEV_ID_LENGTH_MAX)) {
         DHLOGE("IsNeedFilterOut param deviceId is empty.");
         return false;
     }
@@ -574,7 +574,7 @@ bool DistributedInputClient::IsTouchEventNeedFilterOut(const TouchScreenEvent &e
 bool DistributedInputClient::IsStartDistributedInput(const std::string& dhId)
 {
     std::lock_guard<std::mutex> lock(sharingDhIdsMtx_);
-    if (dhId.empty() || (dhId.size() > DHID_LENGTH_MAX)) {
+    if (dhId.empty() || (dhId.size() > DH_ID_LENGTH_MAX)) {
         DHLOGE("IsStartDistributedInput param dhid is error.");
         return false;
     }

@@ -29,7 +29,7 @@ DInputCheckParam &DInputCheckParam::GetInstance(void)
 }
 bool DInputCheckParam::CheckParam(const std::string &deviceId, sptr<IRemoteBroker> callback)
 {
-    if (deviceId.empty() || deviceId.size() > DEVID_LENGTH_MAX) {
+    if (deviceId.empty() || deviceId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam deviceId is empty or deviceId size too long.");
         return false;
     }
@@ -43,7 +43,7 @@ bool DInputCheckParam::CheckParam(const std::string &deviceId, sptr<IRemoteBroke
 bool DInputCheckParam::CheckParam(const std::string& deviceId, const uint32_t& inputTypes,
     sptr<IRemoteBroker> callback)
 {
-    if (deviceId.empty() || deviceId.size() > DEVID_LENGTH_MAX) {
+    if (deviceId.empty() || deviceId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam deviceId is empty or deviceId size too long.");
         return false;
     }
@@ -63,11 +63,11 @@ bool DInputCheckParam::CheckParam(const std::string& deviceId, const uint32_t& i
 bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId, const uint32_t &inputTypes,
     sptr<IRemoteBroker> callback)
 {
-    if (srcId.empty() || srcId.size() > DEVID_LENGTH_MAX) {
+    if (srcId.empty() || srcId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam srcId is empty or srcId size too long.");
         return false;
     }
-    if (sinkId.empty() || sinkId.size() > DEVID_LENGTH_MAX) {
+    if (sinkId.empty() || sinkId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam sinkId is empty or sinkId size too long.");
         return false;
     }
@@ -87,11 +87,11 @@ bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &s
 bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId,
     sptr<IRemoteBroker> callback)
 {
-    if (srcId.empty() || srcId.size() > DEVID_LENGTH_MAX) {
+    if (srcId.empty() || srcId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam srcId is empty or srcId size too long.");
         return false;
     }
-    if (sinkId.empty() || sinkId.size() > DEVID_LENGTH_MAX) {
+    if (sinkId.empty() || sinkId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam sinkId is empty or sinkId size too long.");
         return false;
     }
@@ -105,7 +105,7 @@ bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &s
 bool DInputCheckParam::CheckParam(const std::string &sinkId, const std::vector<std::string> &dhIds,
     sptr<IRemoteBroker> callback)
 {
-    if (sinkId.empty() || sinkId.size() > DEVID_LENGTH_MAX) {
+    if (sinkId.empty() || sinkId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam sinkId is empty or sinkId size too long.");
         return false;
     }
@@ -114,7 +114,7 @@ bool DInputCheckParam::CheckParam(const std::string &sinkId, const std::vector<s
         return false;
     }
     for (auto iter : dhIds) {
-        if (iter.size() > DHID_LENGTH_MAX) {
+        if (iter.size() > DH_ID_LENGTH_MAX) {
             DHLOGE("CheckParam dhId size is too long.");
             return false;
         }
@@ -129,11 +129,11 @@ bool DInputCheckParam::CheckParam(const std::string &sinkId, const std::vector<s
 bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &sinkId,
     const std::vector<std::string> &dhIds, sptr<IRemoteBroker> callback)
 {
-    if (srcId.empty() || srcId.size() > DEVID_LENGTH_MAX) {
+    if (srcId.empty() || srcId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam srcId is empty or srcId size too long.");
         return false;
     }
-    if (sinkId.empty() || sinkId.size() > DEVID_LENGTH_MAX) {
+    if (sinkId.empty() || sinkId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam sinkId is empty or sinkId size too long.");
         return false;
     }
@@ -142,7 +142,7 @@ bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &s
         return false;
     }
     for (auto iter : dhIds) {
-        if (iter.size() > DHID_LENGTH_MAX) {
+        if (iter.size() > DH_ID_LENGTH_MAX) {
             DHLOGE("CheckParam dhId size is too long.");
             return false;
         }
@@ -157,11 +157,11 @@ bool DInputCheckParam::CheckParam(const std::string &srcId, const std::string &s
 bool DInputCheckParam::CheckRegisterParam(const std::string &devId, const std::string &dhId,
     const std::string &parameters, const std::shared_ptr<RegisterCallback> &callback)
 {
-    if (devId.empty() || devId.size() > DEVID_LENGTH_MAX) {
+    if (devId.empty() || devId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam devId is empty or devId size too long.");
         return false;
     }
-    if (dhId.empty() || dhId.size() > DEVID_LENGTH_MAX) {
+    if (dhId.empty() || dhId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam dhId is empty or dhId size too long.");
         return false;
     }
@@ -179,11 +179,11 @@ bool DInputCheckParam::CheckRegisterParam(const std::string &devId, const std::s
 bool DInputCheckParam::CheckUnregisterParam(const std::string &devId, const std::string &dhId,
     const std::shared_ptr<UnregisterCallback> &callback)
 {
-    if (devId.empty() || devId.size() > DEVID_LENGTH_MAX) {
+    if (devId.empty() || devId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam devId is empty or devId size too long.");
         return false;
     }
-    if (dhId.empty() || dhId.size() > DEVID_LENGTH_MAX) {
+    if (dhId.empty() || dhId.size() > DEV_ID_LENGTH_MAX) {
         DHLOGE("CheckParam dhId is empty or dhId size too long.");
         return false;
     }

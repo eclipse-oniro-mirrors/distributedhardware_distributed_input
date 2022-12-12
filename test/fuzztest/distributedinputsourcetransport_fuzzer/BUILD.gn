@@ -38,6 +38,7 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "${services_source_path}/inputinject/include",
     "${services_source_path}/transport/include",
     "//third_party/json/include",
+    "//third_party/libevdev/libevdev/",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
@@ -66,6 +67,7 @@ ohos_fuzztest("DistributedInputSourceTransportFuzzTest") {
     "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

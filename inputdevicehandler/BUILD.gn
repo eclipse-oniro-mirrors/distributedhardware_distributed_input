@@ -29,6 +29,7 @@ ohos_shared_library("libdinput_handler") {
     "${frameworks_path}/include",
     "${utils_path}/include",
     "//third_party/json/include",
+    "//third_party/libevdev/libevdev/",
     "${fwk_interfaces_path}/include",
     "${fwk_interfaces_path}/include/ipc",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
@@ -51,6 +52,7 @@ ohos_shared_library("libdinput_handler") {
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
     "//third_party/openssl:libcrypto_static",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

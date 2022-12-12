@@ -87,6 +87,7 @@ static void StreamReceived(int32_t sessionId, const StreamData *data, const Stre
     (void)param;
     DHLOGI("sessionId: %d", sessionId);
 }
+
 DistributedInputSinkTransport &DistributedInputSinkTransport::GetInstance()
 {
     static DistributedInputSinkTransport instance;

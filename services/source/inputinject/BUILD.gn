@@ -36,6 +36,7 @@ ohos_shared_library("libdinput_inject") {
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//third_party/libevdev/libevdev/"
   ]
 
   sources = [
@@ -43,10 +44,6 @@ ohos_shared_library("libdinput_inject") {
     "src/distributed_input_inject.cpp",
     "src/distributed_input_node_manager.cpp",
     "src/virtual_device.cpp",
-    "src/virtual_keyboard.cpp",
-    "src/virtual_mouse.cpp",
-    "src/virtual_touchpad.cpp",
-    "src/virtual_touchscreen.cpp",
   ]
 
   defines = [
@@ -60,6 +57,7 @@ ohos_shared_library("libdinput_inject") {
     "${fwk_utils_path}:distributedhardwareutils",
     "${utils_path}:libdinput_utils",
     "//third_party/openssl:libcrypto_static",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

@@ -39,6 +39,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${fwk_utils_path}/include",
     "${service_common}/include",
     "//third_party/json/include",
+    "//third_party/libevdev/libevdev/",
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
@@ -94,6 +95,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${services_sink_path}/sinkmanager:libdinput_sink",
     "${services_sink_path}/inputcollector:libdinput_collector",
     "//foundation/window/window_manager/dm:libdm",
+    "//third_party/libevdev:libevdev",
   ]
 
   external_deps = [

@@ -95,6 +95,7 @@ void *DistributedInputCollector::CollectEventsThread(void *param)
 
 void DistributedInputCollector::StartCollectEventsThread()
 {
+    DHLOGI("StartCollectEventsThread!");
     while (isCollectingEvents_) {
         memset_s(&mEventBuffer, sizeof(mEventBuffer), 0, sizeof(mEventBuffer));
         if (inputHub_ == nullptr) {

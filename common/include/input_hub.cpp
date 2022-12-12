@@ -17,17 +17,16 @@
 
 #include <cinttypes>
 #include <cstring>
-#include <filesystem>
-#include <sstream>
-#include <utility>
-
 #include <dirent.h>
 #include <fcntl.h>
+#include <filesystem>
 #include <regex>
 #include <securec.h>
+#include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <utility>
 
 #include "anonymous_string.h"
 #include "distributed_hardware_log.h"
@@ -102,6 +101,7 @@ int32_t InputHub::Release()
     ::close(iNotifyFd_);
     StopCollectInputEvents();
     StopCollectInputHandler();
+    sharedDHIds_.clear();
     return DH_SUCCESS;
 }
 
@@ -114,7 +114,6 @@ size_t InputHub::StartCollectInputEvents(RawEvent* buffer, size_t bufferSize)
             needToScanDevices_ = false;
             ScanInputDevices(DEVICE_PATH);
         }
-
         {
             std::unique_lock<std::mutex> deviceLock(devicesMutex_);
             while (!openingDevices_.empty()) {
@@ -186,9 +185,11 @@ size_t InputHub::GetEvents(RawEvent* buffer, size_t bufferSize)
         if (!device) {
             continue;
         }
-        if (!device->isShare) {
+        if (!sharedDHIds_[device->identifier.descriptor]) {
             continue;
         }
+        DHLOGD("shared device dhId: %s, name: %s", GetAnonyString(device->identifier.descriptor).c_str(),
+            device->identifier.name.c_str());
         if (eventItem.events & EPOLLIN) {
             event += CollectEvent(event, capacity, device, readBuffer, count);
 
@@ -512,7 +513,7 @@ int32_t InputHub::QueryInputDeviceInfo(int fd, InputDevice& identifier)
         buffer[sizeof(buffer) - 1] = '\0';
         identifier.name = buffer;
     }
-
+    DHLOGD("QueryInputDeviceInfo deviceName: %s", buffer);
     // If the device is already a virtual device, don't monitor it.
     if (identifier.name.find(VIRTUAL_DEVICE_NAME) != std::string::npos) {
         return ERR_DH_INPUT_HUB_IS_VIRTUAL_DEVICE;
@@ -550,7 +551,125 @@ int32_t InputHub::QueryInputDeviceInfo(int fd, InputDevice& identifier)
         identifier.uniqueId = buffer;
     }
 
+    QueryEventInfo(fd, identifier);
     return DH_SUCCESS;
+}
+
+void InputHub::QueryEventInfo(int fd, InputDevice& identifier)
+{
+    DHLOGI("QueryEventInfo: devName: %s, dhId: %s!", identifier.name.c_str(),
+        GetAnonyString(identifier.descriptor).c_str());
+    struct libevdev *dev = GetLibEvDev(fd);
+    if (dev == nullptr) {
+        DHLOGE("dev is nullptr");
+        return;
+    }
+    GetEventTypes(dev, identifier);
+    GetEventKeys(dev, identifier);
+    GetABSInfo(dev, identifier);
+    GetRELTypes(dev, identifier);
+    GetProperties(dev, identifier);
+    libevdev_free(dev);
+}
+
+struct libevdev* InputHub::GetLibEvDev(int fd)
+{
+    struct libevdev *dev = nullptr;
+    int rc = 1;
+    rc = libevdev_new_from_fd(fd, &dev);
+    if (rc < 0) {
+        DHLOGE("Failed to init libevdev (%s)", strerror(-rc));
+        return nullptr;
+    }
+    return dev;
+}
+
+void InputHub::GetEventTypes(struct libevdev* dev, InputDevice& identifier)
+{
+    for (uint32_t eventType = 0; eventType < EV_CNT; eventType++) {
+        if (!libevdev_has_event_type(dev, eventType)) {
+            DHLOGD("The device is not support eventType: %d", eventType);
+            continue;
+        }
+        DHLOGI("QueryInputDeviceInfo eventType: %d", eventType);
+        identifier.eventTypes.push_back(eventType);
+    }
+}
+
+int32_t InputHub::GetEventKeys(struct libevdev* dev, InputDevice& identifier)
+{
+    if (!libevdev_has_event_type(dev, EV_KEY)) {
+        DHLOGE("The device doesn't has EV_KEY type!");
+        return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
+    }
+    for (uint32_t eventKey = 0; eventKey < KEY_CNT; eventKey++) {
+        if (!libevdev_has_event_code(dev, EV_KEY, eventKey)) {
+            DHLOGD("The device is not support eventKey: %d", eventKey);
+            continue;
+        }
+        DHLOGI("QueryInputDeviceInfo eventKey: %d", eventKey);
+        identifier.eventKeys.push_back(eventKey);
+    }
+    return DH_SUCCESS;
+}
+
+int32_t InputHub::GetABSInfo(struct libevdev* dev, InputDevice& identifier)
+{
+    if (!libevdev_has_event_type(dev, EV_ABS)) {
+        DHLOGE("The device doesn't has EV_ABS type!");
+        return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
+    }
+    DHLOGI("The device has abs info, devName: %s, dhId: %s!", identifier.name.c_str(),
+        GetAnonyString(identifier.descriptor).c_str());
+    for (uint32_t absType = 0; absType < ABS_CNT; absType++) {
+        if (!libevdev_has_event_code(dev, EV_ABS, absType)) {
+            DHLOGD("The device is not support absType: %d", absType);
+            continue;
+        }
+        DHLOGI("QueryInputDeviceInfo abs type: %d", absType);
+        identifier.absTypes.push_back(absType);
+        const struct input_absinfo *abs = libevdev_get_abs_info(dev, absType);
+        if (abs == nullptr) {
+            DHLOGE("absInfo is nullptr!");
+            continue;
+        }
+        DHLOGI("QueryInputDeviceInfo abs info value: %d, min: %d, max: %d, fuzz: %d, flat: %d, res: %d", abs->value,
+            abs->minimum, abs->maximum, abs->fuzz, abs->flat, abs->resolution);
+        identifier.absInfos[absType].push_back(abs->value);
+        identifier.absInfos[absType].push_back(abs->minimum);
+        identifier.absInfos[absType].push_back(abs->maximum);
+        identifier.absInfos[absType].push_back(abs->fuzz);
+        identifier.absInfos[absType].push_back(abs->flat);
+        identifier.absInfos[absType].push_back(abs->resolution);
+    }
+    return DH_SUCCESS;
+}
+
+int32_t InputHub::GetRELTypes(struct libevdev* dev, InputDevice& identifier)
+{
+    if (!libevdev_has_event_type(dev, EV_REL)) {
+        DHLOGE("The device doesn't has EV_REL type!");
+        return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
+    }
+    for (uint32_t code = 0; code < REL_CNT; code++) {
+        if (!libevdev_has_event_code(dev, EV_REL, code)) {
+            DHLOGD("The device is not support eventCode: %d", code);
+            continue;
+        }
+        DHLOGI("QueryInputDeviceInfo rel types: %d", code);
+        identifier.relTypes.push_back(code);
+    }
+    return DH_SUCCESS;
+}
+
+void InputHub::GetProperties(struct libevdev* dev, InputDevice& identifier)
+{
+    for (uint32_t prop = 0; prop < INPUT_PROP_CNT; prop++) {
+        if (libevdev_has_property(dev, prop)) {
+            DHLOGI("QueryInputDeviceInfo rel prop: %d", prop);
+            identifier.properties.push_back(prop);
+        }
+    }
 }
 
 int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
@@ -567,8 +686,8 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
         QueryLocalTouchScreenInfo(fd);
         device->classes |= INPUT_DEVICE_CLASS_TOUCH | INPUT_DEVICE_CLASS_TOUCH_MT;
     } else if (TestBit(BTN_TOUCH, device->keyBitmask) &&
-               TestBit(ABS_X, device->absBitmask) &&
-               TestBit(ABS_Y, device->absBitmask)) {
+        TestBit(ABS_X, device->absBitmask) &&
+        TestBit(ABS_Y, device->absBitmask)) {
         QueryLocalTouchScreenInfo(fd);
         device->classes |= INPUT_DEVICE_CLASS_TOUCH;
     }
@@ -601,12 +720,10 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
     }
 
     device->identifier.classes = device->classes;
-    if (device->classes & inputTypes_) {
-        device->isShare = true;
-    }
+
     DHLOGI("inputType=%d", inputTypes_.load());
-    DHLOGI("New device: fd=%d, name='%s', classes=0x%x, isShare=%d",
-        fd, device->identifier.name.c_str(), device->classes, device->isShare);
+    DHLOGI("New device: fd=%d, name='%s', classes=0x%x, isShare=%d", fd, device->identifier.name.c_str(),
+        device->classes);
 
     AddDeviceLocked(std::move(device));
     return DH_SUCCESS;
@@ -882,9 +999,12 @@ InputHub::Device* InputHub::GetDeviceByFdLocked(int fd)
 
 InputHub::Device* InputHub::GetSupportDeviceByFd(int fd)
 {
+    DHLOGI("GetSupportDeviceByFd fd: %d", fd);
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto& [id, device] : devices_) {
-        if (device->fd == fd) {
+        DHLOGI("GetSupportDeviceByFd device: %d, fd: %d, path: %s, dhId: %s, classes=0x%x", id, device->fd,
+            device->path.c_str(), GetAnonyString(device->identifier.descriptor).c_str(), device->classes);
+        if (device != nullptr && device->fd == fd) {
             return device.get();
         }
     }
@@ -952,8 +1072,14 @@ AffectDhIds InputHub::SetSharingDevices(bool enabled, std::vector<std::string> d
 {
     AffectDhIds affDhIds;
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
+    DHLOGI("SetSharingDevices start");
     for (auto dhId : dhIds) {
+        DHLOGI("SetSharingDevices dhId: %s, size: %d, enabled: %d", GetAnonyString(dhId).c_str(), devices_.size(),
+            enabled);
+        sharedDHIds_[dhId] = enabled;
         for (const auto &[id, device] : devices_) {
+            DHLOGI("deviceName %s ,dhId: %s ", device->identifier.name.c_str(),
+                GetAnonyString(device->identifier.descriptor).c_str());
             if (device->identifier.descriptor == dhId) {
                 device->isShare = enabled;
                 DHLOGW("dhid:%s, isshare:%d", GetAnonyString(device->identifier.descriptor).c_str(), enabled);
@@ -962,7 +1088,7 @@ AffectDhIds InputHub::SetSharingDevices(bool enabled, std::vector<std::string> d
             }
         }
     }
-
+    DHLOGI("SetSharingDevices end");
     return affDhIds;
 }
 
@@ -1023,8 +1149,9 @@ void InputHub::GetDevicesInfoByDhId(std::vector<std::string> dhidsVec, std::map<
 bool InputHub::IsAllDevicesStoped()
 {
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
-    for (const auto &[id, device] : devices_) {
-        if (device->isShare) {
+    for (const auto &[dhId, isShared] : sharedDHIds_) {
+        DHLOGI("the dhId: %s, isShared: %d", GetAnonyString(dhId).c_str(), isShared);
+        if (isShared) {
             return false;
         }
     }

@@ -37,9 +37,10 @@ public:
     explicit VirtualDevice(const InputDevice& event);
     virtual ~VirtualDevice();
     bool DoIoctl(int32_t fd, int32_t request, const uint32_t value);
-    bool CreateKey();
+    bool CreateKey(const InputDevice& inputDevice);
+    void SetABSInfo(struct uinput_user_dev& inputUserDev, const InputDevice& inputDevice);
     bool SetPhys(const std::string deviceName, std::string dhId);
-    bool SetUp(const std::string &devId, const std::string &dhId);
+    bool SetUp(const InputDevice& inputDevice, const std::string &devId, const std::string &dhId);
     bool InjectInputEvent(const input_event &event);
     void SetNetWorkId(const std::string netWorkId);
     std::string GetNetWorkId();
@@ -47,14 +48,7 @@ public:
     int32_t GetDeviceFd();
     uint16_t GetDeviceType();
 
-protected:
-    VirtualDevice();
-    virtual const std::vector<uint32_t>& GetEventTypes() const = 0;
-    virtual const std::vector<uint32_t>& GetKeys() const = 0;
-    virtual const std::vector<uint32_t>& GetProperties() const = 0;
-    virtual const std::vector<uint32_t>& GetAbs() const = 0;
-    virtual const std::vector<uint32_t>& GetRelBits() const = 0;
-
+private:
     int32_t fd_ = -1;
     std::string deviceName_;
     std::string netWorkId_;
@@ -64,8 +58,6 @@ protected:
     const uint16_t version_;
     const uint16_t classes_;
     struct uinput_user_dev dev_ {};
-    struct uinput_abs_setup absTemp_ = {};
-    std::vector<uinput_abs_setup> absInit_;
     const std::string pid_ = std::to_string(getpid());
 
 private:
