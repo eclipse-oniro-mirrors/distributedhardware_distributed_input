@@ -722,7 +722,7 @@ int32_t InputHub::MakeDevice(int fd, std::unique_ptr<Device> device)
     device->identifier.classes = device->classes;
 
     DHLOGI("inputType=%d", inputTypes_.load());
-    DHLOGI("New device: fd=%d, name='%s', classes=0x%x, isShare=%d", fd, device->identifier.name.c_str(),
+    DHLOGI("New device: fd=%d, name='%s', classes=0x%x", fd, device->identifier.name.c_str(),
         device->classes);
 
     AddDeviceLocked(std::move(device));
@@ -845,8 +845,7 @@ int32_t InputHub::RegisterFdForEpoll(int fd)
     eventItem.events = EPOLLIN | EPOLLWAKEUP;
     eventItem.data.fd = fd;
     if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, fd, &eventItem)) {
-        DHLOGE(
-            "Could not add fd to epoll instance: %s", ConvertErrNo().c_str());
+        DHLOGE("Could not add fd to epoll instance: %s", ConvertErrNo().c_str());
         return -errno;
     }
     return DH_SUCCESS;
@@ -945,8 +944,7 @@ void InputHub::JudgeDeviceOpenOrClose(const inotify_event& event)
             if (event.mask & IN_CREATE) {
                 OpenInputDeviceLocked(filename);
             } else {
-                DHLOGI(
-                    "Removing device '%s' due to inotify event\n", filename.c_str());
+                DHLOGI("Removing device '%s' due to inotify event\n", filename.c_str());
                 CloseDeviceByPathLocked(filename);
             }
         } else {
@@ -962,8 +960,7 @@ void InputHub::CloseDeviceByPathLocked(const std::string& devicePath)
         CloseDeviceLocked(*device);
         return;
     }
-    DHLOGI(
-        "Remove device: %s not found, device may already have been removed.", devicePath.c_str());
+    DHLOGI("Remove device: %s not found, device may already have been removed.", devicePath.c_str());
 }
 
 void InputHub::CloseAllDevicesLocked()
