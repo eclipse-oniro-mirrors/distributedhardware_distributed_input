@@ -99,8 +99,6 @@ HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput01, testing::ext::
     jsonStr1_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE;
     jsonStr1_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
     DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr1_.dump());
-    jsonStr1_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr1_.dump());
 
     jsonStr8_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE_FOR_REL;
     DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
@@ -110,8 +108,6 @@ HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput01, testing::ext::
     DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
 
     jsonStr8_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
-    jsonStr8_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
     DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
     sessionId = -1;
     std::string smsg = "";
@@ -544,7 +540,7 @@ HWTEST_F(DistributedInputSinkTransTest, OnSessionClosed_001, testing::ext::TestS
     EXPECT_EQ(0, DistributedInputSinkTransport::GetInstance().sessionDevMap_.size());
     DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhId, btnCode);
     sessionId = 1;
-    char message[] = "message_test";
+    char message[10] = "message";
     DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhId, btnCode);
     DistributedInputSinkTransport::GetInstance().OnBytesReceived(sessionId, message, dataLen);
 }
