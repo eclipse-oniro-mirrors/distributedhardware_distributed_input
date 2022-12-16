@@ -999,9 +999,9 @@ InputHub::Device* InputHub::GetSupportDeviceByFd(int fd)
     DHLOGI("GetSupportDeviceByFd fd: %d", fd);
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (const auto& [id, device] : devices_) {
-        DHLOGI("GetSupportDeviceByFd device: %d, fd: %d, path: %s, dhId: %s, classes=0x%x", id, device->fd,
-            device->path.c_str(), GetAnonyString(device->identifier.descriptor).c_str(), device->classes);
         if (device != nullptr && device->fd == fd) {
+            DHLOGI("GetSupportDeviceByFd device: %d, fd: %d, path: %s, dhId: %s, classes=0x%x", id, device->fd,
+                device->path.c_str(), GetAnonyString(device->identifier.descriptor).c_str(), device->classes);
             return device.get();
         }
     }
@@ -1095,6 +1095,10 @@ void InputHub::GetShareMousePathByDhId(std::vector<std::string> dhIds, std::stri
     std::unique_lock<std::mutex> deviceLock(devicesMutex_);
     for (auto dhId_ : dhIds) {
         for (const auto &[id, device] : devices_) {
+            if (device == nullptr) {
+                DHLOGE("device is nullptr");
+                continue;
+            }
             DHLOGI("descriptor:%s, isShare[%d], type[%d]", GetAnonyString(device->identifier.descriptor).c_str(),
                    device->isShare, device->classes);
             if ((device->identifier.descriptor == dhId_) &&
