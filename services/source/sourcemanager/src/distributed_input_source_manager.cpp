@@ -363,10 +363,21 @@ void DistributedInputSourceManager::DInputSourceListener::OnReceivedEventRemoteI
     DHLOGI("OnReceivedEventRemoteInput called, deviceId: %s, json size:%d.",
         GetAnonyString(deviceId).c_str(), jsonSize);
 
+    if (!inputData.is_array()) {
+        DHLOGE("inputData not vector!");
+        return;
+    }
+
     RawEvent mEventBuffer[jsonSize];
     int idx = 0;
     for (auto it = inputData.begin(); it != inputData.end(); ++it) {
         nlohmann::json oneData = (*it);
+        if (!IsInt64(oneData, INPUT_KEY_WHEN) || !IsUInt32(oneData, INPUT_KEY_TYPE) ||
+            !IsUInt32(oneData, INPUT_KEY_CODE) || !IsInt32(oneData, INPUT_KEY_VALUE) ||
+            !IsString(oneData, INPUT_KEY_DESCRIPTOR) || !IsString(oneData, INPUT_KEY_PATH)) {
+            DHLOGE("The key is invaild.");
+            continue;
+        }
         mEventBuffer[idx].when = oneData[INPUT_KEY_WHEN];
         mEventBuffer[idx].type = oneData[INPUT_KEY_TYPE];
         mEventBuffer[idx].code = oneData[INPUT_KEY_CODE];

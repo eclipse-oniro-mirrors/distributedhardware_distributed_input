@@ -1114,9 +1114,9 @@ void DistributedInputSourceTransport::NotifyResponsePrepareRemoteInput(int32_t s
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error.");
+    if (!IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_WHITE_LIST)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = FindDeviceBySession(sessionId);
@@ -1132,8 +1132,8 @@ void DistributedInputSourceTransport::NotifyResponseUnprepareRemoteInput(int32_t
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ONUNPREPARE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONUNPREPARE data type is error.");
+    if (!IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = FindDeviceBySession(sessionId);
@@ -1148,8 +1148,9 @@ void DistributedInputSourceTransport::NotifyResponseUnprepareRemoteInput(int32_t
 void DistributedInputSourceTransport::NotifyResponseStartRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ONSTART.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONSTART, data type is error.");
+    if (!IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = FindDeviceBySession(sessionId);
@@ -1164,8 +1165,9 @@ void DistributedInputSourceTransport::NotifyResponseStartRemoteInput(int32_t ses
 void DistributedInputSourceTransport::NotifyResponseStopRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ONSTOP.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean()) {
-        DHLOGE("OnBytesReceived cmdType TRANS_SINK_MSG_ONSTOP data type is error.");
+    if (!IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = FindDeviceBySession(sessionId);
@@ -1181,8 +1183,9 @@ void DistributedInputSourceTransport::NotifyResponseStartRemoteInputDhid(int32_t
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTART.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTART, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = FindDeviceBySession(sessionId);
@@ -1197,8 +1200,9 @@ void DistributedInputSourceTransport::NotifyResponseStartRemoteInputDhid(int32_t
 void DistributedInputSourceTransport::NotifyResponseStopRemoteInputDhid(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTOP.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_DHID_ONSTOP, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = FindDeviceBySession(sessionId);
@@ -1213,6 +1217,13 @@ void DistributedInputSourceTransport::NotifyResponseStopRemoteInputDhid(int32_t 
 void DistributedInputSourceTransport::NotifyResponseKeyState(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_KEY_STATE.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_KEYSTATE_DHID) ||
+        !IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_KEYSTATE_TYPE) ||
+        !IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_KEYSTATE_CODE) ||
+        !IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_KEYSTATE_VALUE)) {
+        DHLOGE("The key is invaild.");
+        return;
+    }
     std::string deviceId = FindDeviceBySession(sessionId);
     if (deviceId.empty()) {
         DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_KEY_STATE, deviceId is error.");
@@ -1226,8 +1237,8 @@ void DistributedInputSourceTransport::NotifyResponseKeyState(int32_t sessionId, 
 void DistributedInputSourceTransport::NotifyReceivedEventRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_BODY_DATA.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_INPUT_DATA].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_BODY_DATA, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_INPUT_DATA)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1258,8 +1269,8 @@ void DistributedInputSourceTransport::CalculateLatency(int32_t sessionId, const 
 void DistributedInputSourceTransport::ReceiveSrcTSrcRelayPrepare(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_DEVICE_ID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
@@ -1281,8 +1292,8 @@ void DistributedInputSourceTransport::ReceiveSrcTSrcRelayPrepare(int32_t session
 void DistributedInputSourceTransport::ReceiveSrcTSrcRelayUnprepare(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_DEVICE_ID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1299,10 +1310,10 @@ void DistributedInputSourceTransport::NotifyResponseRelayPrepareRemoteInput(int3
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_PREPARE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_WHITE_LIST].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_PREPARE, data type is error.");
+    if (!IsInt32(recMsg, DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_WHITE_LIST)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string sinkDevId = FindDeviceBySession(sessionId);
@@ -1318,9 +1329,9 @@ void DistributedInputSourceTransport::NotifyResponseRelayUnprepareRemoteInput(in
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_UNPREPARE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_UNPREPARE, data type is error.");
+    if (!IsInt32(recMsg, DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string sinkDevId = FindDeviceBySession(sessionId);
@@ -1336,10 +1347,10 @@ void DistributedInputSourceTransport::NotifyResponseRelayUnprepareRemoteInput(in
 void DistributedInputSourceTransport::ReceiveRelayPrepareResult(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_PREPARE_RESULT, data type error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_SRC_DEV_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SINK_DEV_ID) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1352,10 +1363,10 @@ void DistributedInputSourceTransport::ReceiveRelayPrepareResult(int32_t sessionI
 void DistributedInputSourceTransport::ReceiveRelayUnprepareResult(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_UNPREPARE_RESULT, data type error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_SRC_DEV_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SINK_DEV_ID) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1369,9 +1380,9 @@ void DistributedInputSourceTransport::ReceiveRelayUnprepareResult(int32_t sessio
 void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartDhid(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
@@ -1392,9 +1403,9 @@ void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartDhid(int32_t sessi
 void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStopDhid(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
@@ -1416,10 +1427,10 @@ void DistributedInputSourceTransport::NotifyResponseRelayStartDhidRemoteInput(in
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTDHID.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTDHID, data type is error.");
+    if (!IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string sinkDevId = FindDeviceBySession(sessionId);
@@ -1443,10 +1454,10 @@ void DistributedInputSourceTransport::NotifyResponseRelayStopDhidRemoteInput(int
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPDHID.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPDHID, data type is error.");
+    if (!IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string sinkDevId = FindDeviceBySession(sessionId);
@@ -1469,11 +1480,11 @@ void DistributedInputSourceTransport::NotifyResponseRelayStopDhidRemoteInput(int
 void DistributedInputSourceTransport::ReceiveRelayStartDhidResult(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_DHID_RESULT, data type error.");
+    if (!IsInt32(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SRC_DEV_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SINK_DEV_ID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1487,11 +1498,11 @@ void DistributedInputSourceTransport::ReceiveRelayStartDhidResult(int32_t sessio
 void DistributedInputSourceTransport::ReceiveRelayStopDhidResult(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_VECTOR_DHID].is_string()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_DHID_RESULT, data type error.");
+    if (!IsInt32(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_VECTOR_DHID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SRC_DEV_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SINK_DEV_ID)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1505,9 +1516,9 @@ void DistributedInputSourceTransport::ReceiveRelayStopDhidResult(int32_t session
 void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartType(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
@@ -1528,9 +1539,9 @@ void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStartType(int32_t sessi
 void DistributedInputSourceTransport::ReceiveSrcTSrcRelayStopType(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE, data type is error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_DEVICE_ID) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string deviceId = recMsg[DINPUT_SOFTBUS_KEY_DEVICE_ID];
@@ -1552,10 +1563,10 @@ void DistributedInputSourceTransport::NotifyResponseRelayStartTypeRemoteInput(in
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTTYPE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STARTTYPE, data type is error.");
+    if (!IsInt32(recMsg, DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string sinkDevId = FindDeviceBySession(sessionId);
@@ -1579,10 +1590,10 @@ void DistributedInputSourceTransport::NotifyResponseRelayStopTypeRemoteInput(int
     const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPTYPE.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_boolean() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SESSION_ID].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ON_RELAY_STOPTYPE, data type is error.");
+    if (!IsInt32(recMsg, DINPUT_SOFTBUS_KEY_SESSION_ID) ||
+        !IsBoolean(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
     std::string sinkDevId = FindDeviceBySession(sessionId);
@@ -1605,11 +1616,11 @@ void DistributedInputSourceTransport::NotifyResponseRelayStopTypeRemoteInput(int
 void DistributedInputSourceTransport::ReceiveRelayStartTypeResult(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_START_TYPE_RESULT, data type error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_SRC_DEV_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SINK_DEV_ID) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1623,11 +1634,11 @@ void DistributedInputSourceTransport::ReceiveRelayStartTypeResult(int32_t sessio
 void DistributedInputSourceTransport::ReceiveRelayStopTypeResult(int32_t sessionId, const nlohmann::json &recMsg)
 {
     DHLOGI("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT.");
-    if (!recMsg[DINPUT_SOFTBUS_KEY_SRC_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_SINK_DEV_ID].is_string() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_RESP_VALUE].is_number() ||
-        !recMsg[DINPUT_SOFTBUS_KEY_INPUT_TYPE].is_number()) {
-        DHLOGE("OnBytesReceived cmdType is TRANS_SOURCE_TO_SOURCE_MSG_STOP_TYPE_RESULT, data type error.");
+    if (!IsString(recMsg, DINPUT_SOFTBUS_KEY_SRC_DEV_ID) ||
+        !IsString(recMsg, DINPUT_SOFTBUS_KEY_SINK_DEV_ID) ||
+        !IsInt32(recMsg, DINPUT_SOFTBUS_KEY_RESP_VALUE) ||
+        !IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_INPUT_TYPE)) {
+        DHLOGE("The key is invaild.");
         return;
     }
 
@@ -1649,10 +1660,10 @@ void DistributedInputSourceTransport::HandleSessionData(int32_t sessionId, const
         return;
     }
 
-    int cmdType = recMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE];
+    uint32_t cmdType = recMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE];
     auto iter = memberFuncMap_.find(cmdType);
     if (iter == memberFuncMap_.end()) {
-        DHLOGE("OnBytesReceived cmdType %d is undefined.", cmdType);
+        DHLOGE("OnBytesReceived cmdType %u is undefined.", cmdType);
         return;
     }
     SourceTransportFunc &func = iter->second;
@@ -1667,13 +1678,8 @@ bool DistributedInputSourceTransport::CheckRecivedData(const std::string& messag
         return false;
     }
 
-    if (recMsg.contains(DINPUT_SOFTBUS_KEY_CMD_TYPE) != true) {
-        DHLOGE("OnBytesReceived message:%s is error, not contain cmdType.", SetAnonyId(message).c_str());
-        return false;
-    }
-
-    if (recMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE].is_number() != true) {
-        DHLOGE("OnBytesReceived cmdType is not number type.");
+    if (!IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_CMD_TYPE)) {
+        DHLOGE("The key is invaild.");
         return false;
     }
 

@@ -115,10 +115,21 @@ std::string SetAnonyId(const std::string &message)
     return jsonObj.dump();
 }
 
+bool IsBoolean(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_boolean();
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
+    return res;
+}
+
 bool IsString(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_string();
-    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
     return res;
 }
 
@@ -126,36 +137,55 @@ bool IsInt32(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_number_integer() && INT32_MIN <= jsonObj[key] &&
         jsonObj[key] <= INT32_MAX;
-    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
     return res;
 }
 
+bool IsInt64(const nlohmann::json& jsonObj, const std::string& key)
+{
+    bool res = jsonObj.contains(key) && jsonObj[key].is_number_integer() && INT64_MIN <= jsonObj[key] &&
+        jsonObj[key] <= INT64_MAX;
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
+    return res;
+}
 
 bool IsUInt16(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT16_MAX;
-    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
     return res;
 }
 
 bool IsUInt32(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT32_MAX;
-    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
     return res;
 }
 
 bool IsUInt64(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_number_unsigned() && jsonObj[key] <= UINT64_MAX;
-    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
     return res;
 }
 
 bool IsArray(const nlohmann::json& jsonObj, const std::string& key)
 {
     bool res = jsonObj.contains(key) && jsonObj[key].is_array();
-    DHLOGI("the key %s in json is %s", key.c_str(), res ? "valid" : "invalid");
+    if (!res) {
+        DHLOGE("The key %s in jsonObj is invalid.", key.c_str());
+    }
     return res;
 }
 
@@ -170,12 +200,12 @@ std::string GetNodeDesc(std::string parameters)
     std::string physicalPath = "N/A";
     int32_t classes = -1;
 
-    if (parObj.find(DEVICE_NAME) != parObj.end() && parObj.find(PHYSICAL_PATH) != parObj.end() &&
-        parObj.find(CLASSES) != parObj.end()) {
+    if (IsString(parObj, DEVICE_NAME) && IsString(parObj, PHYSICAL_PATH) && IsInt32(parObj, CLASSES)) {
         nodeName = parObj.at(DEVICE_NAME).get<std::string>();
         physicalPath = parObj.at(PHYSICAL_PATH).get<std::string>();
         classes = parObj.at(CLASSES).get<int32_t>();
     }
+
     return "{ nodeName: " + nodeName + ", physicalPath: " + physicalPath + ", classes: " +
         std::to_string(classes) + " }";
 }

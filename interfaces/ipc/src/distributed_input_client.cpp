@@ -697,6 +697,10 @@ void DistributedInputClient::AddWhiteListInfos(const std::string &deviceId, cons
         DHLOGE("InputData parse failed!");
         return;
     }
+    if (!inputData.is_array()) {
+        DHLOGE("inputData not vector!");
+        return;
+    }
     size_t jsonSize = inputData.size();
     DHLOGI("AddWhiteListInfosCb OnResult deviceId: %s, json str: %s, json size:%d.\n",
         GetAnonyString(deviceId).c_str(), GetAnonyString(strJson).c_str(), jsonSize);
@@ -716,6 +720,10 @@ void DistributedInputClient::UpdateSinkScreenInfos(const std::string &strJson)
     nlohmann::json inputData = nlohmann::json::parse(strJson, nullptr, false);
     if (inputData.is_discarded()) {
         DHLOGE("InputData parse failed!");
+        return;
+    }
+    if (!inputData.is_array()) {
+        DHLOGE("inputData not vector!");
         return;
     }
     size_t jsonSize = inputData.size();

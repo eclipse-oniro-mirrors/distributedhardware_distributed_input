@@ -95,9 +95,9 @@ private:
     int32_t RefreshEpollItem(bool isSleep);
 
     int32_t OpenInputDeviceLocked(const std::string& devicePath);
-    int32_t QueryInputDeviceInfo(int32_t fd, InputDevice& identifier);
-    void QueryEventInfo(int32_t fd, InputDevice& identifier);
-    struct libevdev* GetLibEvDev(int32_t fd);
+    int32_t QueryInputDeviceInfo(int fd, InputDevice& identifier);
+    void QueryEventInfo(int fd, InputDevice& identifier);
+    struct libevdev* GetLibEvDev(int fd);
     void GetEventTypes(struct libevdev* dev, InputDevice& identifier);
     int32_t GetEventKeys(struct libevdev* dev, InputDevice& identifier);
     int32_t GetABSInfo(struct libevdev* dev, InputDevice& identifier);

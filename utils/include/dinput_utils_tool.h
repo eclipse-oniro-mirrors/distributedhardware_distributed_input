@@ -38,8 +38,10 @@ std::string GetUUIDBySoftBus(const std::string &networkId);
 uint64_t GetCurrentTime();
 std::string SetAnonyId(const std::string &message);
 /* IsString, IsUInt32 and IsUInt64 are used to valid json key */
+bool IsBoolean(const nlohmann::json& jsonObj, const std::string& key);
 bool IsString(const nlohmann::json& jsonObj, const std::string& key);
 bool IsInt32(const nlohmann::json& jsonObj, const std::string& key);
+bool IsInt64(const nlohmann::json& jsonObj, const std::string& key);
 bool IsUInt16(const nlohmann::json& jsonObj, const std::string& key);
 bool IsUInt32(const nlohmann::json& jsonObj, const std::string& key);
 bool IsUInt64(const nlohmann::json& jsonObj, const std::string& key);
