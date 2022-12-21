@@ -42,6 +42,7 @@ namespace DistributedHardware {
 namespace DistributedInput {
 namespace {
     const uint32_t INPUTTYPE = static_cast<uint32_t>(DInputDeviceType::ALL);
+    const uint32_t INPUTTYPE_MOUSE = static_cast<uint32_t>(DInputDeviceType::MOUSE);
 }
 
 void DistributedInputSourceManagerTest::SetUp()
@@ -296,6 +297,42 @@ HWTEST_F(DistributedInputSourceManagerTest, RegisterDistributedHardware_02, test
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, handleStartServerCallback_01, testing::ext::TestSize.Level1)
+{
+    std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string dhId = "input_slkdiek3kddkeojfe";
+    DistributedInputSourceManager::InputDeviceId inputDeviceId {devId, dhId};
+    sourceManager_->inputDevice_.push_back(inputDeviceId);
+    sourceManager_->handleStartServerCallback(devId);
+    EXPECT_EQ(1, sourceManager_->inputDevice_.size());
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, handleStartServerCallback_02, testing::ext::TestSize.Level1)
+{
+    std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
+    sourceManager_->handleStartServerCallback(devId);
+
+    sourceManager_->DeviceMap_[devId] = DINPUT_SOURCE_SWITCH_ON;
+    devId = "devId_20221221_test";
+    sourceManager_->handleStartServerCallback(devId);
+    EXPECT_EQ(2, sourceManager_->DeviceMap_.size());
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UnregCallbackNotify_01, testing::ext::TestSize.Level1)
+{
+    std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string dhId = "input_slkdiek3kddkeojfe";
+    int32_t ret = sourceManager_->UnregCallbackNotify(devId, dhId);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sptr<TestUnregisterDInputCb> callback = new TestUnregisterDInputCb();
+    DistributedInputSourceManager::DInputClientUnregistInfo info {devId, dhId, callback};
+    sourceManager_->unregCallbacks_.push_back(info);
+    devId = "devId_20221221_test";
+    sourceManager_->UnregCallbackNotify(devId, dhId);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
 HWTEST_F(DistributedInputSourceManagerTest, CheckUnregisterParam_01, testing::ext::TestSize.Level1)
 {
     std::string devId = "";
@@ -403,6 +440,9 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_01, testing::ext::T
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
     int32_t ret = sourceManager_->StartRemoteInput(devId, INPUTTYPE, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
+
+    ret = sourceManager_->StartRemoteInput(devId, INPUTTYPE_MOUSE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_02, testing::ext::TestSize.Level1)
@@ -437,6 +477,9 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_01, testing::ext::Te
     std::string devId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
     int32_t ret = sourceManager_->StopRemoteInput(devId, INPUTTYPE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    ret = sourceManager_->StopRemoteInput(devId, INPUTTYPE_MOUSE, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -473,6 +516,9 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_04, testing::ext::T
     std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
     int32_t ret = sourceManager_->StartRemoteInput(srcId, sinkId, INPUTTYPE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    ret = sourceManager_->StartRemoteInput(srcId, sinkId, INPUTTYPE_MOUSE, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -518,6 +564,9 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_04, testing::ext::Te
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
     int32_t ret = sourceManager_->StopRemoteInput(srcId, sinkId, INPUTTYPE, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
+
+    ret = sourceManager_->StopRemoteInput(srcId, sinkId, INPUTTYPE_MOUSE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_05, testing::ext::TestSize.Level1)
@@ -547,6 +596,72 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_06, testing::ext::Te
     std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
     std::string sinkId = "devId_4810input4809_test";
     int32_t ret = sourceManager_->StopRemoteInput(srcId, sinkId, INPUTTYPE, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByType_01, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{true, srcId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->RelayStartRemoteInputByType(srcId, sinkId, INPUTTYPE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_test";
+    ret = sourceManager_->RelayStartRemoteInputByType(srcId, sinkId, INPUTTYPE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    ret = sourceManager_->RelayStartRemoteInputByType(srcId, sinkId, INPUTTYPE_MOUSE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByType_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartDInputCallback> callback = new TestStartDInputCallback();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{false, srcId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->RelayStartRemoteInputByType(srcId, sinkId, INPUTTYPE, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByType_01, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{true, srcId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->RelayStopRemoteInputByType(srcId, sinkId, INPUTTYPE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_test";
+    ret = sourceManager_->RelayStopRemoteInputByType(srcId, sinkId, INPUTTYPE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    ret = sourceManager_->RelayStopRemoteInputByType(srcId, sinkId, INPUTTYPE_MOUSE, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByType_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{false, srcId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->RelayStopRemoteInputByType(srcId, sinkId, INPUTTYPE, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
@@ -582,7 +697,21 @@ HWTEST_F(DistributedInputSourceManagerTest, PrepareRemoteInput_03, testing::ext:
  * @tc.type: FUNC
  * @tc.require: SR000H9J77
  */
+
 HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput_04, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    int32_t sessionId = 1;
+    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->UnprepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput_05, testing::ext::TestSize.Level1)
 {
     std::string srcId = "";
     std::string sinkId = "";
@@ -602,6 +731,15 @@ HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput_04, testing::ex
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, UnprepareRemoteInput_06, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "sinkId_48104809_test";
+    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    int32_t ret = sourceManager_->UnprepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
+}
+
 /**
  * @tc.name: StartRemoteInput
  * @tc.desc: verify the function of starting distributed input with dhid.
@@ -615,6 +753,18 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_07, testing::ext::T
     sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
     dhIds.push_back("Input_slkdiek3kddkeojfe");
     int32_t ret = sourceManager_->StartRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_20221221_test";
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    ret = sourceManager_->StartRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    dhIds.push_back("Input_48094810_test");
+    ret = sourceManager_->StartRemoteInput(sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -635,6 +785,22 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_08, testing::ext::T
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_09, testing::ext::TestSize.Level1)
+{
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_slkdiek3kddkeojfe");
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t sessionId = 1;
+    sourceManager_->staStringCallbacks_.clear();
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{true, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->StartRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
 /**
  * @tc.name: StopRemoteInput
  * @tc.desc: verify the function of stoping distributed input with dhid.
@@ -647,7 +813,22 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_07, testing::ext::Te
     sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
     std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
     dhIds.push_back("Input_slkdiek3kddkeojfe");
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
     int32_t ret = sourceManager_->StopRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_20221221_test";
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfos{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfos;
+    ret = sourceManager_->StopRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    dhIds.push_back("Input_48094810_test");
+    ret = sourceManager_->StopRemoteInput(sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -666,24 +847,56 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_08, testing::ext::Te
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_09, testing::ext::TestSize.Level1)
+{
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_slkdiek3kddkeojfe");
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t sessionId = 1;
+    sourceManager_->stpStringCallbacks_.clear();
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{true, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->StopRemoteInput(sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
 /**
  * @tc.name: StartRemoteInput
  * @tc.desc: verify the function of starting distributed input with dhid.
  * @tc.type: FUNC
  * @tc.require: SR000H9J74
  */
-HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_09, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_10, testing::ext::TestSize.Level1)
 {
     std::vector<std::string> dhIds;
     sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
     std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
     std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
     dhIds.push_back("Input_slkdiek3kddkeojfe");
+    int32_t sessionId = 1;
+    sourceManager_->stpStringCallbacks_.clear();
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
     int32_t ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_20221221_test";
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfos{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfos;
+    ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    dhIds.push_back("Input_48094810_test");
+    ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_10, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_11, testing::ext::TestSize.Level1)
 {
     std::string srcId = "";
     std::string sinkId = "";
@@ -700,10 +913,26 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_10, testing::ext::T
     ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 
-
+    srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
     DistributedInputSourceManager::DInputClientStartDhidInfo startDhIdInfo {srcId, sinkId, dhIds, callback};
     sourceManager_->staStringCallbacks_.push_back(startDhIdInfo);
     ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_12, testing::ext::TestSize.Level1)
+{
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_slkdiek3kddkeojfe");
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t sessionId = 1;
+    sourceManager_->staStringCallbacks_.clear();
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{true, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->StartRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
@@ -713,18 +942,34 @@ HWTEST_F(DistributedInputSourceManagerTest, StartRemoteInput_10, testing::ext::T
  * @tc.type: FUNC
  * @tc.require: SR000H9J74
  */
-HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_09, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_10, testing::ext::TestSize.Level1)
 {
     std::vector<std::string> dhIds;
     sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
     std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
     std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
     dhIds.push_back("Input_slkdiek3kddkeojfe");
+    int32_t sessionId = 1;
+    sourceManager_->stpStringCallbacks_.clear();
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
     int32_t ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_20221221_test";
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfos{false, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfos;
+    ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    dhIds.push_back("Input_48094810_test");
+    ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_10, testing::ext::TestSize.Level1)
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_11, testing::ext::TestSize.Level1)
 {
     std::string srcId = "";
     std::string sinkId = "";
@@ -745,6 +990,22 @@ HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_10, testing::ext::Te
     DistributedInputSourceManager::DInputClientStopDhidInfo stopDhIdInfo {srcId, sinkId, dhIds, callback};
     sourceManager_->stpStringCallbacks_.push_back(stopDhIdInfo);
     ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, StopRemoteInput_12, testing::ext::TestSize.Level1)
+{
+    std::vector<std::string> dhIds;
+    dhIds.push_back("Input_slkdiek3kddkeojfe");
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestStartStopVectorCallbackStub> callback = new TestStartStopVectorCallbackStub();
+    int32_t sessionId = 1;
+    sourceManager_->stpStringCallbacks_.clear();
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
+    DistributedInputSourceTransport::DInputSessionInfo sessionInfo{true, sinkId};
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
+    int32_t ret = sourceManager_->StopRemoteInput(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
@@ -835,9 +1096,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayPrepareRemoteInput_01, testing:
     std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
     int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_.clear();
     DistributedInputSourceTransport::DInputSessionInfo sessionInfo{true, srcId};
     DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId] = sessionInfo;
     int32_t ret = sourceManager_->RelayPrepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_test";
+    sourceManager_->RelayPrepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
@@ -846,8 +1112,25 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayUnprepareRemoteInput_01, testin
     std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
     std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].isToSrcSa = true;
     int32_t ret = sourceManager_->RelayUnprepareRemoteInput(srcId, sinkId, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_test";
+    sourceManager_->RelayUnprepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayUnprepareRemoteInput_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].isToSrcSa = false;
+    int32_t ret = sourceManager_->RelayUnprepareRemoteInput(srcId, sinkId, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByDhid_01, testing::ext::TestSize.Level1)
@@ -857,8 +1140,37 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByDhid_01, test
     std::vector<std::string> dhIds;
     dhIds.push_back("input_slkdiek3kddkeojfe");
     sptr<TestStartStopDInputsCb> callback = new TestStartStopDInputsCb();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].isToSrcSa = true;
     int32_t ret = sourceManager_->RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
+
+    srcId = "srcId_20221221_test";
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].remoteId = srcId;
+    ret = sourceManager_->RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_20221221_test";
+    sourceManager_->RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    dhIds.push_back("Input_48094810_test");
+    sourceManager_->RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStartRemoteInputByDhid_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("input_slkdiek3kddkeojfe");
+    sptr<TestStartStopDInputsCb> callback = new TestStartStopDInputsCb();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].isToSrcSa = false;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].remoteId = srcId;
+    int32_t ret = sourceManager_->RelayStartRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByDhid_01, testing::ext::TestSize.Level1)
@@ -868,8 +1180,37 @@ HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByDhid_01, testi
     std::vector<std::string> dhIds;
     dhIds.push_back("input_slkdiek3kddkeojfe");
     sptr<TestStartStopDInputsCb> callback = new TestStartStopDInputsCb();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].isToSrcSa = true;
     int32_t ret = sourceManager_->RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
     EXPECT_EQ(DH_SUCCESS, ret);
+
+    srcId = "srcId_20221221_test";
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].remoteId = srcId;
+    ret = sourceManager_->RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    sinkId = "sinkId_20221221_test";
+    sourceManager_->RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+
+    dhIds.push_back("Input_48094810_test");
+    sourceManager_->RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(DH_SUCCESS, ret);
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RelayStopRemoteInputByDhid_02, testing::ext::TestSize.Level1)
+{
+    std::string srcId = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
+    std::string sinkId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::vector<std::string> dhIds;
+    dhIds.push_back("input_slkdiek3kddkeojfe");
+    sptr<TestStartStopDInputsCb> callback = new TestStartStopDInputsCb();
+    int32_t sessionId = 1;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].isToSrcSa = false;
+    DistributedInputSourceTransport::GetInstance().sessionDevMap_[sessionId].remoteId = srcId;
+    int32_t ret = sourceManager_->RelayStopRemoteInputByDhid(srcId, sinkId, dhIds, callback);
+    EXPECT_EQ(ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, ret);
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RunRegisterCallback_01, testing::ext::TestSize.Level1)
@@ -880,6 +1221,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RunRegisterCallback_01, testing::ext
     sptr<TestRegisterDInputCb> callback = new TestRegisterDInputCb();
     DistributedInputSourceManager::DInputClientRegistInfo info {devId, dhId, callback};
     sourceManager_->regCallbacks_.push_back(info);
+    sourceManager_->RunRegisterCallback(devId, dhId, status);
+    EXPECT_EQ(0, sourceManager_->regCallbacks_.size());
+
+    devId = "devId_20221221_test";
+    sourceManager_->RunRegisterCallback(devId, dhId, status);
+    EXPECT_EQ(0, sourceManager_->regCallbacks_.size());
+
+    dhId = "dhId_20221221_test";
     sourceManager_->RunRegisterCallback(devId, dhId, status);
     EXPECT_EQ(0, sourceManager_->regCallbacks_.size());
 }
@@ -894,6 +1243,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RunUnregisterCallback_01, testing::e
     sourceManager_->unregCallbacks_.push_back(info);
     sourceManager_->RunUnregisterCallback(devId, dhId, status);
     EXPECT_EQ(0, sourceManager_->unregCallbacks_.size());
+
+    devId = "devId_20221221_test";
+    sourceManager_->RunRegisterCallback(devId, dhId, status);
+    EXPECT_EQ(0, sourceManager_->unregCallbacks_.size());
+
+    dhId = "dhId_20221221_test";
+    sourceManager_->RunRegisterCallback(devId, dhId, status);
+    EXPECT_EQ(0, sourceManager_->unregCallbacks_.size());
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RunPrepareCallback_01, testing::ext::TestSize.Level1)
@@ -904,6 +1261,10 @@ HWTEST_F(DistributedInputSourceManagerTest, RunPrepareCallback_01, testing::ext:
     sptr<TestPrepareDInputCallback> callback = new TestPrepareDInputCallback();
     DistributedInputSourceManager::DInputClientPrepareInfo info {devId, callback};
     sourceManager_->preCallbacks_.push_back(info);
+    sourceManager_->RunPrepareCallback(devId, status, object);
+    EXPECT_EQ(0, sourceManager_->preCallbacks_.size());
+
+    devId = "devId_20221221_test";
     sourceManager_->RunPrepareCallback(devId, status, object);
     EXPECT_EQ(0, sourceManager_->preCallbacks_.size());
 }
@@ -918,6 +1279,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RunRelayPrepareCallback_01, testing:
     sourceManager_->relayPreCallbacks_.push_back(info);
     sourceManager_->RunRelayPrepareCallback(srcId, sinkId, status);
     EXPECT_EQ(0, sourceManager_->relayPreCallbacks_.size());
+
+    srcId = "devId_20221221_test";
+    sourceManager_->RunRelayPrepareCallback(srcId, sinkId, status);
+    EXPECT_EQ(0, sourceManager_->relayPreCallbacks_.size());
+
+    sinkId = "sinkId_20221221_test";
+    sourceManager_->RunRelayPrepareCallback(srcId, sinkId, status);
+    EXPECT_EQ(0, sourceManager_->relayPreCallbacks_.size());
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RunRelayUnprepareCallback_01, testing::ext::TestSize.Level1)
@@ -929,6 +1298,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RunRelayUnprepareCallback_01, testin
     sptr<TestUnprepareDInputCallback> callback = new TestUnprepareDInputCallback();
     DistributedInputSourceManager::DInputClientRelayUnprepareInfo info {srcId, sinkId, callback};
     sourceManager_->relayUnpreCallbacks_.push_back(info);
+    sourceManager_->RunRelayUnprepareCallback(srcId, sinkId, status);
+    EXPECT_EQ(0, sourceManager_->relayUnpreCallbacks_.size());
+
+    srcId = "devId_20221221_test";
+    sourceManager_->RunRelayUnprepareCallback(srcId, sinkId, status);
+    EXPECT_EQ(0, sourceManager_->relayUnpreCallbacks_.size());
+
+    sinkId = "sinkId_20221221_test";
     sourceManager_->RunRelayUnprepareCallback(srcId, sinkId, status);
     EXPECT_EQ(0, sourceManager_->relayUnpreCallbacks_.size());
 }
@@ -955,6 +1332,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RunStartCallback_01, testing::ext::T
     sourceManager_->staCallbacks_.push_back(info);
     sourceManager_->RunStartCallback(devId, inputTypes, status);
     EXPECT_EQ(0, sourceManager_->staCallbacks_.size());
+
+    devId = "devId_20221221_test";
+    sourceManager_->RunStartCallback(devId, inputTypes, status);
+    EXPECT_EQ(0, sourceManager_->staCallbacks_.size());
+
+    inputTypes = 3;
+    sourceManager_->RunStartCallback(devId, inputTypes, status);
+    EXPECT_EQ(0, sourceManager_->staCallbacks_.size());
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, RunStopCallback_01, testing::ext::TestSize.Level1)
@@ -965,6 +1350,14 @@ HWTEST_F(DistributedInputSourceManagerTest, RunStopCallback_01, testing::ext::Te
     sptr<TestStopDInputCallback> callback = new TestStopDInputCallback();
     DistributedInputSourceManager::DInputClientStopInfo info {devId, inputTypes, callback};
     sourceManager_->stpCallbacks_.push_back(info);
+    sourceManager_->RunStopCallback(devId, inputTypes, status);
+    EXPECT_EQ(0, sourceManager_->stpCallbacks_.size());
+
+    devId = "devId_20221221_test";
+    sourceManager_->RunStopCallback(devId, inputTypes, status);
+    EXPECT_EQ(0, sourceManager_->stpCallbacks_.size());
+
+    inputTypes = 3;
     sourceManager_->RunStopCallback(devId, inputTypes, status);
     EXPECT_EQ(0, sourceManager_->stpCallbacks_.size());
 }
@@ -1053,6 +1446,19 @@ HWTEST_F(DistributedInputSourceManagerTest, RunRelayStopTypeCallback_01, testing
     sourceManager_->relayStpTypeCallbacks_.push_back(info);
     sourceManager_->RunRelayStopTypeCallback(srcId, sinkId, status, inputTypes);
     EXPECT_EQ(0, sourceManager_->relayStpTypeCallbacks_.size());
+}
+
+HWTEST_F(DistributedInputSourceManagerTest, RemoveInputDeviceId_01, testing::ext::TestSize.Level1)
+{
+    std::string deviceId = "umkyu1b165e1be98151891erbe8r91ev";
+    std::string dhId = "input_slkdiek3kddkeojfe";
+    sourceManager_->RemoveInputDeviceId(deviceId, dhId);
+    EXPECT_EQ(0, sourceManager_->inputDevice_.size());
+
+    DistributedInputSourceManager::InputDeviceId inputDeviceId {deviceId, dhId};
+    sourceManager_->inputDevice_.push_back(inputDeviceId);
+    sourceManager_->RemoveInputDeviceId(deviceId, dhId);
+    EXPECT_EQ(0, sourceManager_->inputDevice_.size());
 }
 
 HWTEST_F(DistributedInputSourceManagerTest, GetDeviceMapAllDevSwitchOff_01, testing::ext::TestSize.Level1)
