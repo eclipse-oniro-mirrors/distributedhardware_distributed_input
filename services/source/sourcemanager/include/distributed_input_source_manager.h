@@ -305,24 +305,12 @@ public:
     };
 
 public:
-    void RunRegisterCallback(
-        const std::string& devId, const std::string& dhId, const int32_t& status
-    );
-    void RunUnregisterCallback(
-        const std::string& devId, const std::string& dhId, const int32_t& status
-    );
-    void RunPrepareCallback(
-        const std::string& devId, const int32_t& status, const std::string& object
-    );
-    void RunUnprepareCallback(
-        const std::string& devId, const int32_t& status
-    );
-    void RunStartCallback(
-        const std::string& devId, const uint32_t& inputTypes, const int32_t& status
-    );
-    void RunStopCallback(
-        const std::string& devId, const uint32_t& inputTypes, const int32_t& status
-    );
+    void RunRegisterCallback(const std::string &devId, const std::string &dhId, const int32_t &status);
+    void RunUnregisterCallback(const std::string &devId, const std::string &dhId, const int32_t &status);
+    void RunPrepareCallback(const std::string &devId, const int32_t &status, const std::string &object);
+    void RunUnprepareCallback(const std::string &devId, const int32_t &status);
+    void RunStartCallback(const std::string &devId, const uint32_t &inputTypes, const int32_t &status);
+    void RunStopCallback(const std::string &devId, const uint32_t &inputTypes, const int32_t &status);
 
     void RunStartDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status);
     void RunStopDhidCallback(const std::string &sinkId, const std::string &dhIds, const int32_t &status);

@@ -27,6 +27,7 @@
 #include "event_handler.h"
 #include "ipublisher_listener.h"
 #include "publisher_listener_stub.h"
+#include "nlohmann/json.hpp"
 #include "screen.h"
 #include "singleton.h"
 #include "system_ability.h"
@@ -152,6 +153,8 @@ public:
     int32_t RegisterSharingDhIdListener(sptr<ISharingDhIdListener> sharingDhIdListener) override;
 
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+
+    void QueryLocalWhiteList(nlohmann::json &jsonStr);
 
 private:
     void CleanExceptionalInfo(const SrcScreenInfo& srcScreenInfo);

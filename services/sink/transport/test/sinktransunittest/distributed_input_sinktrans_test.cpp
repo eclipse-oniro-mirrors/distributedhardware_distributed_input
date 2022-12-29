@@ -31,7 +31,6 @@ namespace {
     const int32_t INT_DEVID = 1000;
     const int32_t INT_VECTORDHIDS = 123;
     const uint32_t INPUTTYPE = static_cast<uint32_t>(DInputDeviceType::ALL);
-    const uint32_t INT_CMDTYPE = 1;
     const std::string DEVID = "umkyu1b165e1be98151891erbe8r91ev";
     const std::string DHID = "Input_1ds56v18e1v21v8v1erv15r1v8r1j1ty8";
     const std::string SINKID = "networkidc08647073e02e7a78f09473aa122ff57fc81c00";
@@ -63,52 +62,27 @@ HWTEST_F(DistributedInputSinkTransTest, Init, testing::ext::TestSize.Level0)
     EXPECT_EQ(DH_SUCCESS, ret);
 }
 
-HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId_001, testing::ext::TestSize.Level0)
-{
-    std::string srcId = "";
-    int32_t ret = DistributedInputSinkTransport::GetInstance().GetSessionIdByNetId(srcId);
-    EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_GET_SESSIONID_FAIL, ret);
-}
-
-HWTEST_F(DistributedInputSinkTransTest, GetSessionIdByNetId_002, testing::ext::TestSize.Level0)
-{
-    std::string srcId = "umkyu1b165e1be98151891erbe8r91ev";
-    DistributedInputSinkTransport::GetInstance().sessionDevMap_[srcId] = 1;
-    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(1, srcId);
-    int32_t ret = DistributedInputSinkTransport::GetInstance().GetSessionIdByNetId(srcId);
-    EXPECT_EQ(1, ret);
-    DistributedInputSinkTransport::GetInstance().GetDeviceIdBySessionId(100, srcId);
-}
-
 HWTEST_F(DistributedInputSinkTransTest, RespPrepareRemoteInput01, testing::ext::TestSize.Level1)
 {
     DistributedInputSinkManager sinkMgr(4810, false);
     std::shared_ptr<DistributedInputSinkManager::DInputSinkListener> statuslistener =
         std::make_shared<DistributedInputSinkManager::DInputSinkListener>(&sinkMgr);
     DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
-    std::string message = "";
-    int32_t sessionId = 1;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, message);
-    message = "message_test";
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, message);
-    jsonStr_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = INT_CMDTYPE;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr_.dump());
-    jsonStr_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = SOFTBUSCMDTYPE;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(1, jsonStr_.dump());
 
+    int32_t sessionId = 1;
     jsonStr1_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE;
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr1_.dump());
     jsonStr1_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr1_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr1_.dump());
 
     jsonStr8_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_PREPARE_FOR_REL;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr8_.dump());
     jsonStr8_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr8_.dump());
     jsonStr8_[DINPUT_SOFTBUS_KEY_SESSION_ID] = STR_SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
-
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr8_.dump());
     jsonStr8_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr8_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr8_.dump());
     sessionId = -1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespPrepareRemoteInput(sessionId, smsg);
@@ -148,22 +122,22 @@ HWTEST_F(DistributedInputSinkTransTest, RespUnprepareRemoteInput01, testing::ext
     int32_t sessionId = 1;
     jsonStr2_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_UNPREPARE;
     jsonStr2_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr2_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr2_.dump());
 
     jsonStr2_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr2_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr2_.dump());
 
     jsonStr9_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_UNPREPARE_FOR_REL;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr9_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr9_.dump());
     jsonStr9_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr9_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr9_.dump());
     jsonStr9_[DINPUT_SOFTBUS_KEY_SESSION_ID] = STR_SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr9_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr9_.dump());
 
     jsonStr9_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr9_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr9_.dump());
     jsonStr9_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr9_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr9_.dump());
     sessionId = -1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespUnprepareRemoteInput(sessionId, smsg);
@@ -202,36 +176,36 @@ HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput01, testing::ext::Te
     DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     int32_t sessionId = 1;
     jsonStr11_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_TYPE_FOR_REL;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_SESSION_ID] = STR_SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = STR_INPUTTYPE;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
 
     jsonStr11_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = INPUTTYPE;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
 
     jsonStr10_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_DHID_FOR_REL;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr10_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr10_.dump());
     jsonStr10_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr10_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr10_.dump());
     jsonStr10_[DINPUT_SOFTBUS_KEY_SESSION_ID] = STR_SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr10_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr10_.dump());
     jsonStr10_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = INT_VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr10_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr10_.dump());
 
     jsonStr10_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr10_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr10_.dump());
     jsonStr10_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr10_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr10_.dump());
     jsonStr10_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr10_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr10_.dump());
     sessionId = -1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsg);
@@ -262,16 +236,16 @@ HWTEST_F(DistributedInputSinkTransTest, RespStartRemoteInput04, testing::ext::Te
     DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     int32_t sessionId = 1;
     jsonStr6_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_START_DHID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr6_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr6_.dump());
     jsonStr6_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr6_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr6_.dump());
     jsonStr6_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = INT_VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr6_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr6_.dump());
 
     jsonStr6_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr6_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr6_.dump());
     jsonStr6_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr6_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr6_.dump());
     std::string smsg(MESSAGE_MAX_SIZE, 'a');
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStartRemoteInput(sessionId, smsg);
     EXPECT_EQ(ERR_DH_INPUT_SERVER_SINK_TRANSPORT_RESPSTART_FAIL, ret);
@@ -285,36 +259,36 @@ HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput01, testing::ext::Tes
     DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     int32_t sessionId = 1;
     jsonStr12_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr12_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr12_.dump());
     jsonStr12_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr12_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr12_.dump());
     jsonStr12_[DINPUT_SOFTBUS_KEY_SESSION_ID] = STR_SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr12_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr12_.dump());
     jsonStr12_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = STR_INPUTTYPE;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr12_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr12_.dump());
 
     jsonStr12_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr12_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr12_.dump());
     jsonStr12_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr12_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr12_.dump());
     jsonStr12_[DINPUT_SOFTBUS_KEY_INPUT_TYPE] = INPUTTYPE;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr12_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr12_.dump());
 
     jsonStr11_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_DHID_FOR_REL;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_SESSION_ID] = STR_SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = INT_VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
 
     jsonStr11_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_SESSION_ID] = SESSIONID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     jsonStr11_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr11_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr11_.dump());
     sessionId = -1;
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
@@ -345,16 +319,16 @@ HWTEST_F(DistributedInputSinkTransTest, RespStopRemoteInput04, testing::ext::Tes
     DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     int32_t sessionId = 1;
     jsonStr7_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_STOP_DHID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr7_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr7_.dump());
     jsonStr7_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr7_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr7_.dump());
     jsonStr7_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = INT_VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr7_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr7_.dump());
 
     jsonStr7_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr7_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr7_.dump());
     jsonStr7_[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = VECTORDHIDS;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr7_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr7_.dump());
 
     std::string smsg(MESSAGE_MAX_SIZE, 'a');
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespStopRemoteInput(sessionId, smsg);
@@ -478,16 +452,16 @@ HWTEST_F(DistributedInputSinkTransTest, RespLatency02, testing::ext::TestSize.Le
     DistributedInputSinkTransport::GetInstance().callback_ = statuslistener;
     int32_t sessionId = 1;
     jsonStr5_[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SOURCE_MSG_LATENCY;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr5_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr5_.dump());
     jsonStr5_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = INT_DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr5_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr5_.dump());
 
     jsonStr5_[DINPUT_SOFTBUS_KEY_DEVICE_ID] = DEVID;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, jsonStr5_.dump());
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, jsonStr5_.dump());
 
     std::string message = "";
     DistributedInputSinkTransport::GetInstance().callback_ = nullptr;
-    DistributedInputSinkTransport::GetInstance().HandleSessionData(sessionId, message);
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, message);
     std::string smsg = "";
     int32_t ret = DistributedInputSinkTransport::GetInstance().RespLatency(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
@@ -507,42 +481,6 @@ HWTEST_F(DistributedInputSinkTransTest, SendMessage_001, testing::ext::TestSize.
     std::string smsg = "qwerzsdgertgdfgbrtyhuert6345634tgadsgfq13451234rfaDSFQ34FQQWEFWQERQWEFQWEFASEFQWERQWERQWER123";
     int32_t ret = DistributedInputSinkTransport::GetInstance().SendMessage(sessionId, smsg);
     EXPECT_EQ(DH_SUCCESS, ret);
-}
-
-HWTEST_F(DistributedInputSinkTransTest, OnSessionOpened_001, testing::ext::TestSize.Level1)
-{
-    int32_t sessionId = 0;
-    int32_t result = 1;
-    int32_t ret = DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
-    EXPECT_EQ(DH_SUCCESS, ret);
-}
-
-HWTEST_F(DistributedInputSinkTransTest, OnSessionOpened_002, testing::ext::TestSize.Level1)
-{
-    int32_t sessionId = 1;
-    int32_t result = 0;
-    int32_t ret = DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
-    EXPECT_EQ(DH_SUCCESS, ret);
-}
-
-HWTEST_F(DistributedInputSinkTransTest, OnSessionClosed_001, testing::ext::TestSize.Level1)
-{
-    int32_t sessionId = -1;
-    std::string networkId = "umkyu1b165e1be98151891erbe8r91ev";
-    char *data = nullptr;
-    uint32_t dataLen = 100;
-    std::string dhId = "dhId_test";
-    uint32_t btnCode = 0;
-    DistributedInputSinkTransport::GetInstance().sessionDevMap_.clear();
-    DistributedInputSinkTransport::GetInstance().OnBytesReceived(sessionId, data, dataLen);
-    DistributedInputSinkTransport::GetInstance().sessionDevMap_[networkId] = sessionId;
-    DistributedInputSinkTransport::GetInstance().OnSessionClosed(sessionId);
-    EXPECT_EQ(0, DistributedInputSinkTransport::GetInstance().sessionDevMap_.size());
-    DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhId, btnCode);
-    sessionId = 1;
-    char message[10] = "message";
-    DistributedInputSinkTransport::GetInstance().SendKeyStateNodeMsg(sessionId, dhId, btnCode);
-    DistributedInputSinkTransport::GetInstance().OnBytesReceived(sessionId, message, dataLen);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

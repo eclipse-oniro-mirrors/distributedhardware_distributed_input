@@ -66,6 +66,7 @@ private:
     /* the key is dhId, and the value is virtualDevice */
     std::map<std::string, std::unique_ptr<VirtualDevice>> virtualDeviceMap_;
     std::mutex virtualDeviceMapMutex_;
+    std::atomic<bool> isInjectThreadCreated_;
     std::atomic<bool> isInjectThreadRunning_;
     std::mutex operationMutex_;
     std::thread eventInjectThread_;

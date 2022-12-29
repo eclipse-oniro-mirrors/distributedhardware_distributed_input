@@ -33,59 +33,27 @@
 #include "session.h"
 #include "softbus_bus_center.h"
 
+#include "distributed_input_transport_base.h"
+
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-DistributedInputSinkTransport::DistributedInputSinkTransport() : sessionDevMap_({}), mySessionName_("")
+DistributedInputSinkTransport::DistributedInputSinkTransport() : mySessionName_("")
 {
     std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(true);
     eventHandler_ = std::make_shared<DistributedInputSinkTransport::DInputSinkEventHandler>(runner);
-    DHLOGI("DistributedInputSinkTransport eventHandler_");
+    DHLOGI("DistributedInputSinkTransport ctor.");
 }
 
 DistributedInputSinkTransport::~DistributedInputSinkTransport()
 {
-    DHLOGI("~DistributedInputSinkTransport");
-    sessionDevMap_.clear();
+    DHLOGI("DistributedInputSinkTransport dtor.");
     (void)RemoveSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str());
 }
 
 DistributedInputSinkTransport::DInputSinkEventHandler::DInputSinkEventHandler(
     const std::shared_ptr<AppExecFwk::EventRunner> &runner) : AppExecFwk::EventHandler(runner)
 {
-}
-
-static int32_t SessionOpened(int32_t sessionId, int32_t result)
-{
-    return DistributedInput::DistributedInputSinkTransport::GetInstance().OnSessionOpened(sessionId, result);
-}
-
-static void SessionClosed(int32_t sessionId)
-{
-    DistributedInput::DistributedInputSinkTransport::GetInstance().OnSessionClosed(sessionId);
-}
-
-static void BytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
-{
-    DistributedInput::DistributedInputSinkTransport::GetInstance().OnBytesReceived(sessionId, data, dataLen);
-}
-
-static void MessageReceived(int32_t sessionId, const void *data, uint32_t dataLen)
-{
-    (void)sessionId;
-    (void)data;
-    (void)dataLen;
-    DHLOGI("sessionId: %d, dataLen:%d", sessionId, dataLen);
-}
-
-static void StreamReceived(int32_t sessionId, const StreamData *data, const StreamData *ext,
-    const StreamFrameInfo *param)
-{
-    (void)sessionId;
-    (void)data;
-    (void)ext;
-    (void)param;
-    DHLOGI("sessionId: %d", sessionId);
 }
 
 DistributedInputSinkTransport &DistributedInputSinkTransport::GetInstance()
@@ -101,10 +69,10 @@ void DistributedInputSinkTransport::DInputSinkEventHandler::ProcessEvent(const A
     switch (eventId) {
         case EHandlerMsgType::DINPUT_SINK_EVENT_HANDLER_MSG: {
             std::shared_ptr<nlohmann::json> innerMsg = event->GetSharedObject<nlohmann::json>();
-            nlohmann::json sendMsg;
-            sendMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_BODY_DATA;
-            sendMsg[DINPUT_SOFTBUS_KEY_INPUT_DATA] = innerMsg->dump();
-            std::string smsg = sendMsg.dump();
+            nlohmann::json jsonStr;
+            jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_BODY_DATA;
+            jsonStr[DINPUT_SOFTBUS_KEY_INPUT_DATA] = innerMsg->dump();
+            std::string smsg = jsonStr.dump();
             RecordEventLog(innerMsg);
             int32_t sessionId = DistributedInputSinkSwitch::GetInstance().GetSwitchOpenedSession();
             if (sessionId > 0) {
@@ -122,30 +90,17 @@ void DistributedInputSinkTransport::DInputSinkEventHandler::ProcessEvent(const A
 
 int32_t DistributedInputSinkTransport::Init()
 {
-    // 1.create session
     DHLOGI("Init");
-    ISessionListener iSessionListener = {
-        .OnSessionOpened = SessionOpened,
-        .OnSessionClosed = SessionClosed,
-        .OnBytesReceived = BytesReceived,
-        .OnMessageReceived = MessageReceived,
-        .OnStreamReceived = StreamReceived
-    };
-    auto localNode = std::make_unique<NodeBasicInfo>();
-    int32_t retCode = GetLocalNodeDeviceInfo(DINPUT_PKG_NAME.c_str(), localNode.get());
-    if (retCode != DH_SUCCESS) {
-        DHLOGE("Init could not get local device id.");
-        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_INIT_FAIL;
-    }
-    std::string networkId = localNode->networkId;
-    DHLOGI("Init device networkId is %s", GetAnonyString(networkId).c_str());
-    mySessionName_ = SESSION_NAME_SINK + networkId.substr(0, INTERCEPT_STRING_LENGTH);
 
-    int32_t ret = CreateSessionServer(DINPUT_PKG_NAME.c_str(), mySessionName_.c_str(), &iSessionListener);
+    int32_t ret = DistributedInputTransportBase::GetInstance().Init();
     if (ret != DH_SUCCESS) {
-        DHLOGE("Init CreateSessionServer failed, error code %d.", ret);
-        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_INIT_FAIL;
+        DHLOGE("Init Sink Transport Failed");
+        return ret;
     }
+
+    statuslistener_ = std::make_shared<DInputTransbaseSinkListener>(this);
+    DistributedInputTransportBase::GetInstance().RegisterSinkHandleSessionCallback(statuslistener_);
+    RegRespFunMap();
     return DH_SUCCESS;
 }
 
@@ -266,143 +221,20 @@ void DistributedInputSinkTransport::SendKeyStateNodeMsg(const int32_t sessionId,
 
 int32_t DistributedInputSinkTransport::SendMessage(int32_t sessionId, std::string &message)
 {
-    DHLOGD("start SendMessage");
-    if (message.size() > MSG_MAX_SIZE) {
-        DHLOGE("SendMessage error: message.size() > MSG_MAX_SIZE");
-        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
-    }
-    uint8_t *buf = reinterpret_cast<uint8_t *>(calloc((MSG_MAX_SIZE), sizeof(uint8_t)));
-    if (buf == nullptr) {
-        DHLOGE("SendMessage: malloc memory failed");
-        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
-    }
-    int32_t outLen = 0;
-    if (memcpy_s(buf, MSG_MAX_SIZE, reinterpret_cast<const uint8_t *>(message.c_str()), message.size()) != EOK) {
-        DHLOGE("SendMessage: memcpy memory failed");
-        free(buf);
-        return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_SENDMESSAGE_FAIL;
-    }
-    outLen = static_cast<int32_t>(message.size());
-    int32_t ret = SendBytes(sessionId, buf, outLen);
-    free(buf);
-    return ret;
+    return DistributedInputTransportBase::GetInstance().SendMsg(sessionId, message);
 }
 
-int32_t DistributedInputSinkTransport::GetSessionIdByNetId(const std::string &srcId)
+DistributedInputSinkTransport::DInputTransbaseSinkListener::DInputTransbaseSinkListener(
+    DistributedInputSinkTransport *transport)
 {
-    std::map<std::string, int32_t>::iterator it = sessionDevMap_.find(srcId);
-    if (it != sessionDevMap_.end()) {
-        return it->second;
-    }
-    DHLOGE("get session id failed, srcId = %s", GetAnonyString(srcId).c_str());
-    return ERR_DH_INPUT_SERVER_SINK_TRANSPORT_GET_SESSIONID_FAIL;
+    sinkTransportObj_ = transport;
+    DHLOGI("DInputTransbaseSinkListener init.");
 }
 
-void DistributedInputSinkTransport::GetDeviceIdBySessionId(int32_t sessionId, std::string &srcId)
+DistributedInputSinkTransport::DInputTransbaseSinkListener::~DInputTransbaseSinkListener()
 {
-    for (auto iter = sessionDevMap_.begin(); iter != sessionDevMap_.end(); iter++) {
-        if (sessionId == iter->second) {
-            srcId = iter->first;
-            return;
-        }
-    }
-    srcId = "";
-}
-
-int32_t DistributedInputSinkTransport::OnSessionOpened(int32_t sessionId, int32_t result)
-{
-    if (result != DH_SUCCESS) {
-        DHLOGE("session open failed, sessionId: %d", sessionId);
-        return DH_SUCCESS;
-    }
-    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
-    if (dhFwkKit != nullptr) {
-        DHLOGD("Enable low Latency!");
-        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, ENABLE_LOW_LATENCY.dump());
-    }
-
-    // return 1 is client
-    int32_t sessionSide = GetSessionSide(sessionId);
-    DHLOGI("session open succeed, sessionId: %d, sessionSide %d", sessionId, sessionSide);
-
-    char mySessionName[SESSION_NAME_SIZE_MAX] = "";
-    char peerSessionName[SESSION_NAME_SIZE_MAX] = "";
-    char peerDevId[DEVICE_ID_SIZE_MAX] = "";
-    int ret = GetMySessionName(sessionId, mySessionName, sizeof(mySessionName));
-    if (ret != DH_SUCCESS) {
-        DHLOGE("get my session name failed, session id is %d", sessionId);
-    }
-    // get other device session name
-    ret = GetPeerSessionName(sessionId, peerSessionName, sizeof(peerSessionName));
-    if (ret != DH_SUCCESS) {
-        DHLOGE("get my peer session name failed, session id is %d", sessionId);
-    }
-
-    ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
-    if (ret != DH_SUCCESS) {
-        DHLOGE("get my peer device id failed, session id is %d", sessionId);
-    } else {
-        sessionDevMap_[peerDevId] = sessionId;
-    }
-    DHLOGI("mySessionName:%s, peerSessionName:%s, peerDevId:%s",
-        mySessionName, peerSessionName, GetAnonyString(peerDevId).c_str());
-    HiDumper::GetInstance().CreateSessionInfo(std::string(peerDevId), sessionId, mySessionName, peerSessionName,
-        SessionStatus::OPENED);
-    return DH_SUCCESS;
-}
-
-void DistributedInputSinkTransport::OnSessionClosed(int32_t sessionId)
-{
-    DHLOGI("OnSessionClosed, sessionId: %d", sessionId);
-    std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
-    if (dhFwkKit != nullptr) {
-        DHLOGD("Disable low Latency!");
-        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, DISABLE_LOW_LATENCY.dump());
-    }
-
-    char peerDevId[DEVICE_ID_SIZE_MAX] = "";
-    int ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
-    if (ret != DH_SUCCESS) {
-        DHLOGI("get my peer device id failed, session id is %d", sessionId);
-    }
-    for (auto iter = sessionDevMap_.begin(); iter != sessionDevMap_.end(); iter++) {
-        if (iter->second == sessionId) {
-            sessionDevMap_.erase(iter);
-            break;
-        }
-    }
-    DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
-    HiDumper::GetInstance().SetSessionStatus(std::string(peerDevId), SessionStatus::CLOSED);
-    HiDumper::GetInstance().DeleteSessionInfo(std::string(peerDevId));
-}
-
-void DistributedInputSinkTransport::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
-{
-    DHLOGI("OnBytesReceived, sessionId: %d, dataLen:%d", sessionId, dataLen);
-    if (sessionId < 0 || data == nullptr || dataLen <= 0 || dataLen > MSG_MAX_SIZE) {
-        DHLOGE("OnBytesReceived param check failed");
-        return;
-    }
-
-    uint8_t *buf = reinterpret_cast<uint8_t *>(calloc(dataLen + 1, sizeof(uint8_t)));
-    if (buf == nullptr) {
-        DHLOGE("OnBytesReceived: malloc memory failed");
-        return;
-    }
-
-    if (memcpy_s(buf, dataLen + 1, reinterpret_cast<const uint8_t *>(data), dataLen) != EOK) {
-        DHLOGE("OnBytesReceived: memcpy memory failed");
-        free(buf);
-        return;
-    }
-
-    std::string message(buf, buf + dataLen);
-    DHLOGI("OnBytesReceived message:%s.", SetAnonyId(message).c_str());
-    HandleSessionData(sessionId, message);
-
-    free(buf);
-    DHLOGI("OnBytesReceived completed");
-    return;
+    sinkTransportObj_ = nullptr;
+    DHLOGI("DInputTransbaseSinkListener destory.");
 }
 
 void DistributedInputSinkTransport::NotifyPrepareRemoteInput(int32_t sessionId, const nlohmann::json &recMsg)
@@ -463,6 +295,7 @@ void DistributedInputSinkTransport::NotifyLatency(int32_t sessionId, const nlohm
         DHLOGE("The key is invaild.");
         return;
     }
+
     nlohmann::json jsonStr;
     jsonStr[DINPUT_SOFTBUS_KEY_CMD_TYPE] = TRANS_SINK_MSG_LATENCY;
     jsonStr[DINPUT_SOFTBUS_KEY_RESP_VALUE] = true;
@@ -590,7 +423,40 @@ void DistributedInputSinkTransport::NotifyRelayStopTypeRemoteInput(int32_t sessi
     callback_->OnRelayStopTypeRemoteInput(toSrcSessionId, sessionId, deviceId, inputTypes);
 }
 
-void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const std::string& message)
+void DistributedInputSinkTransport::DInputTransbaseSinkListener::NotifySessionClosed(int32_t sessionId)
+{
+    DistributedInputSinkSwitch::GetInstance().RemoveSession(sessionId);
+}
+
+void DistributedInputSinkTransport::DInputTransbaseSinkListener::HandleSessionData(int32_t sessionId,
+    const std::string &message)
+{
+    DistributedInputSinkTransport::GetInstance().HandleData(sessionId, message);
+}
+
+void DistributedInputSinkTransport::RegRespFunMap()
+{
+    memberFuncMap_[TRANS_SOURCE_MSG_PREPARE] = &DistributedInputSinkTransport::NotifyPrepareRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_UNPREPARE] = &DistributedInputSinkTransport::NotifyUnprepareRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_START_TYPE] = &DistributedInputSinkTransport::NotifyStartRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_STOP_TYPE] = &DistributedInputSinkTransport::NotifyStopRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_LATENCY] = &DistributedInputSinkTransport::NotifyLatency;
+    memberFuncMap_[TRANS_SOURCE_MSG_START_DHID] = &DistributedInputSinkTransport::NotifyStartRemoteInputDhid;
+    memberFuncMap_[TRANS_SOURCE_MSG_STOP_DHID] = &DistributedInputSinkTransport::NotifyStopRemoteInputDhid;
+    memberFuncMap_[TRANS_SOURCE_MSG_PREPARE_FOR_REL] = &DistributedInputSinkTransport::NotifyRelayPrepareRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_UNPREPARE_FOR_REL] =
+        &DistributedInputSinkTransport::NotifyRelayUnprepareRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_START_DHID_FOR_REL] =
+        &DistributedInputSinkTransport::NotifyRelayStartDhidRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_STOP_DHID_FOR_REL] =
+        &DistributedInputSinkTransport::NotifyRelayStopDhidRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_START_TYPE_FOR_REL] =
+        &DistributedInputSinkTransport::NotifyRelayStartTypeRemoteInput;
+    memberFuncMap_[TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL] =
+        &DistributedInputSinkTransport::NotifyRelayStopTypeRemoteInput;
+}
+
+void DistributedInputSinkTransport::HandleData(int32_t sessionId, const std::string& message)
 {
     if (callback_ == nullptr) {
         DHLOGE("OnBytesReceived the callback_ is null, the message:%s abort.", SetAnonyId(message).c_str());
@@ -598,74 +464,14 @@ void DistributedInputSinkTransport::HandleSessionData(int32_t sessionId, const s
     }
 
     nlohmann::json recMsg = nlohmann::json::parse(message, nullptr, false);
-    if (recMsg.is_discarded()) {
-        DHLOGE("OnBytesReceived jsonStr error.");
-        return;
-    }
-
-    if (!IsUInt32(recMsg, DINPUT_SOFTBUS_KEY_CMD_TYPE)) {
-        DHLOGE("The key is invaild.");
-        return;
-    }
-
     uint32_t cmdType = recMsg[DINPUT_SOFTBUS_KEY_CMD_TYPE];
-    switch (cmdType) {
-        case TRANS_SOURCE_MSG_PREPARE: {
-            NotifyPrepareRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_UNPREPARE: {
-            NotifyUnprepareRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_START_TYPE: {
-            NotifyStartRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_STOP_TYPE: {
-            NotifyStopRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_LATENCY: {
-            NotifyLatency(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_START_DHID: {
-            NotifyStartRemoteInputDhid(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_STOP_DHID: {
-            NotifyStopRemoteInputDhid(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_PREPARE_FOR_REL: {
-            NotifyRelayPrepareRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_UNPREPARE_FOR_REL: {
-            NotifyRelayUnprepareRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_START_DHID_FOR_REL: {
-            NotifyRelayStartDhidRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_STOP_DHID_FOR_REL: {
-            NotifyRelayStopDhidRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_START_TYPE_FOR_REL: {
-            NotifyRelayStartTypeRemoteInput(sessionId, recMsg);
-            break;
-        }
-        case TRANS_SOURCE_MSG_STOP_TYPE_FOR_REL: {
-            NotifyRelayStopTypeRemoteInput(sessionId, recMsg);
-            break;
-        }
-        default:
-            DHLOGE("OnBytesReceived cmdType is undefined.");
-            break;
+    auto iter = memberFuncMap_.find(cmdType);
+    if (iter == memberFuncMap_.end()) {
+        DHLOGE("OnBytesReceived cmdType %u is undefined.", cmdType);
+        return;
     }
+    SinkTransportFunc &func = iter->second;
+    (this->*func)(sessionId, recMsg);
 }
 
 void DistributedInputSinkTransport::CloseAllSession()
