@@ -218,7 +218,7 @@ void DistributedInputTransportBase::StopSession(const std::string &remoteDevId)
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
 
     if (remoteDevSessionMap_.count(remoteDevId) == 0) {
-        DHLOGI("remoteDevSessionMap_ Not find remoteDevId: %s", GetAnonyString(remoteDevId).c_str());
+        DHLOGE("remoteDevSessionMap not find remoteDevId: %s", GetAnonyString(remoteDevId).c_str());
         return;
     }
     int32_t sessionId = remoteDevSessionMap_[remoteDevId];
@@ -288,15 +288,15 @@ int32_t DistributedInputTransportBase::OnSessionOpened(int32_t sessionId, int32_
     char peerDevId[DEVICE_ID_SIZE_MAX] = {0};
     int32_t ret = GetMySessionName(sessionId, mySessionName, sizeof(mySessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get my session name failed, session id is %d", sessionId);
+        DHLOGE("get my session name failed, session id is %d", sessionId);
     }
     ret = GetPeerSessionName(sessionId, peerSessionName, sizeof(peerSessionName));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get peer session name failed, session id is %d", sessionId);
+        DHLOGE("get peer session name failed, session id is %d", sessionId);
     }
     ret = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     if (ret != DH_SUCCESS) {
-        DHLOGI("get peer device id failed, session id is %d", sessionId);
+        DHLOGE("get peer device id failed, session id is %d", sessionId);
     }
 
     {
@@ -338,13 +338,13 @@ void DistributedInputTransportBase::OnSessionClosed(int32_t sessionId)
         channelStatusMap_.erase(deviceId);
 
         if (sinkCallback_ == nullptr) {
-            DHLOGI("sinkCallback is nullptr.");
+            DHLOGE("sinkCallback is nullptr.");
             return;
         }
         sinkCallback_->NotifySessionClosed(sessionId);
 
         if (srcCallback_ == nullptr) {
-            DHLOGI("srcCallback is nullptr.");
+            DHLOGE("srcCallback is nullptr.");
             return;
         }
         srcCallback_->NotifySessionClosed();
@@ -406,7 +406,7 @@ void DistributedInputTransportBase::HandleSession(int32_t sessionId, const std::
     DHLOGI("HandleSession cmdType %u.", cmdType);
     if (cmdType < TRANS_MSG_SRC_SINK_SPLIT) {
         if (srcCallback_ == nullptr) {
-            DHLOGI("srcCallback is nullptr.");
+            DHLOGE("srcCallback is nullptr.");
             return;
         }
         DHLOGI("HandleSession to source.");
@@ -415,7 +415,7 @@ void DistributedInputTransportBase::HandleSession(int32_t sessionId, const std::
     }
     if (cmdType > TRANS_MSG_SRC_SINK_SPLIT) {
         if (sinkCallback_ == nullptr) {
-            DHLOGI("sinkCallback is nullptr.");
+            DHLOGE("sinkCallback is nullptr.");
             return;
         }
         DHLOGI("HandleSession to sink.");

@@ -381,7 +381,7 @@ void InputHub::GetDeviceHandler()
 int32_t InputHub::RefreshEpollItem(bool isSleep)
 {
     pendingEventIndex_ = 0;
-    int pollResult = epoll_wait(epollFd_, mPendingEventItems, EPOLL_MAX_EVENTS, 0);
+    int pollResult = epoll_wait(epollFd_, mPendingEventItems, EPOLL_MAX_EVENTS, EPOLL_WAITTIME);
     if (pollResult == 0) {
         // Timed out.
         pendingEventCount_ = 0;
@@ -445,15 +445,31 @@ void InputHub::ScanInputDevices(const std::string& dirname)
     closedir(dir);
 }
 
+void InputHub::CloseFd(int fd)
+{
+    if (fd < 0) {
+        DHLOGE("No fd need to be closed.");
+        return;
+    }
+    close(fd);
+    fd = -1;
+}
+
+bool InputHub::IsDeviceRegistered(const std::string& devicePath)
+{
+    std::unique_lock<std::mutex> deviceLock(devicesMutex_);
+    for (const auto& [deviceId, device] : devices_) {
+        if (device->path == devicePath) {
+            return true; // device was already registered
+        }
+    }
+    return false;
+}
+
 int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
 {
-    {
-        std::unique_lock<std::mutex> deviceLock(devicesMutex_);
-        for (const auto& [deviceId, device] : devices_) {
-            if (device->path == devicePath) {
-                return DH_SUCCESS; // device was already registered
-            }
-        }
+    if (IsDeviceRegistered(devicePath)) {
+        return DH_SUCCESS;
     }
 
     std::unique_lock<std::mutex> my_lock(operationMutex_);
@@ -481,11 +497,13 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     }
     if (count >= MAX_RETRY_COUNT) {
         DHLOGE("could not open %s, %s\n", devicePath.c_str(), ConvertErrNo().c_str());
+        CloseFd(fd);
         return ERR_DH_INPUT_HUB_OPEN_DEVICEPATH_FAIL;
     }
 
     InputDevice identifier;
     if (QueryInputDeviceInfo(fd, identifier) < 0) {
+        CloseFd(fd);
         return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
     }
     GenerateDescriptor(identifier);
@@ -496,6 +514,7 @@ int32_t InputHub::OpenInputDeviceLocked(const std::string& devicePath)
     RecordDeviceLog(deviceId, devicePath, identifier);
 
     if (MakeDevice(fd, std::move(device)) < 0) {
+        CloseFd(fd);
         return ERR_DH_INPUT_HUB_MAKE_DEVICE_FAIL;
     }
 
@@ -522,14 +541,12 @@ int32_t InputHub::QueryInputDeviceInfo(int fd, InputDevice& identifier)
     int driverVersion;
     if (ioctl(fd, EVIOCGVERSION, &driverVersion)) {
         DHLOGE("could not get driver version for %s\n", ConvertErrNo().c_str());
-        close(fd);
         return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
     }
     // Get device identifier.
     struct input_id inputId;
     if (ioctl(fd, EVIOCGID, &inputId)) {
         DHLOGE("could not get device input id for %s\n", ConvertErrNo().c_str());
-        close(fd);
         return ERR_DH_INPUT_HUB_QUERY_INPUT_DEVICE_INFO_FAIL;
     }
     identifier.bus = inputId.bustype;

@@ -121,6 +121,8 @@ private:
     Device* GetDeviceByPathLocked(const std::string& devicePath);
     Device* GetDeviceByFdLocked(int fd);
     Device* GetSupportDeviceByFd(int fd);
+    void CloseFd(int fd);
+    bool IsDeviceRegistered(const std::string& devicePath);
 
     bool ContainsNonZeroByte(const uint8_t* array, uint32_t startIndex, uint32_t endIndex);
     int64_t ProcessEventTimestamp(const input_event& event);

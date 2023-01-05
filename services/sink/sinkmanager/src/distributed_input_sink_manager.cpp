@@ -550,8 +550,9 @@ void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_
         }
         break;
     }
-    if (fd > 0) {
+    if (fd >= 0) {
         close(fd);
+        fd = -1;
     }
 }
 
