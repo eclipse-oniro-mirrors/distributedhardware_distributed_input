@@ -445,7 +445,7 @@ void InputHub::ScanInputDevices(const std::string& dirname)
     closedir(dir);
 }
 
-void InputHub::CloseFd(int fd)
+void InputHub::CloseFd(int& fd)
 {
     if (fd < 0) {
         DHLOGE("No fd need to be closed.");
