@@ -775,7 +775,8 @@ DistributedInputSinkManager::ProjectWindowListener::ProjectWindowListener(Distri
     std::lock_guard<std::mutex> lock(handleScreenMutex_);
     sinkManagerObj_ = manager;
     if (screen_ == nullptr) {
-        std::vector<sptr<Rosen::Screen>> screens = Rosen::ScreenManager::GetInstance().GetAllScreens();
+        std::vector<sptr<Rosen::Screen>> screens;
+        Rosen::ScreenManager::GetInstance().GetAllScreens(screens);
         screen_ = screens[SCREEN_ID_DEFAULT];
     }
 }
