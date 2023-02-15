@@ -33,9 +33,6 @@
 #include "dinput_utils_tool.h"
 #include "distributed_input_inject.h"
 #include "hidumper.h"
-#include "session.h"
-#include "softbus_bus_center.h"
-#include "softbus_common.h"
 
 #include "distributed_input_transport_base.h"
 
@@ -574,7 +571,6 @@ int32_t DistributedInputSourceTransport::NotifyOriginStopTypeResult(int32_t srcT
     DHLOGI("NotifyOriginStopTypeResult srcTsrcSeId:%d, smsg:%s.", srcTsrcSeId, SetAnonyId(smsg).c_str());
     return DH_SUCCESS;
 }
-
 
 int32_t DistributedInputSourceTransport::StartRemoteInput(const std::string& deviceId, const uint32_t& inputTypes)
 {

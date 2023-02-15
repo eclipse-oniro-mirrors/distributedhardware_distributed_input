@@ -26,3 +26,14 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
     *info = nodeBasicInfo;
     return DH_SUCCESS;
 }
+
+int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId,
+    NodeDeviceInfoKey key, uint8_t *info, int32_t infoLen)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)key;
+    (void)info;
+    (void)infoLen;
+    return DH_SUCCESS;
+}

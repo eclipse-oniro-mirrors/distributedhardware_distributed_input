@@ -30,6 +30,7 @@ static char g_peerSessionName[CHAR_ARRAY_SIZE + 1];
 static char g_mySessionName[CHAR_ARRAY_SIZE + 1];
 int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
+    (void)pkgName;
     std::cout << "CreateSessionServer start sessionName:" << sessionName << std::endl;
     if (strlen(sessionName) == 0) {
         std::cout << "CreateSessionServer sessionName is empty." << std::endl;
@@ -43,22 +44,27 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         std::cout << "strcpy_s faild" << std::endl;
         return DH_ERROR;
     }
-    g_listener.onBytesReceived = listener->onBytesReceived;
-    g_listener.onMessageReceived = listener->onMessageReceived;
-    g_listener.onSessionClosed = listener->onSessionClosed;
-    g_listener.onSessionOpened = listener->onSessionOpened;
-    g_listener.onStreamReceived = listener->onStreamReceived;
+    g_listener.OnBytesReceived = listener->OnBytesReceived;
+    g_listener.OnMessageReceived = listener->OnMessageReceived;
+    g_listener.OnSessionClosed = listener->OnSessionClosed;
+    g_listener.OnSessionOpened = listener->OnSessionOpened;
+    g_listener.OnStreamReceived = listener->OnStreamReceived;
     return DH_SUCCESS;
 }
 
 int RemoveSessionServer(const char *pkgName, const char *sessionName)
 {
+    (void)pkgName;
+    (void)sessionName;
     return DH_SUCCESS;
 }
 
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId, const char *groupId,
     const SessionAttribute *attr)
 {
+    (void)mySessionName;
+    (void)groupId;
+    (void)attr;
     if (strlen(peerSessionName) == 0) {
         return DH_ERROR;
     }
@@ -80,28 +86,42 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 
 void OpenSessionResult()
 {
-    g_listener.onSessionOpened(MOCK_SESSION_ID, DH_SUCCESS);
+    g_listener.OnSessionOpened(MOCK_SESSION_ID, DH_SUCCESS);
 }
 
-void CloseSession(int sessionId) {}
+void CloseSession(int sessionId)
+{
+    (void)sessionId;
+}
 
 int SendBytes(int sessionId, const void *data, unsigned int len)
 {
+    (void)sessionId;
+    (void)data;
+    (void)len;
     return DH_SUCCESS;
 }
 
 int SendMessage(int sessionId, const void *data, unsigned int len)
 {
+    (void)sessionId;
+    (void)data;
+    (void)len;
     return DH_SUCCESS;
 }
 
 int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
+    (void)sessionId;
+    (void)data;
+    (void)ext;
+    (void)param;
     return DH_SUCCESS;
 }
 
 int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
 {
+    (void)sessionId;
     if (strncpy_s(sessionName, len + 1, g_mySessionName, CHAR_ARRAY_SIZE) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
@@ -111,6 +131,7 @@ int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
 
 int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
 {
+    (void)sessionId;
     if (strncpy_s(sessionName, len + 1, g_peerSessionName, CHAR_ARRAY_SIZE) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
@@ -120,6 +141,7 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
 
 int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
 {
+    (void)sessionId;
     if (strncpy_s(devId, len + 1, g_peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
         std::cout << "strncpy_s faild" << std::endl;
         return DH_ERROR;
@@ -129,21 +151,33 @@ int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
 
 int GetSessionSide(int sessionId)
 {
+    (void)sessionId;
     return AUTH_SESSION_SIDE_CLIENT;
 }
 
 int SetFileReceiveListener(const char *pkgName, const char *sessionName, const IFileReceiveListener *recvListener,
     const char *rootDir)
 {
+    (void)pkgName;
+    (void)sessionName;
+    (void)recvListener;
+    (void)rootDir;
     return DH_SUCCESS;
 }
 
 int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener)
 {
+    (void)pkgName;
+    (void)sessionName;
+    (void)sendListener;
     return DH_SUCCESS;
 }
 
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
+    (void)sessionId;
+    (void)sFileList;
+    (void)dFileList;
+    (void)fileCnt;
     return DH_SUCCESS;
 }

@@ -33,8 +33,19 @@
 #include "dinput_utils_tool.h"
 #include "distributed_input_inject.h"
 #include "hidumper.h"
+
+#ifndef COMPILE_TEST_MODE
 #include "session.h"
+#else
+#include "session_mock.h"
+#endif
+
+#ifndef COMPILE_TEST_MODE
 #include "softbus_bus_center.h"
+#else
+#include "softbus_bus_center_mock.h"
+#endif
+
 #include "softbus_common.h"
 
 namespace OHOS {

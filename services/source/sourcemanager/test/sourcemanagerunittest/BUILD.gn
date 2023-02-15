@@ -60,6 +60,7 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//base/security/access_token/interfaces/innerkits/nativetoken/include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
     "//foundation/distributedhardware/distributed_input/services/transportbase/include",
+    "${distributedinput_path}/utils/include",
   ]
 
   sources = [
@@ -93,9 +94,13 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_manager.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/src/distributed_input_source_sa_cli_mgr.cpp",
     "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
+    "//foundation/distributedhardware/distributed_input/services/transportbase/src/distributed_input_transport_base.cpp",
     "distributed_input_sourcemanager_test.cpp",
     "${common_path}/test/mock/session_mock.cpp",
     "${common_path}/test/mock/softbus_bus_center_mock.cpp",
+    "${distributedinput_path}/utils/src/dinput_utils_tool.cpp",
+    "${distributedinput_path}/utils/src/dinput_context.cpp",
+    "${distributedinput_path}/utils/src/dinput_sa_process_state.cpp",
   ]
 
   cflags = [
@@ -110,12 +115,12 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "HI_LOG_ENABLE",
     "DH_LOG_TAG=\"distributedinpututtest\"",
     "LOG_DOMAIN=0xD004100",
+    "COMPILE_TEST_MODE"
   ]
 
   deps = [
     "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
-    "${utils_path}:libdinput_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/libevdev:libevdev",
     "//third_party/openssl:libcrypto_static",
@@ -125,7 +130,6 @@ ohos_unittest("distributed_input_sourcemanager_test") {
     "//base/security/access_token/interfaces/innerkits/accesstoken:libaccesstoken_sdk",
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    "//foundation/distributedhardware/distributed_input/services/transportbase:libdinput_trans_base",
   ]
 
   external_deps = [

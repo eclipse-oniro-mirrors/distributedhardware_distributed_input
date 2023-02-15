@@ -44,7 +44,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${dfx_utils_path}/include",
     "${utils_path}/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "${common_path}/mock",
+    "${common_path}/test/mock",
     "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/include",
     "${fwk_interfaces_path}/include/ipc",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
@@ -62,15 +62,18 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "${ipc_path}/include",
     "${ipc_path}/src",
     "${services_sink_path}/inputcollector/include",
+    "${services_source_path}/inputinject/include",
+    "//foundation/distributedhardware/distributed_input/inputdevicehandler/include",
   ]
 
   sources = [
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
+    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
+    "//foundation/distributedhardware/distributed_input/services/transportbase/src/distributed_input_transport_base.cpp",
     "distributed_input_sinktrans_test.cpp",
     "${common_path}/test/mock/session_mock.cpp",
     "${common_path}/test/mock/softbus_bus_center_mock.cpp",
-    "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/src/distributed_input_sink_manager.cpp",
   ]
 
   cflags = [
@@ -85,6 +88,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "HI_LOG_ENABLE",
     "DH_LOG_TAG=\"distributedinpututtest\"",
     "LOG_DOMAIN=0xD004100",
+    "COMPILE_TEST_MODE"
   ]
 
   deps = [
@@ -95,7 +99,6 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "${services_sink_path}/sinkmanager:libdinput_sink",
     "${services_sink_path}/inputcollector:libdinput_collector",
-    "//foundation/distributedhardware/distributed_input/services/transportbase:libdinput_trans_base",
     "//foundation/window/window_manager/dm:libdm",
     "//third_party/libevdev:libevdev",
   ]
@@ -104,6 +107,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "c_utils:utils",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "hitrace_native:hitrace_meter",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

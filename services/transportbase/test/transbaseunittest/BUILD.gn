@@ -46,8 +46,6 @@ ohos_unittest("distributed_input_transbase_test") {
     "//third_party/json/include",
     "//third_party/libevdev/libevdev/",
     "${distributedinput_path}/inputdevicehandler/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "//base/notification/eventhandler/interfaces/inner_api",
     "${common_path}/test/mock",
@@ -57,6 +55,7 @@ ohos_unittest("distributed_input_transbase_test") {
     "//foundation/distributedhardware/distributed_input/services/source/transport/src/distributed_input_source_transport.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_transport.cpp",
     "//foundation/distributedhardware/distributed_input/services/sink/transport/src/distributed_input_sink_switch.cpp",
+    "//foundation/distributedhardware/distributed_input/services/transportbase/src/distributed_input_transport_base.cpp",
     "distributed_input_transbase_test.cpp",
     "${common_path}/test/mock/session_mock.cpp",
     "${common_path}/test/mock/softbus_bus_center_mock.cpp",
@@ -74,6 +73,7 @@ ohos_unittest("distributed_input_transbase_test") {
     "HI_LOG_ENABLE",
     "DH_LOG_TAG=\"distributedinpututtest\"",
     "LOG_DOMAIN=0xD004100",
+    "COMPILE_TEST_MODE"
   ]
 
   deps = [
@@ -84,7 +84,6 @@ ohos_unittest("distributed_input_transbase_test") {
     "//third_party/libevdev:libevdev",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/distributedhardware/distributed_input/services/source/inputinject:libdinput_inject",
-    "//foundation/distributedhardware/distributed_input/services/transportbase:libdinput_trans_base",
   ]
 
   external_deps = [

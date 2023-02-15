@@ -27,7 +27,6 @@
 #include "nlohmann/json.hpp"
 #include "system_ability_definition.h"
 #include "string_ex.h"
-#include "softbus_bus_center.h"
 
 #include "distributed_hardware_fwk_kit.h"
 #include "ipublisher_listener.h"

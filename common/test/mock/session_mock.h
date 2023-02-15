@@ -146,25 +146,25 @@ constexpr uint32_t DEVICE_ID_SIZE_MAX = 65;
 constexpr uint32_t CHAR_ARRAY_SIZE = 100;
 
 typedef struct {
-    int (*onSessionOpened)(int sessionId, int result);
-    void (*onSessionClosed)(int sessionId);
-    void (*onBytesReceived)(int sessionId, const void *data, unsigned int dataLen);
-    void (*onMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
-    void (*onStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext,
+    int (*OnSessionOpened)(int sessionId, int result);
+    void (*OnSessionClosed)(int sessionId);
+    void (*OnBytesReceived)(int sessionId, const void *data, unsigned int dataLen);
+    void (*OnMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
+    void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext,
         const StreamFrameInfo *param);
 } ISessionListener;
 
 typedef struct {
-    int (*onReceiveFileStarted)(int sessionId, const char *files, int fileCnt);
-    int (*onReceiveFileProcess)(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal);
-    void (*onReceiveFileFinished)(int sessionId, const char *files, int fileCnt);
-    void (*onFileTransError)(int sessionId);
+    int (*OnReceiveFileStarted)(int sessionId, const char *files, int fileCnt);
+    int (*OnReceiveFileProcess)(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal);
+    void (*OnReceiveFileFinished)(int sessionId, const char *files, int fileCnt);
+    void (*OnFileTransError)(int sessionId);
 } IFileReceiveListener;
 
 typedef struct {
-    int (*onSendFileProcess)(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal);
-    int (*onSendFileFinished)(int sessionId, const char *firstFile);
-    void (*onFileTransError)(int sessionId);
+    int (*OnSendFileProcess)(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal);
+    int (*OnSendFileFinished)(int sessionId, const char *firstFile);
+    void (*OnFileTransError)(int sessionId);
 } IFileSendListener;
 
 int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener);

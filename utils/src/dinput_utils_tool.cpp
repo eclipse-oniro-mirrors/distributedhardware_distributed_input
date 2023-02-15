@@ -23,7 +23,12 @@
 
 #include "anonymous_string.h"
 #include "nlohmann/json.hpp"
+
+#ifndef COMPILE_TEST_MODE
 #include "softbus_bus_center.h"
+#else
+#include "softbus_bus_center_mock.h"
+#endif
 
 #include "constants_dinput.h"
 #include "dinput_errcode.h"
