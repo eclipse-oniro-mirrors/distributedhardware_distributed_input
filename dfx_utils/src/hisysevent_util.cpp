@@ -26,7 +26,7 @@ IMPLEMENT_SINGLE_INSTANCE(HisyseventUtil);
 
 void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string msg)
 {
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t res = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::DISTRIBUTED_INPUT,
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
@@ -38,7 +38,7 @@ void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string msg)
 
 void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string devId, std::string msg)
 {
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t res = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::DISTRIBUTED_INPUT,
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
@@ -51,7 +51,7 @@ void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string devId
 
 void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string devId, std::string dhId, std::string msg)
 {
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t res = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::DISTRIBUTED_INPUT,
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
@@ -65,7 +65,7 @@ void HisyseventUtil::SysEventWriteBehavior(std::string status, std::string devId
 
 void HisyseventUtil::SysEventWriteFault(std::string status, std::string msg)
 {
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t res = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::DISTRIBUTED_INPUT,
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -77,7 +77,7 @@ void HisyseventUtil::SysEventWriteFault(std::string status, std::string msg)
 
 void HisyseventUtil::SysEventWriteFault(std::string status, std::string devId, int32_t errorCode, std::string msg)
 {
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t res = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::DISTRIBUTED_INPUT,
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -92,7 +92,7 @@ void HisyseventUtil::SysEventWriteFault(std::string status, std::string devId, i
 void HisyseventUtil::SysEventWriteFault(std::string status, std::string devId, std::string dhId, int32_t errorCode,
     std::string msg)
 {
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t res = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::DISTRIBUTED_INPUT,
         status,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
