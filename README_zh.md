@@ -12,7 +12,9 @@
 
 **分布式输入主控端(DInputSource)**：使用周边其他设备键鼠输入能力的设备，称为分布式输入主控端，周边其他设备键鼠事件可以在主控端生效。
 
-**分布式输入SDK(DistributedInputSDK)**：分布式输入组件对外提供的SDK，包括InnerSDK和LocalSDK。InnerSDK用于供多模输入(multimodalinput_input)调用分布式输入内部API，调用分布式输入能力；LocalSDK实现了分布式硬件管理框架(distributed_hardware_fwk)定义的组件扩展接口，供分布式硬件管理框架调度分布式输入组件能力。
+**分布式输入InnerSDK(DistributedInputSDK)**：用于供多模输入(multimodalinput_input)调用分布式输入内部API，调用分布式输入能力。
+
+**分布式输入硬件框架南向扩展实现(DistributedInputFwkImpl)**：实现了分布式硬件管理框架(distributed_hardware_fwk)定义的组件扩展接口，供分布式硬件管理框架调度分布式输入组件能力。
 
 **分布式输入驱动管理(DInputDriverMgr)**：管理分布式输入驱动，提供分布式输入驱动的添加和删除能力。
 
