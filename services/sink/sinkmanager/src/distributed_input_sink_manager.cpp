@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <fcntl.h>
+#include <pthread.h>
 #include <thread>
 #include <linux/input.h>
 
@@ -210,8 +211,7 @@ void DistributedInputSinkManager::DInputSinkListener::OnStartRemoteInput(
             deviceInfos);
         for (auto deviceInfo : deviceInfos) {
             DHLOGI("deviceInfo dhId, %s", GetAnonyString(deviceInfo.second).c_str());
-            std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, sessionId,
-                deviceInfo.second).detach();
+            CreateCheckThread(sessionId, deviceInfo.second);
         }
     }
 }
@@ -269,7 +269,7 @@ void DistributedInputSinkManager::DInputSinkListener::OnStartRemoteInputDhid(con
         return;
     }
 
-    std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, sessionId, strDhids).detach();
+    CreateCheckThread(sessionId, strDhids);
     // add the dhids
     if (startRes == DH_SUCCESS) {
         std::vector<std::string> vecStr;
@@ -337,8 +337,7 @@ void DistributedInputSinkManager::DInputSinkListener::OnRelayStartDhidRemoteInpu
         return;
     }
 
-    std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this,
-        toSinkSessionId, strDhids).detach();
+    CreateCheckThread(toSinkSessionId, strDhids);
 
     // add the dhids
     if (startRes == DH_SUCCESS) {
@@ -434,8 +433,7 @@ void DistributedInputSinkManager::DInputSinkListener::OnRelayStartTypeRemoteInpu
         deviceInfos);
     for (auto deviceInfo : deviceInfos) {
         DHLOGI("deviceInfo dhId, %s", GetAnonyString(deviceInfo.second).c_str());
-        std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, toSinkSessionId,
-            deviceInfo.second).detach();
+        CreateCheckThread(toSinkSessionId, deviceInfo.second);
     }
 }
 
@@ -495,6 +493,18 @@ void DistributedInputSinkManager::DInputSinkListener::StringSplit(const std::str
 void DistributedInputSinkManager::DInputSinkListener::SleepTimeMs()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(READ_SLEEP_TIME_MS));
+}
+
+void DistributedInputSinkManager::DInputSinkListener::CreateCheckThread(const int32_t &sessionId,
+    const std::string &strDhids)
+{
+    std::thread checkKeyStateThread =
+        std::thread(&DistributedInputSinkManager::DInputSinkListener::CheckKeyState, this, sessionId, strDhids);
+    int32_t ret = pthread_setname_np(checkKeyStateThread.native_handle(), CHECK_KEY_STATUS_THREAD_NAME);
+    if (ret != 0) {
+        DHLOGE("CreateCheckThread setname failed.");
+    }
+    checkKeyStateThread.detach();
 }
 
 void DistributedInputSinkManager::DInputSinkListener::CheckKeyState(const int32_t &sessionId,

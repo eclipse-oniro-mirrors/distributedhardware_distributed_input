@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cstring>
 
 #include <fcntl.h>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "anonymous_string.h"
@@ -247,6 +248,10 @@ void DistributedInputNodeManager::ReportEvent(const RawEvent rawEvent)
 
 void DistributedInputNodeManager::InjectEvent()
 {
+    int32_t ret = pthread_setname_np(pthread_self(), EVENT_INJECT_THREAD_NAME);
+    if (ret != 0) {
+        DHLOGE("InjectEvent setname failed.");
+    }
     DHLOGI("start");
     while (isInjectThreadRunning_.load()) {
         std::shared_ptr<RawEvent> event = nullptr;

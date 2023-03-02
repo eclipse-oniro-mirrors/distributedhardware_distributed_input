@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <pthread.h>
 
 #include "anonymous_string.h"
 #include "distributed_hardware_fwk_kit.h"
@@ -652,6 +653,10 @@ int32_t DistributedInputSourceTransport::LatencyCount(const std::string& deviceI
 
 void DistributedInputSourceTransport::StartLatencyCount(const std::string& deviceId)
 {
+    int32_t ret = pthread_setname_np(pthread_self(), LATENCY_COUNT_THREAD_NAME);
+    if (ret != 0) {
+        DHLOGE("StartLatencyCount setname failed.");
+    }
     DHLOGI("start");
     while (isLatencyThreadRunning_.load()) {
         if (sendNum_ >= INPUT_LATENCY_DELAY_TIMES) {

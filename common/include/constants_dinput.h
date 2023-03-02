@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -182,6 +182,14 @@ namespace DistributedInput {
     const std::string PROPERTIES = "properties";
 
     const std::string DINPUT_LOG_TITLE_TAG = "DINPUT";
+
+    constexpr const char* LATENCY_COUNT_THREAD_NAME = "latencyCount";
+
+    constexpr const char* EVENT_INJECT_THREAD_NAME = "eventInject";
+
+    constexpr const char* COLLECT_EVENT_THREAD_NAME = "collectEvents";
+
+    constexpr const char* CHECK_KEY_STATUS_THREAD_NAME = "checkKeyStatus";
 
     constexpr int32_t LOG_MAX_LEN = 4096;
 

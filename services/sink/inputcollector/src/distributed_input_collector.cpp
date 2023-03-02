@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <securec.h>
 #include <unistd.h>
@@ -87,6 +88,10 @@ bool DistributedInputCollector::InitCollectEventsThread()
 
 void *DistributedInputCollector::CollectEventsThread(void *param)
 {
+    int32_t ret = pthread_setname_np(pthread_self(), COLLECT_EVENT_THREAD_NAME);
+    if (ret != 0) {
+        DHLOGE("CollectEventsThread setname failed.");
+    }
     DistributedInputCollector *pThis = reinterpret_cast<DistributedInputCollector *>(param);
     pThis->StartCollectEventsThread();
     DHLOGW("DistributedInputCollector::CollectEventsThread exist!");

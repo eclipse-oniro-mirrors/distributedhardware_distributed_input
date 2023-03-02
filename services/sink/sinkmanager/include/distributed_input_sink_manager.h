@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,7 @@ public:
         }
         void SleepTimeMs();
         void StringSplit(const std::string &str, const char split, std::vector<std::string> &vecStr);
+        void CreateCheckThread(const int32_t &sessionId, const std::string &strDhids);
         void CheckKeyState(const int32_t &sessionId, const std::string &strDhids);
     };
 
