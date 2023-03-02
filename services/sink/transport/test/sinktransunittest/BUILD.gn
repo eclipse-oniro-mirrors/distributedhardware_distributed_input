@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -108,6 +108,7 @@ ohos_unittest("distributed_input_sinktrans_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "hitrace_native:hitrace_meter",
+    "samgr:samgr_proxy",
   ]
 
   cflags_cc = [ "-DHILOG_ENABLE" ]

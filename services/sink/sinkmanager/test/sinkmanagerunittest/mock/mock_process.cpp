@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef DINPUT_SA_PROCESS_STATE_H
-#define DINPUT_SA_PROCESS_STATE_H
+#include "mock_process.h"
+
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 namespace DistributedInput {
-void SetSinkProcessExit();
-void SetSourceProcessExit();
+void MockProcess::MockDinputProcess(const char* processName)
+{
+    static const char *PERMS[] = {
+        "ohos.permission.DISTRIBUTED_DATASYNC"
+    };
+    uint64_t tokenId;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = PERMS,
+        .acls = nullptr,
+        .processName = processName,
+        .aplStr = "system_core",
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+}
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
-
-#endif // DINPUT_SA_PROCESS_STATE_H

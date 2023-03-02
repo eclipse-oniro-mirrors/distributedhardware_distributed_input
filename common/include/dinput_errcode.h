@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,7 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_TRANS_STOP_FAIL = -64014;
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_MANAGER_START_MSG_IS_BAD = -64015;
     constexpr int32_t ERR_DH_INPUT_SERVER_SINK_MANAGER_STOP_MSG_IS_BAD = -64016;
+    constexpr int32_t ERR_DH_INPUT_SERVER_SINK_MANAGER_RELEASE_FAIL = -64017;
     // service source error code
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_REGISTER_FAIL = -65000;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_INJECT_UNREGISTER_FAIL = -65001;
@@ -76,7 +77,7 @@ namespace DistributedInput {
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_CLOSE_DEVICE_FAIL = -65006;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_GET_DEVICE_FAIL = -65007;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANAGER_INIT_FAIL = -65008;
-    constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANSGER_RELEASE_FAIL = -65009;
+    constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANAGER_RELEASE_FAIL = -65009;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REGISTER_FAIL = -65010;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNREGISTER_FAIL = -65011;
     constexpr int32_t ERR_DH_INPUT_SERVER_SOURCE_MANAGER_REMOVE_INPUT_NODE_FAIL = -65012;

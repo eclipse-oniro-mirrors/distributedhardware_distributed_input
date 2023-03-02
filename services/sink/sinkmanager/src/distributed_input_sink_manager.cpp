@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,9 +37,9 @@
 #include "dinput_context.h"
 #include "dinput_errcode.h"
 #include "dinput_log.h"
-#include "dinput_sa_process_state.h"
 #include "dinput_utils_tool.h"
 #include "hidumper.h"
+#include "hisysevent_util.h"
 #include "white_list_util.h"
 
 namespace OHOS {
@@ -713,11 +713,8 @@ int32_t DistributedInputSinkManager::Init()
 
 int32_t DistributedInputSinkManager::Release()
 {
-    DHLOGI("exit");
-
-    // 1.stop all session switch
+    DHLOGI("Release sink Manager.");
     DistributedInputSinkSwitch::GetInstance().StopAllSwitch();
-    // 2.close all session
     DistributedInputSinkTransport::GetInstance().CloseAllSession();
 
     {
@@ -726,9 +723,9 @@ int32_t DistributedInputSinkManager::Release()
         sharingDhIdsMap_.clear();
     }
 
-    // 3.notify callback servertype
+    // notify callback servertype
     SetStartTransFlag(DInputServerType::NULL_SERVER_TYPE);
-    // 4.Release input collect resource
+    // Release input collect resource
     DistributedInputCollector::GetInstance().Release();
 
     serviceRunningState_ = ServiceSinkRunningState::STATE_NOT_START;
@@ -737,9 +734,23 @@ int32_t DistributedInputSinkManager::Release()
         DHLOGI("UnPublish ProjectWindowListener");
         dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_SINK_PROJECT_WINDOW_INFO, projectWindowListener_);
     }
-    DHLOGI("exit dinput sink sa.");
-    SetSinkProcessExit();
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Disable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, DISABLE_LOW_LATENCY.dump());
+    }
 
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT, "dinput sink sa exit success.");
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        DHLOGE("Failed to get SystemAbilityManager.");
+        return ERR_DH_INPUT_SERVER_SINK_MANAGER_RELEASE_FAIL;
+    }
+    int32_t ret = systemAbilityMgr->UnloadSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Failed to UnloadSystemAbility service! errcode: %d.", ret);
+        return ERR_DH_INPUT_SERVER_SINK_MANAGER_RELEASE_FAIL;
+    }
+    DHLOGI("Sink unloadSystemAbility successfully.");
     return DH_SUCCESS;
 }
 

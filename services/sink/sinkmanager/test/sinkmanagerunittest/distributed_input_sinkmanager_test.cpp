@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "softbus_common.h"
 
 #include "dinput_errcode.h"
+#include "mock_process.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -103,6 +104,7 @@ HWTEST_F(DistributedInputSinkManagerTest, Init, testing::ext::TestSize.Level0)
 
 HWTEST_F(DistributedInputSinkManagerTest, Release, testing::ext::TestSize.Level0)
 {
+    MockProcess::MockDinputProcess("dinput");
     int32_t ret = sinkManager_->Release();
     EXPECT_EQ(DH_SUCCESS, ret);
 }

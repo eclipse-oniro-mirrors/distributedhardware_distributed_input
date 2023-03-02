@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         return DH_ERROR;
     }
     if (strcpy_s(g_mySessionName, strlen(sessionName) + 1, sessionName) != EOK) {
-        std::cout << "strcpy_s faild" << std::endl;
+        std::cout << "strcpy_s failed" << std::endl;
         return DH_ERROR;
     }
     g_listener.OnBytesReceived = listener->OnBytesReceived;
@@ -72,11 +72,11 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         return DH_ERROR;
     }
     if (strncpy_s(g_peerSessionName, CHAR_ARRAY_SIZE + 1, peerSessionName, CHAR_ARRAY_SIZE) != EOK) {
-        std::cout << "strncpy_s faild" << std::endl;
+        std::cout << "strncpy_s failed" << std::endl;
         return DH_ERROR;
     }
     if (strncpy_s(g_peerDeviceId, CHAR_ARRAY_SIZE + 1, peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
-        std::cout << "strncpy_s faild" << std::endl;
+        std::cout << "strncpy_s failed" << std::endl;
         return DH_ERROR;
     }
     std::thread thd(OpenSessionResult);
@@ -123,7 +123,7 @@ int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
 {
     (void)sessionId;
     if (strncpy_s(sessionName, len + 1, g_mySessionName, CHAR_ARRAY_SIZE) != EOK) {
-        std::cout << "strncpy_s faild" << std::endl;
+        std::cout << "strncpy_s failed" << std::endl;
         return DH_ERROR;
     }
     return DH_SUCCESS;
@@ -133,7 +133,7 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
 {
     (void)sessionId;
     if (strncpy_s(sessionName, len + 1, g_peerSessionName, CHAR_ARRAY_SIZE) != EOK) {
-        std::cout << "strncpy_s faild" << std::endl;
+        std::cout << "strncpy_s failed" << std::endl;
         return DH_ERROR;
     }
     return DH_SUCCESS;
@@ -143,7 +143,7 @@ int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
 {
     (void)sessionId;
     if (strncpy_s(devId, len + 1, g_peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
-        std::cout << "strncpy_s faild" << std::endl;
+        std::cout << "strncpy_s failed" << std::endl;
         return DH_ERROR;
     }
     return DH_SUCCESS;

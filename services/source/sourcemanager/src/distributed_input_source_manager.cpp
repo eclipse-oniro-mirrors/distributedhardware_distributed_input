@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,6 @@
 #include "dinput_errcode.h"
 #include "dinput_hitrace.h"
 #include "dinput_log.h"
-#include "dinput_sa_process_state.h"
 #include "dinput_utils_tool.h"
 #include "distributed_input_client.h"
 #include "distributed_input_inject.h"
@@ -634,7 +633,7 @@ void DistributedInputSourceManager::DInputSourceManagerEventHandler::NotifyRegis
         }
     } else {
         DHLOGW("ProcessEvent DINPUT_SOURCE_MANAGER_RIGISTER_MSG the "
-            "devId[%s] dhId[%s] is bad data.", GetAnonyString(deviceId).c_str(), GetAnonyString(dhId).c_str());
+            "devId: %s, dhId: %s is bad data.", GetAnonyString(deviceId).c_str(), GetAnonyString(dhId).c_str());
     }
 
     sourceManagerObj_->RunRegisterCallback(deviceId, dhId,
@@ -978,44 +977,51 @@ int32_t DistributedInputSourceManager::Init()
 
 int32_t DistributedInputSourceManager::Release()
 {
-    DHLOGI("exit");
-
-    // 1.remove input node
+    DHLOGI("Release source manager.");
     for (auto iter = inputDevice_.begin(); iter != inputDevice_.end(); ++iter) {
         std::string devId = iter->devId;
         std::string dhId = iter->dhId;
-        DHLOGI("Release() devId[%s] dhId[%s]", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
+        DHLOGI("Release devId: %s, dhId: %s.", GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str());
         int32_t ret = DistributedInputInject::GetInstance().UnregisterDistributedHardware(devId, dhId);
         if (ret != DH_SUCCESS) {
-            DHLOGW("DistributedInputSourceManager Release called, remove node fail.");
+            DHLOGW("DinputSourceManager Release called, remove node fail.");
         }
     }
-
-    // 2.delete all device node data
-    DHLOGI("Release transport instance");
     DistributedInputSourceTransport::GetInstance().Release();
-
-    // 3.delete all device node data
-    DHLOGI("inputDevice clear");
     inputDevice_.clear();
     DeviceMap_.clear();
     InputTypesMap_.clear();
 
-    // 4. isStart callback
     std::shared_ptr<nlohmann::json> jsonArrayMsg = std::make_shared<nlohmann::json>();
     nlohmann::json tmpJson;
     tmpJson[INPUT_SOURCEMANAGER_KEY_RESULT] = static_cast<int32_t>(DInputServerType::NULL_SERVER_TYPE);
     jsonArrayMsg->push_back(tmpJson);
     AppExecFwk::InnerEvent::Pointer msgEvent = AppExecFwk::InnerEvent::Get(
         DINPUT_SOURCE_MANAGER_STARTSERVER_MSG, jsonArrayMsg, 0);
-
-    if (callBackHandler_ == nullptr) {
-        DHLOGE("Release callBackHandler_ is null.");
-        return ERR_DH_INPUT_SERVER_SOURCE_MANSGER_RELEASE_FAIL;
+    if (callBackHandler_ != nullptr) {
+        DHLOGI("Sourcemanager send event success.");
+        callBackHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
-    callBackHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-
     serviceRunningState_ = ServiceSourceRunningState::STATE_NOT_START;
+    UnregisterDHFwkPublisher();
+
+    HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_EXIT, "dinput source sa exit success.");
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        DHLOGE("Failed to get SystemAbilityManager.");
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_RELEASE_FAIL;
+    }
+    int32_t ret = systemAbilityMgr->UnloadSystemAbility(DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID);
+    if (ret != DH_SUCCESS) {
+        DHLOGE("Failed to UnloadSystemAbility service! errcode: %d.", ret);
+        return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_RELEASE_FAIL;
+    }
+    DHLOGI("Source unloadSystemAbility successfully.");
+    return DH_SUCCESS;
+}
+
+void DistributedInputSourceManager::UnregisterDHFwkPublisher()
+{
     std::shared_ptr<DistributedHardwareFwkKit> dhFwkKit = DInputContext::GetInstance().GetDHFwkKit();
     if (dhFwkKit != nullptr && startDScreenListener_ != nullptr) {
         DHLOGI("UnPublish StartDScreenListener");
@@ -1029,9 +1035,10 @@ int32_t DistributedInputSourceManager::Release()
         DHLOGI("UnPublish DeviceOfflineListener");
         dhFwkKit->UnregisterPublisherListener(DHTopic::TOPIC_DEV_OFFLINE, deviceOfflineListener_);
     }
-    DHLOGI("exit dinput source sa.");
-    SetSourceProcessExit();
-    return DH_SUCCESS;
+    if (dhFwkKit != nullptr) {
+        DHLOGD("Disable low Latency!");
+        dhFwkKit->PublishMessage(DHTopic::TOPIC_LOW_LATENCY, DISABLE_LOW_LATENCY.dump());
+    }
 }
 
 bool DistributedInputSourceManager::CheckRegisterParam(const std::string &devId, const std::string &dhId,
@@ -1060,7 +1067,7 @@ int32_t DistributedInputSourceManager::RegisterDistributedHardware(const std::st
     const std::string& parameters, sptr<IRegisterDInputCallback> callback)
 {
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_REGISTER, devId, dhId, "dinput register call.");
-    DHLOGI("RegisterDistributedHardware called, deviceId: %s,  dhId: %s,  parameters: %s",
+    DHLOGI("RegisterDistributedHardware called, deviceId: %s, dhId: %s, parameters: %s",
         GetAnonyString(devId).c_str(), GetAnonyString(dhId).c_str(), SetAnonyId(parameters).c_str());
     if (!CheckRegisterParam(devId, dhId, parameters, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_REGISTER_FAIL, devId, dhId,
@@ -1284,7 +1291,7 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_PREPARE, deviceId, "Dinput prepare call.");
     if (!DInputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_PREPARE_START, DINPUT_PREPARE_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
@@ -1337,7 +1344,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_UNPREPARE, deviceId, "Dinput unprepare call.");
     if (!DInputCheckParam::GetInstance().CheckParam(deviceId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_UNPREPARE_START, DINPUT_UNPREPARE_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
     }
@@ -1380,7 +1387,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, deviceId, "Dinput start use call.");
     if (!DInputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
@@ -1425,7 +1432,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, deviceId, "Dinput stop use call");
     if (!DInputCheckParam::GetInstance().CheckParam(deviceId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, deviceId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_START_START, DINPUT_START_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
@@ -1469,7 +1476,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_START_USE, sinkId, "Dinput start use call.");
     if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
@@ -1523,7 +1530,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
     HisyseventUtil::GetInstance().SysEventWriteBehavior(DINPUT_STOP_USE, sinkId, "Dinput stop use call.");
     if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, inputTypes, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
@@ -1632,7 +1639,7 @@ int32_t DistributedInputSourceManager::PrepareRemoteInput(const std::string &src
     DHLOGI("Dinput prepare, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL, "Dinput prepare param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_PREPARE_FAIL;
     }
@@ -1678,7 +1685,7 @@ int32_t DistributedInputSourceManager::UnprepareRemoteInput(const std::string &s
     DHLOGI("Dinput unprepare, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL, "Dinput unprepare param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_UNPREPARE_FAIL;
     }
@@ -1740,7 +1747,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &sinkI
     DHLOGI("Dinput start, sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
     if (!DInputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
@@ -1791,7 +1798,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &sinkId
     DHLOGI("Dinput stop, sinkId: %s, vector.string.size: %d", GetAnonyString(sinkId).c_str(), dhIds.size());
     if (!DInputCheckParam::GetInstance().CheckParam(sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }
@@ -1839,7 +1846,7 @@ int32_t DistributedInputSourceManager::StartRemoteInput(const std::string &srcId
     DHLOGI("Dinput start, srcId: %s, sinkId: %s", GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str());
     if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL, "Dinput start param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_START_FAIL;
     }
@@ -1892,7 +1899,7 @@ int32_t DistributedInputSourceManager::StopRemoteInput(const std::string &srcId,
         GetAnonyString(srcId).c_str(), GetAnonyString(sinkId).c_str(), dhIds.size());
     if (!DInputCheckParam::GetInstance().CheckParam(srcId, sinkId, dhIds, callback)) {
         HisyseventUtil::GetInstance().SysEventWriteFault(DINPUT_OPT_FAIL, sinkId,
-            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is faild.");
+            ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL, "Dinput stop param is failed.");
         FinishAsyncTrace(DINPUT_HITRACE_LABEL, DINPUT_STOP_START, DINPUT_STOP_TASK);
         return ERR_DH_INPUT_SERVER_SOURCE_MANAGER_STOP_FAIL;
     }

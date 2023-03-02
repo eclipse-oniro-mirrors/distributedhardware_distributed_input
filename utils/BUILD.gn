@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,7 +39,6 @@ ohos_shared_library("libdinput_utils") {
     "src/dinput_context.cpp",
     "src/dinput_log.cpp",
     "src/dinput_utils_tool.cpp",
-    "src/dinput_sa_process_state.cpp",
   ]
 
   defines = [
@@ -49,7 +48,6 @@ ohos_shared_library("libdinput_utils") {
   ]
 
   deps = [
-    "${dfx_utils_path}:libdinput_dfx_utils",
     "${fwk_utils_path}:distributedhardwareutils",
     "${fwk_interfaces_path}:libdhfwk_sdk",
     "//third_party/openssl:libcrypto_static",
