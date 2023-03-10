@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,8 +185,17 @@ int32_t DistributedInputSourceStub::HandleStartDhidRemoteInput(MessageParcel &da
 
     std::vector<std::string> tempVector;
     uint32_t vecSize = data.ReadUint32();
+    if (vecSize > IPC_VECTOR_MAX_SIZE) {
+        DHLOGE("HandleStartDhidRemoteInput vecSize too large");
+        return ERR_DH_INPUT_IPC_READ_VALID_FAIL;
+    }
+
     for (uint32_t i = 0; i < vecSize; i++) {
         std::string dhid = data.ReadString();
+        if (dhid.empty()) {
+            DHLOGE("HandleStartDhidRemoteInput dhid is empty");
+            continue;
+        }
         tempVector.push_back(dhid);
     }
 
@@ -205,8 +214,17 @@ int32_t DistributedInputSourceStub::HandleStopDhidRemoteInput(MessageParcel &dat
 
     std::vector<std::string> tempVector;
     uint32_t vecSize = data.ReadUint32();
+    if (vecSize > IPC_VECTOR_MAX_SIZE) {
+        DHLOGE("HandleStopDhidRemoteInput vecSize too large");
+        return ERR_DH_INPUT_IPC_READ_VALID_FAIL;
+    }
+
     for (uint32_t i = 0; i < vecSize; i++) {
         std::string dhid = data.ReadString();
+        if (dhid.empty()) {
+            DHLOGE("HandleStopDhidRemoteInput dhid is empty");
+            continue;
+        }
         tempVector.push_back(dhid);
     }
 
@@ -226,8 +244,17 @@ int32_t DistributedInputSourceStub::HandleStartRelayDhidRemoteInput(MessageParce
 
     std::vector<std::string> tempVector;
     uint32_t vecSize = data.ReadUint32();
+    if (vecSize > IPC_VECTOR_MAX_SIZE) {
+        DHLOGE("HandleStartRelayDhidRemoteInput vecSize too large");
+        return ERR_DH_INPUT_IPC_READ_VALID_FAIL;
+    }
+
     for (uint32_t i = 0; i < vecSize; i++) {
         std::string dhid = data.ReadString();
+        if (dhid.empty()) {
+            DHLOGE("HandleStartRelayDhidRemoteInput dhid is empty");
+            continue;
+        }
         tempVector.push_back(dhid);
     }
 
@@ -247,8 +274,17 @@ int32_t DistributedInputSourceStub::HandleStopRelayDhidRemoteInput(MessageParcel
 
     std::vector<std::string> tempVector;
     uint32_t vecSize = data.ReadUint32();
+    if (vecSize > IPC_VECTOR_MAX_SIZE) {
+        DHLOGE("HandleStopRelayDhidRemoteInput vecSize too large");
+        return ERR_DH_INPUT_IPC_READ_VALID_FAIL;
+    }
+
     for (uint32_t i = 0; i < vecSize; i++) {
         std::string dhid = data.ReadString();
+        if (dhid.empty()) {
+            DHLOGE("HandleStopRelayDhidRemoteInput dhid is empty");
+            continue;
+        }
         tempVector.push_back(dhid);
     }
 
