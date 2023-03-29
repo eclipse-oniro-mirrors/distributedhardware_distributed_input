@@ -53,7 +53,7 @@
 │   |   ├── inputinject                     # 分布式输入的原始事件注入
 │   |   ├── sourcemanager                   # 分布式输入的source侧业务管理，实现外部相关接口
 │   |   └── transport                       # 分布式输入source侧事件接收
-|   └── transportbase                       # 分布式输入的键鼠事件数据传输接口
+|   └── transportbase                       # 分布式输入的驱动事件数据传输接口
 ├── sinkhandler                             # 分布式输入实现的分布式硬件管理框架定义的sink侧部件接入接口
 ├── sourcehandler                           # 分布式输入实现的分布式硬件管理框架定义的source侧部件接入接口
 └── test                                    # 分布式输入fuzz测试的实现
@@ -88,13 +88,20 @@
 
 (1) 应用可以通过调用多模输入的能力查询接口，查询到对端可信设备具有的分布式输入能力。
 
-(2) 应用可以通过调用多模输入的准备使用接口，启动分布式输入的资源准备，包括设备间网络连接的建立以及相关资源线程的启动等。
+(2) 应用可以通过调用多模输入的enable接口，打开分布式输入的开关。
 
-(3) 应用可以通过调用多模输入的开始使用接口，启动分布式输入的跨设备输入能力，首先通知主控端设备开始使用被控端设备的输入外设，此时被控端设备的分布式输入服务采集到输入外设原始事件并回传到主控端，主控端分布式输入接收到事件并注入到对应的分布式输入驱动，多模输入驱动获取到注入的被控端外设事件，进行事件处理后在本地生效，从而实现了主控端对被控端输入外设的使用。
+启动分布式输入的资源准备，包括设备间网络连接的建立以及相关资源线程的启动等。
+
+(3) 应用可以通过调用多模输入的开始使用接口，启动分布式输入的跨设备输入能力：
+
+- 设备间首次进行分布式输入时，分布式输入部件会启动相关的资源准备，包括设备间网络连接的建立以及相关资源线程的启动等；
+
+- 设备间非首次进行分布式输入时，分布式输入部件会通知主控端设备开始使用被控端设备的输入外设，此时被控端设备的分布式输入服务采集到输入外设原始事件并回传到主控端，主控端分布式输入接收到事件并注入到对应的分布式输入驱动，多模输入驱动获取到注入的被控端外设事件，进行事件处理后在本地生效，从而实现了主控端对被控端输入外设的使用。
 
 (4) 如果不需要使用被控端输入能力，应用可以通过调用多模输入的停止使用接口，通知被控端分布式输入不再回传被控端的外设事件，被控端外设事件在被控端本地生效。
 
-(5) 如果业务方停止使用分布式输入能力，应用可以通过调用多模输入的取消准备接口，停止主控端和被控端相关资源线程，断开设备间网络连接。
+(5) 如果业务方停止使用分布式输入能力，应用可以通过调用多模输入的disable接口，销毁主控端和被控端相关资源线程，断开设备间网络连接。
+
 备注：关于多模输入分布式输入相关接口的使用，参见多模输入相关文档。
 
 #### **4. 设备下线**
@@ -120,7 +127,7 @@
 [distributed_screen](https://gitee.com/openharmony/distributedhardware_distributed_screen)
 
 分布式音频
-[distributed_audio](https://gitee.com/openharmony-sig/distributedhardware_distributed_audio)
+[distributed_audio](https://gitee.com/openharmony/distributedhardware_distributed_audio)
 
 **分布式输入
-[distributed_input](https://gitee.com/openharmony-sig/distributedhardware_distributed_input)**
+[distributed_input](https://gitee.com/openharmony/distributedhardware_distributed_input)**
