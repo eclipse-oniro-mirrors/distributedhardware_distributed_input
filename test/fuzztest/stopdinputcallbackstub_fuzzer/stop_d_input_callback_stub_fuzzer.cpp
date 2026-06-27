@@ -51,8 +51,8 @@ constexpr DInputFuzzUnsigned STOP_RESULT_CODE =
 void WriteResultPayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
 {
     parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
-    parcel.DINPUT_FUZZ_WRITE_UNSIGNED(fdp.ConsumeIntegral<DInputFuzzUnsigned>());
-    parcel.DINPUT_FUZZ_WRITE_SIGNED(fdp.ConsumeIntegral<DInputFuzzSigned>());
+    parcel.WriteUint32(fdp.ConsumeIntegral<DInputFuzzUnsigned>());
+    parcel.WriteInt32(fdp.ConsumeIntegral<DInputFuzzSigned>());
 }
 
 void RunRequest(StopDInputCallbackStub &stub, DInputFuzzUnsigned code,

@@ -68,7 +68,7 @@ void WriteVectorPayload(MessageParcel &parcel, FuzzedDataProvider &fdp, bool ove
         IPC_VECTOR_MAX_SIZE + DINPUT_FUZZ_VECTOR_OVERSIZE_STEP :
         fdp.ConsumeIntegralInRange<DInputFuzzUnsigned>(
             DINPUT_FUZZ_MIN_VECTOR_SIZE, DINPUT_FUZZ_MAX_VECTOR_SIZE);
-    parcel.DINPUT_FUZZ_WRITE_UNSIGNED(vectorSize);
+    parcel.WriteUint32(vectorSize);
     DInputFuzzUnsigned writeCount = oversize ? DINPUT_FUZZ_NO_VECTOR_WRITE : vectorSize;
     for (DInputFuzzUnsigned i = DINPUT_FUZZ_DEFAULT_VALUE; i < writeCount; ++i) {
         parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));

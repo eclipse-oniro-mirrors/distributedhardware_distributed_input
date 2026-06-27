@@ -48,7 +48,7 @@ constexpr DInputFuzzUnsigned UNPREPARE_RESULT_CODE =
 void WriteResultPayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
 {
     parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
-    parcel.DINPUT_FUZZ_WRITE_SIGNED(fdp.ConsumeIntegral<DInputFuzzSigned>());
+    parcel.WriteInt32(fdp.ConsumeIntegral<DInputFuzzSigned>());
 }
 
 void RunRequest(UnprepareDInputCallbackStub &stub, DInputFuzzUnsigned code,

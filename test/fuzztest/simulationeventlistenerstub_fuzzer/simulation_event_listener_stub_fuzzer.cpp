@@ -50,9 +50,9 @@ constexpr DInputFuzzUnsigned SIMULATION_RESULT_CODE =
 
 void WriteEventPayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
 {
-    parcel.DINPUT_FUZZ_WRITE_UNSIGNED(fdp.ConsumeIntegral<DInputFuzzUnsigned>());
-    parcel.DINPUT_FUZZ_WRITE_UNSIGNED(fdp.ConsumeIntegral<DInputFuzzUnsigned>());
-    parcel.DINPUT_FUZZ_WRITE_SIGNED(fdp.ConsumeIntegral<DInputFuzzSigned>());
+    parcel.WriteUint32(fdp.ConsumeIntegral<DInputFuzzUnsigned>());
+    parcel.WriteUint32(fdp.ConsumeIntegral<DInputFuzzUnsigned>());
+    parcel.WriteInt32(fdp.ConsumeIntegral<DInputFuzzSigned>());
 }
 
 void RunRequest(SimulationEventListenerStub &stub, DInputFuzzUnsigned code,
