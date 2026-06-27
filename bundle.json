@@ -113,7 +113,13 @@
         "//foundation/distributedhardware/distributed_input/test/fuzztest/startstopresultcallbackstub_fuzzer:fuzztest",
         "//foundation/distributedhardware/distributed_input/test/fuzztest/inputnodelistenerstub_fuzzer:fuzztest",
         "//foundation/distributedhardware/distributed_input/test/fuzztest/simulationeventlistenerstub_fuzzer:fuzztest",
-        "//foundation/distributedhardware/distributed_input/test/fuzztest/ipccallbackbroad_fuzzer:fuzztest"
+        "//foundation/distributedhardware/distributed_input/test/fuzztest/ipccallbackbroad_fuzzer:fuzztest",
+        "//foundation/distributedhardware/distributed_input/test/fuzztest/inputcheckparam_fuzzer:fuzztest",
+        "//foundation/distributedhardware/distributed_input/test/fuzztest/dinpututilstool_fuzzer:fuzztest",
+        "//foundation/distributedhardware/distributed_input/test/fuzztest/whitelistutilstate_fuzzer:fuzztest",
+        "//foundation/distributedhardware/distributed_input/test/fuzztest/dinputcontextscreen_fuzzer:fuzztest",
+        "//foundation/distributedhardware/distributed_input/test/fuzztest/touchpadfragment_fuzzer:fuzztest",
+        "//foundation/distributedhardware/distributed_input/test/fuzztest/dinputsinkstate_fuzzer:fuzztest"
       ]
     }
   }

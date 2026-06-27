@@ -88,7 +88,7 @@ void InputNodeListenerStubFuzzTest(const DInputFuzzByte *data, size_t size)
     if (data == nullptr || size == DINPUT_FUZZ_EMPTY_SIZE) {
         return;
     }
-    sptr<InputNodeListenerStub> stub(new (std::nothrow) TestInputNodeListenerStub());
+    sptr<TestInputNodeListenerStub> stub(new (std::nothrow) TestInputNodeListenerStub());
     if (stub == nullptr) {
         return;
     }
@@ -97,12 +97,20 @@ void InputNodeListenerStubFuzzTest(const DInputFuzzByte *data, size_t size)
     RunRequest(*stub, static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_OFF), fdp, true);
     RunRequest(*stub, static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_ON), fdp, false);
     RunRequest(*stub, fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp, fdp.ConsumeBool());
+    stub->OnNodeOnLine(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
+        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
+        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
+        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
+    stub->OnNodeOffLine(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
+        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
+        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
 
-extern "C" int LLVMFuzzerTestOneInput(const DInputFuzzByte *data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(
+    const OHOS::DistributedHardware::DistributedInput::DInputFuzzByte *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::InputNodeListenerStubFuzzTest(data, size);
     return DINPUT_FUZZ_SUCCESS;

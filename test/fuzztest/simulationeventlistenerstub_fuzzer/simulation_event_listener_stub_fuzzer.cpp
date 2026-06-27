@@ -66,7 +66,7 @@ void SimulationEventListenerStubFuzzTest(const DInputFuzzByte *data, size_t size
     if (data == nullptr || size == DINPUT_FUZZ_EMPTY_SIZE) {
         return;
     }
-    sptr<SimulationEventListenerStub> stub(new (std::nothrow) TestSimulationEventListenerStub());
+    sptr<TestSimulationEventListenerStub> stub(new (std::nothrow) TestSimulationEventListenerStub());
     if (stub == nullptr) {
         return;
     }
@@ -74,12 +74,15 @@ void SimulationEventListenerStubFuzzTest(const DInputFuzzByte *data, size_t size
     RunRequest(*stub, static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON), fdp, true);
     RunRequest(*stub, static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON), fdp, false);
     RunRequest(*stub, fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp, fdp.ConsumeBool());
+    (void)stub->OnSimulationEvent(fdp.ConsumeIntegral<DInputFuzzUnsigned>(),
+        fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp.ConsumeIntegral<DInputFuzzSigned>());
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
 
-extern "C" int LLVMFuzzerTestOneInput(const DInputFuzzByte *data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(
+    const OHOS::DistributedHardware::DistributedInput::DInputFuzzByte *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::SimulationEventListenerStubFuzzTest(data, size);
     return DINPUT_FUZZ_SUCCESS;

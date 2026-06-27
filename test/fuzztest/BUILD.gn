@@ -16,6 +16,7 @@ group("fuzztest") {
 
   deps = [
     "dinputconfigdh_fuzzer:fuzztest",
+    "dinputcontextscreen_fuzzer:fuzztest",
     "dinputinitsink_fuzzer:fuzztest",
     "dinputinitsource_fuzzer:fuzztest",
     "dinputonsessionclosed_fuzzer:fuzztest",
@@ -23,13 +24,17 @@ group("fuzztest") {
     "dinputpermissioncheck_fuzzer:fuzztest",
     "dinputreleasesink_fuzzer:fuzztest",
     "dinputreleasesource_fuzzer:fuzztest",
+    "dinputsinkstate_fuzzer:fuzztest",
     "dinputsubscribelocaldh_fuzzer:fuzztest",
+    "dinpututilstool_fuzzer:fuzztest",
     "distributedinputclient_fuzzer:fuzztest",
     "distributedinputkit_fuzzer:fuzztest",
     "distributedinputsinktransport_fuzzer:fuzztest",
     "distributedinputsourcetransport_fuzzer:fuzztest",
     "distributedinputtransportbase_fuzzer:fuzztest",
+    "inputcheckparam_fuzzer:fuzztest",
     "inputnodelistenerstub_fuzzer:fuzztest",
+    "ipccallbackbroad_fuzzer:fuzztest",
     "preparedinputcallbackstub_fuzzer:fuzztest",
     "registerdinputcallbackstub_fuzzer:fuzztest",
     "simulationeventlistenerstub_fuzzer:fuzztest",
@@ -37,8 +42,9 @@ group("fuzztest") {
     "startstopdinputscallbackstub_fuzzer:fuzztest",
     "startstopresultcallbackstub_fuzzer:fuzztest",
     "stopdinputcallbackstub_fuzzer:fuzztest",
+    "touchpadfragment_fuzzer:fuzztest",
     "unpreparedinputcallbackstub_fuzzer:fuzztest",
     "unregisterdinputcallbackstub_fuzzer:fuzztest",
-    "ipccallbackbroad_fuzzer:fuzztest",
+    "whitelistutilstate_fuzzer:fuzztest",
   ]
 }

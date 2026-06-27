@@ -81,7 +81,7 @@ void StartStopResultCallbackStubFuzzTest(const DInputFuzzByte *data, size_t size
     if (data == nullptr || size == DINPUT_FUZZ_EMPTY_SIZE) {
         return;
     }
-    sptr<StartStopResultCallbackStub> stub(new (std::nothrow) TestStartStopResultCallbackStub());
+    sptr<TestStartStopResultCallbackStub> stub(new (std::nothrow) TestStartStopResultCallbackStub());
     if (stub == nullptr) {
         return;
     }
@@ -95,12 +95,18 @@ void StartStopResultCallbackStubFuzzTest(const DInputFuzzByte *data, size_t size
     RunRequest(*stub, static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_STOP), fdp, false,
         false);
     RunRequest(*stub, fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp, fdp.ConsumeBool(), false);
+    std::vector<std::string> dhIds = { fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH) };
+    stub->OnStart(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
+        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH), dhIds);
+    stub->OnStop(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
+        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH), dhIds);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware
 } // namespace OHOS
 
-extern "C" int LLVMFuzzerTestOneInput(const DInputFuzzByte *data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(
+    const OHOS::DistributedHardware::DistributedInput::DInputFuzzByte *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::StartStopResultCallbackStubFuzzTest(data, size);
     return DINPUT_FUZZ_SUCCESS;
