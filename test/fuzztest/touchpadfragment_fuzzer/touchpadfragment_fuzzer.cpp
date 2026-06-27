@@ -135,9 +135,9 @@ void ExerciseManagerSequences(FuzzedDataProvider &provider, const std::string &d
 
     (void)mgr.PushEvent(dhId,
         MakeEvent(provider, EV_ABS, ABS_X, provider.ConsumeIntegral<int32_t>(), dhId));
-    PushSequence(mgr, wholeTouch);
-    PushSequence(mgr, notWholeTouch);
-    PushSequence(mgr, dropFragment);
+    PushSequence(mgr, dhId, wholeTouch);
+    PushSequence(mgr, dhId, notWholeTouch);
+    PushSequence(mgr, dhId, dropFragment);
     (void)mgr.GetAndClearEvents(dhId);
     mgr.Clear(dhId);
 }

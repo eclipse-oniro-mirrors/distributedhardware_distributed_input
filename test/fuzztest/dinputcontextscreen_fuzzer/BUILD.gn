@@ -41,6 +41,7 @@ ohos_fuzztest("DInputContextScreenFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
+    "distributed_hardware_fwk:distributedhardwareutils",
     "distributed_hardware_fwk:libdhfwk_sdk",
     "hilog:libhilog",
     "ipc:ipc_core",
