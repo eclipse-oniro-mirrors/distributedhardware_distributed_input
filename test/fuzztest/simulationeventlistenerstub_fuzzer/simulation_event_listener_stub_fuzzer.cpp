@@ -45,6 +45,9 @@ private:
     DInputFuzzSigned lastValue_ = DINPUT_FUZZ_DEFAULT_VALUE;
 };
 
+constexpr DInputFuzzUnsigned SIMULATION_RESULT_CODE =
+    static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON);
+
 void WriteEventPayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
 {
     parcel.DINPUT_FUZZ_WRITE_UNSIGNED(fdp.ConsumeIntegral<DInputFuzzUnsigned>());
@@ -52,10 +55,12 @@ void WriteEventPayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
     parcel.DINPUT_FUZZ_WRITE_SIGNED(fdp.ConsumeIntegral<DInputFuzzSigned>());
 }
 
-void RunRequest(SimulationEventListenerStub &stub, DInputFuzzUnsigned code, FuzzedDataProvider &fdp, bool validToken)
+void RunRequest(SimulationEventListenerStub &stub, DInputFuzzUnsigned code,
+    FuzzedDataProvider &fdp, bool validToken)
 {
     FuzzUtil::IpcRequestContext context;
-    FuzzUtil::WriteInterfaceToken(context.data, SimulationEventListenerStub::GetDescriptor(), validToken);
+    FuzzUtil::WriteInterfaceToken(context.data,
+        SimulationEventListenerStub::GetDescriptor(), validToken);
     WriteEventPayload(context.data, fdp);
     stub.OnRemoteRequest(code, context.data, context.reply, context.option);
 }
@@ -66,16 +71,19 @@ void SimulationEventListenerStubFuzzTest(const DInputFuzzByte *data, size_t size
     if (data == nullptr || size == DINPUT_FUZZ_EMPTY_SIZE) {
         return;
     }
-    sptr<TestSimulationEventListenerStub> stub(new (std::nothrow) TestSimulationEventListenerStub());
+    sptr<TestSimulationEventListenerStub> stub(
+        new (std::nothrow) TestSimulationEventListenerStub());
     if (stub == nullptr) {
         return;
     }
     FuzzedDataProvider fdp(data, size);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON), fdp, true);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON), fdp, false);
+    RunRequest(*stub, SIMULATION_RESULT_CODE, fdp, true);
+    RunRequest(*stub, SIMULATION_RESULT_CODE, fdp, false);
     RunRequest(*stub, fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp, fdp.ConsumeBool());
-    (void)stub->OnSimulationEvent(fdp.ConsumeIntegral<DInputFuzzUnsigned>(),
-        fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp.ConsumeIntegral<DInputFuzzSigned>());
+    DInputFuzzUnsigned type = fdp.ConsumeIntegral<DInputFuzzUnsigned>();
+    DInputFuzzUnsigned code = fdp.ConsumeIntegral<DInputFuzzUnsigned>();
+    DInputFuzzSigned value = fdp.ConsumeIntegral<DInputFuzzSigned>();
+    (void)stub->OnSimulationEvent(type, code, value);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

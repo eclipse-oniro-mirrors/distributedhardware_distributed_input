@@ -36,10 +36,22 @@ constexpr uint32_t ID_CASE_COUNT = 4U;
 constexpr uint32_t TYPE_CASE_COUNT = 5U;
 constexpr uint32_t MAX_DHID_COUNT = 6U;
 constexpr size_t PARAMETER_MAX_SIZE = 128U;
+constexpr uint32_t EMPTY_ID_CASE = 0U;
+constexpr uint32_t VALID_ID_CASE = 1U;
+constexpr uint32_t MAX_LENGTH_ID_CASE = 2U;
+constexpr uint32_t NONE_TYPE_CASE = 0U;
+constexpr uint32_t ALL_TYPE_CASE = 1U;
+constexpr uint32_t COMBINED_TYPE_CASE = 2U;
+constexpr uint32_t OVERSIZE_TYPE_CASE = 3U;
+constexpr size_t OUT_OF_RANGE_SIZE_STEP = 1U;
+constexpr uint32_t OUT_OF_RANGE_TYPE_STEP = 1U;
+constexpr int32_t CALLBACK_SUCCESS = 0;
+constexpr int32_t FUZZ_TEST_SUCCESS = 0;
 
 class TestStartDInputCallback final : public StartDInputCallbackStub {
 public:
-    void OnResult(const std::string &devId, const uint32_t &inputTypes, const int32_t &status) override
+    void OnResult(const std::string &devId, const uint32_t &inputTypes,
+        const int32_t &status) override
     {
         (void)devId;
         (void)inputTypes;
@@ -56,7 +68,7 @@ public:
         (void)dhId;
         (void)status;
         (void)data;
-        return 0;
+        return CALLBACK_SUCCESS;
     }
 };
 
@@ -69,7 +81,7 @@ public:
         (void)dhId;
         (void)status;
         (void)data;
-        return 0;
+        return CALLBACK_SUCCESS;
     }
 };
 
@@ -82,16 +94,16 @@ std::string ConsumeNonEmptyString(FuzzedDataProvider &provider, size_t maxSize)
 std::string ConsumeDeviceId(FuzzedDataProvider &provider)
 {
     uint32_t idCase = provider.ConsumeIntegralInRange<uint32_t>(0U, ID_CASE_COUNT - 1U);
-    if (idCase == 0U) {
+    if (idCase == EMPTY_ID_CASE) {
         return "";
     }
-    if (idCase == 1U) {
+    if (idCase == VALID_ID_CASE) {
         return ConsumeNonEmptyString(provider, DEV_ID_LENGTH_MAX);
     }
-    if (idCase == 2U) {
+    if (idCase == MAX_LENGTH_ID_CASE) {
         return std::string(DEV_ID_LENGTH_MAX, 'D');
     }
-    return std::string(DEV_ID_LENGTH_MAX + 1U, 'E');
+    return std::string(DEV_ID_LENGTH_MAX + OUT_OF_RANGE_SIZE_STEP, 'E');
 }
 
 std::string ConsumeDhId(FuzzedDataProvider &provider)
@@ -99,24 +111,24 @@ std::string ConsumeDhId(FuzzedDataProvider &provider)
     if (provider.ConsumeBool()) {
         return ConsumeNonEmptyString(provider, DH_ID_LENGTH_MAX);
     }
-    return std::string(DH_ID_LENGTH_MAX + 1U, 'H');
+    return std::string(DH_ID_LENGTH_MAX + OUT_OF_RANGE_SIZE_STEP, 'H');
 }
 
 uint32_t ConsumeInputTypes(FuzzedDataProvider &provider)
 {
     uint32_t typeCase = provider.ConsumeIntegralInRange<uint32_t>(0U, TYPE_CASE_COUNT - 1U);
-    if (typeCase == 0U) {
+    if (typeCase == NONE_TYPE_CASE) {
         return static_cast<uint32_t>(DInputDeviceType::NONE);
     }
-    if (typeCase == 1U) {
+    if (typeCase == ALL_TYPE_CASE) {
         return static_cast<uint32_t>(DInputDeviceType::ALL);
     }
-    if (typeCase == 2U) {
+    if (typeCase == COMBINED_TYPE_CASE) {
         return static_cast<uint32_t>(DInputDeviceType::MOUSE) |
             static_cast<uint32_t>(DInputDeviceType::KEYBOARD);
     }
-    if (typeCase == 3U) {
-        return static_cast<uint32_t>(DInputDeviceType::ALL) + 1U;
+    if (typeCase == OVERSIZE_TYPE_CASE) {
+        return static_cast<uint32_t>(DInputDeviceType::ALL) + OUT_OF_RANGE_TYPE_STEP;
     }
     return provider.ConsumeIntegral<uint32_t>();
 }
@@ -149,8 +161,10 @@ void ExerciseBaselineChecks(DInputCheckParam &checker)
     sptr<IRemoteBroker> callback = MakeRemoteCallback(true);
     std::vector<std::string> dhIds = { "dhid_valid" };
     uint32_t inputTypes = static_cast<uint32_t>(DInputDeviceType::ALL);
-    std::shared_ptr<TestRegisterCallback> registerCallback = std::make_shared<TestRegisterCallback>();
-    std::shared_ptr<TestUnregisterCallback> unregisterCallback = std::make_shared<TestUnregisterCallback>();
+    std::shared_ptr<TestRegisterCallback> registerCallback =
+        std::make_shared<TestRegisterCallback>();
+    std::shared_ptr<TestUnregisterCallback> unregisterCallback =
+        std::make_shared<TestUnregisterCallback>();
 
     (void)checker.CheckParam("device_valid", callback);
     (void)checker.CheckParam("device_valid", inputTypes, callback);
@@ -191,7 +205,8 @@ void ExerciseRegisterChecks(DInputCheckParam &checker, FuzzedDataProvider &provi
 {
     std::string devId = ConsumeDeviceId(provider);
     std::string dhId = ConsumeDhId(provider);
-    std::string parameters = provider.ConsumeBool() ? "" : provider.ConsumeRandomLengthString(PARAMETER_MAX_SIZE);
+    std::string parameters = provider.ConsumeBool() ? "" :
+        provider.ConsumeRandomLengthString(PARAMETER_MAX_SIZE);
     std::shared_ptr<TestRegisterCallback> registerCallback =
         provider.ConsumeBool() ? std::make_shared<TestRegisterCallback>() : nullptr;
     std::shared_ptr<TestUnregisterCallback> unregisterCallback =
@@ -222,5 +237,5 @@ void InputCheckParamFuzzTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::InputCheckParamFuzzTest(data, size);
-    return 0;
+    return OHOS::DistributedHardware::DistributedInput::FUZZ_TEST_SUCCESS;
 }

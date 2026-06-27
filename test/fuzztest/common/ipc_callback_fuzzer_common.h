@@ -22,7 +22,8 @@
 #include "message_option.h"
 #include "message_parcel.h"
 
-#define DINPUT_FUZZ_INVALID_DESCRIPTOR u"ohos.DistributedHardware.DistributedInput.FuzzInvalidDescriptor"
+#define DINPUT_FUZZ_INVALID_DESCRIPTOR \
+    u"ohos.DistributedHardware.DistributedInput.FuzzInvalidDescriptor"
 #define DINPUT_FUZZ_MAX_STRING_LENGTH UCHAR_MAX + true
 #define DINPUT_FUZZ_MAX_VECTOR_SIZE CHAR_BIT
 #define DINPUT_FUZZ_MIN_VECTOR_SIZE false
@@ -49,7 +50,8 @@ struct IpcRequestContext {
     MessageOption option;
 };
 
-inline void WriteInterfaceToken(MessageParcel &parcel, const std::u16string &descriptor, bool validToken)
+inline void WriteInterfaceToken(MessageParcel &parcel, const std::u16string &descriptor,
+    bool validToken)
 {
     if (validToken) {
         parcel.WriteInterfaceToken(descriptor);

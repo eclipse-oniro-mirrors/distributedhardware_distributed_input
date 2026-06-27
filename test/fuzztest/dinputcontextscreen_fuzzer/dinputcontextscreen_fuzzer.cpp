@@ -33,6 +33,8 @@ constexpr uint32_t DIMENSION_MIN = 1U;
 constexpr uint32_t DIMENSION_MAX = 4096U;
 constexpr int32_t SA_ID_MIN = -16;
 constexpr int32_t SA_ID_MAX = 4096;
+constexpr uint32_t ZERO_DIMENSION = 0U;
+constexpr int32_t FUZZ_TEST_SUCCESS = 0;
 
 std::string ConsumeId(FuzzedDataProvider &provider)
 {
@@ -43,7 +45,7 @@ std::string ConsumeId(FuzzedDataProvider &provider)
 uint32_t ConsumeDimension(FuzzedDataProvider &provider, bool allowZero)
 {
     if (allowZero && provider.ConsumeBool()) {
-        return 0U;
+        return ZERO_DIMENSION;
     }
     return provider.ConsumeIntegralInRange<uint32_t>(DIMENSION_MIN, DIMENSION_MAX);
 }
@@ -114,7 +116,8 @@ void ExerciseSinkInfo(DInputContext &context, FuzzedDataProvider &provider)
 
 void ExerciseSrcInfo(DInputContext &context, FuzzedDataProvider &provider)
 {
-    std::string key = context.GetScreenInfoKey(ConsumeId(provider), provider.ConsumeIntegral<uint64_t>());
+    std::string key = context.GetScreenInfoKey(ConsumeId(provider),
+        provider.ConsumeIntegral<uint64_t>());
     SrcScreenInfo srcInfo = BuildSrcScreenInfo(provider);
 
     (void)context.UpdateSrcScreenInfo(key + "_missing", srcInfo);
@@ -157,5 +160,5 @@ void DInputContextScreenFuzzTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::DInputContextScreenFuzzTest(data, size);
-    return 0;
+    return OHOS::DistributedHardware::DistributedInput::FUZZ_TEST_SUCCESS;
 }

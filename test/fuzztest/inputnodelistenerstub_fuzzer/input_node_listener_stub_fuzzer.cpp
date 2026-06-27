@@ -55,6 +55,11 @@ private:
     std::string lastSinkNodeDesc_;
 };
 
+constexpr DInputFuzzUnsigned NODE_ON_CODE =
+    static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_ON);
+constexpr DInputFuzzUnsigned NODE_OFF_CODE =
+    static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_OFF);
+
 void WriteOnlinePayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
 {
     parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
@@ -70,11 +75,13 @@ void WriteOfflinePayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
     parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
 }
 
-void RunRequest(InputNodeListenerStub &stub, DInputFuzzUnsigned code, FuzzedDataProvider &fdp, bool validToken)
+void RunRequest(InputNodeListenerStub &stub, DInputFuzzUnsigned code,
+    FuzzedDataProvider &fdp, bool validToken)
 {
     FuzzUtil::IpcRequestContext context;
-    FuzzUtil::WriteInterfaceToken(context.data, InputNodeListenerStub::GetDescriptor(), validToken);
-    if (code == static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_ON)) {
+    FuzzUtil::WriteInterfaceToken(context.data,
+        InputNodeListenerStub::GetDescriptor(), validToken);
+    if (code == NODE_ON_CODE) {
         WriteOnlinePayload(context.data, fdp);
     } else {
         WriteOfflinePayload(context.data, fdp);
@@ -88,22 +95,22 @@ void InputNodeListenerStubFuzzTest(const DInputFuzzByte *data, size_t size)
     if (data == nullptr || size == DINPUT_FUZZ_EMPTY_SIZE) {
         return;
     }
-    sptr<TestInputNodeListenerStub> stub(new (std::nothrow) TestInputNodeListenerStub());
+    sptr<TestInputNodeListenerStub> stub(
+        new (std::nothrow) TestInputNodeListenerStub());
     if (stub == nullptr) {
         return;
     }
     FuzzedDataProvider fdp(data, size);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_ON), fdp, true);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_OFF), fdp, true);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_ON), fdp, false);
+    RunRequest(*stub, NODE_ON_CODE, fdp, true);
+    RunRequest(*stub, NODE_OFF_CODE, fdp, true);
+    RunRequest(*stub, NODE_ON_CODE, fdp, false);
     RunRequest(*stub, fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp, fdp.ConsumeBool());
-    stub->OnNodeOnLine(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
-    stub->OnNodeOffLine(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
+    std::string srcDevId = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    std::string sinkDevId = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    std::string sinkNodeId = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    std::string sinkNodeDesc = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    stub->OnNodeOnLine(srcDevId, sinkDevId, sinkNodeId, sinkNodeDesc);
+    stub->OnNodeOffLine(srcDevId, sinkDevId, sinkNodeId);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

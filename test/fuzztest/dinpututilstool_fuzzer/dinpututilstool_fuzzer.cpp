@@ -36,6 +36,9 @@ constexpr size_t STRING_MAX_LEN = 96U;
 constexpr uint32_t VECTOR_MAX_COUNT = 8U;
 constexpr int32_t INT_MIN_BOUND = -1024;
 constexpr int32_t INT_MAX_BOUND = 1024;
+constexpr size_t BIT_ARRAY_SIZE = 2U;
+constexpr int BIT_INDEX_MIN = 0;
+constexpr int32_t FUZZ_TEST_SUCCESS = 0;
 
 std::string ConsumeText(FuzzedDataProvider &provider)
 {
@@ -55,7 +58,9 @@ nlohmann::json BuildTypedJson(FuzzedDataProvider &provider)
     jsonObj["stringKey"] = ConsumeText(provider);
     jsonObj["intKey"] = provider.ConsumeIntegralInRange<int32_t>(INT_MIN_BOUND, INT_MAX_BOUND);
     jsonObj["uintKey"] = provider.ConsumeIntegral<uint32_t>();
-    jsonObj["arrayKey"] = nlohmann::json::array({ ConsumeText(provider), provider.ConsumeIntegral<uint32_t>() });
+    jsonObj["arrayKey"] = nlohmann::json::array({
+        ConsumeText(provider), provider.ConsumeIntegral<uint32_t>()
+    });
     jsonObj[DEVICE_NAME] = ConsumeNonEmptyText(provider);
     jsonObj[PHYSICAL_PATH] = ConsumeNonEmptyText(provider);
     jsonObj[CLASSES] = provider.ConsumeIntegralInRange<int32_t>(INT_MIN_BOUND, INT_MAX_BOUND);
@@ -68,7 +73,8 @@ nlohmann::json BuildSoftBusJson(FuzzedDataProvider &provider)
     jsonObj[DINPUT_SOFTBUS_KEY_DEVICE_ID] = ConsumeNonEmptyText(provider);
     jsonObj[DESCRIPTOR] = ConsumeNonEmptyText(provider);
     jsonObj[DINPUT_SOFTBUS_KEY_INPUT_DATA] = ConsumeNonEmptyText(provider);
-    jsonObj[DINPUT_SOFTBUS_KEY_VECTOR_DHID] = ConsumeNonEmptyText(provider) + "." + ConsumeNonEmptyText(provider);
+    jsonObj[DINPUT_SOFTBUS_KEY_VECTOR_DHID] =
+        ConsumeNonEmptyText(provider) + "." + ConsumeNonEmptyText(provider);
     jsonObj[DINPUT_SOFTBUS_KEY_SRC_DEV_ID] = ConsumeNonEmptyText(provider);
     jsonObj[DINPUT_SOFTBUS_KEY_SINK_DEV_ID] = ConsumeNonEmptyText(provider);
     return jsonObj;
@@ -109,7 +115,8 @@ void ExerciseJsonHelpers(FuzzedDataProvider &provider)
 void ExerciseStringHelpers(FuzzedDataProvider &provider)
 {
     std::string value = ConsumeText(provider);
-    std::string joinedInput = ConsumeNonEmptyText(provider) + "." + ConsumeText(provider) + "." + ConsumeText(provider);
+    std::string joinedInput = ConsumeNonEmptyText(provider) + "." +
+        ConsumeText(provider) + "." + ConsumeText(provider);
     char split = provider.ConsumeBool() ? '.' : ',';
     std::vector<std::string> splitValues;
     std::vector<std::string> dhIds = ConsumeStringVector(provider);
@@ -125,14 +132,16 @@ void ExerciseStringHelpers(FuzzedDataProvider &provider)
 
 void ExerciseDevicePathHelpers(FuzzedDataProvider &provider)
 {
-    std::string invalidPath = provider.ConsumeBool() ? "" : "/not_exist_dinput_" + ConsumeText(provider);
+    std::string invalidPath = provider.ConsumeBool() ? "" :
+        "/not_exist_dinput_" + ConsumeText(provider);
     std::vector<std::string> inputPaths;
     std::vector<std::string> nodePaths = { invalidPath };
-    std::array<unsigned long, 2U> bits = {
+    std::array<unsigned long, BIT_ARRAY_SIZE> bits = {
         provider.ConsumeIntegral<unsigned long>(),
         provider.ConsumeIntegral<unsigned long>(),
     };
-    int bit = provider.ConsumeIntegralInRange<int>(0, static_cast<int>(bits.size() * LONG_BITS - 1U));
+    int bit = provider.ConsumeIntegralInRange<int>(
+        BIT_INDEX_MIN, static_cast<int>(bits.size() * LONG_BITS - 1U));
     int fd = UN_INIT_FD_VALUE;
 
     (void)BitIsSet(bits.data(), bit);
@@ -162,5 +171,5 @@ void DInputUtilsToolFuzzTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::DInputUtilsToolFuzzTest(data, size);
-    return 0;
+    return OHOS::DistributedHardware::DistributedInput::FUZZ_TEST_SUCCESS;
 }

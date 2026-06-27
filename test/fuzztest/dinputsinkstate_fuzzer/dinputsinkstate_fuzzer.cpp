@@ -34,6 +34,8 @@ constexpr size_t DHID_MAX_SIZE = 64U;
 constexpr uint32_t DHID_MAX_COUNT = 5U;
 constexpr uint32_t EVENT_MAX_COUNT = 8U;
 constexpr int32_t INVALID_SESSION_ID = -1;
+constexpr int32_t SYN_REPORT_VALUE = 0;
+constexpr int32_t FUZZ_TEST_SUCCESS = 0;
 
 std::string ConsumeDhId(FuzzedDataProvider &provider)
 {
@@ -52,8 +54,8 @@ std::vector<std::string> ConsumeDhIds(FuzzedDataProvider &provider)
     return dhIds;
 }
 
-RawEvent MakeEvent(FuzzedDataProvider &provider, const std::string &dhId, uint32_t type, uint32_t code,
-    int32_t value)
+RawEvent MakeEvent(FuzzedDataProvider &provider, const std::string &dhId, uint32_t type,
+    uint32_t code, int32_t value)
 {
     RawEvent event;
     event.when = provider.ConsumeIntegral<int64_t>();
@@ -67,14 +69,17 @@ RawEvent MakeEvent(FuzzedDataProvider &provider, const std::string &dhId, uint32
 
 RawEvent ConsumeKeyEvent(FuzzedDataProvider &provider, const std::string &dhId)
 {
-    uint32_t code = provider.ConsumeBool() ? KEY_A : provider.ConsumeIntegralInRange<uint32_t>(KEY_ESC, KEY_MAX);
+    uint32_t code = provider.ConsumeBool() ? KEY_A :
+        provider.ConsumeIntegralInRange<uint32_t>(KEY_ESC, KEY_MAX);
     int32_t value = provider.ConsumeBool() ? KEY_DOWN_STATE : KEY_REPEAT;
     return MakeEvent(provider, dhId, EV_KEY, code, value);
 }
 
-void ExerciseDhIdState(DInputSinkState &state, FuzzedDataProvider &provider, const std::vector<std::string> &dhIds)
+void ExerciseDhIdState(DInputSinkState &state, FuzzedDataProvider &provider,
+    const std::vector<std::string> &dhIds)
 {
-    int32_t sessionId = provider.ConsumeBool() ? INVALID_SESSION_ID : provider.ConsumeIntegral<int32_t>();
+    int32_t sessionId = provider.ConsumeBool() ? INVALID_SESSION_ID :
+        provider.ConsumeIntegral<int32_t>();
     DhIdState dhIdState = provider.ConsumeBool() ? DhIdState::THROUGH_IN : DhIdState::THROUGH_OUT;
 
     (void)state.RecordDhIds(dhIds, DhIdState::THROUGH_IN, sessionId);
@@ -86,7 +91,8 @@ void ExerciseDhIdState(DInputSinkState &state, FuzzedDataProvider &provider, con
     (void)state.RemoveDhIds({ dhIds.front() });
 }
 
-void ExerciseKeyStates(DInputSinkState &state, FuzzedDataProvider &provider, const std::string &dhId)
+void ExerciseKeyStates(DInputSinkState &state, FuzzedDataProvider &provider,
+    const std::string &dhId)
 {
     std::vector<RawEvent> events;
     uint32_t count = provider.ConsumeIntegralInRange<uint32_t>(1U, EVENT_MAX_COUNT);
@@ -106,7 +112,8 @@ void ExerciseKeyStates(DInputSinkState &state, FuzzedDataProvider &provider, con
     (void)state.IsDhIdDown(dhId);
 }
 
-void ExerciseTouchPadManager(DInputSinkState &state, FuzzedDataProvider &provider, const std::string &dhId)
+void ExerciseTouchPadManager(DInputSinkState &state, FuzzedDataProvider &provider,
+    const std::string &dhId)
 {
     auto mgr = state.GetTouchPadEventFragMgr();
     if (mgr == nullptr) {
@@ -114,9 +121,9 @@ void ExerciseTouchPadManager(DInputSinkState &state, FuzzedDataProvider &provide
     }
     std::vector<RawEvent> touchEvents = {
         MakeEvent(provider, dhId, EV_KEY, BTN_TOUCH, KEY_DOWN_STATE),
-        MakeEvent(provider, dhId, EV_SYN, SYN_REPORT, 0),
+        MakeEvent(provider, dhId, EV_SYN, SYN_REPORT, SYN_REPORT_VALUE),
         MakeEvent(provider, dhId, EV_KEY, BTN_TOUCH, KEY_UP_STATE),
-        MakeEvent(provider, dhId, EV_SYN, SYN_REPORT, 0),
+        MakeEvent(provider, dhId, EV_SYN, SYN_REPORT, SYN_REPORT_VALUE),
     };
     for (const RawEvent &event : touchEvents) {
         (void)mgr->PushEvent(dhId, event);
@@ -152,5 +159,5 @@ void DInputSinkStateFuzzTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::DInputSinkStateFuzzTest(data, size);
-    return 0;
+    return OHOS::DistributedHardware::DistributedInput::FUZZ_TEST_SUCCESS;
 }

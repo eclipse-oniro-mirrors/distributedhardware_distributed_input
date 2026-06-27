@@ -42,16 +42,21 @@ private:
     DInputFuzzSigned lastStatus_ = DINPUT_FUZZ_DEFAULT_VALUE;
 };
 
+constexpr DInputFuzzUnsigned START_STOP_DHIDS_RESULT_CODE =
+    static_cast<DInputFuzzUnsigned>(IStartStopDInputsCallback::Message::RESULT_STRING);
+
 void WriteResultPayload(MessageParcel &parcel, FuzzedDataProvider &fdp)
 {
     parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
     parcel.DINPUT_FUZZ_WRITE_SIGNED(fdp.ConsumeIntegral<DInputFuzzSigned>());
 }
 
-void RunRequest(StartStopDInputsCallbackStub &stub, DInputFuzzUnsigned code, FuzzedDataProvider &fdp, bool validToken)
+void RunRequest(StartStopDInputsCallbackStub &stub, DInputFuzzUnsigned code,
+    FuzzedDataProvider &fdp, bool validToken)
 {
     FuzzUtil::IpcRequestContext context;
-    FuzzUtil::WriteInterfaceToken(context.data, StartStopDInputsCallbackStub::GetDescriptor(), validToken);
+    FuzzUtil::WriteInterfaceToken(context.data,
+        StartStopDInputsCallbackStub::GetDescriptor(), validToken);
     WriteResultPayload(context.data, fdp);
     stub.OnRemoteRequest(code, context.data, context.reply, context.option);
 }
@@ -62,16 +67,18 @@ void StartStopDInputsCallbackStubFuzzTest(const DInputFuzzByte *data, size_t siz
     if (data == nullptr || size == DINPUT_FUZZ_EMPTY_SIZE) {
         return;
     }
-    sptr<TestStartStopDInputsCallbackStub> stub(new (std::nothrow) TestStartStopDInputsCallbackStub());
+    sptr<TestStartStopDInputsCallbackStub> stub(
+        new (std::nothrow) TestStartStopDInputsCallbackStub());
     if (stub == nullptr) {
         return;
     }
     FuzzedDataProvider fdp(data, size);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(IStartStopDInputsCallback::Message::RESULT_STRING), fdp, true);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(IStartStopDInputsCallback::Message::RESULT_STRING), fdp, false);
+    RunRequest(*stub, START_STOP_DHIDS_RESULT_CODE, fdp, true);
+    RunRequest(*stub, START_STOP_DHIDS_RESULT_CODE, fdp, false);
     RunRequest(*stub, fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp, fdp.ConsumeBool());
-    stub->OnResultDhids(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeIntegral<DInputFuzzSigned>());
+    std::string devId = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    DInputFuzzSigned status = fdp.ConsumeIntegral<DInputFuzzSigned>();
+    stub->OnResultDhids(devId, status);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

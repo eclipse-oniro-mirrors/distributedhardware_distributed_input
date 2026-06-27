@@ -33,14 +33,16 @@ namespace DistributedInput {
 namespace {
 class TestStartStopResultCallbackStub : public StartStopResultCallbackStub {
 public:
-    void OnStart(const std::string &srcId, const std::string &sinkId, std::vector<std::string> &dhIds) override
+    void OnStart(const std::string &srcId, const std::string &sinkId,
+        std::vector<std::string> &dhIds) override
     {
         lastSrcId_ = srcId;
         lastSinkId_ = sinkId;
         lastDhIds_ = dhIds;
     }
 
-    void OnStop(const std::string &srcId, const std::string &sinkId, std::vector<std::string> &dhIds) override
+    void OnStop(const std::string &srcId, const std::string &sinkId,
+        std::vector<std::string> &dhIds) override
     {
         lastSrcId_ = srcId;
         lastSinkId_ = sinkId;
@@ -53,12 +55,19 @@ private:
     std::vector<std::string> lastDhIds_;
 };
 
+constexpr DInputFuzzUnsigned RESULT_START_CODE =
+    static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_START);
+constexpr DInputFuzzUnsigned RESULT_STOP_CODE =
+    static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_STOP);
+
 void WriteVectorPayload(MessageParcel &parcel, FuzzedDataProvider &fdp, bool oversize)
 {
     parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
     parcel.WriteString(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH));
-    DInputFuzzUnsigned vectorSize = oversize ? IPC_VECTOR_MAX_SIZE + DINPUT_FUZZ_VECTOR_OVERSIZE_STEP :
-        fdp.ConsumeIntegralInRange<DInputFuzzUnsigned>(DINPUT_FUZZ_MIN_VECTOR_SIZE, DINPUT_FUZZ_MAX_VECTOR_SIZE);
+    DInputFuzzUnsigned vectorSize = oversize ?
+        IPC_VECTOR_MAX_SIZE + DINPUT_FUZZ_VECTOR_OVERSIZE_STEP :
+        fdp.ConsumeIntegralInRange<DInputFuzzUnsigned>(
+            DINPUT_FUZZ_MIN_VECTOR_SIZE, DINPUT_FUZZ_MAX_VECTOR_SIZE);
     parcel.DINPUT_FUZZ_WRITE_UNSIGNED(vectorSize);
     DInputFuzzUnsigned writeCount = oversize ? DINPUT_FUZZ_NO_VECTOR_WRITE : vectorSize;
     for (DInputFuzzUnsigned i = DINPUT_FUZZ_DEFAULT_VALUE; i < writeCount; ++i) {
@@ -66,11 +75,12 @@ void WriteVectorPayload(MessageParcel &parcel, FuzzedDataProvider &fdp, bool ove
     }
 }
 
-void RunRequest(StartStopResultCallbackStub &stub, DInputFuzzUnsigned code, FuzzedDataProvider &fdp, bool validToken,
-    bool oversize)
+void RunRequest(StartStopResultCallbackStub &stub, DInputFuzzUnsigned code,
+    FuzzedDataProvider &fdp, bool validToken, bool oversize)
 {
     FuzzUtil::IpcRequestContext context;
-    FuzzUtil::WriteInterfaceToken(context.data, StartStopResultCallbackStub::GetDescriptor(), validToken);
+    FuzzUtil::WriteInterfaceToken(context.data,
+        StartStopResultCallbackStub::GetDescriptor(), validToken);
     WriteVectorPayload(context.data, fdp, oversize);
     stub.OnRemoteRequest(code, context.data, context.reply, context.option);
 }
@@ -81,25 +91,23 @@ void StartStopResultCallbackStubFuzzTest(const DInputFuzzByte *data, size_t size
     if (data == nullptr || size == DINPUT_FUZZ_EMPTY_SIZE) {
         return;
     }
-    sptr<TestStartStopResultCallbackStub> stub(new (std::nothrow) TestStartStopResultCallbackStub());
+    sptr<TestStartStopResultCallbackStub> stub(
+        new (std::nothrow) TestStartStopResultCallbackStub());
     if (stub == nullptr) {
         return;
     }
     FuzzedDataProvider fdp(data, size);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_START), fdp, true,
-        false);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_STOP), fdp, true,
-        false);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_START), fdp, true,
-        true);
-    RunRequest(*stub, static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_STOP), fdp, false,
-        false);
+    RunRequest(*stub, RESULT_START_CODE, fdp, true, false);
+    RunRequest(*stub, RESULT_STOP_CODE, fdp, true, false);
+    RunRequest(*stub, RESULT_START_CODE, fdp, true, true);
+    RunRequest(*stub, RESULT_STOP_CODE, fdp, false, false);
     RunRequest(*stub, fdp.ConsumeIntegral<DInputFuzzUnsigned>(), fdp, fdp.ConsumeBool(), false);
-    std::vector<std::string> dhIds = { fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH) };
-    stub->OnStart(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH), dhIds);
-    stub->OnStop(fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH),
-        fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH), dhIds);
+    std::string dhId = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    std::vector<std::string> dhIds = { dhId };
+    std::string srcId = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    std::string sinkId = fdp.ConsumeRandomLengthString(DINPUT_FUZZ_MAX_STRING_LENGTH);
+    stub->OnStart(srcId, sinkId, dhIds);
+    stub->OnStop(srcId, sinkId, dhIds);
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

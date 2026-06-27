@@ -46,6 +46,19 @@ namespace DistributedInput {
 namespace {
 constexpr DInputFuzzUnsigned UNKNOWN_CODE_MASK = 0x80000000U;
 constexpr DInputFuzzUnsigned EXTRA_CASE_COUNT = 8U;
+constexpr DInputFuzzUnsigned EXTRA_ADD_WHITE_LIST_CASE = 0U;
+constexpr DInputFuzzUnsigned EXTRA_NODE_OFFLINE_CASE = 1U;
+constexpr DInputFuzzUnsigned EXTRA_NO_SHARING_CASE = 2U;
+constexpr DInputFuzzUnsigned EXTRA_SIMULATION_CASE = 3U;
+constexpr DInputFuzzUnsigned EXTRA_VECTOR_OVERSIZE_CASE = 4U;
+constexpr DInputFuzzUnsigned EXTRA_SESSION_STATE_CASE = 5U;
+constexpr DInputFuzzUnsigned EXTRA_START_INPUT_CASE = 6U;
+constexpr DInputFuzzUnsigned START_INPUT_RESULT_CODE =
+    static_cast<DInputFuzzUnsigned>(IStartDInputCallback::Message::RESULT);
+constexpr DInputFuzzUnsigned STOP_INPUT_RESULT_CODE =
+    static_cast<DInputFuzzUnsigned>(IStopDInputCallback::Message::RESULT);
+constexpr DInputFuzzUnsigned START_STOP_RESULT_START_CODE =
+    static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_START);
 
 struct IpcRequestSpec {
     std::u16string descriptor;
@@ -118,7 +131,8 @@ public:
 
 class TestRegisterDInputCallbackStub final : public RegisterDInputCallbackStub {
 public:
-    void OnResult(const std::string &devId, const std::string &dhId, const DInputFuzzSigned &status) override
+    void OnResult(const std::string &devId, const std::string &dhId,
+        const DInputFuzzSigned &status) override
     {
         (void)devId;
         (void)dhId;
@@ -128,7 +142,8 @@ public:
 
 class TestUnregisterDInputCallbackStub final : public UnregisterDInputCallbackStub {
 public:
-    void OnResult(const std::string &devId, const std::string &dhId, const DInputFuzzSigned &status) override
+    void OnResult(const std::string &devId, const std::string &dhId,
+        const DInputFuzzSigned &status) override
     {
         (void)devId;
         (void)dhId;
@@ -169,14 +184,16 @@ public:
 
 class TestStartStopResultCallbackStub final : public StartStopResultCallbackStub {
 public:
-    void OnStart(const std::string &srcId, const std::string &sinkId, std::vector<std::string> &dhIds) override
+    void OnStart(const std::string &srcId, const std::string &sinkId,
+        std::vector<std::string> &dhIds) override
     {
         (void)srcId;
         (void)sinkId;
         (void)dhIds;
     }
 
-    void OnStop(const std::string &srcId, const std::string &sinkId, std::vector<std::string> &dhIds) override
+    void OnStop(const std::string &srcId, const std::string &sinkId,
+        std::vector<std::string> &dhIds) override
     {
         (void)srcId;
         (void)sinkId;
@@ -293,8 +310,10 @@ void WriteVectorPayload(MessageParcel &parcel, FuzzedDataProvider &fdp, bool ove
 {
     parcel.WriteString(ConsumeString(fdp));
     parcel.WriteString(ConsumeString(fdp));
-    DInputFuzzUnsigned vectorSize = oversize ? IPC_VECTOR_MAX_SIZE + DINPUT_FUZZ_VECTOR_OVERSIZE_STEP :
-        fdp.ConsumeIntegralInRange<DInputFuzzUnsigned>(DINPUT_FUZZ_MIN_VECTOR_SIZE, DINPUT_FUZZ_MAX_VECTOR_SIZE);
+    DInputFuzzUnsigned vectorSize = oversize ?
+        IPC_VECTOR_MAX_SIZE + DINPUT_FUZZ_VECTOR_OVERSIZE_STEP :
+        fdp.ConsumeIntegralInRange<DInputFuzzUnsigned>(
+            DINPUT_FUZZ_MIN_VECTOR_SIZE, DINPUT_FUZZ_MAX_VECTOR_SIZE);
     parcel.WriteUint32(vectorSize);
     DInputFuzzUnsigned writeCount = oversize ? DINPUT_FUZZ_NO_VECTOR_WRITE : vectorSize;
     for (DInputFuzzUnsigned i = DINPUT_FUZZ_DEFAULT_VALUE; i < writeCount; ++i) {
@@ -303,7 +322,8 @@ void WriteVectorPayload(MessageParcel &parcel, FuzzedDataProvider &fdp, bool ove
 }
 
 template<typename Stub, typename PayloadWriter>
-void RunIpcRequest(Stub &stub, const IpcRequestSpec &request, FuzzedDataProvider &fdp, PayloadWriter payloadWriter)
+void RunIpcRequest(Stub &stub, const IpcRequestSpec &request,
+    FuzzedDataProvider &fdp, PayloadWriter payloadWriter)
 {
     FuzzUtil::IpcRequestContext context;
     FuzzUtil::WriteInterfaceToken(context.data, request.descriptor, request.validToken);
@@ -320,38 +340,53 @@ void RunKnownAndNegative(Stub &stub, const std::u16string &descriptor, DInputFuz
     RunIpcRequest(stub, { descriptor, ConsumeUnknownCode(fdp), true }, fdp, payloadWriter);
 }
 
+void WriteNormalVectorPayload(MessageParcel &parcel, FuzzedDataProvider &provider)
+{
+    WriteVectorPayload(parcel, provider, false);
+}
+
+void WriteOversizeVectorPayload(MessageParcel &parcel, FuzzedDataProvider &provider)
+{
+    WriteVectorPayload(parcel, provider, true);
+}
+
 void ExerciseBasicCallbacks(FuzzedDataProvider &fdp)
 {
     TestAddWhiteListInfosCallbackStub addWhiteListStub;
     RunKnownAndNegative(addWhiteListStub, AddWhiteListInfosCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IAddWhiteListInfosCallback::Message::RESULT), fdp, WriteTwoStringPayload);
+        static_cast<DInputFuzzUnsigned>(IAddWhiteListInfosCallback::Message::RESULT),
+        fdp, WriteTwoStringPayload);
 
     TestDelWhiteListInfosCallbackStub delWhiteListStub;
     RunKnownAndNegative(delWhiteListStub, DelWhiteListInfosCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IDelWhiteListInfosCallback::Message::RESULT), fdp, WriteOneStringPayload);
+        static_cast<DInputFuzzUnsigned>(IDelWhiteListInfosCallback::Message::RESULT),
+        fdp, WriteOneStringPayload);
 
     TestGetSinkScreenInfosCallbackStub getScreenInfosStub;
     RunKnownAndNegative(getScreenInfosStub, GetSinkScreenInfosCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IGetSinkScreenInfosCallback::Message::RESULT), fdp, WriteOneStringPayload);
+        static_cast<DInputFuzzUnsigned>(IGetSinkScreenInfosCallback::Message::RESULT),
+        fdp, WriteOneStringPayload);
 }
 
 void ExerciseLifecycleCallbacks(FuzzedDataProvider &fdp)
 {
     TestPrepareDInputCallbackStub prepareStub;
     RunKnownAndNegative(prepareStub, PrepareDInputCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IPrepareDInputCallback::Message::RESULT), fdp, WriteStringStatusPayload);
+        static_cast<DInputFuzzUnsigned>(IPrepareDInputCallback::Message::RESULT),
+        fdp, WriteStringStatusPayload);
 
     TestUnprepareDInputCallbackStub unprepareStub;
     RunKnownAndNegative(unprepareStub, UnprepareDInputCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IUnprepareDInputCallback::Message::RESULT), fdp, WriteStringStatusPayload);
+        static_cast<DInputFuzzUnsigned>(IUnprepareDInputCallback::Message::RESULT),
+        fdp, WriteStringStatusPayload);
 
     TestStartDInputCallbackStub startStub;
     RunKnownAndNegative(startStub, StartDInputCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IStartDInputCallback::Message::RESULT), fdp, WriteStartStopPayload);
+        START_INPUT_RESULT_CODE, fdp, WriteStartStopPayload);
 
     TestStopDInputCallbackStub stopStub;
     RunKnownAndNegative(stopStub, StopDInputCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IStopDInputCallback::Message::RESULT), fdp, WriteStartStopPayload);
+        STOP_INPUT_RESULT_CODE, fdp, WriteStartStopPayload);
 }
 
 void ExerciseRegisterCallbacks(FuzzedDataProvider &fdp)
@@ -376,7 +411,8 @@ void ExerciseListenerCallbacks(FuzzedDataProvider &fdp)
 {
     TestInputNodeListenerStub nodeStub;
     RunKnownAndNegative(nodeStub, InputNodeListenerStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_ON), fdp, WriteNodeOnlinePayload);
+        static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_ON),
+        fdp, WriteNodeOnlinePayload);
     RunIpcRequest(nodeStub,
         { InputNodeListenerStub::GetDescriptor(),
             static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_OFF), true },
@@ -385,7 +421,8 @@ void ExerciseListenerCallbacks(FuzzedDataProvider &fdp)
 
     TestSharingDhIdListenerStub sharingStub;
     RunKnownAndNegative(sharingStub, SharingDhIdListenerStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(ISharingDhIdListener::Message::SHARING), fdp, WriteOneStringPayload);
+        static_cast<DInputFuzzUnsigned>(ISharingDhIdListener::Message::SHARING),
+        fdp, WriteOneStringPayload);
     RunIpcRequest(sharingStub,
         { SharingDhIdListenerStub::GetDescriptor(),
             static_cast<DInputFuzzUnsigned>(ISharingDhIdListener::Message::NO_SHARING), true },
@@ -394,7 +431,8 @@ void ExerciseListenerCallbacks(FuzzedDataProvider &fdp)
 
     TestSimulationEventListenerStub simulationStub;
     RunKnownAndNegative(simulationStub, SimulationEventListenerStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON), fdp, WriteSimulationPayload);
+        static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON),
+        fdp, WriteSimulationPayload);
 }
 
 void ExerciseVectorCallbacks(FuzzedDataProvider &fdp)
@@ -406,64 +444,99 @@ void ExerciseVectorCallbacks(FuzzedDataProvider &fdp)
 
     TestStartStopResultCallbackStub resultStub;
     RunKnownAndNegative(resultStub, StartStopResultCallbackStub::GetDescriptor(),
-        static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_START), fdp,
-        [](MessageParcel &parcel, FuzzedDataProvider &provider) { WriteVectorPayload(parcel, provider, false); });
+        START_STOP_RESULT_START_CODE, fdp, WriteNormalVectorPayload);
     RunIpcRequest(resultStub,
         { StartStopResultCallbackStub::GetDescriptor(),
             static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_STOP), true },
-        fdp,
-        [](MessageParcel &parcel, FuzzedDataProvider &provider) { WriteVectorPayload(parcel, provider, false); });
+        fdp, WriteNormalVectorPayload);
     RunIpcRequest(resultStub,
         { StartStopResultCallbackStub::GetDescriptor(),
-            static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_START), true },
-        fdp,
-        [](MessageParcel &parcel, FuzzedDataProvider &provider) { WriteVectorPayload(parcel, provider, true); });
+            START_STOP_RESULT_START_CODE, true },
+        fdp, WriteOversizeVectorPayload);
     RunIpcRequest(resultStub,
         { StartStopResultCallbackStub::GetDescriptor(),
             static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_STOP), true },
-        fdp,
-        [](MessageParcel &parcel, FuzzedDataProvider &provider) { WriteVectorPayload(parcel, provider, true); });
+        fdp, WriteOversizeVectorPayload);
     std::vector<std::string> emptyDhIds;
     resultStub.OnStop(ConsumeString(fdp), ConsumeString(fdp), emptyDhIds);
+}
+
+void ExerciseExtraAddWhiteList(FuzzedDataProvider &fdp)
+{
+    TestAddWhiteListInfosCallbackStub stub;
+    IpcRequestSpec request = {
+        AddWhiteListInfosCallbackStub::GetDescriptor(),
+        ConsumeUnknownCode(fdp),
+        fdp.ConsumeBool()
+    };
+    RunIpcRequest(stub, request, fdp, WriteTwoStringPayload);
+}
+
+void ExerciseExtraNodeOffline(FuzzedDataProvider &fdp)
+{
+    TestInputNodeListenerStub stub;
+    IpcRequestSpec request = {
+        InputNodeListenerStub::GetDescriptor(),
+        static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_OFF),
+        fdp.ConsumeBool()
+    };
+    RunIpcRequest(stub, request, fdp, WriteNodeOfflinePayload);
+}
+
+void ExerciseExtraNoSharing(FuzzedDataProvider &fdp)
+{
+    TestSharingDhIdListenerStub stub;
+    IpcRequestSpec request = {
+        SharingDhIdListenerStub::GetDescriptor(),
+        static_cast<DInputFuzzUnsigned>(ISharingDhIdListener::Message::NO_SHARING),
+        fdp.ConsumeBool()
+    };
+    RunIpcRequest(stub, request, fdp, WriteOneStringPayload);
+}
+
+void ExerciseExtraSimulation(FuzzedDataProvider &fdp)
+{
+    TestSimulationEventListenerStub stub;
+    IpcRequestSpec request = {
+        SimulationEventListenerStub::GetDescriptor(),
+        static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON),
+        fdp.ConsumeBool()
+    };
+    RunIpcRequest(stub, request, fdp, WriteSimulationPayload);
+}
+
+void ExerciseExtraVectorOversize(FuzzedDataProvider &fdp)
+{
+    TestStartStopResultCallbackStub stub;
+    IpcRequestSpec request = {
+        StartStopResultCallbackStub::GetDescriptor(),
+        START_STOP_RESULT_START_CODE,
+        fdp.ConsumeBool()
+    };
+    RunIpcRequest(stub, request, fdp, WriteOversizeVectorPayload);
 }
 
 void ExerciseExtraCallbackPath(DInputFuzzUnsigned selector, FuzzedDataProvider &fdp)
 {
     switch (selector) {
-        case 0: {
-            TestAddWhiteListInfosCallbackStub stub;
-            RunIpcRequest(stub, { AddWhiteListInfosCallbackStub::GetDescriptor(), ConsumeUnknownCode(fdp),
-                fdp.ConsumeBool() }, fdp, WriteTwoStringPayload);
+        case EXTRA_ADD_WHITE_LIST_CASE: {
+            ExerciseExtraAddWhiteList(fdp);
             break;
         }
-        case 1: {
-            TestInputNodeListenerStub stub;
-            RunIpcRequest(stub, { InputNodeListenerStub::GetDescriptor(),
-                static_cast<DInputFuzzUnsigned>(InputNodeListener::Message::RESULT_OFF), fdp.ConsumeBool() },
-                fdp, WriteNodeOfflinePayload);
+        case EXTRA_NODE_OFFLINE_CASE: {
+            ExerciseExtraNodeOffline(fdp);
             break;
         }
-        case 2: {
-            TestSharingDhIdListenerStub stub;
-            RunIpcRequest(stub, { SharingDhIdListenerStub::GetDescriptor(),
-                static_cast<DInputFuzzUnsigned>(ISharingDhIdListener::Message::NO_SHARING), fdp.ConsumeBool() },
-                fdp, WriteOneStringPayload);
+        case EXTRA_NO_SHARING_CASE: {
+            ExerciseExtraNoSharing(fdp);
             break;
         }
-        case 3: {
-            TestSimulationEventListenerStub stub;
-            RunIpcRequest(stub, { SimulationEventListenerStub::GetDescriptor(),
-                static_cast<DInputFuzzUnsigned>(ISimulationEventListener::Message::RESULT_ON), fdp.ConsumeBool() },
-                fdp, WriteSimulationPayload);
+        case EXTRA_SIMULATION_CASE: {
+            ExerciseExtraSimulation(fdp);
             break;
         }
-        case 4: {
-            TestStartStopResultCallbackStub stub;
-            RunIpcRequest(stub, { StartStopResultCallbackStub::GetDescriptor(),
-                static_cast<DInputFuzzUnsigned>(IStartStopResultCallback::Message::RESULT_START), fdp.ConsumeBool() },
-                fdp, [](MessageParcel &parcel, FuzzedDataProvider &provider) {
-                    WriteVectorPayload(parcel, provider, true);
-                });
+        case EXTRA_VECTOR_OVERSIZE_CASE: {
+            ExerciseExtraVectorOversize(fdp);
             break;
         }
         default:
@@ -474,25 +547,34 @@ void ExerciseExtraCallbackPath(DInputFuzzUnsigned selector, FuzzedDataProvider &
 void ExerciseExtraStatePath(DInputFuzzUnsigned selector, FuzzedDataProvider &fdp)
 {
     switch (selector) {
-        case 5: {
+        case EXTRA_SESSION_STATE_CASE: {
             TestRegisterSessionStateCallbackStub stub;
-            RunIpcRequest(stub, { RegisterSessionStateCallbackStub::GetDescriptor(),
-                static_cast<DInputFuzzUnsigned>(ISessionStateCallback::Message::RESULT), fdp.ConsumeBool() },
-                fdp, WriteStringUintStatusPayload);
+            IpcRequestSpec request = {
+                RegisterSessionStateCallbackStub::GetDescriptor(),
+                static_cast<DInputFuzzUnsigned>(ISessionStateCallback::Message::RESULT),
+                fdp.ConsumeBool()
+            };
+            RunIpcRequest(stub, request, fdp, WriteStringUintStatusPayload);
             break;
         }
-        case 6: {
+        case EXTRA_START_INPUT_CASE: {
             TestStartDInputCallbackStub stub;
-            RunIpcRequest(stub, { StartDInputCallbackStub::GetDescriptor(),
-                static_cast<DInputFuzzUnsigned>(IStartDInputCallback::Message::RESULT), fdp.ConsumeBool() },
-                fdp, WriteStartStopPayload);
+            IpcRequestSpec request = {
+                StartDInputCallbackStub::GetDescriptor(),
+                START_INPUT_RESULT_CODE,
+                fdp.ConsumeBool()
+            };
+            RunIpcRequest(stub, request, fdp, WriteStartStopPayload);
             break;
         }
         default: {
             TestUnregisterDInputCallbackStub stub;
-            RunIpcRequest(stub, { UnregisterDInputCallbackStub::GetDescriptor(),
-                static_cast<DInputFuzzUnsigned>(IUnregisterDInputCallback::Message::RESULT), fdp.ConsumeBool() },
-                fdp, WriteTwoStringStatusPayload);
+            IpcRequestSpec request = {
+                UnregisterDInputCallbackStub::GetDescriptor(),
+                static_cast<DInputFuzzUnsigned>(IUnregisterDInputCallback::Message::RESULT),
+                fdp.ConsumeBool()
+            };
+            RunIpcRequest(stub, request, fdp, WriteTwoStringStatusPayload);
             break;
         }
     }
@@ -500,8 +582,8 @@ void ExerciseExtraStatePath(DInputFuzzUnsigned selector, FuzzedDataProvider &fdp
 
 void ExerciseSelectedExtraPath(FuzzedDataProvider &fdp)
 {
-    DInputFuzzUnsigned selector = fdp.ConsumeIntegralInRange<DInputFuzzUnsigned>(DINPUT_FUZZ_DEFAULT_VALUE,
-        EXTRA_CASE_COUNT - 1U);
+    DInputFuzzUnsigned selector = fdp.ConsumeIntegralInRange<DInputFuzzUnsigned>(
+        DINPUT_FUZZ_DEFAULT_VALUE, EXTRA_CASE_COUNT - 1U);
     ExerciseExtraCallbackPath(selector, fdp);
     ExerciseExtraStatePath(selector, fdp);
 }

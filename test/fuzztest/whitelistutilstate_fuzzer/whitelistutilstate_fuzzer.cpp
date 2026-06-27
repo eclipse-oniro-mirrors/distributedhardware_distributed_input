@@ -35,6 +35,12 @@ constexpr uint32_t KEY_CODE_MAX_COUNT = 2U;
 constexpr uint32_t DEVICE_ID_CASE_COUNT = 4U;
 constexpr int32_t KEY_CODE_MIN = 1;
 constexpr int32_t KEY_CODE_MAX = 8;
+constexpr size_t KEY_ACTION_GROUP_COUNT = 2U;
+constexpr size_t LAST_KEY_GROUP_OFFSET = 2U;
+constexpr size_t WHITE_LIST_SEED_COUNT = 2U;
+constexpr size_t KEY_WITH_ACTION_GROUP_COUNT = 2U;
+constexpr size_t SINGLE_KEY_COUNT = 1U;
+constexpr int32_t FUZZ_TEST_SUCCESS = 0;
 
 std::string ConsumeDeviceId(FuzzedDataProvider &provider)
 {
@@ -62,12 +68,13 @@ TYPE_COMBINATION_KEY_VEC BuildValidCombination(FuzzedDataProvider &provider)
 {
     uint32_t modifierCount = provider.ConsumeIntegralInRange<uint32_t>(0U, KEY_GROUP_MAX_COUNT);
     TYPE_COMBINATION_KEY_VEC combination;
-    combination.reserve(modifierCount + 2U);
+    combination.reserve(modifierCount + KEY_WITH_ACTION_GROUP_COUNT);
     for (uint32_t i = 0U; i < modifierCount; ++i) {
         combination.emplace_back(ConsumeKeyGroup(provider));
     }
     combination.push_back({ ConsumeKeyCode(provider) });
-    int32_t keyAction = static_cast<int32_t>(provider.ConsumeBool() ? KEY_DOWN_STATE : KEY_UP_STATE);
+    int32_t keyAction =
+        static_cast<int32_t>(provider.ConsumeBool() ? KEY_DOWN_STATE : KEY_UP_STATE);
     combination.push_back({ keyAction });
     return combination;
 }
@@ -80,8 +87,8 @@ TYPE_COMBINATION_KEY_VEC BuildInvalidCombination(FuzzedDataProvider &provider)
     TYPE_COMBINATION_KEY_VEC combination = BuildValidCombination(provider);
     if (provider.ConsumeBool()) {
         combination.back().push_back(ConsumeKeyCode(provider));
-    } else if (combination.size() >= 2U) {
-        combination[combination.size() - 2U].push_back(ConsumeKeyCode(provider));
+    } else if (combination.size() >= KEY_ACTION_GROUP_COUNT) {
+        combination[combination.size() - LAST_KEY_GROUP_OFFSET].push_back(ConsumeKeyCode(provider));
     }
     return combination;
 }
@@ -90,7 +97,7 @@ TYPE_WHITE_LIST_VEC ConsumeWhiteList(FuzzedDataProvider &provider)
 {
     uint32_t count = provider.ConsumeIntegralInRange<uint32_t>(0U, COMBINATION_MAX_COUNT);
     TYPE_WHITE_LIST_VEC whiteList;
-    whiteList.reserve(count + 2U);
+    whiteList.reserve(count + WHITE_LIST_SEED_COUNT);
     whiteList.emplace_back(BuildValidCombination(provider));
     whiteList.emplace_back(BuildInvalidCombination(provider));
     for (uint32_t i = 0U; i < count; ++i) {
@@ -104,14 +111,14 @@ BusinessEvent BuildMatchingEvent(const TYPE_WHITE_LIST_VEC &whiteList)
 {
     BusinessEvent event;
     for (const auto &combination : whiteList) {
-        if (combination.size() < 2U || combination.back().empty()) {
+        if (combination.size() < KEY_ACTION_GROUP_COUNT || combination.back().empty()) {
             continue;
         }
-        const TYPE_KEY_CODE_VEC &lastKey = combination[combination.size() - 2U];
-        if (lastKey.size() != 1U) {
+        const TYPE_KEY_CODE_VEC &lastKey = combination[combination.size() - LAST_KEY_GROUP_OFFSET];
+        if (lastKey.size() != SINGLE_KEY_COUNT) {
             continue;
         }
-        for (size_t i = 0U; i + 2U < combination.size(); ++i) {
+        for (size_t i = 0U; i + KEY_ACTION_GROUP_COUNT < combination.size(); ++i) {
             for (int32_t keyCode : combination[i]) {
                 event.pressedKeys.emplace_back(keyCode);
             }
@@ -177,5 +184,5 @@ void WhiteListUtilStateFuzzTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::DistributedHardware::DistributedInput::WhiteListUtilStateFuzzTest(data, size);
-    return 0;
+    return OHOS::DistributedHardware::DistributedInput::FUZZ_TEST_SUCCESS;
 }
