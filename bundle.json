@@ -83,7 +83,6 @@
             "test": [
                 "//foundation/distributedhardware/distributed_input/interfaces/inner_kits/test:test",
                 "//foundation/distributedhardware/distributed_input/sourcehandler/test:test",
-                "//foundation/distributedhardware/distributed_input/sinkhandler/test:test",
                 "//foundation/distributedhardware/distributed_input/test:test",
                 "//foundation/distributedhardware/distributed_input/services/sink/transport/test:test",
                 "//foundation/distributedhardware/distributed_input/services/sink/inputcollector/test:test",
@@ -93,7 +92,6 @@
                 "//foundation/distributedhardware/distributed_input/services/transportbase/test:test",
                 "//foundation/distributedhardware/distributed_input/utils/test:test",
                 "//foundation/distributedhardware/distributed_input/dfx_utils/test:test",
-                "//foundation/distributedhardware/distributed_input/interfaces/ipc/test:test",
                 "//foundation/distributedhardware/distributed_input/interfaces/ipc/test/fuzztest:fuzztest",
                 "//foundation/distributedhardware/distributed_input/inputdevicehandler/test:test",
                 "//foundation/distributedhardware/distributed_input/services/state/test:test"
