@@ -53,9 +53,9 @@ public:
     void OnResult(const std::string &devId, const uint32_t &inputTypes,
         const int32_t &status) override
     {
-        (void)devId;
-        (void)inputTypes;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(inputTypes);
+        static_cast<void>(status);
     }
 };
 
@@ -64,10 +64,10 @@ public:
     int32_t OnRegisterResult(const std::string &devId, const std::string &dhId, int32_t status,
         const std::string &data) override
     {
-        (void)devId;
-        (void)dhId;
-        (void)status;
-        (void)data;
+        static_cast<void>(devId);
+        static_cast<void>(dhId);
+        static_cast<void>(status);
+        static_cast<void>(data);
         return CALLBACK_SUCCESS;
     }
 };
@@ -77,10 +77,10 @@ public:
     int32_t OnUnregisterResult(const std::string &devId, const std::string &dhId, int32_t status,
         const std::string &data) override
     {
-        (void)devId;
-        (void)dhId;
-        (void)status;
-        (void)data;
+        static_cast<void>(devId);
+        static_cast<void>(dhId);
+        static_cast<void>(status);
+        static_cast<void>(data);
         return CALLBACK_SUCCESS;
     }
 };
@@ -166,14 +166,14 @@ void ExerciseBaselineChecks(DInputCheckParam &checker)
     std::shared_ptr<TestUnregisterCallback> unregisterCallback =
         std::make_shared<TestUnregisterCallback>();
 
-    (void)checker.CheckParam("device_valid", callback);
-    (void)checker.CheckParam("device_valid", inputTypes, callback);
-    (void)checker.CheckParam("source_valid", "sink_valid", inputTypes, callback);
-    (void)checker.CheckParam("source_valid", "sink_valid", callback);
-    (void)checker.CheckParam("sink_valid", dhIds, callback);
-    (void)checker.CheckParam("source_valid", "sink_valid", dhIds, callback);
-    (void)checker.CheckRegisterParam("device_valid", "dhid_valid", "{}", registerCallback);
-    (void)checker.CheckUnregisterParam("device_valid", "dhid_valid", unregisterCallback);
+    static_cast<void>(checker.CheckParam("device_valid", callback));
+    static_cast<void>(checker.CheckParam("device_valid", inputTypes, callback));
+    static_cast<void>(checker.CheckParam("source_valid", "sink_valid", inputTypes, callback));
+    static_cast<void>(checker.CheckParam("source_valid", "sink_valid", callback));
+    static_cast<void>(checker.CheckParam("sink_valid", dhIds, callback));
+    static_cast<void>(checker.CheckParam("source_valid", "sink_valid", dhIds, callback));
+    static_cast<void>(checker.CheckRegisterParam("device_valid", "dhid_valid", "{}", registerCallback));
+    static_cast<void>(checker.CheckUnregisterParam("device_valid", "dhid_valid", unregisterCallback));
 }
 
 void ExerciseRemoteBrokerChecks(DInputCheckParam &checker, FuzzedDataProvider &provider)
@@ -184,10 +184,10 @@ void ExerciseRemoteBrokerChecks(DInputCheckParam &checker, FuzzedDataProvider &p
     std::string sinkId = ConsumeDeviceId(provider);
     uint32_t inputTypes = ConsumeInputTypes(provider);
 
-    (void)checker.CheckParam(devId, callback);
-    (void)checker.CheckParam(devId, inputTypes, callback);
-    (void)checker.CheckParam(srcId, sinkId, inputTypes, callback);
-    (void)checker.CheckParam(srcId, sinkId, callback);
+    static_cast<void>(checker.CheckParam(devId, callback));
+    static_cast<void>(checker.CheckParam(devId, inputTypes, callback));
+    static_cast<void>(checker.CheckParam(srcId, sinkId, inputTypes, callback));
+    static_cast<void>(checker.CheckParam(srcId, sinkId, callback));
 }
 
 void ExerciseDhIdVectorChecks(DInputCheckParam &checker, FuzzedDataProvider &provider)
@@ -197,8 +197,8 @@ void ExerciseDhIdVectorChecks(DInputCheckParam &checker, FuzzedDataProvider &pro
     std::string sinkId = ConsumeDeviceId(provider);
     std::vector<std::string> dhIds = ConsumeDhIds(provider);
 
-    (void)checker.CheckParam(sinkId, dhIds, callback);
-    (void)checker.CheckParam(srcId, sinkId, dhIds, callback);
+    static_cast<void>(checker.CheckParam(sinkId, dhIds, callback));
+    static_cast<void>(checker.CheckParam(srcId, sinkId, dhIds, callback));
 }
 
 void ExerciseRegisterChecks(DInputCheckParam &checker, FuzzedDataProvider &provider)
@@ -212,8 +212,8 @@ void ExerciseRegisterChecks(DInputCheckParam &checker, FuzzedDataProvider &provi
     std::shared_ptr<TestUnregisterCallback> unregisterCallback =
         provider.ConsumeBool() ? std::make_shared<TestUnregisterCallback>() : nullptr;
 
-    (void)checker.CheckRegisterParam(devId, dhId, parameters, registerCallback);
-    (void)checker.CheckUnregisterParam(devId, dhId, unregisterCallback);
+    static_cast<void>(checker.CheckRegisterParam(devId, dhId, parameters, registerCallback));
+    static_cast<void>(checker.CheckUnregisterParam(devId, dhId, unregisterCallback));
 }
 } // namespace
 

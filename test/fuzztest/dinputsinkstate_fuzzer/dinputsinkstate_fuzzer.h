@@ -16,6 +16,6 @@
 #ifndef DINPUTSINKSTATE_FUZZER_H
 #define DINPUTSINKSTATE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "dinputsinkstate_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "dinputsinkstate_fuzzer";
 
 #endif // DINPUTSINKSTATE_FUZZER_H

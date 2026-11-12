@@ -16,6 +16,6 @@
 #ifndef UNREGISTER_D_INPUT_CALLBACK_STUB_FUZZER_H
 #define UNREGISTER_D_INPUT_CALLBACK_STUB_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "unregisterdinputcallbackstub_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "unregisterdinputcallbackstub_fuzzer";
 
 #endif // UNREGISTER_D_INPUT_CALLBACK_STUB_FUZZER_H

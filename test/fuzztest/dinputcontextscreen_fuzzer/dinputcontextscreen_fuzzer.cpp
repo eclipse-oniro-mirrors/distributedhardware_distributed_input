@@ -106,12 +106,12 @@ void ExerciseSinkInfo(DInputContext &context, FuzzedDataProvider &provider)
     std::string key = context.GetScreenInfoKey(devId, sourceWinId);
     SinkScreenInfo sinkInfo = BuildSinkScreenInfo(provider);
 
-    (void)context.UpdateSinkScreenInfo(key + "_missing", sinkInfo);
-    (void)context.GetSinkScreenInfo(key);
-    (void)context.UpdateSinkScreenInfo(key, sinkInfo);
-    (void)context.GetAllSinkScreenInfo();
+    static_cast<void>(context.UpdateSinkScreenInfo(key + "_missing", sinkInfo));
+    static_cast<void>(context.GetSinkScreenInfo(key));
+    static_cast<void>(context.UpdateSinkScreenInfo(key, sinkInfo));
+    static_cast<void>(context.GetAllSinkScreenInfo());
     context.CleanExceptionalInfo(sinkInfo.srcScreenInfo);
-    (void)context.RemoveSinkScreenInfo(key);
+    static_cast<void>(context.RemoveSinkScreenInfo(key));
 }
 
 void ExerciseSrcInfo(DInputContext &context, FuzzedDataProvider &provider)
@@ -120,11 +120,11 @@ void ExerciseSrcInfo(DInputContext &context, FuzzedDataProvider &provider)
         provider.ConsumeIntegral<uint64_t>());
     SrcScreenInfo srcInfo = BuildSrcScreenInfo(provider);
 
-    (void)context.UpdateSrcScreenInfo(key + "_missing", srcInfo);
-    (void)context.GetSrcScreenInfo(key);
-    (void)context.UpdateSrcScreenInfo(key, srcInfo);
+    static_cast<void>(context.UpdateSrcScreenInfo(key + "_missing", srcInfo));
+    static_cast<void>(context.GetSrcScreenInfo(key));
+    static_cast<void>(context.UpdateSrcScreenInfo(key, srcInfo));
     context.CleanExceptionalInfo(srcInfo);
-    (void)context.RemoveSrcScreenInfo(key);
+    static_cast<void>(context.RemoveSrcScreenInfo(key));
 }
 
 void ExerciseLocalAndRemoteInfo(DInputContext &context, FuzzedDataProvider &provider)
@@ -133,10 +133,10 @@ void ExerciseLocalAndRemoteInfo(DInputContext &context, FuzzedDataProvider &prov
     sptr<IRemoteObject> remoteObject = nullptr;
 
     context.SetLocalTouchScreenInfo(BuildLocalTouchScreenInfo(provider));
-    (void)context.GetLocalTouchScreenInfo();
-    (void)context.GetDHFwkKit();
+    static_cast<void>(context.GetLocalTouchScreenInfo());
+    static_cast<void>(context.GetDHFwkKit());
     context.AddRemoteObject(saId, remoteObject);
-    (void)context.GetRemoteObject(saId);
+    static_cast<void>(context.GetRemoteObject(saId));
     context.RemoveRemoteObject(saId);
 }
 } // namespace

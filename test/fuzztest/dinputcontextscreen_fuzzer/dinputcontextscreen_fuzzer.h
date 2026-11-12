@@ -16,6 +16,6 @@
 #ifndef DINPUTCONTEXTSCREEN_FUZZER_H
 #define DINPUTCONTEXTSCREEN_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "dinputcontextscreen_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "dinputcontextscreen_fuzzer";
 
 #endif // DINPUTCONTEXTSCREEN_FUZZER_H

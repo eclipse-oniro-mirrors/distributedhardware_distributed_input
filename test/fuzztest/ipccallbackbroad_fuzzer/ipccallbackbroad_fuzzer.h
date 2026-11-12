@@ -16,6 +16,6 @@
 #ifndef IPC_CALLBACK_BROAD_FUZZER_H
 #define IPC_CALLBACK_BROAD_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "ipccallbackbroad_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "ipccallbackbroad_fuzzer";
 
 #endif // IPC_CALLBACK_BROAD_FUZZER_H

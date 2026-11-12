@@ -16,6 +16,6 @@
 #ifndef START_STOP_RESULT_CALLBACK_STUB_FUZZER_H
 #define START_STOP_RESULT_CALLBACK_STUB_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "startstopresultcallbackstub_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "startstopresultcallbackstub_fuzzer";
 
 #endif // START_STOP_RESULT_CALLBACK_STUB_FUZZER_H

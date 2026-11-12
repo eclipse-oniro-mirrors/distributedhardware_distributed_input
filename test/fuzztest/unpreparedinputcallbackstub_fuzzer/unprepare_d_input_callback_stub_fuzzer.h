@@ -16,6 +16,6 @@
 #ifndef UNPREPARE_D_INPUT_CALLBACK_STUB_FUZZER_H
 #define UNPREPARE_D_INPUT_CALLBACK_STUB_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "unpreparedinputcallbackstub_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "unpreparedinputcallbackstub_fuzzer";
 
 #endif // UNPREPARE_D_INPUT_CALLBACK_STUB_FUZZER_H

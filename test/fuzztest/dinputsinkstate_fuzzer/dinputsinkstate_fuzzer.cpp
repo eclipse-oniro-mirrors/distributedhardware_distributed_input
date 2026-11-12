@@ -82,13 +82,13 @@ void ExerciseDhIdState(DInputSinkState &state, FuzzedDataProvider &provider,
         provider.ConsumeIntegral<int32_t>();
     DhIdState dhIdState = provider.ConsumeBool() ? DhIdState::THROUGH_IN : DhIdState::THROUGH_OUT;
 
-    (void)state.RecordDhIds(dhIds, DhIdState::THROUGH_IN, sessionId);
-    (void)state.RecordDhIds(dhIds, dhIdState, INVALID_SESSION_ID);
+    static_cast<void>(state.RecordDhIds(dhIds, DhIdState::THROUGH_IN, sessionId));
+    static_cast<void>(state.RecordDhIds(dhIds, dhIdState, INVALID_SESSION_ID));
     for (const std::string &dhId : dhIds) {
-        (void)state.GetStateByDhid(dhId);
+        static_cast<void>(state.GetStateByDhid(dhId));
     }
-    (void)state.GetStateByDhid(ConsumeDhId(provider) + "_missing");
-    (void)state.RemoveDhIds({ dhIds.front() });
+    static_cast<void>(state.GetStateByDhid(ConsumeDhId(provider) + "_missing"));
+    static_cast<void>(state.RemoveDhIds({ dhIds.front() }));
 }
 
 void ExerciseKeyStates(DInputSinkState &state, FuzzedDataProvider &provider,
@@ -105,11 +105,11 @@ void ExerciseKeyStates(DInputSinkState &state, FuzzedDataProvider &provider,
         state.AddKeyDownState(event);
         state.CheckAndSetLongPressedKeyOrder(event);
     }
-    (void)state.IsDhIdDown(dhId);
+    static_cast<void>(state.IsDhIdDown(dhId));
     for (const RawEvent &event : events) {
         state.RemoveKeyDownState(event);
     }
-    (void)state.IsDhIdDown(dhId);
+    static_cast<void>(state.IsDhIdDown(dhId));
 }
 
 void ExerciseTouchPadManager(DInputSinkState &state, FuzzedDataProvider &provider,
@@ -126,9 +126,9 @@ void ExerciseTouchPadManager(DInputSinkState &state, FuzzedDataProvider &provide
         MakeEvent(provider, dhId, EV_SYN, SYN_REPORT, SYN_REPORT_VALUE),
     };
     for (const RawEvent &event : touchEvents) {
-        (void)mgr->PushEvent(dhId, event);
+        static_cast<void>(mgr->PushEvent(dhId, event));
     }
-    (void)mgr->GetAndClearEvents(dhId);
+    static_cast<void>(mgr->GetAndClearEvents(dhId));
     mgr->Clear(dhId);
 }
 } // namespace
@@ -144,13 +144,13 @@ void DInputSinkStateFuzzTest(const uint8_t *data, size_t size)
     std::vector<std::string> dhIds = ConsumeDhIds(provider);
     std::string primaryDhId = dhIds.front();
 
-    (void)state.Init();
+    static_cast<void>(state.Init());
     ExerciseDhIdState(state, provider, dhIds);
     ExerciseKeyStates(state, provider, primaryDhId);
     ExerciseTouchPadManager(state, provider, primaryDhId);
     state.ClearDeviceStates();
-    (void)state.RemoveDhIds(dhIds);
-    (void)state.Release();
+    static_cast<void>(state.RemoveDhIds(dhIds));
+    static_cast<void>(state.Release());
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

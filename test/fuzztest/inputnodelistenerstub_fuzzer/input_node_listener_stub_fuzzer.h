@@ -16,6 +16,6 @@
 #ifndef INPUT_NODE_LISTENER_STUB_FUZZER_H
 #define INPUT_NODE_LISTENER_STUB_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "inputnodelistenerstub_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "inputnodelistenerstub_fuzzer";
 
 #endif // INPUT_NODE_LISTENER_STUB_FUZZER_H

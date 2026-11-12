@@ -16,6 +16,6 @@
 #ifndef INPUTCHECKPARAM_FUZZER_H
 #define INPUTCHECKPARAM_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "inputcheckparam_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "inputcheckparam_fuzzer";
 
 #endif // INPUTCHECKPARAM_FUZZER_H

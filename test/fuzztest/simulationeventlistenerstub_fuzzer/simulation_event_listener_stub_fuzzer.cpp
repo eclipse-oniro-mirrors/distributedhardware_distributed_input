@@ -83,7 +83,7 @@ void SimulationEventListenerStubFuzzTest(const DInputFuzzByte *data, size_t size
     DInputFuzzUnsigned type = fdp.ConsumeIntegral<DInputFuzzUnsigned>();
     DInputFuzzUnsigned code = fdp.ConsumeIntegral<DInputFuzzUnsigned>();
     DInputFuzzSigned value = fdp.ConsumeIntegral<DInputFuzzSigned>();
-    (void)stub->OnSimulationEvent(type, code, value);
+    static_cast<void>(stub->OnSimulationEvent(type, code, value));
 }
 } // namespace DistributedInput
 } // namespace DistributedHardware

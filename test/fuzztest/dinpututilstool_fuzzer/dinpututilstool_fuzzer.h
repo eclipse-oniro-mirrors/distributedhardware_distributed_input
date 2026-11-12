@@ -16,6 +16,6 @@
 #ifndef DINPUTUTILSTOOL_FUZZER_H
 #define DINPUTUTILSTOOL_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "dinpututilstool_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "dinpututilstool_fuzzer";
 
 #endif // DINPUTUTILSTOOL_FUZZER_H

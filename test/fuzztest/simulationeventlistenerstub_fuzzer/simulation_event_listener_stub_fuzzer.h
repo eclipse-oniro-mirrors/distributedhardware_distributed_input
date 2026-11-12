@@ -16,6 +16,6 @@
 #ifndef SIMULATION_EVENT_LISTENER_STUB_FUZZER_H
 #define SIMULATION_EVENT_LISTENER_STUB_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "simulationeventlistenerstub_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "simulationeventlistenerstub_fuzzer";
 
 #endif // SIMULATION_EVENT_LISTENER_STUB_FUZZER_H

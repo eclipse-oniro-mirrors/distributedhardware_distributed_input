@@ -16,6 +16,6 @@
 #ifndef TOUCHPADFRAGMENT_FUZZER_H
 #define TOUCHPADFRAGMENT_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "touchpadfragment_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "touchpadfragment_fuzzer";
 
 #endif // TOUCHPADFRAGMENT_FUZZER_H

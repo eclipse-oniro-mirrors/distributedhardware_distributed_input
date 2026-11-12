@@ -70,8 +70,8 @@ class TestAddWhiteListInfosCallbackStub final : public AddWhiteListInfosCallback
 public:
     void OnResult(const std::string &deviceId, const std::string &strJson) override
     {
-        (void)deviceId;
-        (void)strJson;
+        static_cast<void>(deviceId);
+        static_cast<void>(strJson);
     }
 };
 
@@ -79,7 +79,7 @@ class TestDelWhiteListInfosCallbackStub final : public DelWhiteListInfosCallback
 public:
     void OnResult(const std::string &deviceId) override
     {
-        (void)deviceId;
+        static_cast<void>(deviceId);
     }
 };
 
@@ -87,7 +87,7 @@ class TestGetSinkScreenInfosCallbackStub final : public GetSinkScreenInfosCallba
 public:
     void OnResult(const std::string &strJson) override
     {
-        (void)strJson;
+        static_cast<void>(strJson);
     }
 };
 
@@ -96,18 +96,18 @@ public:
     void OnNodeOnLine(const std::string &srcDevId, const std::string &sinkDevId,
         const std::string &sinkNodeId, const std::string &sinkNodeDesc) override
     {
-        (void)srcDevId;
-        (void)sinkDevId;
-        (void)sinkNodeId;
-        (void)sinkNodeDesc;
+        static_cast<void>(srcDevId);
+        static_cast<void>(sinkDevId);
+        static_cast<void>(sinkNodeId);
+        static_cast<void>(sinkNodeDesc);
     }
 
     void OnNodeOffLine(const std::string &srcDevId, const std::string &sinkDevId,
         const std::string &sinkNodeId) override
     {
-        (void)srcDevId;
-        (void)sinkDevId;
-        (void)sinkNodeId;
+        static_cast<void>(srcDevId);
+        static_cast<void>(sinkDevId);
+        static_cast<void>(sinkNodeId);
     }
 };
 
@@ -115,8 +115,8 @@ class TestPrepareDInputCallbackStub final : public PrepareDInputCallbackStub {
 public:
     void OnResult(const std::string &devId, const DInputFuzzSigned &status) override
     {
-        (void)devId;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(status);
     }
 };
 
@@ -124,8 +124,8 @@ class TestUnprepareDInputCallbackStub final : public UnprepareDInputCallbackStub
 public:
     void OnResult(const std::string &devId, const DInputFuzzSigned &status) override
     {
-        (void)devId;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(status);
     }
 };
 
@@ -134,9 +134,9 @@ public:
     void OnResult(const std::string &devId, const std::string &dhId,
         const DInputFuzzSigned &status) override
     {
-        (void)devId;
-        (void)dhId;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(dhId);
+        static_cast<void>(status);
     }
 };
 
@@ -145,9 +145,9 @@ public:
     void OnResult(const std::string &devId, const std::string &dhId,
         const DInputFuzzSigned &status) override
     {
-        (void)devId;
-        (void)dhId;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(dhId);
+        static_cast<void>(status);
     }
 };
 
@@ -156,9 +156,9 @@ public:
     void OnResult(const std::string &devId, const DInputFuzzUnsigned &inputTypes,
         const DInputFuzzSigned &status) override
     {
-        (void)devId;
-        (void)inputTypes;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(inputTypes);
+        static_cast<void>(status);
     }
 };
 
@@ -167,9 +167,9 @@ public:
     void OnResult(const std::string &devId, const DInputFuzzUnsigned &inputTypes,
         const DInputFuzzSigned &status) override
     {
-        (void)devId;
-        (void)inputTypes;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(inputTypes);
+        static_cast<void>(status);
     }
 };
 
@@ -177,8 +177,8 @@ class TestStartStopDInputsCallbackStub final : public StartStopDInputsCallbackSt
 public:
     void OnResultDhids(const std::string &devId, const DInputFuzzSigned &status) override
     {
-        (void)devId;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(status);
     }
 };
 
@@ -187,17 +187,17 @@ public:
     void OnStart(const std::string &srcId, const std::string &sinkId,
         std::vector<std::string> &dhIds) override
     {
-        (void)srcId;
-        (void)sinkId;
-        (void)dhIds;
+        static_cast<void>(srcId);
+        static_cast<void>(sinkId);
+        static_cast<void>(dhIds);
     }
 
     void OnStop(const std::string &srcId, const std::string &sinkId,
         std::vector<std::string> &dhIds) override
     {
-        (void)srcId;
-        (void)sinkId;
-        (void)dhIds;
+        static_cast<void>(srcId);
+        static_cast<void>(sinkId);
+        static_cast<void>(dhIds);
     }
 };
 
@@ -205,13 +205,13 @@ class TestSharingDhIdListenerStub final : public SharingDhIdListenerStub {
 public:
     DInputFuzzSigned OnSharing(const std::string &dhId) override
     {
-        (void)dhId;
+        static_cast<void>(dhId);
         return DINPUT_FUZZ_SUCCESS;
     }
 
     DInputFuzzSigned OnNoSharing(const std::string &dhId) override
     {
-        (void)dhId;
+        static_cast<void>(dhId);
         return DINPUT_FUZZ_SUCCESS;
     }
 };
@@ -221,9 +221,9 @@ public:
     DInputFuzzSigned OnSimulationEvent(DInputFuzzUnsigned type, DInputFuzzUnsigned code,
         DInputFuzzSigned value) override
     {
-        (void)type;
-        (void)code;
-        (void)value;
+        static_cast<void>(type);
+        static_cast<void>(code);
+        static_cast<void>(value);
         return DINPUT_FUZZ_SUCCESS;
     }
 };
@@ -232,8 +232,8 @@ class TestRegisterSessionStateCallbackStub final : public RegisterSessionStateCa
 public:
     void OnResult(const std::string &devId, const DInputFuzzUnsigned status) override
     {
-        (void)devId;
-        (void)status;
+        static_cast<void>(devId);
+        static_cast<void>(status);
     }
 };
 

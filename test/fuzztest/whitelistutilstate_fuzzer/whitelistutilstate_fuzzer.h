@@ -16,6 +16,6 @@
 #ifndef WHITELISTUTILSTATE_FUZZER_H
 #define WHITELISTUTILSTATE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "whitelistutilstate_fuzzer"
+constexpr char FUZZ_PROJECT_NAME[] = "whitelistutilstate_fuzzer";
 
 #endif // WHITELISTUTILSTATE_FUZZER_H

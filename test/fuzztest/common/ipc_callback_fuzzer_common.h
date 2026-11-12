@@ -22,17 +22,17 @@
 #include "message_option.h"
 #include "message_parcel.h"
 
-#define DINPUT_FUZZ_INVALID_DESCRIPTOR \
-    (u"ohos.DistributedHardware.DistributedInput.FuzzInvalidDescriptor")
-#define DINPUT_FUZZ_MAX_STRING_LENGTH (UCHAR_MAX + 1U)
-#define DINPUT_FUZZ_MAX_VECTOR_SIZE (CHAR_BIT)
-#define DINPUT_FUZZ_MIN_VECTOR_SIZE (0U)
-#define DINPUT_FUZZ_NO_VECTOR_WRITE (0U)
-#define DINPUT_FUZZ_EMPTY_SIZE (0U)
-#define DINPUT_FUZZ_DEFAULT_VALUE (0U)
-#define DINPUT_FUZZ_SUCCESS (0)
-#define DINPUT_FUZZ_VECTOR_OVERSIZE_STEP (1U)
-#define DINPUT_FUZZ_SIGNED_MASK (INT_MAX)
+constexpr char16_t DINPUT_FUZZ_INVALID_DESCRIPTOR[] =
+    u"ohos.DistributedHardware.DistributedInput.FuzzInvalidDescriptor";
+constexpr unsigned int DINPUT_FUZZ_MAX_STRING_LENGTH = UCHAR_MAX + 1U;
+constexpr int DINPUT_FUZZ_MAX_VECTOR_SIZE = CHAR_BIT;
+constexpr unsigned int DINPUT_FUZZ_MIN_VECTOR_SIZE = 0U;
+constexpr unsigned int DINPUT_FUZZ_NO_VECTOR_WRITE = 0U;
+constexpr unsigned int DINPUT_FUZZ_EMPTY_SIZE = 0U;
+constexpr unsigned int DINPUT_FUZZ_DEFAULT_VALUE = 0U;
+constexpr int DINPUT_FUZZ_SUCCESS = 0;
+constexpr unsigned int DINPUT_FUZZ_VECTOR_OVERSIZE_STEP = 1U;
+constexpr int DINPUT_FUZZ_SIGNED_MASK = INT_MAX;
 
 namespace OHOS {
 namespace DistributedHardware {

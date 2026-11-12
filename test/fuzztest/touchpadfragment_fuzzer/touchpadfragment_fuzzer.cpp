@@ -93,7 +93,7 @@ void PushSequence(TouchPadEventFragmentMgr &mgr, const std::string &dhId,
     const std::vector<RawEvent> &events)
 {
     for (const RawEvent &event : events) {
-        (void)mgr.PushEvent(dhId, event);
+        static_cast<void>(mgr.PushEvent(dhId, event));
     }
 }
 
@@ -102,18 +102,18 @@ void ExerciseFragment(FuzzedDataProvider &provider, const std::string &dhId)
     TouchPadEventFragment fragment;
     fragment.PushEvent(MakeEvent(provider, EV_KEY, BTN_TOUCH, KEY_DOWN_STATE, dhId));
     fragment.PushEvent(MakeEvent(provider, EV_SYN, SYN_REPORT, SYN_REPORT_VALUE, dhId));
-    (void)fragment.IsTouchPadOptStart();
-    (void)fragment.IsTouchPadOptFinish();
-    (void)fragment.IsShouldDrop();
-    (void)fragment.GetEvents();
+    static_cast<void>(fragment.IsTouchPadOptStart());
+    static_cast<void>(fragment.IsTouchPadOptFinish());
+    static_cast<void>(fragment.IsShouldDrop());
+    static_cast<void>(fragment.GetEvents());
 
     TouchPadEventFragment finishFragment;
     finishFragment.PushEvent(MakeEvent(provider, EV_KEY, BTN_TOUCH, KEY_UP_STATE, dhId));
     finishFragment.PushEvent(MakeEvent(provider, EV_SYN, SYN_REPORT, SYN_REPORT_VALUE, dhId));
-    (void)finishFragment.IsTouchPadOptStart();
-    (void)finishFragment.IsTouchPadOptFinish();
-    (void)finishFragment.IsShouldDrop();
-    (void)finishFragment.GetEvents();
+    static_cast<void>(finishFragment.IsTouchPadOptStart());
+    static_cast<void>(finishFragment.IsTouchPadOptFinish());
+    static_cast<void>(finishFragment.IsShouldDrop());
+    static_cast<void>(finishFragment.GetEvents());
 }
 
 void ExerciseManagerSequences(FuzzedDataProvider &provider, const std::string &dhId)
@@ -133,12 +133,12 @@ void ExerciseManagerSequences(FuzzedDataProvider &provider, const std::string &d
         MakeEvent(provider, EV_SYN, SYN_REPORT, SYN_REPORT_VALUE, dhId),
     };
 
-    (void)mgr.PushEvent(dhId,
-        MakeEvent(provider, EV_ABS, ABS_X, provider.ConsumeIntegral<int32_t>(), dhId));
+    static_cast<void>(mgr.PushEvent(dhId,
+        MakeEvent(provider, EV_ABS, ABS_X, provider.ConsumeIntegral<int32_t>(), dhId)));
     PushSequence(mgr, dhId, wholeTouch);
     PushSequence(mgr, dhId, notWholeTouch);
     PushSequence(mgr, dhId, dropFragment);
-    (void)mgr.GetAndClearEvents(dhId);
+    static_cast<void>(mgr.GetAndClearEvents(dhId));
     mgr.Clear(dhId);
 }
 
@@ -147,9 +147,9 @@ void ExerciseFuzzedManager(FuzzedDataProvider &provider, const std::string &dhId
     TouchPadEventFragmentMgr mgr;
     uint32_t count = provider.ConsumeIntegralInRange<uint32_t>(0U, EXTRA_EVENT_MAX_COUNT);
     for (uint32_t i = 0U; i < count; ++i) {
-        (void)mgr.PushEvent(dhId, ConsumeEvent(provider, dhId));
+        static_cast<void>(mgr.PushEvent(dhId, ConsumeEvent(provider, dhId)));
     }
-    (void)mgr.GetAndClearEvents(provider.ConsumeBool() ? dhId : dhId + "_missing");
+    static_cast<void>(mgr.GetAndClearEvents(provider.ConsumeBool() ? dhId : dhId + "_missing"));
     mgr.Clear(dhId);
 }
 } // namespace

@@ -97,19 +97,19 @@ void ExerciseJsonHelpers(FuzzedDataProvider &provider)
     nlohmann::json softbusJson = BuildSoftBusJson(provider);
     std::string randomMessage = ConsumeText(provider);
 
-    (void)IsBoolean(typedJson, "boolKey");
-    (void)IsString(typedJson, "stringKey");
-    (void)IsInt32(typedJson, "intKey");
-    (void)IsInt64(typedJson, "intKey");
-    (void)IsUInt16(typedJson, "uintKey");
-    (void)IsUInt32(typedJson, "uintKey");
-    (void)IsUInt64(typedJson, "uintKey");
-    (void)IsArray(typedJson, "arrayKey");
-    (void)IsString(typedJson, "missingKey");
-    (void)GetNodeDesc(typedJson.dump());
-    (void)GetNodeDesc(randomMessage);
-    (void)SetAnonyId(softbusJson.dump());
-    (void)SetAnonyId(randomMessage);
+    static_cast<void>(IsBoolean(typedJson, "boolKey"));
+    static_cast<void>(IsString(typedJson, "stringKey"));
+    static_cast<void>(IsInt32(typedJson, "intKey"));
+    static_cast<void>(IsInt64(typedJson, "intKey"));
+    static_cast<void>(IsUInt16(typedJson, "uintKey"));
+    static_cast<void>(IsUInt32(typedJson, "uintKey"));
+    static_cast<void>(IsUInt64(typedJson, "uintKey"));
+    static_cast<void>(IsArray(typedJson, "arrayKey"));
+    static_cast<void>(IsString(typedJson, "missingKey"));
+    static_cast<void>(GetNodeDesc(typedJson.dump()));
+    static_cast<void>(GetNodeDesc(randomMessage));
+    static_cast<void>(SetAnonyId(softbusJson.dump()));
+    static_cast<void>(SetAnonyId(randomMessage));
 }
 
 void ExerciseStringHelpers(FuzzedDataProvider &provider)
@@ -121,13 +121,13 @@ void ExerciseStringHelpers(FuzzedDataProvider &provider)
     std::vector<std::string> splitValues;
     std::vector<std::string> dhIds = ConsumeStringVector(provider);
 
-    (void)GetAnonyString(value);
-    (void)GetAnonyInt32(provider.ConsumeIntegral<int32_t>());
-    (void)Sha256(value);
+    static_cast<void>(GetAnonyString(value));
+    static_cast<void>(GetAnonyInt32(provider.ConsumeIntegral<int32_t>()));
+    static_cast<void>(Sha256(value));
     SplitStringToVector(joinedInput, split, splitValues);
-    (void)GetString(splitValues);
-    (void)JointDhIds(dhIds);
-    (void)SplitDhIdString(joinedInput);
+    static_cast<void>(GetString(splitValues));
+    static_cast<void>(JointDhIds(dhIds));
+    static_cast<void>(SplitDhIdString(joinedInput));
 }
 
 void ExerciseDevicePathHelpers(FuzzedDataProvider &provider)
@@ -144,9 +144,9 @@ void ExerciseDevicePathHelpers(FuzzedDataProvider &provider)
         BIT_INDEX_MIN, static_cast<int>(bits.size() * LONG_BITS - 1U));
     int fd = UN_INIT_FD_VALUE;
 
-    (void)BitIsSet(bits.data(), bit);
-    (void)OpenInputDeviceFdByPath(invalidPath);
-    (void)ConvertErrNo();
+    static_cast<void>(BitIsSet(bits.data(), bit));
+    static_cast<void>(OpenInputDeviceFdByPath(invalidPath));
+    static_cast<void>(ConvertErrNo());
     ScanInputDevicesPath(invalidPath, inputPaths);
     ResetVirtualDevicePressedKeys(nodePaths);
     CloseFd(fd);

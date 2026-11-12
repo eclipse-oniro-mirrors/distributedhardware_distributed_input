@@ -153,17 +153,17 @@ void ExerciseWhiteListState(FuzzedDataProvider &provider)
     TYPE_WHITE_LIST_VEC whiteList = ConsumeWhiteList(provider);
     TYPE_WHITE_LIST_VEC outputList;
 
-    (void)whiteListUtil.SyncWhiteList(deviceId, whiteList);
-    (void)whiteListUtil.GetWhiteList(deviceId, outputList);
-    (void)whiteListUtil.GetWhiteList(missingDeviceId, outputList);
-    (void)whiteListUtil.IsNeedFilterOut(deviceId, BuildMatchingEvent(whiteList));
-    (void)whiteListUtil.IsNeedFilterOut(deviceId, BuildFuzzedEvent(provider));
-    (void)whiteListUtil.IsNeedFilterOut(missingDeviceId, BuildFuzzedEvent(provider));
-    (void)whiteListUtil.ClearWhiteList(missingDeviceId);
-    (void)whiteListUtil.ClearWhiteList(deviceId);
-    (void)whiteListUtil.IsNeedFilterOut(deviceId, BuildFuzzedEvent(provider));
+    static_cast<void>(whiteListUtil.SyncWhiteList(deviceId, whiteList));
+    static_cast<void>(whiteListUtil.GetWhiteList(deviceId, outputList));
+    static_cast<void>(whiteListUtil.GetWhiteList(missingDeviceId, outputList));
+    static_cast<void>(whiteListUtil.IsNeedFilterOut(deviceId, BuildMatchingEvent(whiteList)));
+    static_cast<void>(whiteListUtil.IsNeedFilterOut(deviceId, BuildFuzzedEvent(provider)));
+    static_cast<void>(whiteListUtil.IsNeedFilterOut(missingDeviceId, BuildFuzzedEvent(provider)));
+    static_cast<void>(whiteListUtil.ClearWhiteList(missingDeviceId));
+    static_cast<void>(whiteListUtil.ClearWhiteList(deviceId));
+    static_cast<void>(whiteListUtil.IsNeedFilterOut(deviceId, BuildFuzzedEvent(provider)));
     if (provider.ConsumeBool()) {
-        (void)whiteListUtil.ClearWhiteList();
+        static_cast<void>(whiteListUtil.ClearWhiteList());
     }
 }
 } // namespace
