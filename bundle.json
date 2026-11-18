@@ -88,13 +88,32 @@
                 "//foundation/distributedhardware/distributed_input/services/sink/inputcollector/test:test",
                 "//foundation/distributedhardware/distributed_input/services/source/transport/test:test",
                 "//foundation/distributedhardware/distributed_input/common/include/test:test",
+                "//foundation/distributedhardware/distributed_input/services/source/inputinject/test:test",
+                "//foundation/distributedhardware/distributed_input/services/source/sourcemanager/test:test",
                 "//foundation/distributedhardware/distributed_input/services/sink/sinkmanager/test:test",
                 "//foundation/distributedhardware/distributed_input/services/transportbase/test:test",
                 "//foundation/distributedhardware/distributed_input/utils/test:test",
                 "//foundation/distributedhardware/distributed_input/dfx_utils/test:test",
                 "//foundation/distributedhardware/distributed_input/interfaces/ipc/test/fuzztest:fuzztest",
                 "//foundation/distributedhardware/distributed_input/inputdevicehandler/test:test",
-                "//foundation/distributedhardware/distributed_input/services/state/test:test"
+                "//foundation/distributedhardware/distributed_input/services/state/test:test",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/unregisterdinputcallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/preparedinputcallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/unpreparedinputcallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/registerdinputcallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/startdinputcallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/stopdinputcallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/startstopdinputscallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/startstopresultcallbackstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/inputnodelistenerstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/simulationeventlistenerstub_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/ipccallbackbroad_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/inputcheckparam_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/dinpututilstool_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/whitelistutilstate_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/dinputcontextscreen_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/touchpadfragment_fuzzer:fuzztest",
+                "//foundation/distributedhardware/distributed_input/test/fuzztest/dinputsinkstate_fuzzer:fuzztest"
             ]
         }
     }
